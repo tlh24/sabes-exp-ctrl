@@ -1,4 +1,4 @@
 sabes-exp-ctrl
 ==============
 
-experimental control software for the Sabes lab, UCSF
+Experimental control software for the Sabes lab, UCSF. 
