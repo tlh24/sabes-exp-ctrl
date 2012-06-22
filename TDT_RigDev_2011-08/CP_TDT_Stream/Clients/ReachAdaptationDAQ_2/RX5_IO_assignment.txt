@@ -1,0 +1,78 @@
+*********************************************************  
+Original:
+---------------------------------------------------------
+RP2.1
+-----
+ADC:  
+  Ch=1 IScan, IN-1 on the front panel
+  Ch=2 Iscan, IN-2 on the front panel 
+      
+DAC:  
+  Ch=1 Tone, OUT-1 on the front panel
+  
+D-Out
+  M=1 (bit 0) Juicer, JB1 on PP16 panel 
+
+D-In
+  M=1 (bit 0) Liberty Sync, JA1 on PP16 panel
+  
+---------------------------------------------------------
+RX5
+-----
+ADC:  
+  One channel selectable by ChanSel parameter. Default: Ch=1 (AmpA),
+  comes from an Amp (A-D)
+  
+DAC: 
+  Ch=1 ADC selected channel monitor, DAC-1 on the front panel 
+  
+D-Out:
+  M=1 (bit 0) Z-bus state (CONFLICT! with the pixel detector bit 0),
+  JA1 on PP16 panel (Digital I/O)
+  
+D-In:
+  M=15 (bits 0-3) Pixel detector, JA1-JA4 on PP16 panel
+
+
+*********************************************************  
+New:
+---------------------------------------------------------
+RX5
+-----
+ADC:  
+  One channel selectable by ChanSel parameter. Default: Ch=1 (AmpA),
+  comes from an Amp (A-D)
+DAC: 
+  Ch=1 ADC selected channel monitor, DAC-1 on the front panel or 
+  JA2 on PP16 panel 2 (Multi I/O)
+  Ch=2 Tone (the only signal for which we have to add the muti-I/O panel),
+  JA4 on PP16 panel 2 (Multi I/O)
+  
+D-Out:
+  M=128 (bit 7) Juicer, JA8 on PP16 panel 1 (Digital I/O)
+  
+D-In:
+  M=15 (bits 0-3) Pixel detector, JA1-JA4 on PP16 panel 1 (Digital I/O)
+  M=64 (bit 6) Liberty Sync, JA7 on PP16 panel 1 (Digital I/O)
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

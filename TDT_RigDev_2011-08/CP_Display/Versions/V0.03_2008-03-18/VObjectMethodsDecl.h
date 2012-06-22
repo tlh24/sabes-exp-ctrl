@@ -1,0 +1,25 @@
+// common methods
+  STDMETHOD(GetXY)( SAFEARRAY ** ppsaXY);
+  STDMETHOD(SetXY)( SAFEARRAY * psaXY, long iLogID);
+  STDMETHOD(GetZ)( double *pdZ);
+  STDMETHOD(SetZ)( double dZ, long iLogID);
+  STDMETHOD(GetScale)( double * pdScale);
+  STDMETHOD(SetScale)( double dScale, long iLogID);
+  STDMETHOD(GetAngle)( double * pdAngle);
+  STDMETHOD(SetAngle)( double dAngle, long iLogID);
+  STDMETHOD(GetColor)( SAFEARRAY ** ppsaRGB);
+  STDMETHOD(SetColor)( SAFEARRAY * psaColors, long iLogID );
+  STDMETHOD(GetAlpha)( double *pdAlpha);
+  STDMETHOD(SetAlpha)( double dAlpha, long iLogID );
+  STDMETHOD(GetFillFlag)( long * piFillFlag );
+  STDMETHOD(SetFillFlag)( long iFillFlag, long iLogID );
+  STDMETHOD(GetShowFlag)( long * piShowFlag );
+  STDMETHOD(SetShowFlag)( long iShowFlag, long iLogID);
+  STDMETHOD(GetGroupID)( long * piGroupID );
+  STDMETHOD(SetGroupID)( long iGroupID );
+  STDMETHOD(GetClippedCount)( long *piClippedCount);
+  STDMETHOD(Move)( SAFEARRAY * psaXY, long iLogID );
+  STDMETHOD(Scale)( double dScale, long iLogID );
+  STDMETHOD(Rotate)( double dAngle, long iLogID );
+  STDMETHOD(Show)( long iLogID );
+  STDMETHOD(Hide)( long iLogID );

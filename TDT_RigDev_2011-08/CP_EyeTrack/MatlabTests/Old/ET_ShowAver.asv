@@ -1,0 +1,32 @@
+srvname = 'CP_EyeTrack.Application'
+
+hITrack=actxserver(srvname);
+figure;
+hITrack.ConnectTracker();
+pause(0.1)
+
+nPoints = 10;
+dDuration = 0;
+tic;
+while( dDuration < 10 ) % 10 seconds
+  [iIdx dTime dData] = hITrack.GetDataLatest(nPoints); 
+  dX = mean(dData(1,:));
+  dY = mean(dData(2,:));
+
+  
+  pause(0.05);
+  dDuration = toc;
+end
+iIdx1 = hITrack.GetIndexLatest;
+nPoints = iIdx1 - iIdx0 + 1;
+% [dTimeStamps, fTrajectory] = hITrack.GetDataBuffered( nPoints, iIdx0 );
+
+[dTimeStamps, fTrajectory] = invoke( hITrack, 'GetDataBuffered', nPoints, iIdx0 );
+
+plot(fTrajectory(1,:), fTrajectory(2,:), '.');
+% hITrack.DisconnectTracker();
+
+% delete(hITrack)
+
+
+

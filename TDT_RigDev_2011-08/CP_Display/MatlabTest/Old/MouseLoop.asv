@@ -1,0 +1,31 @@
+% VisSrvName = 'VisServer2';
+VisSrvName = 'grappelli';
+
+fprintf('Starting VisServer...\n')
+fprintf('VisWindow\n')
+hW = actxserver('VisServer.VisWindow',VisSrvName); pause(1);
+hW.calibrated = 0;
+fprintf('VisDisk\n')
+hFng = actxserver('VisServer.VisDisk',VisSrvName); pause(1);
+fprintf('VisMouse\n')
+hMou = actxserver('VisServer.VisMouse',VisSrvName); pause(1);
+fprintf('Move the mouse on the VisServer. Click to start. \n')
+
+
+hFng.show =1;
+hMou.capture();
+
+click(1)=0;
+while ~click(1)
+  click = hMou.click;
+end
+tick
+for i=1:1000
+  pos = hMou.pos;
+  hFng.pos = [pos(1) 768 - pos(2)];
+end
+fprintf('Finished\n');
+if iscom(hMou)  release(hMou); end;
+if iscom(hFng)  release(hFng); end;
+if iscom(hW)  release(hW); end;
+

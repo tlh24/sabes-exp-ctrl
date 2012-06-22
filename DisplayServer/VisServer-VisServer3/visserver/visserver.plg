@@ -1,0 +1,123 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: VisServer - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "midl.exe /tlb ".\VisServer.tlb" /h "VisServer.h" /iid "VisServer_i.c" /Oicf "D:\Sabes\VisServer-VisServer3\visserver\VisServer.idl""
+Creating command line "rc.exe /l 0x409 /fo"Debug/VisServer.res" /d "_DEBUG" "D:\Sabes\VisServer-VisServer3\visserver\VisServer.rc"" 
+Creating temporary file "C:\Profiles\sabes\LOCALS~1\Temp\RSP2A65.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /ZI /Od /I "..\Common" /I "..\NumRec" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /Fp"Debug/VisServer.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\Sabes\VisServer-VisServer3\Common\ComUtils.cpp"
+"D:\Sabes\VisServer-VisServer3\visserver\VisCalibrate.cpp"
+"D:\Sabes\VisServer-VisServer3\visserver\VisDisk.cpp"
+"D:\Sabes\VisServer-VisServer3\visserver\VisMouse.cpp"
+"D:\Sabes\VisServer-VisServer3\visserver\VisObject.cpp"
+"D:\Sabes\VisServer-VisServer3\visserver\VisPolygon.cpp"
+"D:\Sabes\VisServer-VisServer3\visserver\VisServer.cpp"
+"D:\Sabes\VisServer-VisServer3\visserver\VisText.cpp"
+"D:\Sabes\VisServer-VisServer3\visserver\VisWindow.cpp"
+"D:\Sabes\VisServer-VisServer3\visserver\VisWindowManagement.cpp"
+"D:\Sabes\VisServer-VisServer3\visserver\VisComplexShape.cpp"
+]
+Creating command line "cl.exe @C:\Profiles\sabes\LOCALS~1\Temp\RSP2A65.tmp" 
+Creating temporary file "C:\Profiles\sabes\LOCALS~1\Temp\RSP2A66.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /ZI /Od /I "..\Common" /I "..\NumRec" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /Fp"Debug/VisServer.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\Sabes\VisServer-VisServer3\visserver\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\Profiles\sabes\LOCALS~1\Temp\RSP2A66.tmp" 
+Creating temporary file "C:\Profiles\sabes\LOCALS~1\Temp\RSP2A67.tmp" with contents
+[
+opengl32.lib glu32.lib glaux.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/VisServer.pdb" /debug /machine:I386 /out:"Debug/VisServer.exe" /pdbtype:sept /libpath:"../nr/release" 
+".\Debug\ComUtils.obj"
+".\Debug\StdAfx.obj"
+".\Debug\VisCalibrate.obj"
+".\Debug\VisDisk.obj"
+".\Debug\VisMouse.obj"
+".\Debug\VisObject.obj"
+".\Debug\VisPolygon.obj"
+".\Debug\VisServer.obj"
+".\Debug\VisText.obj"
+".\Debug\VisWindow.obj"
+".\Debug\VisWindowManagement.obj"
+".\Debug\VisServer.res"
+".\Debug\VisComplexShape.obj"
+]
+Creating command line "link.exe @C:\Profiles\sabes\LOCALS~1\Temp\RSP2A67.tmp"
+Creating temporary file "C:\Profiles\sabes\LOCALS~1\Temp\RSP2A68.bat" with contents
+[
+@echo off
+".\Debug\VisServer.exe" /RegServer
+echo regsvr32 exec. time > ".\Debug\regsvr32.trg"
+echo Server registration done!
+]
+Creating command line "C:\Profiles\sabes\LOCALS~1\Temp\RSP2A68.bat"
+Creating Type Library...
+Microsoft (R) MIDL Compiler Version 5.01.0164  
+Copyright (c) Microsoft Corp 1991-1997. All rights reserved.
+Processing D:\Sabes\VisServer-VisServer3\visserver\VisServer.idl
+VisServer.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\oaidl.idl
+oaidl.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\objidl.idl
+objidl.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\unknwn.idl
+unknwn.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\wtypes.idl
+wtypes.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\ocidl.idl
+ocidl.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\oleidl.idl
+oleidl.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\servprov.idl
+servprov.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\urlmon.idl
+urlmon.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\msxml.idl
+msxml.idl
+Compiling resources...
+Compiling...
+StdAfx.cpp
+
+NOTE: WINVER has been defined as 0x0500 or greater which enables
+Windows NT 5.0 and Windows 98 features. When these headers were released,
+Windows NT 5.0 beta 1 and Windows 98 beta 2.1 were the current versions.
+
+For this release when WINVER is defined as 0x0500 or greater, you can only
+build beta or test applications.  To build a retail application,
+set WINVER to 0x0400 or visit http://www.microsoft.com/msdn/sdk
+to see if retail Windows NT 5.0 or Windows 98 headers are available.
+
+See the SDK release notes for more information.
+
+d:\sabes\visserver-visserver3\visserver\visobject.h(24) : warning C4141: 'virtual' : used more than once
+Compiling...
+ComUtils.cpp
+VisCalibrate.cpp
+D:\Sabes\VisServer-VisServer3\visserver\VisCalibrate.cpp(412) : warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+VisDisk.cpp
+VisMouse.cpp
+VisObject.cpp
+VisPolygon.cpp
+VisServer.cpp
+VisText.cpp
+VisWindow.cpp
+VisWindowManagement.cpp
+VisComplexShape.cpp
+Generating Code...
+Linking...
+<h3>Output Window</h3>
+Performing registration
+Server registration done!
+
+
+
+<h3>Results</h3>
+VisServer.exe - 0 error(s), 2 warning(s)
+</pre>
+</body>
+</html>

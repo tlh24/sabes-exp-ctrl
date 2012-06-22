@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		{550FD218-E639-41C8-A1DC-11C873341AC1} = s 'VisServer'
+		'VisServer.EXE'
+		{
+			val AppID = s {550FD218-E639-41C8-A1DC-11C873341AC1}
+		}
+	}
+}

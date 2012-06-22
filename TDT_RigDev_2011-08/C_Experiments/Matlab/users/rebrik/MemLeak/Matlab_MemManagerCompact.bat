@@ -1,0 +1,1 @@
+C:\MATLAB\bin\win32\MATLAB.exe -memmgr compact

@@ -1,0 +1,55 @@
+// LibertyServer.idl : IDL source for LibertyServer.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (LibertyServer.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+	[
+		object,
+		uuid(705CFB61-77AF-4DC8-A827-CAB714F9EE42),
+		dual,
+		helpstring("ILiberty Interface"),
+		pointer_default(unique)
+	]
+	interface ILiberty : IDispatch
+	{
+		[propget, id(1), helpstring("property active")] HRESULT active([out, retval] double *pVal);
+		[propput, id(1), helpstring("property active")] HRESULT active([in] double newVal);
+		[propget, id(2), helpstring("property latest")] HRESULT latest([out, retval] VARIANT *pVal);
+		[id(3), helpstring("method setup")] HRESULT setup([in] double btime, [in] double ptime);
+		[id(4), helpstring("method getBuffer")] HRESULT getBuffer([in] int m, [out, retval] VARIANT *pVal);
+		[id(5), helpstring("method startBuffer")] HRESULT startBuffer();
+		[id(6), helpstring("method stopBuffer")] HRESULT stopBuffer();
+		[propget, id(7), helpstring("property activeSensors")] HRESULT activeSensors([out, retval] VARIANT *pVal);
+		[propput, id(7), helpstring("property activeSensors")] HRESULT activeSensors([in] VARIANT newVal);
+		[propget, id(8), helpstring("property availableSensors")] HRESULT availableSensors([out, retval] VARIANT *pVal);
+		[propget, id(9), helpstring("property posFilter")] HRESULT posFilter([out, retval] VARIANT *pVal);
+		[propput, id(9), helpstring("property posFilter")] HRESULT posFilter([in] VARIANT newVal);
+		[propget, id(10), helpstring("property attFilter")] HRESULT attFilter([out, retval] VARIANT *pVal);
+		[propput, id(10), helpstring("property attFilter")] HRESULT attFilter([in] VARIANT newVal);
+		[propget, id(11), helpstring("property errCount")] HRESULT errCount([out, retval] double *pVal);
+		[id(12), helpstring("method getErr")] HRESULT getErr([in] int i, [out, retval] BSTR *pVal);
+		[id(13), helpstring("method clearErrs")] HRESULT clearErrs();
+	};
+
+[
+	uuid(3CD16022-9D9F-4E00-A81D-8114D924B8F1),
+	version(1.0),
+	helpstring("LibertyServer 1.0 Type Library")
+]
+library LIBERTYSERVERLib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	[
+		uuid(76066C59-8458-4251-AA8B-1B761BEC5E29),
+		helpstring("Liberty Class")
+	]
+	coclass Liberty
+	{
+		[default] interface ILiberty;
+	};
+};

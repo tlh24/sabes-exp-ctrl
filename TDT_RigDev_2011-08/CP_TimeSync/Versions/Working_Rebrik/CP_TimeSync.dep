@@ -1,0 +1,31 @@
+# Microsoft Developer Studio Generated Dependency File, included by CP_TimeSync.mak
+
+.\ClassFactory.cpp : \
+	".\ClassFactory.h"\
+	
+
+.\Util\Console.cpp : \
+	".\Util\Console.h"\
+	
+
+.\Util\cp_printf.cpp : \
+	".\Util\Console.h"\
+	".\Util\CP_printf.h"\
+	
+
+.\CP_TimeSync.cpp : \
+	".\Util\CP_printf.h"\
+	
+
+.\CP_TimeSync.rc : \
+	".\CP_TimeSync.ico"\
+	
+
+.\CP_TimeSyncClass.cpp : \
+	".\CP_TimeSyncClass.h"\
+	
+
+.\TimeSyncGlob.cpp : \
+	".\ClassFactory.h"\
+	".\RegisterCom.h"\
+	

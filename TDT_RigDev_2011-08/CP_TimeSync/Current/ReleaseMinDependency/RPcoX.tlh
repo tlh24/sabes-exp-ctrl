@@ -1,0 +1,408 @@
+// Created by Microsoft (R) C/C++ Compiler Version 12.00.8964.0 (0cfbdced).
+//
+// d:\sabes\dropbox\2011-labcode\tdt_rigdev_2011-08\cp_timesync\current\releasemindependency\RPcoX.tlh
+//
+// C++ source equivalent of Win32 type library RPcoX.ocx
+// compiler-generated file created 08/19/11 at 01:25:00 - DO NOT EDIT!
+
+#pragma once
+#pragma pack(push, 8)
+
+#include <comdef.h>
+
+//
+// Forward references and typedefs
+//
+
+struct __declspec(uuid("d323a623-1d13-11d4-8858-444553540000"))
+/* dispinterface */ _DRPcoX;
+struct __declspec(uuid("d323a624-1d13-11d4-8858-444553540000"))
+/* dispinterface */ _DRPcoXEvents;
+struct /* coclass */ RPcoX;
+
+//
+// Smart pointer typedef declarations
+//
+
+_COM_SMARTPTR_TYPEDEF(_DRPcoX, __uuidof(IDispatch));
+_COM_SMARTPTR_TYPEDEF(_DRPcoXEvents, __uuidof(IDispatch));
+
+//
+// Type library items
+//
+
+struct __declspec(uuid("d323a623-1d13-11d4-8858-444553540000"))
+_DRPcoX : IDispatch
+{
+    //
+    // Wrapper methods for error-handling
+    //
+
+    // Methods:
+    _bstr_t GetError ( );
+    long Connect (
+        long Interface,
+        long DevNum );
+    long SetTagVal (
+        _bstr_t Name,
+        float Val );
+    long LoadCOF (
+        _bstr_t FileName );
+    long Run ( );
+    long Halt ( );
+    long SoftTrg (
+        long Trg_Bitn );
+    float GetTagVal (
+        _bstr_t Name );
+    long ReadTag (
+        _bstr_t Name,
+        float * pBuf,
+        long nOS,
+        long nWords );
+    long WriteTag (
+        _bstr_t Name,
+        float * pBuf,
+        long nOS,
+        long nWords );
+    long SendParTable (
+        _bstr_t Name,
+        float IndexID );
+    long SendSrcFile (
+        _bstr_t Name,
+        long SeekOS,
+        long nWords );
+    long GetNames (
+        _bstr_t NameList,
+        long MaxNames,
+        long ObjType );
+    _variant_t ReadTagV (
+        _bstr_t Name,
+        long nOS,
+        long nWords );
+    long WriteTagV (
+        _bstr_t Name,
+        long nOS,
+        const _variant_t & Buf );
+    long GetTagSize (
+        _bstr_t Name );
+    long GetTagType (
+        _bstr_t Name );
+    long SetSrcFileName (
+        _bstr_t Name,
+        _bstr_t FileName );
+    long GetNumOf (
+        _bstr_t ObjTypeName );
+    _bstr_t GetNameOf (
+        _bstr_t ObjTypeName,
+        long Index );
+    long ReadCOF (
+        _bstr_t FileName );
+    long ConnectRP2 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRL2 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRA16 (
+        _bstr_t IntName,
+        long DevNum );
+    _variant_t ReadTagVEX (
+        _bstr_t Name,
+        long nOS,
+        long nWords,
+        _bstr_t SrcType,
+        _bstr_t DstType,
+        long nChans );
+    long GetStatus ( );
+    long GetCycUse ( );
+    long ClearCOF ( );
+    long WriteTagVEX (
+        _bstr_t Name,
+        long nOS,
+        _bstr_t DstType,
+        const _variant_t & Buf );
+    long ZeroTag (
+        _bstr_t Name );
+    float GetSFreq ( );
+    long ConnectRV8 (
+        _bstr_t IntName,
+        long DevNum );
+    long GetDevCfg (
+        long Addr,
+        long Width32 );
+    long SetDevCfg (
+        long Addr,
+        long Val,
+        long Width32 );
+    long LoadCOFsf (
+        _bstr_t FileName,
+        float SampFreq );
+    long DefStatus (
+        long DefID );
+    _variant_t GetDefData (
+        long DefID );
+    HRESULT AboutBox ( );
+    long ConnectRM1 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRM2 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRX5 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRX6 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRX7 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRX8 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRX9 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRZ2 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRZ3 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRZ4 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRZ5 (
+        _bstr_t IntName,
+        long DevNum );
+    long ConnectRZ6 (
+        _bstr_t IntName,
+        long DevNum );
+
+    //
+    // Wrapper methods without error-handling
+    //
+
+    // Methods:
+    HRESULT raw_GetError (
+        BSTR * _result );
+    HRESULT raw_Connect (
+        long Interface,
+        long DevNum,
+        long * _result );
+    HRESULT raw_SetTagVal (
+        BSTR Name,
+        float Val,
+        long * _result );
+    HRESULT raw_LoadCOF (
+        BSTR FileName,
+        long * _result );
+    HRESULT raw_Run (
+        long * _result );
+    HRESULT raw_Halt (
+        long * _result );
+    HRESULT raw_SoftTrg (
+        long Trg_Bitn,
+        long * _result );
+    HRESULT raw_GetTagVal (
+        BSTR Name,
+        float * _result );
+    HRESULT raw_ReadTag (
+        BSTR Name,
+        float * pBuf,
+        long nOS,
+        long nWords,
+        long * _result );
+    HRESULT raw_WriteTag (
+        BSTR Name,
+        float * pBuf,
+        long nOS,
+        long nWords,
+        long * _result );
+    HRESULT raw_SendParTable (
+        BSTR Name,
+        float IndexID,
+        long * _result );
+    HRESULT raw_SendSrcFile (
+        BSTR Name,
+        long SeekOS,
+        long nWords,
+        long * _result );
+    HRESULT raw_GetNames (
+        BSTR NameList,
+        long MaxNames,
+        long ObjType,
+        long * _result );
+    HRESULT raw_ReadTagV (
+        BSTR Name,
+        long nOS,
+        long nWords,
+        VARIANT * _result );
+    HRESULT raw_WriteTagV (
+        BSTR Name,
+        long nOS,
+        const VARIANT & Buf,
+        long * _result );
+    HRESULT raw_GetTagSize (
+        BSTR Name,
+        long * _result );
+    HRESULT raw_GetTagType (
+        BSTR Name,
+        long * _result );
+    HRESULT raw_SetSrcFileName (
+        BSTR Name,
+        BSTR FileName,
+        long * _result );
+    HRESULT raw_GetNumOf (
+        BSTR ObjTypeName,
+        long * _result );
+    HRESULT raw_GetNameOf (
+        BSTR ObjTypeName,
+        long Index,
+        BSTR * _result );
+    HRESULT raw_ReadCOF (
+        BSTR FileName,
+        long * _result );
+    HRESULT raw_ConnectRP2 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRL2 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRA16 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ReadTagVEX (
+        BSTR Name,
+        long nOS,
+        long nWords,
+        BSTR SrcType,
+        BSTR DstType,
+        long nChans,
+        VARIANT * _result );
+    HRESULT raw_GetStatus (
+        long * _result );
+    HRESULT raw_GetCycUse (
+        long * _result );
+    HRESULT raw_ClearCOF (
+        long * _result );
+    HRESULT raw_WriteTagVEX (
+        BSTR Name,
+        long nOS,
+        BSTR DstType,
+        const VARIANT & Buf,
+        long * _result );
+    HRESULT raw_ZeroTag (
+        BSTR Name,
+        long * _result );
+    HRESULT raw_GetSFreq (
+        float * _result );
+    HRESULT raw_ConnectRV8 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_GetDevCfg (
+        long Addr,
+        long Width32,
+        long * _result );
+    HRESULT raw_SetDevCfg (
+        long Addr,
+        long Val,
+        long Width32,
+        long * _result );
+    HRESULT raw_LoadCOFsf (
+        BSTR FileName,
+        float SampFreq,
+        long * _result );
+    HRESULT raw_DefStatus (
+        long DefID,
+        long * _result );
+    HRESULT raw_GetDefData (
+        long DefID,
+        VARIANT * _result );
+    HRESULT raw_AboutBox ( );
+    HRESULT raw_ConnectRM1 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRM2 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRX5 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRX6 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRX7 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRX8 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRX9 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRZ2 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRZ3 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRZ4 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRZ5 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+    HRESULT raw_ConnectRZ6 (
+        BSTR IntName,
+        long DevNum,
+        long * _result );
+};
+
+struct __declspec(uuid("d323a624-1d13-11d4-8858-444553540000"))
+_DRPcoXEvents : IDispatch
+{
+    //
+    // Wrapper methods for error-handling
+    //
+
+    // Methods:
+    HRESULT DefComplete (
+        long DefID );
+
+    //
+    // Wrapper methods without error-handling
+    //
+
+    // Methods:
+    HRESULT raw_DefComplete (
+        long DefID );
+};
+
+struct __declspec(uuid("d323a625-1d13-11d4-8858-444553540000"))
+RPcoX;
+    // [ default ] dispinterface _DRPcoX
+    // [ default, source ] dispinterface _DRPcoXEvents
+
+//
+// Wrapper method implementations
+//
+
+#include "d:\sabes\dropbox\2011-labcode\tdt_rigdev_2011-08\cp_timesync\current\releasemindependency\RPcoX.tli"
+
+#pragma pack(pop)

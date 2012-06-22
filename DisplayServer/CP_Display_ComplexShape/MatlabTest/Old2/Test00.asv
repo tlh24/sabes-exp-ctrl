@@ -1,0 +1,12 @@
+% strVisServerName = 'VisServer1';
+strVisServerName = 'grappelli';
+
+hVM = actxserver('CP_Display.VMain'); 
+get(hTracker)
+methods(hTracker)
+methodsview(hTracker)  
+
+hVM.strProgramVersion;
+
+%if iscom(hVM)  release(hVM); end;
+

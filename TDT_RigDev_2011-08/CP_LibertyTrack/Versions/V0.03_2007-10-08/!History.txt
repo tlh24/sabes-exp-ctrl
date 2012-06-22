@@ -1,0 +1,10 @@
+CP_LibertyTrack history
+
+V0.03 2007-10-08
+  - Added frame print to the GUI window
+  - Added fix for spurious marked frame with high index (never happened in the tests, 
+    could have been due to bad WindowProc() which I fixed, see below)
+  - Fixed SetSensorsTransformIdx, which complained on valid input. 
+    It was due to an error in SafeArrayLib
+  - Changed message handling routine to be DialogProc, not WindowProc
+

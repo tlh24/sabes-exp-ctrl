@@ -1,0 +1,48 @@
+# Microsoft Developer Studio Generated Dependency File, included by LibertyServer.mak
+
+..\common\ComUtils.cpp : \
+	"..\common\ComUtils.h"\
+	
+
+.\Liberty.cpp : \
+	"..\..\..\program files\polhemus\pdi\inc\pdi.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdibiterr.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdidefs.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdidev.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdierror.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdifilter.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdimdat.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdiser.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pditracker.h"\
+	"..\common\ComUtils.h"\
+	"..\numrec\nr.h"\
+	"..\numrec\nrutil.h"\
+	".\Liberty.h"\
+	".\LibertyServer.h"\
+	
+
+.\LibertyServer.cpp : \
+	"..\..\..\program files\polhemus\pdi\inc\pdi.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdibiterr.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdidefs.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdidev.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdierror.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdifilter.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdimdat.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pdiser.h"\
+	"..\..\..\program files\polhemus\pdi\inc\pditracker.h"\
+	".\Liberty.h"\
+	".\LibertyServer.h"\
+	".\LibertyServer_i.c"\
+	
+
+.\LibertyServer.rc : \
+	".\Liberty.rgs"\
+	".\LibertyServer.rgs"\
+	".\LibertyServer.tlb"\
+	
+
+.\StdAfx.cpp : \
+	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	".\StdAfx.h"\
+	

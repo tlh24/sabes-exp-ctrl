@@ -1,0 +1,21 @@
+HKCR
+{
+	VisServer.VisWindow.1 = s 'VisWindow Class'
+	{
+		CLSID = s '{9BCD7029-6FD2-45C4-93A8-925BC3108927}'
+	}
+	VisServer.VisWindow = s 'VisWindow Class'
+	{
+		CLSID = s '{9BCD7029-6FD2-45C4-93A8-925BC3108927}'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {9BCD7029-6FD2-45C4-93A8-925BC3108927} = s 'VisWindow Class'
+		{
+			ProgID = s 'VisServer.VisWindow.1'
+			VersionIndependentProgID = s 'VisServer.VisWindow'
+			val AppID = s '{550FD218-E639-41C8-A1DC-11C873341AC1}'
+			LocalServer32 = s '%Module%'
+		}
+	}
+}

@@ -1,0 +1,220 @@
+    % Start new experiment
+    % 
+    % ExperimentStart( RecoverFlag )
+    %
+    % INPUTS:
+    %  
+    %  RecoverFlag = 1 will keep time ticking, e.g. when recovering from 
+    %  Matlab crash
+    %
+    %  RecoverFlag = 0 (default) will reset TDT clock
+    
+    function ExperimentStart( RecoverFlag, RecordMode )
+    
+    ExperimentGlobalsInclude;
+    ServerNamesInclude;
+    
+    if nargin < 1  
+      RecoverFlag = 0;
+    end
+    
+    g_ExpData = [];
+    
+    
+    %% Connect to Servers, save handles to the globals
+    hVMain = actxserver('CP_Display.VMain',strDisplayComputer);
+    g_ExpData.hVMain = hVMain;
+    hTracker=actxserver(strTrackerName, strTrackerComputer);
+    g_ExpData.hTracker = hTracker;
+    hEyeTrack=actxserver('CP_EyeTrack.Application', strEyeTrackComputer);
+    g_ExpData.hEyeTrack = hEyeTrack;
+    
+    % Stop sync on Display
+    hVMain.StopSync;
+    % Stop sync on Liberty/Optotrak
+    hTracker.DisconnectTracker;
+    % Stop sync on IScan
+    hEyeTrack.DisconnectTracker;
+    % Reset TDT TimeSync
+    
+    if RecoverFlag
+      disp('Recovering experiment timing');
+    end
+    
+    g_ExpData.StartTime = TimeSyncStart(RecoverFlag);  % StartTime is Matlab's now() or 0 if we are restarting
+    
+    if RecoverFlag
+      if g_ExpData.StartTime ~= 0
+        fprintf('Cannot recover, RP2 was not running. Stopping RP2\n');
+        TimeSyncStop;
+        clear g_ExpData;
+        error('Error in RP2 time recover!');
+      end
+      % Reset timestamps and counters on RP2
+      DisplayClearTiming;
+      TrackerClearTiming;
+      EyeTrackClearTiming;
+    end
+
+    %--- Init Display  ------------
+    DispCalibMtx = GetDisplayCalibMatrix( );
+    hVMain.SetTransformMatrix(DispCalibMtx); % set display calibration
+    % Start sync on Display
+    hVMain.StartSync( );
+    
+    disp('init display')
+    %--- Init Liberty/Optotrak  ------------
+    % Get tracker ID 
+    % POTENTIALLY PROBLEMATIC?? (PNS 2011-08) 
+    [iTrackerID iTrackerState] = hTracker.GetTrackerState;
+    
+    % Set sensors 
+    TrackerSensorsOnMtx = TrackerGetSensorsOnMtx( );
+    hTracker.SetSensors(TrackerSensorsOnMtx);
+    
+    % Get/Set the transform
+    % Tracker should be already calibrated:
+    % (trivial for Liberty, real for OptoTrak)
+    
+    switch iTrackerID  %  1 = Liberty, 2 = OptoTrak
+      case 1    % Liberty
+        TrackerCalibMtx = TrackerGetCalibMatrix(); 
+        hTracker.SetTransformMatrix(TrackerCalibMtx, 1);
+    % we really need to set only one sensor, but Matlab will complain:
+    % single value is not a SafeArray
+    % hTracker.SetSensorsTransformIdx( int32([1 1])); 
+      case 2    % OptoTrak
+        % we use 2 matrices (top and bottom of the table)
+        TrackerCalibMtx = TrackerGetCalibMatrix(1); 
+        hTracker.SetTransformMatrix(TrackerCalibMtx, 1);
+        TrackerCalibMtx = TrackerGetCalibMatrix(2); 
+        hTracker.SetTransformMatrix(TrackerCalibMtx, 2);
+      otherwise
+        error('Invalid tracker ID: %d", iTrackerID');
+    end
+    
+    % Start sync on Liberty/Optotrack
+    hTracker.ConnectTracker;
+    disp('init liberty')
+    
+    %--- Init IScan  ------------
+    EyeCalibMatrix = GetEyeCalibMatrix( );
+    hEyeTrack.SetTransformMatrix( EyeCalibMatrix );
+    % Start sync on Liberty/Optotrack
+    hEyeTrack.ConnectTracker;
+    pause(2);
+    
+    disp('init eyescan')
+    
+    
+    %--- check state of the servers
+    
+    strErr = [];
+    % Get Tracker state
+    [iTrackerID iTrackerState] = hTracker.GetTrackerState;
+    
+    switch iTrackerID  %  1 = Liberty, 2 = OptoTrak
+      case 1    % Liberty
+        if iTrackerState ~= 3
+          strErr = [strErr sprintf('Error in the Liberty connection! Check Liberty.')];
+        end
+      case 2    % OptoTrak
+        if iTrackerState ~= 1
+          strErr = [strErr sprintf('Error in the OptoTrak connection! Check OptoTrak.')];
+        end
+      otherwise
+        strErr = [strErr sprintf('Invalid tracker ID: %d", iTrackerID')];
+    end
+    
+    [iTrackerID iTrackerState] = hEyeTrack.GetTrackerState;
+    if iTrackerState ~= 1
+      strErr =  [strErr sprintf('Error in the IScan connection! Check IScan settings.')];
+    end
+    
+    disp('Checked server connections - all ok')
+    if length(strErr) > 1
+      error(strErr)
+    end
+    
+    %--- Get initial timing
+    [dFrameCnt dFrameTimeMs ] = DisplayGetTiming( );
+    g_ExpData.dDisplayFrameCnt = dFrameCnt;
+    g_ExpData.dDisplayFrameTimeMs = dFrameTimeMs;
+    
+    [dFrameCnt dFrameTimeMs ] = TrackerGetTiming( );
+    g_ExpData.dTrackerFrameCnt = dFrameCnt;
+    g_ExpData.dTrackerFrameTimeMs = dFrameTimeMs;
+    
+    [dFrameCnt dFrameTimeMs ] = EyeTrackGetTiming( );
+    g_ExpData.dEyeTrackFrameCnt = dFrameCnt;
+    g_ExpData.dEyeTrackFrameTimeMs = dFrameTimeMs;
+    
+    
+    disp('got initial timing')
+    %--- check sync pulses
+    pause(5);
+    [dFrameCnt dFrameTimeMs ] = DisplayGetTiming( );
+    if (dFrameCnt - g_ExpData.dDisplayFrameCnt) < 60
+      strErr =  [strErr sprintf('%s\nError in the CP_Display frame pulses! Check the cables.', strErr )];
+    end
+    
+    [dFrameCnt dFrameTimeMs ] = TrackerGetTiming( );
+    if (dFrameCnt - g_ExpData.dTrackerFrameCnt) < 120
+      strErr =  [strErr sprintf('%s\nError in the Tracker frame pulses! Check the cables.', strErr )];
+    end
+    
+    [dFrameCnt dFrameTimeMs ] = EyeTrackGetTiming( );
+    if (dFrameCnt - g_ExpData.dEyeTrackFrameCnt) < 120
+      strErr =  [strErr sprintf('%s\nError in the CP_EyeTrack frame pulses! Check the cables.', strErr )];
+    end
+    
+    if length(strErr) > 1
+      error(strErr)
+    end
+    
+    ExperimentTimingUpdate;
+    
+    % Check display time
+    EventID = 111111;
+    hVMain.ResetEventLog;
+    hVDisk = actxserver('CP_Display.VDisk', strDisplayComputer); 
+    pause(0.5);
+    dTimeMs = TimeSyncGetTimeMs();
+    hVDisk.Show(EventID);
+    [id DisplTime] = hVMain.GetEventLog;
+    delete(hVDisk);
+    
+    DisplShowTime = DisplTime(find(id == EventID));
+    DispRelTime = DisplShowTime-dTimeMs;
+    fprintf('Display relative time, ms: %g\n', DispRelTime);
+    
+    
+    % Check tracker time
+    dTimeMs = TimeSyncGetTimeMs();
+    [iIdx, TrackerTime, Coord ] = invoke( hTracker, 'GetSensorLatest', 1, 1 );
+    TrackerRelTime = TrackerTime - dTimeMs;
+    fprintf('Tracker relative time, ms: %g\n', TrackerRelTime);
+    
+    % Check eye track time
+    dTimeMs = TimeSyncGetTimeMs();
+    [iIdx, EyeTime, Coord ] = invoke( hEyeTrack, 'GetDataLatest', 1 );
+    EyeRelTime = EyeTime - dTimeMs;
+    fprintf('Eye relative time, ms: %g\n', EyeRelTime);
+    
+    strErr = [];
+    if abs(DispRelTime) > 100 
+      strErr =  [strErr sprintf('%s\nError in the CP_Display timing!', strErr )];
+    end
+    
+    if abs(TrackerRelTime) > 100 
+      strErr =  [strErr sprintf('%s\nError in the Tracker timing!', strErr )];
+    end
+    
+    if abs(EyeRelTime) > 100 
+      strErr =  [strErr sprintf('%s\nError in the CP_EyeTrack timing!', strErr )];
+    end
+    
+    if length(strErr) > 1
+      error(strErr)
+    end
+    

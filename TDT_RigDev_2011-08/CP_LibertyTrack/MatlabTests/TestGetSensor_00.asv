@@ -1,0 +1,26 @@
+srvname = 'CP_LibertyTrack.Application';
+
+hTracker=actxserver(srvname);
+
+SensorsOn = int32([1 3]);
+hTracker.SetSensors(SensorsOn);
+
+hTracker.ConnectTracker;
+pause(2);
+iIdxBe = hTracker.GetDataIndexLatest
+
+pause(4);
+[iIdx1 dTime1 dXYZ1] = invoke(hTracker, 'GetSensorLatest', 1 )  
+[iIdx2 dTime2 dXYZ2] = invoke(hTracker, 'GetSensorLatest', 2 )  
+
+[iIdx1 dTime1 dXYZ1] = invoke(hTracker, 'GetSensorLatest', 1, 5 );  
+[iIdx2 dTime2 dXYZ2] = invoke(hTracker, 'GetSensorLatest', 2, 10 );  
+
+iIdx = hTracker.GetDataIndexLatest
+
+[dTime_b1 dXYZ1_b1] = invoke(hTracker, 'GetSensorBuffered', 1, 0, iIdx+1 );  
+[dTime_b2 dXYZ1_b2] = invoke(hTracker, 'GetSensorBuffered', 2, 0, iIdx+1 );  
+
+hTracker.DisconnectTracker;
+% delete(hTracker);
+% clear functions;

@@ -1,0 +1,284 @@
+Microsoft Windows XP [Version 5.1.2600]
+(C) Copyright 1985-2001 Microsoft Corp.
+
+C:\Documents and Settings\Motorlab.PHAIR>cd C:\users\rebrik\OptoTrys\GetNextRaw\
+Debug
+
+C:\users\rebrik\OptoTrys\GetNextRaw\Debug>GetNextRaw
+Sensors in system       :  3
+ODAUs in system         :  0
+Default OPTOTRAK Markers:  6
+Frame Number:      100
+Elements    :        6
+Flags       : 0x0000
+Marker 1                Centroid Peak  DRC Code
+        Sensor 1         1547.09  127  255 CENTROID_OK
+        Sensor 2          644.57  122  255 CENTROID_OK
+        Sensor 3         1457.52  133  224 CENTROID_OK
+Marker 2                Centroid Peak  DRC Code
+        Sensor 1          559.56   30  255 CENTROID_OK
+        Sensor 2          731.94    7  255 CENTROID_OK
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 3                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 4                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 5                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 6                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Frame Number:      101
+Elements    :        6
+Flags       : 0x0000
+Marker 1                Centroid Peak  DRC Code
+        Sensor 1         1547.09  127  255 CENTROID_OK
+        Sensor 2          644.58  122  255 CENTROID_OK
+        Sensor 3         1457.51  134  224 CENTROID_OK
+Marker 2                Centroid Peak  DRC Code
+        Sensor 1          559.56   30  255 CENTROID_OK
+        Sensor 2          731.96    7  255 CENTROID_OK
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 3                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 4                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    4  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 5                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 6                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    4  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Frame Number:      102
+Elements    :        6
+Flags       : 0x0000
+Marker 1                Centroid Peak  DRC Code
+        Sensor 1         1547.08  127  255 CENTROID_OK
+        Sensor 2          644.59  123  255 CENTROID_OK
+        Sensor 3         1457.51  132  223 CENTROID_OK
+Marker 2                Centroid Peak  DRC Code
+        Sensor 1          559.56   31  255 CENTROID_OK
+        Sensor 2          731.98    7  255 CENTROID_OK
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 3                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 4                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 5                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 6                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Frame Number:      103
+Elements    :        6
+Flags       : 0x0000
+Marker 1                Centroid Peak  DRC Code
+        Sensor 1         1547.08  127  255 CENTROID_OK
+        Sensor 2          644.58  122  255 CENTROID_OK
+        Sensor 3         1457.51  134  224 CENTROID_OK
+Marker 2                Centroid Peak  DRC Code
+        Sensor 1          559.56   31  255 CENTROID_OK
+        Sensor 2          731.95    7  255 CENTROID_OK
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 3                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 4                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 5                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 6                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Frame Number:      104
+Elements    :        6
+Flags       : 0x0000
+Marker 1                Centroid Peak  DRC Code
+        Sensor 1         1547.09  127  255 CENTROID_OK
+        Sensor 2          644.56  120  255 CENTROID_OK
+        Sensor 3         1457.51  133  224 CENTROID_OK
+Marker 2                Centroid Peak  DRC Code
+        Sensor 1          559.56   30  255 CENTROID_OK
+        Sensor 2          731.91    7  255 CENTROID_OK
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 3                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 4                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 5                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 6                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    4  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Frame Number:      105
+Elements    :        6
+Flags       : 0x0000
+Marker 1                Centroid Peak  DRC Code
+        Sensor 1         1547.08  126  255 CENTROID_OK
+        Sensor 2          644.54  119  255 CENTROID_OK
+        Sensor 3         1457.52  133  224 CENTROID_OK
+Marker 2                Centroid Peak  DRC Code
+        Sensor 1          559.56   31  255 CENTROID_OK
+        Sensor 2          731.93    7  255 CENTROID_OK
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 3                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 4                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    4  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 5                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 6                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Frame Number:      106
+Elements    :        6
+Flags       : 0x0000
+Marker 1                Centroid Peak  DRC Code
+        Sensor 1         1547.08  127  255 CENTROID_OK
+        Sensor 2          644.55  120  255 CENTROID_OK
+        Sensor 3         1457.51  133  224 CENTROID_OK
+Marker 2                Centroid Peak  DRC Code
+        Sensor 1          559.56   30  255 CENTROID_OK
+        Sensor 2          731.91    7  255 CENTROID_OK
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 3                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 4                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 5                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 6                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Frame Number:      107
+Elements    :        6
+Flags       : 0x0000
+Marker 1                Centroid Peak  DRC Code
+        Sensor 1         1547.08  127  255 CENTROID_OK
+        Sensor 2          644.54  119  255 CENTROID_OK
+        Sensor 3         1457.51  135  224 CENTROID_OK
+Marker 2                Centroid Peak  DRC Code
+        Sensor 1          559.56   31  255 CENTROID_OK
+        Sensor 2          731.91    7  255 CENTROID_OK
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 3                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 4                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 5                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 6                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    4  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Frame Number:      108
+Elements    :        6
+Flags       : 0x0000
+Marker 1                Centroid Peak  DRC Code
+        Sensor 1         1547.08  127  255 CENTROID_OK
+        Sensor 2          644.54  120  255 CENTROID_OK
+        Sensor 3         1457.52  133  223 CENTROID_OK
+Marker 2                Centroid Peak  DRC Code
+        Sensor 1          559.56   31  255 CENTROID_OK
+        Sensor 2          731.91    7  255 CENTROID_OK
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 3                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 4                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 5                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 6                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Frame Number:      109
+Elements    :        6
+Flags       : 0x0000
+Marker 1                Centroid Peak  DRC Code
+        Sensor 1         1547.08  127  255 CENTROID_OK
+        Sensor 2          644.56  121  255 CENTROID_OK
+        Sensor 3         1457.52  133  223 CENTROID_OK
+Marker 2                Centroid Peak  DRC Code
+        Sensor 1          559.57   31  255 CENTROID_OK
+        Sensor 2          731.94    7  255 CENTROID_OK
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 3                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 4                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    4  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 5                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+Marker 6                Centroid Peak  DRC Code
+        Sensor 1         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 2         missing    3  255 CENTROID_PEAK_TOO_SMALL
+        Sensor 3         missing    3  255 CENTROID_PEAK_TOO_SMALL
+
+Program execution complete.
+
+C:\users\rebrik\OptoTrys\GetNextRaw\Debug>

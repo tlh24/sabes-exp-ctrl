@@ -1,0 +1,309 @@
+// VisServer.idl : IDL source for VisServer.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (VisServer.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+                             
+	
+	[
+		object,
+		uuid(4AE7A11E-2626-462F-A5B4-B65ED1E0F354),
+		dual,
+		helpstring("IVisWindow Interface"),
+		pointer_default(unique)
+	]
+	interface IVisWindow : IDispatch
+	{
+		[propget, id(1), helpstring("Window active flag")] HRESULT active([out, retval] double *pVal);
+		[propget, id(2), helpstring("Window calibrated flag")] HRESULT calibrated([out, retval] double *pVal);
+		[propput, id(2), helpstring("Window calibrated flag")] HRESULT calibrated([in] double newVal);
+		[propget, id(3), helpstring("Window process priority")] HRESULT priority([out, retval] double *pVal);
+		[propput, id(3), helpstring("Window process  priority")] HRESULT priority([in] double newVal);
+		[propget, id(4), helpstring("Window error string")] HRESULT errstring([out, retval] BSTR *pVal);
+		[propget, id(6), helpstring("Window batch mode")] HRESULT batchmode([out, retval] double *pVal);
+		[propput, id(6), helpstring("Window batch mode")] HRESULT batchmode([in] double newVal);
+		[propget, id(7), helpstring("Action blocking mode")] HRESULT blockmode([out, retval] double *pVal);
+		[propput, id(7), helpstring("Action blocking mode")] HRESULT blockmode([in] double newVal);
+		[propget, id(8), helpstring("Action log and clock mode")] HRESULT logmode([out, retval] double *pVal);
+		[propput, id(8), helpstring("Action log and clock mode")] HRESULT logmode([in] double newVal);
+		[propget, id(9), helpstring("Action log")] HRESULT actionlog([out, retval] VARIANT *pVal);
+		[propget, id(10), helpstring("property counter")] HRESULT counter([out, retval] double *pVal);
+		[propput, id(10), helpstring("property counter")] HRESULT counter([in] double newVal);
+		[propget, id(11), helpstring("property counter pos")] HRESULT counterpos([out, retval] VARIANT *pVal);
+		[propput, id(11), helpstring("property counter pos")] HRESULT counterpos([in] VARIANT newVal);
+		[propget, id(12), helpstring("property counter size")] HRESULT countersize([out, retval] VARIANT *pVal);
+		[propput, id(12), helpstring("property counter size")] HRESULT countersize([in] VARIANT newVal);
+		[id(13), helpstring("method draw batch now")] HRESULT drawnow();
+		[id(14), helpstring("method clear screen (un-show all)")] HRESULT clrscreen();
+		[id(15), helpstring("method clear action log")] HRESULT clrlog();
+	};
+	
+	
+	[
+		object,
+		uuid(8F9791E3-3208-11D5-AF95-00A0C9A51AF0),
+		dual,
+		helpstring("IVisCalibrate Interface"),
+		pointer_default(unique)
+	]
+	interface IVisCalibrate : IDispatch
+	{
+		[propget, id(1), helpstring("calibration point count")] HRESULT count([out, retval] double *pVal);
+		[propput, id(1), helpstring("calibration point count")] HRESULT count([in] double newVal);
+		[propget, id(2), helpstring("calibration point position (x,y)")] HRESULT pos([out, retval] VARIANT *pVal);
+		[propput, id(2), helpstring("calibration point position (x,y)")] HRESULT pos([in] VARIANT newVal);
+		[propget, id(3), helpstring("ready for next calibration position")] HRESULT ready([out, retval] double *pVal);
+	};
+	
+	[
+		object,
+		uuid(6DD8ABE8-5259-4915-8E12-54141A9FC79D),
+		dual,
+		helpstring("IVisMouse Interface"),
+		pointer_default(unique)
+	]
+	interface IVisMouse : IDispatch
+	{
+		[propget, id(1), helpstring("property BOOL started")] HRESULT started([out, retval] double *pVal);
+		[propget, id(2), helpstring("property BOOL error")] HRESULT error([out, retval] BSTR *pVal);
+		[propget, id(3), helpstring("property BOOL confine cursor")] HRESULT confine([out, retval] double *pVal);
+		[propput, id(3), helpstring("property BOOL confine cursor")] HRESULT confine([in] double newVal);
+		[propget, id(4), helpstring("property mouse pos")] HRESULT pos([out, retval] VARIANT *pVal);
+		[propput, id(4), helpstring("property mouse pos")] HRESULT pos([in] VARIANT newVal);
+		[propget, id(5), helpstring("property events")] HRESULT events([out, retval] VARIANT *pVal);
+		[propget, id(6), helpstring("property down")] HRESULT down([out, retval] VARIANT *pVal);
+		[propget, id(7), helpstring("property click")] HRESULT click([out, retval] VARIANT *pVal);
+		[propget, id(8), helpstring("property dblclick")] HRESULT dblclick([out, retval] VARIANT *pVal);
+		[id(9), helpstring("method reset")] HRESULT reset();
+		[id(10), helpstring("method capture")] HRESULT capture();
+	};
+
+	[
+		object,
+		uuid(8C9E4758-2478-4197-8D3B-6618A3CFE069),
+		dual,
+		helpstring("IVisDisk Interface"),
+		pointer_default(unique)
+	]
+	interface IVisDisk : IDispatch
+	{
+		[propget, id(1), helpstring("disk radius")] HRESULT radius([out, retval] double *pVal);
+		[propput, id(1), helpstring("disk radius")] HRESULT radius([in] double newVal);
+		[propget, id(2), helpstring("disk color (r,g,b)")] HRESULT color([out, retval] VARIANT *pVal);
+		[propput, id(2), helpstring("disk color (r,g,b)")] HRESULT color([in] VARIANT newVal);
+		[propget, id(3), helpstring("disk alpha")] HRESULT alpha([out, retval] double *pVal);
+		[propput, id(3), helpstring("disk alpha")] HRESULT alpha([in] double newVal);
+		[propget, id(4), helpstring("disk fill flag")] HRESULT fill([out, retval] double *pVal);
+		[propput, id(4), helpstring("disk fill flag")] HRESULT fill([in] double newVal);
+		[propget, id(5), helpstring("disk pos (x,y)")] HRESULT pos([out, retval] VARIANT *pVal);
+		[propput, id(5), helpstring("disk pos (x,y)")] HRESULT pos([in] VARIANT newVal);
+		[propget, id(6), helpstring("disk depth z")] HRESULT z([out, retval] double *pVal);
+		[propput, id(6), helpstring("disk depth z")] HRESULT z([in] double newVal);
+		[propget, id(7), helpstring("disk showing flag")] HRESULT show([out, retval] double *pVal);
+		[propput, id(7), helpstring("disk showing flag")] HRESULT show([in] double newVal);
+		[propget, id(9), helpstring("disk clipped")] HRESULT clipped([out, retval] double *pVal);
+		[propget, id(10), helpstring("disk error string")] HRESULT errstring([out, retval] BSTR *pVal);
+		[propget, id(11), helpstring("property points")] HRESULT points([out, retval] double *pVal);
+		[propput, id(11), helpstring("property points")] HRESULT points([in] double newVal);
+		[propget, id(12), helpstring("action list tag")] HRESULT tag([out, retval] double *pVal);
+	};
+	[
+		object,
+		uuid(9B123F2C-FFB0-4E8E-9AB9-179F8E114E2D),
+		dual,
+		helpstring("IVisPolygon Interface"),
+		pointer_default(unique)
+	]
+	interface IVisPolygon : IDispatch
+	{
+		[propget, id(1), helpstring("polygon scaling factor")] HRESULT scale([out, retval] double *pVal);
+		[propput, id(1), helpstring("polygon scaling factor")] HRESULT scale([in] double newVal);
+		[propget, id(2), helpstring("polygon rotation angle - degree")] HRESULT angle([out, retval] double *pVal);
+		[propput, id(2), helpstring("polygon rotation angle - degree")] HRESULT angle([in] double newVal);
+		[propget, id(3), helpstring("polygon origin position")] HRESULT pos([out, retval] VARIANT *pVal);
+		[propput, id(3), helpstring("polygon origin position")] HRESULT pos([in] VARIANT newVal);
+		[propget, id(4), helpstring("polygon point (vertex) positions, from origin")] HRESULT points([out, retval] VARIANT *pVal);
+		[propput, id(4), helpstring("polygon point (vertex) positions, from origin")] HRESULT points([in] VARIANT newVal);
+		[propget, id(5), helpstring("polygon primary color")] HRESULT color([out, retval] VARIANT *pVal);
+		[propput, id(5), helpstring("polygon primary color")] HRESULT color([in] VARIANT newVal);
+		[propget, id(6), helpstring("polygon alpha (transparency)")] HRESULT alpha([out, retval] double *pVal);
+		[propput, id(6), helpstring("polygon alpha (transparency)")] HRESULT alpha([in] double newVal);
+		[propget, id(7), helpstring("polygon fill flag")] HRESULT fill([out, retval] double *pVal);
+		[propput, id(7), helpstring("polygon fill flag")] HRESULT fill([in] double newVal);
+		[propget, id(8), helpstring("polygon depth z")] HRESULT z([out, retval] double *pVal);
+		[propput, id(8), helpstring("polygon depth z")] HRESULT z([in] double newVal);
+		[propget, id(9), helpstring("polygon exact vertices")] HRESULT exact([out, retval] double *pVal);
+		[propput, id(9), helpstring("polygon exact vertices")] HRESULT exact([in] double newVal);
+		[propget, id(10), helpstring("polygon showing flag")] HRESULT show([out, retval] double *pVal);
+		[propput, id(10), helpstring("polygon showing flag")] HRESULT show([in] double newVal);
+		[propget, id(11), helpstring("polygon clipped flag")] HRESULT clipped([out, retval] double *pVal);
+		[propget, id(12), helpstring("polygon error string")] HRESULT errstring([out, retval] BSTR *pVal);
+		[propget, id(13), helpstring("property image")] HRESULT image([out, retval] VARIANT *pVal);
+		[propput, id(13), helpstring("property image")] HRESULT image([in] VARIANT newVal);
+		[propget, id(14), helpstring("action log tag")] HRESULT tag([out, retval] double *pVal);
+	};
+	
+	[
+		object,
+		uuid(C58ECF91-0E4D-4715-BF85-B559F6154D9D),
+		dual,
+		helpstring("IVisText Interface"),
+		pointer_default(unique)
+	]
+	interface IVisText : IDispatch
+	{
+		[propget, id(1), helpstring("text scaling factor (x,y)")] HRESULT scale([out, retval] VARIANT *pVal);
+		[propput, id(1), helpstring("text scaling factor (x y)")] HRESULT scale([in] VARIANT newVal);
+		[propget, id(2), helpstring("text rotation angle - degree")] HRESULT angle([out, retval] double *pVal);
+		[propput, id(2), helpstring("text rotation angle - degree")] HRESULT angle([in] double newVal);
+		[propget, id(3), helpstring("text center position")] HRESULT pos([out, retval] VARIANT *pVal);
+		[propput, id(3), helpstring("text center position")] HRESULT pos([in] VARIANT newVal);
+		[propget, id(4), helpstring("text depth z")] HRESULT z([out, retval] double *pVal);
+		[propput, id(4), helpstring("text depth z")] HRESULT z([in] double newVal);
+		[propget, id(5), helpstring("text string")] HRESULT text([out, retval] BSTR *pVal);
+		[propput, id(5), helpstring("text string")] HRESULT text([in] BSTR newVal);
+		[propget, id(6), helpstring("text color")] HRESULT color([out, retval] VARIANT *pVal);
+		[propput, id(6), helpstring("text color")] HRESULT color([in] VARIANT newVal);
+		[propget, id(7), helpstring("text alpha (transparency)")] HRESULT alpha([out, retval] double *pVal);
+		[propput, id(7), helpstring("text alpha (transparency)")] HRESULT alpha([in] double newVal);
+		[propget, id(8), helpstring("text fill flag")] HRESULT fill([out, retval] double *pVal);
+		[propput, id(8), helpstring("text fill flag")] HRESULT fill([in] double newVal);
+		[propget, id(9), helpstring("text showing flag")] HRESULT show([out, retval] double *pVal);
+		[propput, id(9), helpstring("text showing flag")] HRESULT show([in] double newVal);
+		[propget, id(10), helpstring("text clipped flag")] HRESULT clipped([out, retval] double *pVal);
+		[propget, id(11), helpstring("text error string")] HRESULT errstring([out, retval] BSTR *pVal);
+		[propget, id(12), helpstring("text string size")] HRESULT size([out, retval] VARIANT *pVal);
+		[propget, id(13), helpstring("text font weight - 100:100:900")] HRESULT fontWeight([out, retval] double *pVal);
+		[propput, id(13), helpstring("text font weight - 100:100:900")] HRESULT fontWeight([in] double newVal);
+		[propget, id(14), helpstring("text font Underline -- BOOL")] HRESULT fontUnderline([out, retval] double *pVal);
+		[propput, id(14), helpstring("text font Underline -- BOOL")] HRESULT fontUnderline([in] double newVal);
+		[propget, id(15), helpstring("text font Italic -- BOOL")] HRESULT fontItalic([out, retval] double *pVal);
+		[propput, id(15), helpstring("text font Italic -- BOOL")] HRESULT fontItalic([in] double newVal);
+		[propget, id(16), helpstring("text font Name - string")] HRESULT fontName([out, retval] BSTR *pVal);
+		[propput, id(16), helpstring("text font Name - string")] HRESULT fontName([in] BSTR newVal);
+		[propget, id(17), helpstring("action log tag")] HRESULT tag([out, retval] double *pVal);
+	};
+	[
+		object,
+		uuid(93A0D4E6-4128-4D00-B7A2-E799C3AE914C),
+		dual,
+		helpstring("IVisComplexShape Interface"),
+		pointer_default(unique)
+	]
+	interface IVisComplexShape : IDispatch
+	{
+		[propget, id(1), helpstring("property tag")] HRESULT tag([out, retval] double *pVal);
+		[propget, id(2), helpstring("property show")] HRESULT show([out, retval] double *pVal);
+		[propput, id(2), helpstring("property show")] HRESULT show([in] double newVal);
+		[propget, id(3), helpstring("property pos")] HRESULT pos([out, retval] VARIANT *pVal);
+		[propput, id(3), helpstring("property pos")] HRESULT pos([in] VARIANT newVal);
+		[propget, id(4), helpstring("property z")] HRESULT z([out, retval] double *pVal);
+		[propput, id(4), helpstring("property z")] HRESULT z([in] double newVal);
+		[propget, id(5), helpstring("property errstring")] HRESULT errstring([out, retval] BSTR *pVal);
+		[propget, id(6), helpstring("property clipped")] HRESULT clipped([out, retval] double *pVal);
+		[propget, id(7), helpstring("property scale")] HRESULT scale([out, retval] double *pVal);
+		[propput, id(7), helpstring("property scale")] HRESULT scale([in] double newVal);
+		[propget, id(8), helpstring("property angle")] HRESULT angle([out, retval] double *pVal);
+		[propput, id(8), helpstring("property angle")] HRESULT angle([in] double newVal);
+		[propget, id(9), helpstring("property exact")] HRESULT exact([out, retval] double *pVal);
+		[propput, id(9), helpstring("property exact")] HRESULT exact([in] double newVal);
+		[propget, id(10), helpstring("property color")] HRESULT color([out, retval] VARIANT *pVal);
+		[propput, id(10), helpstring("property color")] HRESULT color([in] VARIANT newVal);
+		[propget, id(11), helpstring("property vertices")] HRESULT vertices([out, retval] VARIANT *pVal);
+		[propput, id(11), helpstring("property vertices")] HRESULT vertices([in] VARIANT newVal);
+		[propget, id(12), helpstring("property colors")] HRESULT colors([out, retval] VARIANT *pVal);
+		[propput, id(12), helpstring("property colors")] HRESULT colors([in] VARIANT newVal);
+		[propget, id(13), helpstring("property edgeFlags")] HRESULT edgeFlags([out, retval] VARIANT *pVal);
+		[propput, id(13), helpstring("property edgeFlags")] HRESULT edgeFlags([in] VARIANT newVal);
+		[propget, id(14), helpstring("property indices")] HRESULT indices([out, retval] VARIANT *pVal);
+		[propput, id(14), helpstring("property indices")] HRESULT indices([in] VARIANT newVal);
+		[propget, id(15), helpstring("property polygonStipple")] HRESULT polygonStipple([out, retval] VARIANT *pVal);
+		[propput, id(15), helpstring("property polygonStipple")] HRESULT polygonStipple([in] VARIANT newVal);
+		[propget, id(16), helpstring("property lineStipple")] HRESULT lineStipple([out, retval] double *pVal);
+		[propput, id(16), helpstring("property lineStipple")] HRESULT lineStipple([in] double newVal);
+		[propget, id(17), helpstring("property lineStippleFactor")] HRESULT lineStippleFactor([out, retval] double *pVal);
+		[propput, id(17), helpstring("property lineStippleFactor")] HRESULT lineStippleFactor([in] double newVal);
+		[propget, id(18), helpstring("property lineWidth")] HRESULT lineWidth([out, retval] double *pVal);
+		[propput, id(18), helpstring("property lineWidth")] HRESULT lineWidth([in] double newVal);
+		[propget, id(19), helpstring("property pointSize")] HRESULT pointSize([out, retval] double *pVal);
+		[propput, id(19), helpstring("property pointSize")] HRESULT pointSize([in] double newVal);
+		[propget, id(20), helpstring("property drawMode")] HRESULT drawMode([out, retval] BSTR *pVal);
+		[propput, id(20), helpstring("property drawMode")] HRESULT drawMode([in] BSTR newVal);
+	};
+
+[
+	uuid(28FEF39F-E9E6-4C49-9C0A-ABF568D1B70C),
+	version(1.0),
+	helpstring("VisServer 1.0 Type Library")
+]
+library VISSERVERLib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	
+	[
+		uuid(9BCD7029-6FD2-45C4-93A8-925BC3108927),
+		helpstring("VisWindow Class")
+	]
+	coclass VisWindow
+	{
+		[default] interface IVisWindow;
+	};
+	
+	[
+		uuid(F8E14EF6-8745-492A-AE76-96634DE5AECA),
+		helpstring("VisDisk Class")
+	]
+	coclass VisDisk
+	{
+		[default] interface IVisDisk;
+	};
+	
+	[
+		uuid(8F9791E4-3208-11D5-AF95-00A0C9A51AF0),
+		helpstring("VisCalibrate Class")
+	]
+	coclass VisCalibrate
+	{
+		[default] interface IVisCalibrate;
+	};
+	
+	[
+		uuid(1B381A2C-5AD5-4693-9552-31ED73EE4669),
+		helpstring("VisMouse Class")
+	]
+	coclass VisMouse
+	{
+		[default] interface IVisMouse;
+	};
+	[
+		uuid(36925681-9F7C-4CCE-A9E7-95D9AA439D32),
+		helpstring("VisPolygon Class")
+	]
+	coclass VisPolygon
+	{
+		[default] interface IVisPolygon;
+	};
+	
+	[
+		uuid(D67B3EC4-13C6-4465-9979-C06E63D9D6B4),
+		helpstring("VisText Class")
+	]
+	coclass VisText
+	{
+		[default] interface IVisText;
+	};
+
+	[
+		uuid(2A837E88-C773-41D3-9F4A-BD7219866329),
+		helpstring("VisComplexShape Class")
+	]
+	coclass VisComplexShape
+	{
+		[default] interface IVisComplexShape;
+	};
+};

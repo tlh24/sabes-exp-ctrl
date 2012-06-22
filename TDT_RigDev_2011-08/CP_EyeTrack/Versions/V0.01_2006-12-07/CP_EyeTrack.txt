@@ -1,0 +1,32 @@
+CP_TDT_StreamCom.h -> CP_iTrackCom.h
+CP_TS_Class.h  -> CP_iTrackClass.h
+LIBID_CP_TDT_Stream_Lib -> LIBID_CP_iTrack_Lib
+IID_ITDT_Stream -> IID_IiTrack
+CP_TS_Class -> CP_iTrackClass
+pCP_TS
+
+
+
+
+CP_iTrack.ico
+CP_iTrack.rc
+iTackGlob.h
+iTrackThread.h
+iTrackGlob.cpp
+iTrackCom.idl
+CP_iTrackClass.cpp
+CP_iTrackClass.h
+iTrackThread.cpp
+iTrack.h
+iTrack.cpp
+DataFile.cpp
+CP_iTrack.cpp
+CP_iTrack.dsp
+CP_iTrack.txt
+
+CP_TDT_Stream.cpp
+CP_TDT_StreamCom.h
+CP_TS_Class.cpp
+Stream_Glob.cpp
+TDT_Stream.cpp
+TimerThread.h

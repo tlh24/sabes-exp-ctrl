@@ -1,0 +1,2 @@
+% strCompName = 'CannonBall';
+strCompName = 'localhost';

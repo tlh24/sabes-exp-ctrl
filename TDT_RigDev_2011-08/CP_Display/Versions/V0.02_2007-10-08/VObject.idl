@@ -1,0 +1,48 @@
+    [helpstring("Origin position X,Y")] 
+      HRESULT GetXY([out] SAFEARRAY(double) * psaXY);
+    [helpstring("Origin position X,Y")] 
+      HRESULT SetXY([in] SAFEARRAY(double) saXY, [in, defaultvalue(0)] long iLogID);
+    [helpstring("Origin position Z (depth)")] 
+      HRESULT GetZ([out] double *pdZ);
+    [helpstring("Origin position Z (depth)")] 
+      HRESULT SetZ([in] double dZ, [in, defaultvalue(0)] long iLogID);
+    [helpstring("Scaling factor")] 
+      HRESULT GetScale([out] double * pdScale);
+    [helpstring("Scaling factor")] 
+      HRESULT SetScale([in] double dScale, [in, defaultvalue(0)] long iLogID);
+    [helpstring("Rotation angle, degrees")] 
+      HRESULT GetAngle([out] double * pdAngle);
+    [helpstring("Rotation angle, degrees")] 
+      HRESULT SetAngle([in] double dAngle, [in, defaultvalue(0)] long iLogID);
+    [helpstring("Color (R,G,B)")] 
+      HRESULT GetColor([out] SAFEARRAY(double) *psaColors);
+    [helpstring("Color (R,G,B)")] 
+      HRESULT SetColor([in] SAFEARRAY(double) saColors, [in, defaultvalue(0)] long iLogID );
+    [helpstring("Alpha (transparency) 1= solid")] 
+      HRESULT GetAlpha([out] double *pdAlpha);
+    [helpstring("Alpha (transparency) 1= solid")] 
+      HRESULT SetAlpha([in] double dAlpha, [in, defaultvalue(0)] long iLogID );
+    [helpstring("Filled (=1) or just the contour (=0)")] 
+      HRESULT GetFillFlag([out] long * piFillFlag );
+    [helpstring("Filled (=1) or just the contour (=0)")] 
+      HRESULT SetFillFlag([in] long iFillFlag, [in, defaultvalue(0)] long iLogID );
+    [helpstring("Show (=1) or Hide (=0)")] 
+      HRESULT GetShowFlag([out] long * piShowFlag );
+    [helpstring("Show (=1) or Hide (=0)")] 
+      HRESULT SetShowFlag([in] long iShowFlag, [in, defaultvalue(0)] long iLogID);
+    [helpstring("GroupID is 0 by default")] 
+      HRESULT GetGroupID([out] long * piGroupID );
+    [helpstring("GroupID is 0 by default")] 
+      HRESULT SetGroupID([in] long iGroupID);
+    [helpstring("Number of clipped vertices, calculated on draw")] 
+      HRESULT GetClippedCount([out] long *piClippedCount);
+    [helpstring("Moves graphics object")] 
+      HRESULT Move([in] SAFEARRAY(double) saXY, [in, defaultvalue(0)] long iLogID );
+    [helpstring("Scales graphic object")] 
+      HRESULT Scale([in] double dScale, [in, defaultvalue(0)] long iLogID );
+    [helpstring("Rotates graphics object")] 
+      HRESULT Rotate([in] double dAngle, [in, defaultvalue(0)] long iLogID );
+    [helpstring("Shows graphics object")] 
+      HRESULT Show([in, defaultvalue(0)] long iLogID );
+    [helpstring("Hides graphics object")] 
+      HRESULT Hide([in, defaultvalue(0)] long iLogID );

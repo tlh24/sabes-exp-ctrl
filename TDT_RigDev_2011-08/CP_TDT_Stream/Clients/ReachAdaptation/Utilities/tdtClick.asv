@@ -1,0 +1,52 @@
+function [outfreq, outangle]=tdtClick(freq,angle)
+
+% FUNCTION tdtClick(freq)
+%
+% Set the following variables
+%
+% freq - scalar>0 - frequency in Hz
+%      - 0        -  turn tone off
+%      - []       -  return current tone
+% channel number  - [1 2 3 4] 
+% ch amplitude    - [0-1]
+% gate            - 0/1 
+
+global TDTdev
+persistent lastFreq lastAngle 
+
+%% First Time
+if( isempty(lastFreq) ) 
+    lastFreq=0;
+    lastAngle=0;
+end
+
+if (nargin==0) 
+   outfreq = lastFreq;
+   outangle = lastAngle;
+end
+
+if( freq == lastFreq & angle == lastAngle )  %% Nothing has changed
+    return;     
+elseif ( freq == lastFreq & angle ~= lastAngle) %% Angle changed
+    lastAngle = angle;
+    invoke(TDTdev,'SetTargetVal','RX5(1).ClickAngle',angle);    
+elseif ( freq ~= lastFreq & angle == lastAngle) %% Frequency changed
+    lastFreq = freq;
+    invoke(TDTdev,'SetTargetVal','RX5(1).ClickFreq',freq);
+else   %% Both frequency and angle changed
+    invoke(TDTdev,'SetTargetVal','RX5(1).ClickAngle',angle);
+    invoke(TDTdev,'SetTargetVal','RX5(1).ClickFreq',freq);
+    lastFreq  = freq;
+    lastAngle = angle;
+end
+%% Turn off
+if( freq == 0 )
+    invoke(TDTdev,'SetTargetVal','RX5(1).ClickGate',0);
+    lastFreq=freq;
+    return
+end
+
+%% Turn on
+if( lastFreq == 0 )
+    invoke(TDTdev,'SetTargetVal','RX5(1).ClickGate',1);
+end

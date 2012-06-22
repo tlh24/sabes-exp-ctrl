@@ -1,0 +1,24 @@
+HKCR
+{
+	VisServer.VisJoystick.1 = s 'VisJoystick Class'
+	{
+		CLSID = s '{9E21F870-40F4-4E90-AD4A-448B4E5B6004}'
+	}
+	VisServer.VisJoystick = s 'VisJoystick Class'
+	{
+		CLSID = s '{9E21F870-40F4-4E90-AD4A-448B4E5B6004}'
+		CurVer = s 'VisServer.VisJoystick.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {9E21F870-40F4-4E90-AD4A-448B4E5B6004} = s 'VisJoystick Class'
+		{
+			ProgID = s 'VisServer.VisJoystick.1'
+			VersionIndependentProgID = s 'VisServer.VisJoystick'
+			ForceRemove 'Programmable'
+			LocalServer32 = s '%MODULE%'
+			val AppID = s '{550FD218-E639-41C8-A1DC-11C873341AC1}'
+			'TypeLib' = s '{28FEF39F-E9E6-4C49-9C0A-ABF568D1B70C}'
+		}
+	}
+}

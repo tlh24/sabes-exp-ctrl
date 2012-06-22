@@ -1,0 +1,104 @@
+// CP_OptoTrack.idl : IDL source for CP_OptoTrack.exe
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (CP_OptoTrack.tlb) and marshalling code.
+
+import "oaidl.idl";
+//import "ocidl.idl";
+
+
+//------------------------------------------------------------
+// IOptoTrack interface
+
+	[
+		object,  // tells MIDL to produce COM, not RPC interface
+		uuid(ebd33078-ceb1-11d5-9c3e-0050da2a68c8),
+		dual,
+    oleautomation,
+		helpstring("IOptoTrack Interface"),
+ 		pointer_default(unique)
+	]                                  
+	interface IOptoTrack  : IDispatch {
+
+    [propget, id(1), helpstring("Gets Program Version String")] 
+       HRESULT strProgramVersion([out, retval] BSTR * pVal);
+
+    [id(2), helpstring("Connects to P&O tracker")] 
+      HRESULT ConnectTracker();
+
+    [id(3), helpstring("Returns P&O tracker ID: 0 = not connected, 1 = Opto, 2 = OptoTrack, 101 = Opto (Time sync Ok)")] 
+      HRESULT GetTrackerState( [out] long *pTracker );
+
+    [id(4), helpstring("Disconnects from the tracker")] 
+      HRESULT DisconnectTracker();
+
+		[propget, id(5), helpstring("Prediction time in ms ( 0<=T<40 )")] 
+      HRESULT dPredictionTimeMs([out, retval] double *pVal);
+		[propput, id(5), helpstring("Prediction time in ms ( 0<=T<40 )")] 
+      HRESULT dPredictionTimeMs([in] double newVal);
+
+    [id(6), helpstring("Set zero time, clear data")] 
+      HRESULT ResetBuffer();
+
+		[id(7), helpstring("Array of sensors")] 
+      HRESULT GetSensors([out, retval] SAFEARRAY(double) *padSensors);
+
+ 		[id(8), helpstring("Array of sensors")] 
+      HRESULT SetSensors([in] SAFEARRAY(double) adMatrix);
+
+    [propget, id(9), helpstring("Buffer size in frames")] 
+      HRESULT lngBufferSize([out, retval] long *pnItems);
+
+    [propget, id(10), helpstring("Get latest data index")] 
+      HRESULT lngLatestDataIndex( [out, retval] long *plIdx);
+
+    [id(12), helpstring("Get latest data index, timestamp in ms, and coordinates")] 
+      HRESULT GetSensorLatest( [in] long lngSensorIdx,
+                               [out] long *plIdx,
+                               [out] SAFEARRAY(double) * padData );
+
+    [id(13), helpstring("Get timestamps in ms, and coordinates")] 
+      HRESULT GetSensorBuffer( [in] long lngSensorIdx,
+                               [in] long lngIdx,
+                               [in] long nItems,
+                               [out] SAFEARRAY(double) * padData );
+
+    [id(14), helpstring("Get latest data index, timestamp in ms, and coordinates")] 
+      HRESULT GetAllSensorsLatest( [out] long *plIdx,
+                                   [out] SAFEARRAY(double) * padData );
+
+    [id(15), helpstring("Get timestamps in ms, and coordinates")] 
+      HRESULT GetAllSensorsBuffer( [in] long lngIdx,
+                                   [in] long nItems,
+                                   [out] SAFEARRAY(double) * padData );
+
+  };
+
+
+[
+	// normally don't have to change this guid,
+	// it's used to label the type library
+	uuid(ebd33074-ceb1-11d5-9c3e-0050da2a68c8),
+  // Note: make sure to update code in LoadRegTypeLib() and UnRegisterTypeLib()
+  // on version change!
+	version(0.0),  
+	// this shows up in the "references" in VB
+	helpstring("CP_OptoTrack Type Library")
+]
+library CP_OptoTrackLib  // This is the lib name used by VB
+{
+	importlib("stdole32.tlb");
+	[
+		// This is the class (com object guid)
+		// Don't have to change it normally
+		uuid(ebd33070-ceb1-11d5-9c3e-0050da2a68c8),
+		helpstring("CP_OptoTrack Class")
+	]
+
+	coclass CP_OptoClass { // This is the object name used by VB
+	
+    [default] dispinterface IOptoTrack;
+	};
+
+};

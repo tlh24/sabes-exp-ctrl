@@ -1,0 +1,10 @@
+function saveIntermediateTrialData(dat)
+%
+%
+%
+%
+
+global Params
+
+
+save(sprintf('%s_TEMP/savedData',Params.FILENAME));

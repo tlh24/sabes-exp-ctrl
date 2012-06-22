@@ -1,0 +1,16 @@
+% strVisServerName = 'VisServer1';
+strVisServerName = 'grappelli';
+
+
+nFrames = 1000;
+nDisks = 20;
+
+fprintf('Starting VisServer...\n')
+fprintf('VisWindow\n')
+hW = actxserver('CP_Display.VisWindow',strVisServerName); 
+
+hW.clrscreen(1);
+hW.clrscreen;
+
+%if iscom(hW)  release(hW); end;
+

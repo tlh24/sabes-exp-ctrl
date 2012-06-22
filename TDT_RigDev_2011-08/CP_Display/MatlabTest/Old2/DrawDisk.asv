@@ -1,0 +1,18 @@
+% strVisServerName = 'VisServer1';
+strVisServerName = 'grappelli';
+
+hVMain = actxserver('CP_Display.VMain'); 
+hVMain.GetVersion
+hVDisk = actxserver('CP_Display.VDisk'); 
+
+get(hVDisk)
+methods(hVDisk)
+
+hVDisk.Show;
+hVDisk.SetXY([512,384]);
+hVDisk.SetRadius(40);
+hVDisk.SetColor([1 0 1]);
+pause(1.0);
+hVDisk.SetN_Vertices(3);
+hVDisk.Rotate(-30);
+hMainScaleAll(2);

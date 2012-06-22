@@ -1,0 +1,3 @@
+%  rigConfigInclude.m
+
+strRigName = 'Axl';

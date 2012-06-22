@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		{EBD33080-CEB1-11D5-9C3E-0050DA2A68C8} = s 'CP_Display'
+		'CP_Display.EXE'
+		{
+			val AppID = s {EBD33080-CEB1-11D5-9C3E-0050DA2A68C8}
+		}
+	}
+}

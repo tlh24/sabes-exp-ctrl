@@ -1,0 +1,15 @@
+srvname = 'CP_LibertyTrack.Application';
+
+hTracker=actxserver(srvname);
+
+SensorsOn = int32([1]);
+hTracker.SetSensors(SensorsOn);
+
+hTracker.ConnectTracker;
+pause(3);
+
+iIdx = hTracker.
+
+% hTracker.DisconnectTracker;
+% delete(hTracker);
+% clear functions;

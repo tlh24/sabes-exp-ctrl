@@ -1,0 +1,142 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAIN_DIALOG DIALOGEX 100, 1000, 292, 284
+STYLE DS_NOIDLEMSG | DS_CENTER | WS_MINIMIZEBOX | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "CP LibertyTrack"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Exit",IDC_CMD_EXIT,197,256,85,15
+    PUSHBUTTON      "Start",IDC_CMD_START,197,236,40,15
+    PUSHBUTTON      "Stop",IDC_CMD_STOP,243,236,40,15
+    CONTROL         "",IDC_PICTURE,"Static",SS_BLACKFRAME,1,3,288,202,
+                    WS_EX_STATICEDGE
+    RTEXT           "Frame: ",IDC_STATIC,6,210,53,8
+    LTEXT           "0",IDC_LBL_FRAME,66,210,53,8
+    RTEXT           "Missed frames: ",IDC_STATIC,6,220,53,8
+    LTEXT           "0",IDC_LBL_N_MISSED,66,220,53,8
+    RTEXT           "Missed count: ",IDC_STATIC,6,230,53,8
+    LTEXT           "0",IDC_LBL_MISSED_CNT,66,230,53,8
+    RTEXT           "Time, sec: ",IDC_STATIC,150,210,33,8
+    LTEXT           "0.0",IDC_LBL_TIME,190,210,99,8
+    RTEXT           "X:",IDC_STATIC,11,245,8,8
+    RTEXT           "Y:",IDC_STATIC,11,256,8,8
+    RTEXT           "Z:",IDC_STATIC,11,267,8,8
+    LTEXT           "0",IDC_LBL_X1,29,245,26,8
+    LTEXT           "0",IDC_LBL_Y1,29,256,26,8
+    LTEXT           "0",IDC_LBL_Z1,29,267,26,8
+    LTEXT           "0",IDC_LBL_X2,69,245,26,8
+    LTEXT           "0",IDC_LBL_Y2,69,256,26,8
+    LTEXT           "0",IDC_LBL_Z2,69,267,26,8
+    LTEXT           "0",IDC_LBL_X3,109,245,26,8
+    LTEXT           "0",IDC_LBL_Y3,109,256,26,8
+    LTEXT           "0",IDC_LBL_Z3,109,267,26,8
+    LTEXT           "0",IDC_LBL_X4,149,245,26,8
+    LTEXT           "0",IDC_LBL_Y4,149,256,26,8
+    LTEXT           "0",IDC_LBL_Z4,149,267,26,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_MAIN_DIALOG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 280
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "1 TYPELIB ""CP_OptoTrackCom.tlb""\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON_APPL           ICON    DISCARDABLE     "CP_OptoTrack.ico"
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+1 TYPELIB "CP_OptoTrackCom.tlb"
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,33 @@
+function [dTS_c0 dTS_c1 dCerebusDuration] = ...
+  NevCalcTimeCoeffs( strFileName, dGlobRecOnTS, dGlobRecOffTS, dGlobRecSyncTS)
+
+TimeSyncConfigInclude; % we use dGlobClockHz and iGlobTickPeriod
+
+[dRP2_SyncUpTS dRP2_SyncDwnTS ...
+dRecOnTS dRecOffTS ...
+dPauseOnTS dPauseOffTS ...
+dRecSyncTS ]  =  NevGetParsedDigInEvents( strFileName );
+
+
+% find matching ref points
+if (~isempty(dRecSyncTS)) & (~isempty(dGlobRecSyncTS))
+  dGlobRefTS = dGlobRecSyncTS;
+  dCerebusRefTS = dRecSyncTS;
+  
+elseif
+ (~isempty(dRecSyncTS)) & (~isempty(dGlobRecOffTS))
+  dGlobRefTS = dGlobRecSyncTS;
+  dCerebusRefTS = dRecSyncTS;  
+end
+
+
+dCerebusDuration =  dRP2_SyncUpTS(end) - dRP2_SyncUpTS(1); % in seconds
+dGlobPeriod = iGlobTickPeriod/dGlobClockHz;
+dGlobDuration = dGlobPeriod * ( length(dRP2_SyncUpTS) - 1); % duration in RP2 time (sec)
+
+
+dTS_c1 = dGlobDuration/dCerebusDuration;
+dTS_c0 = dGlobRefTS - dCerebusRefTS;
+
+% dTS_c0 = dGlobRecSyncTS - dRecSyncTS;
+% dGlobRecSyncTS = dRecordingSyncTimes/1000; % convert to seconds

@@ -1,0 +1,14 @@
+strDir = 'D:\tmp\TDT_Tanks\';
+% strFile = 'Test_20060414_Block-15.i16';
+strFile = 'Test_20060414_Block-15.i16';
+
+strPath = [strDir strFile]
+hf=fopen(strPath);
+ch_vals = fread(hf, inf, 'int16' );
+fclose(hf);
+
+chDiff = diff(ch_vals);
+
+idx = find(chDiff ~= 1);
+
+length(idx)

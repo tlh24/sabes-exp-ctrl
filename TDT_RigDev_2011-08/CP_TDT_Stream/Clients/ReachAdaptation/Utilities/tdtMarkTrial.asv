@@ -1,0 +1,41 @@
+function tdtMarkTrial(mark)
+
+% FUNCTION tdtMarkTrial(mark)
+%
+% Set tone frequence
+%
+% mark - scalar
+%      - 1   -  mark Start/Stop Trial  
+%      - 0   -  
+%
+
+global TDTdev
+persistent lastMark
+
+%% First Time
+if( isempty(lastMark) ) lastMark=0; end
+
+%% Return 
+if( isempty(mark) ) 
+    currMark=lastMark; 
+    return; 
+end
+
+%% Nothing has changed
+if( mark == lastMark) return; end
+
+%% Mark Trial
+if( freq == 0 )
+    invoke(TDTdev,'SetTargetVal','RP2(1).ToneGate',0);
+    lastFreq=freq;
+    return
+end
+
+%% Set Freq
+invoke(TDTdev,'SetTargetVal','RP2(1).ToneFreq',freq);
+
+%% Mark Trial
+if( lastMark == 0 )
+    invoke(TDTdev,'SetTargetVal','RP2(1).MarkTrial',1);
+end
+lastFreq=freq;

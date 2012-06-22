@@ -1,0 +1,127 @@
+// CP_LibertyTrack.idl : IDL source for CP_LibertyTrack.exe
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (CP_LibertyTrack.tlb) and marshalling code.
+
+import "oaidl.idl";
+//import "ocidl.idl";
+
+
+//------------------------------------------------------------
+// ILibertyTrack interface
+
+	[
+		object,  // tells MIDL to produce COM, not RPC interface
+		uuid(ebd33068-ceb1-11d5-9c3e-0050da2a68c8),
+		dual,
+    oleautomation,
+		helpstring("ILibertyTrack Interface"),
+ 		pointer_default(unique)
+	]                                  
+	interface ILibertyTrack  : IDispatch {
+
+    [helpstring("Program Version String")] 
+       HRESULT GetVersion([out] BSTR * pVal);
+
+    [helpstring("Connects to Liberty")] 
+      HRESULT ConnectTracker();
+    [helpstring("Disconnects from P&O tracker")] 
+      HRESULT DisconnectTracker();
+
+    [helpstring("Returns tracker ID: 0 = not connected, 1 = Liberty, 2 = OptoTrak, 3 = ISCAN. State: 1=connected")] 
+      HRESULT GetTrackerState( [out] long * piTrackerID,
+                               [out] long * piState   );
+
+    [helpstring("Returns current frame count.")] 
+      HRESULT GetFrameCount( [out] long * pnFrames );
+
+    [helpstring("Time scale coefficients to convert frames to milliseconds")]
+      HRESULT GetTimeScale([out] double *pdC0,
+                           [out] double *pdC1);
+    [helpstring("Time scale coefficients to convert frames to milliseconds")]
+      HRESULT SetTimeScale([in] double dC0,
+                           [in] double dC1);
+
+    [helpstring("Rotation and translation matrix (3x4)")]
+      HRESULT GetTransformMatrix([in, defaultvalue(1)] long iTransformIdx,
+                                 [out] SAFEARRAY(double) * psaTransform);
+    [helpstring("Rotation and translation matrix (3x4)")]
+      HRESULT SetTransformMatrix([in] SAFEARRAY(double) saTransform,
+                                 [in, defaultvalue(1)] long iTransformIdx);
+
+		[helpstring("Array of sensors: index and port (optional)")] 
+      HRESULT GetSensors([out] SAFEARRAY(long) *psaSensors);
+ 		[helpstring("Array of sensors: index and port (optional)")] 
+      HRESULT SetSensors([in] SAFEARRAY(long) saSensors);
+
+ 		[helpstring("Activate markers. Ignored on Liberty.")]
+      HRESULT ActivateSensors( );
+ 		[helpstring("Deactivate markers. Ignored on Liberty.")]
+      HRESULT DeactivateSensors( );
+
+		[helpstring("Array of sensors transform index")] 
+      HRESULT GetSensorsTransformIdx([out] SAFEARRAY(long) *psaTransformIdx);
+ 		[helpstring("Array of sensors transform index")] 
+      HRESULT SetSensorsTransformIdx([in] SAFEARRAY(long) saTransformIdx);
+
+    [helpstring("Buffer size in frames")] 
+      HRESULT GetBufferSize([out] long *pnFrames);
+    [helpstring("Get latest data index")] 
+      HRESULT GetDataIndexLatest( [out] long *piDataIdx );
+    [helpstring("Get latest data index, timestamp in ms, and coordinates")] 
+      HRESULT GetSensorLatest( [in] long iSensorIdx,
+                               [in, defaultvalue(1)]  long nFrames,
+                               [out] long *piDataIdx,
+                               [out] SAFEARRAY(double) * psaTimeStampMs,
+                               [out] SAFEARRAY(double) * psaCoord,
+                               [out] SAFEARRAY(double) * psaVelocity );
+    [helpstring("Get timestamps, and coordinates")] 
+      HRESULT GetSensorBuffered( [in] long iSensorIdx,
+                                 [in] long iDataIdx,
+                                 [in] long nFrames,
+                                 [out] SAFEARRAY(double) * psaTimeStampMs,
+                                 [out] SAFEARRAY(double) * psaCoord,
+                                 [out] SAFEARRAY(double) * psaVelocity );
+    [helpstring("Get latest data index, timestamp, and coordinates")] 
+      HRESULT GetAllSensorsLatest( [in, defaultvalue(1)]  long nFrames,
+                                   [out] long *piIdx,
+                                   [out] SAFEARRAY(double) * psaTimeStampMs,
+                                   [out] SAFEARRAY(double) * psaCoord,
+                                   [out] SAFEARRAY(double) * psaVelocity );
+    [helpstring("Get timestamps, and coordinates")] 
+      HRESULT GetAllSensorsBuffered( [in] long iDataIdx,
+                                     [in] long nFrames,
+                                     [out] SAFEARRAY(double) * psaTimeStampMs,
+                                     [out] SAFEARRAY(double) * pafCoord,
+                                     [out] SAFEARRAY(double) * pafVelocity );
+
+  };
+
+
+[
+	// normally don't have to change this guid,
+	// it's used to label the type library
+	uuid(ebd33064-ceb1-11d5-9c3e-0050da2a68c8),
+  // Note: make sure to update code in LoadRegTypeLib() and UnRegisterTypeLib()
+  // on version change!
+	version(0.0),  
+	// this shows up in the "references" in VB
+	helpstring("CP_LibertyTrack Type Library")
+]
+library CP_LibertyTrackLib  // This is the lib name used by VB
+{
+	importlib("stdole32.tlb");
+	[
+		// This is the class (com object guid)
+		// Don't have to change it normally
+		uuid(ebd33060-ceb1-11d5-9c3e-0050da2a68c8),
+		helpstring("CP_LibertyTrack Class")
+	]
+
+	coclass CP_LibertyClass { // This is the object name used by VB
+	
+    [default] dispinterface ILibertyTrack;
+	};
+
+};

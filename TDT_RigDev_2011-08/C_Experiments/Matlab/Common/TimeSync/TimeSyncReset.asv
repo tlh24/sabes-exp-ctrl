@@ -1,0 +1,14 @@
+function TimeSyncReset
+
+TimeSyncGlobalsInclude;
+
+g_hTimeSync.SetTagVal('RecordingGateIn', 0);   % clear record bit
+g_hTimeSync.SetTagVal('PauseGateIn', 0); % clear pause bit
+g_hTimeSync.SoftTrg(1);  % reset triggers/counters
+
+
+ExperimentGlobalsInclude;
+
+%% Get Com Handle and Make Connection
+hDev=actxserver('TDevAcc.X');
+g_ExpData.hDev = hDev;

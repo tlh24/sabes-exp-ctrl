@@ -1,0 +1,13 @@
+% % SensorsOnMtx = int32([1 1]'); % to set the first sensor
+% % SensorsOnMtx = int32([1 2]);  % to set the first 2 sensors
+% % SensorsOnMtx = int32([1 2 3]);  % to set the first 3 sensors
+% % SensorsOnMtx = int32([1 2 3 4]);  % to set the first 4 sensors
+
+%sensorList = [1 1]'; % to set the first sensor
+%sensorList = [1 2]; % to set the first 2 sensors
+%sensorList = [1 2 3]; % to set the first 3 sensors
+sensorList = [1 2 3 4]; % to set the first 4 sensors
+
+SensorsOnMtx = int32(sensorList);
+
+fprintf('\n\n\t%s: Using the first %i sensors  <----\n\n\n',mfilename,length(sensorList));

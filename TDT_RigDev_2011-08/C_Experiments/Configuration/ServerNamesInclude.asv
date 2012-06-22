@@ -1,0 +1,9 @@
+strDisplayComputer = 'VisServer1';
+
+strEyeTrackComputer = 'Cannonball';
+
+strTrackerComputer = 'Cannonball';
+strTrackerName = 'CP_LibertyTrack.Application';
+
+strTimeSyncComputer = 'Cannonball';
+strTimeSyncName = 'CP_TimeSync.Application';

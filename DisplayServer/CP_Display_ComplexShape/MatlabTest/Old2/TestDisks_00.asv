@@ -1,0 +1,54 @@
+% strDisplayComputer = 'VisServer1';
+strDisplayComputer = 'grappelli';
+
+hVMain = actxserver('CP_Display.VMain', strDisplayComputer); 
+hVMain.GetVersion
+% hVDisk = actxserver('CP_Display.VDisk', strDisplayComputer); 
+
+% get(hVDisk)
+% methods(hVDisk)
+% 
+% hVDisk.Show;
+% hVDisk.SetXY([512,384]);
+% hVDisk.SetRadius(40);
+% hVDisk.SetColor([1 0 1]);
+% pause(1.0);
+% hVDisk.SetN_Vertices(3);
+% hVDisk.Rotate(-30);
+% pause(1.0);
+% hVMain.ScaleAll(4);
+
+nFrames = 1000;
+nDisks = 20;
+
+fprintf('Creating VDisks\n')
+for i=1:nDisks
+  hDsk(i) = actxserver('CP_Display.VDisk', strDisplayComputer); 
+end
+disk_params = rand(5, nDisks, nFrames);
+scale_vect = [1023 767 1 1 1]';
+scale_mat = repmat(scale_vect, [1, nDisks, nFrames]); 
+disk_params = scale_mat .* disk_params; % X,Y-coord, RGB
+
+hVMain.StartBatchDraw;
+for i=1:nDisks
+  hDsk(i).SetColor([disk_params(3:5,i,1)]);
+  hDsk(i).Show;
+end
+
+tic
+for j=1:nFrames
+  hVMain.StartBatchDraw;
+  for i = 1:nDisks
+    hDsk(i).SetXY([disk_params(1:2,i,j)]);
+  end
+  hVMain.FinishBatchDraw;
+end
+toc/nFrames
+
+fprintf('Finished\n');
+for i=1:nDisks
+  if iscom(hDsk(i))  release(hDsk(i)); end;
+end
+% if iscom(hW)  release(hW); end;
+% 

@@ -1,0 +1,41 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: GetNextRaw - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\MOTORL~1.PHA\LOCALS~1\Temp\RSPC.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /I "../Opto" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR"Debug/" /Fp"Debug/GetNextRaw.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\users\rebrik\OptoTrys\GetNextRaw\GetNextRaw.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\MOTORL~1.PHA\LOCALS~1\Temp\RSPC.tmp" 
+Creating temporary file "C:\DOCUME~1\MOTORL~1.PHA\LOCALS~1\Temp\RSPD.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ../Opto/oapi.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/GetNextRaw.pdb" /debug /machine:I386 /out:"Debug/GetNextRaw.exe" /pdbtype:sept 
+.\Debug\GetNextRaw.obj
+]
+Creating command line "link.exe @C:\DOCUME~1\MOTORL~1.PHA\LOCALS~1\Temp\RSPD.tmp"
+<h3>Output Window</h3>
+Compiling...
+GetNextRaw.c
+C:\users\rebrik\OptoTrys\GetNextRaw\GetNextRaw.c(74) : warning C4101: 'uSensorCnt' : unreferenced local variable
+C:\users\rebrik\OptoTrys\GetNextRaw\GetNextRaw.c(68) : warning C4101: 'nSensorCode' : unreferenced local variable
+C:\users\rebrik\OptoTrys\GetNextRaw\GetNextRaw.c(73) : warning C4101: 'uMarkerCnt' : unreferenced local variable
+C:\users\rebrik\OptoTrys\GetNextRaw\GetNextRaw.c(65) : warning C4101: 'nNumSensors' : unreferenced local variable
+C:\users\rebrik\OptoTrys\GetNextRaw\GetNextRaw.c(66) : warning C4101: 'nNumOdaus' : unreferenced local variable
+C:\users\rebrik\OptoTrys\GetNextRaw\GetNextRaw.c(67) : warning C4101: 'nMarkers' : unreferenced local variable
+Linking...
+Creating command line "bscmake.exe /nologo /o"Debug/GetNextRaw.bsc"  .\Debug\GetNextRaw.sbr"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+GetNextRaw.exe - 0 error(s), 6 warning(s)
+</pre>
+</body>
+</html>

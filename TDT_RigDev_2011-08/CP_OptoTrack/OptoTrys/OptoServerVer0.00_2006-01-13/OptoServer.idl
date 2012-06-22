@@ -1,0 +1,51 @@
+// OptoServer.idl : IDL source for OptoServer.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (OptoServer.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+	
+	[
+		object,
+		uuid(B066FF86-7D9E-4C8F-9A34-F640BFDD3BE4),
+		dual,
+		helpstring("IOptoServer Interface"),
+		pointer_default(unique)
+	]
+	interface IOptoServer : IDispatch
+	{
+		[propget, id(1), helpstring("Property: markers activeive")] HRESULT active([out, retval] short *pVal);
+		[propput, id(1), helpstring("property active")] HRESULT active([in] short newVal);
+		[propget, id(2), helpstring("method latest")] HRESULT latest([out, retval] VARIANT *posVar);
+		[propget, id(3), helpstring("method next")] HRESULT next([out, retval] VARIANT *posVar);
+		[id(4), helpstring("method startBuffer")] HRESULT startBuffer();
+		[id(5), helpstring("method stopBuffer")] HRESULT stopBuffer();
+		[id(6), helpstring("method getBuffer")] HRESULT getBuffer([in] short marker, [out, retval] VARIANT *posVar);
+		[id(7), helpstring("method setup")] HRESULT setup([in] VARIANT makers, [in] float rate, [in, optional] float time);
+		[id(8), helpstring("method setframe")] HRESULT setframe([in] VARIANT makers);
+		[propget, id(9), helpstring("property error")] HRESULT error([out, retval] BSTR *pVal);
+		[propget, id(10), helpstring("property latestframe")] HRESULT latestframe([out, retval] double *pVal);
+	};
+
+[
+	uuid(37967B1D-F5A0-4940-B485-F40355B1DC1C),
+	version(1.0),
+	helpstring("OptoServer 1.0 Type Library")
+]
+library OPTOSERVERLib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	
+	[
+		uuid(858130AA-8F41-4B35-B8F0-04E358904B48),
+		helpstring("OptoServer Class")
+	]
+	coclass OptoServer
+	{
+		[default] interface IOptoServer;
+	};
+};

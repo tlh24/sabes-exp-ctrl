@@ -1,0 +1,9 @@
+??? Error using ==> set
+Bad value for axes property: 'XLim'
+Values must be increasing and non-NaN.
+
+Error in ==> SensIntReaching at 475
+        set(gca,'xlim',[0 Data(trial).expttime]);
+
+Error in ==> RunSIR at 45
+SensIntReaching(test);

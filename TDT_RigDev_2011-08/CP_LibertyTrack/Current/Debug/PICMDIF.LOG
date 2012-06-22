@@ -1,0 +1,15 @@
+17:53:52:078 	USB Binary Header Failure: Host Error parsing tracker response :  
+17:53:55:125 	USB Binary Header Failure: Host Error parsing tracker response :  
+17:53:55:343 	USB Binary Header Failure: Host Error parsing tracker response :  
+17:53:55:703 	USB Binary Header Failure: Host Error parsing tracker response :  
+17:54:28:937 	USB Binary Header Failure: Host Error parsing tracker response :  
+17:54:36:156 	USB Binary Header Failure: Host Error parsing tracker response :  
+17:54:40:750 	USB Binary Header Failure: Host Error parsing tracker response :  
+17:54:41:703 	USB Binary Header Failure: Host Error parsing tracker response :  
+17:55:02:937 	PiCommUSB::ReadComplete - iocount ? index 17 ERROR 31 : Too many links
+
+17:55:03:406 	PiCommUSB::ReadComplete - iocount ? index 18 ERROR 1167 : Unknown error
+
+
+===============Finish Logging================
+

@@ -1,0 +1,26 @@
+function ToneStart( dFreqHz, dDurationSec  )
+
+ExperimentGlobalsInclude;
+TimeSyncGlobalsInclude;
+
+g_ExpData.hDev.SetTargetVal('ToneFreqHz', dFreqHz);
+
+iTimeTicks = dDurationSec * 1000 / g_dTsTicksToMs;
+g_ExpData.hDev.SetTargetVal('ToneDurTicks', iTimeTicks);
+
+% g_hTimeSync.SoftTrg(3);
+g_ExpData.hDev.SetTargetVal('Trig3', iTimeTicks);
+g_ExpData.hDev.SetTargetVal('ToneDurTicks', iTimeTicks);
+
+
+          
+nToneOnEvents = g_ExpData.hDev.GetTargetVal('ToneOnCnt');
+iToneOnTicks = g_ExpData.hDev.ReadTargetVEX('ToneOnTimes',...
+        0,nToneOnEvents,'I32','F64');
+nToneOffEvents = g_ExpData.hDev.GetTargetVal('ToneOffCnt');
+iToneOffTicks = g_ExpData.hDev.ReadTargetVEX('ToneOffTimes',...
+        0,nToneOffEvents,'I32','F64');
+
+dToneOnTimes = double(iToneOnTicks) * g_dTsTicksToMs;
+dToneOffTimes = double(iToneOffTicks) * g_dTsTicksToMs;
+

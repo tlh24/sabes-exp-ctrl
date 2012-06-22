@@ -1,0 +1,159 @@
+# Microsoft Developer Studio Generated Dependency File, included by CP_Display.mak
+
+.\Util\Console.cpp : \
+	".\Util\Console.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\CP_Display.cpp : \
+	".\ATL_Defs.h"\
+	".\BuildOptions.h"\
+	".\CP_Display.h"\
+	".\CP_Display_i.c"\
+	".\GL_Engine.h"\
+	".\GL_Font.h"\
+	".\Util\CP_printf.h"\
+	".\Util\PointerArray.h"\
+	".\Util\SafeArrayLib.h"\
+	".\VDisk.h"\
+	".\VMain.h"\
+	".\VMouse.h"\
+	".\VObject.h"\
+	".\VObjectMethodsDecl.h"\
+	".\VPolygon.h"\
+	".\VText.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\CP_Display.idl : \
+	".\VObject.idl"\
+	
+
+.\CP_Display.rc : \
+	".\CP_Display.rgs"\
+	".\VDisk.rgs"\
+	".\VMain.rgs"\
+	".\VMouse.rgs"\
+	".\VPolygon.rgs"\
+	".\VText.rgs"\
+	
+
+.\Util\CP_printf.cpp : \
+	".\BuildOptions.h"\
+	".\Util\Console.h"\
+	".\Util\CP_printf.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\FrameCounter.cpp : \
+	".\FrameCounter.h"\
+	".\Util\CP_printf.h"\
+	".\Util\PortTalkGrantIO.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\GL_Engine.cpp : \
+	".\ATL_Defs.h"\
+	".\BuildOptions.h"\
+	".\CP_Display.h"\
+	".\FrameCounter.h"\
+	".\GL_Engine.h"\
+	".\Util\CP_printf.h"\
+	".\Util\PointerArray.h"\
+	".\VMouse.h"\
+	".\VObject.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\GL_Font.cpp : \
+	".\GL_Font.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\Util\PointerArray.cpp : \
+	".\Util\PointerArray.h"\
+	
+
+.\Util\PortTalkGrantIO.c : \
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\Util\SafeArrayLib.cpp : \
+	".\Util\CP_printf.h"\
+	".\Util\SafeArrayLib.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\VDisk.cpp : \
+	".\ATL_Defs.h"\
+	".\CP_Display.h"\
+	".\GL_Engine.h"\
+	".\Util\CP_printf.h"\
+	".\Util\PointerArray.h"\
+	".\Util\SafeArrayLib.h"\
+	".\VDisk.h"\
+	".\VObject.h"\
+	".\VObjectMethodsDecl.h"\
+	".\VObjectMethodsImpl.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\VMain.cpp : \
+	".\ATL_Defs.h"\
+	".\CP_Display.h"\
+	".\FrameCounter.h"\
+	".\GL_Engine.h"\
+	".\Util\CP_printf.h"\
+	".\Util\PointerArray.h"\
+	".\Util\SafeArrayLib.h"\
+	".\VMain.h"\
+	".\VObject.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\VMouse.cpp : \
+	".\ATL_Defs.h"\
+	".\CP_Display.h"\
+	".\GL_Engine.h"\
+	".\Util\CP_printf.h"\
+	".\Util\PointerArray.h"\
+	".\Util\SafeArrayLib.h"\
+	".\VMouse.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\VObject.cpp : \
+	".\GL_Engine.h"\
+	".\Util\PointerArray.h"\
+	".\Util\SafeArrayLib.h"\
+	".\VObject.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\VPolygon.cpp : \
+	".\ATL_Defs.h"\
+	".\CP_Display.h"\
+	".\GL_Engine.h"\
+	".\Util\CP_printf.h"\
+	".\Util\PointerArray.h"\
+	".\Util\SafeArrayLib.h"\
+	".\VObject.h"\
+	".\VObjectMethodsDecl.h"\
+	".\VObjectMethodsImpl.h"\
+	".\VPolygon.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\VText.cpp : \
+	".\ATL_Defs.h"\
+	".\CP_Display.h"\
+	".\GL_Engine.h"\
+	".\GL_Font.h"\
+	".\Util\CP_printf.h"\
+	".\Util\PointerArray.h"\
+	".\VObject.h"\
+	".\VObjectMethodsDecl.h"\
+	".\VObjectMethodsImpl.h"\
+	".\VText.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	

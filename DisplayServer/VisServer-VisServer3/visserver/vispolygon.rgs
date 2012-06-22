@@ -1,0 +1,24 @@
+HKCR
+{
+	VisServer.VisPolygon.1 = s 'VisPolygon Class'
+	{
+		CLSID = s '{36925681-9F7C-4CCE-A9E7-95D9AA439D32}'
+	}
+	VisServer.VisPolygon = s 'VisPolygon Class'
+	{
+		CLSID = s '{36925681-9F7C-4CCE-A9E7-95D9AA439D32}'
+		CurVer = s 'VisServer.VisPolygon.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {36925681-9F7C-4CCE-A9E7-95D9AA439D32} = s 'VisPolygon Class'
+		{
+			ProgID = s 'VisServer.VisPolygon.1'
+			VersionIndependentProgID = s 'VisServer.VisPolygon'
+			ForceRemove 'Programmable'
+			LocalServer32 = s '%MODULE%'
+			val AppID = s '{550FD218-E639-41C8-A1DC-11C873341AC1}'
+			'TypeLib' = s '{28FEF39F-E9E6-4C49-9C0A-ABF568D1B70C}'
+		}
+	}
+}

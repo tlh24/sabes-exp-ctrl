@@ -1,0 +1,30 @@
+function [nJuiceOnEvents dJuiceOnTimes nJuiceOffEvents dJuiceOffTimes] = ...
+            JuiceGetEvents( )
+
+TimeSyncGlobalsInclude;
+          
+nJuiceOnEvents = g_hTimeSync.GetTagVal('JuiceOnCnt');
+dJuiceOnTicks = g_hTimeSync.ReadTagVEX('JuiceOnTimes',...
+                    0,nJuiceOnEvents,'I32','F64',1);
+nJuiceOffEvents = g_hTimeSync.GetTagVal('JuiceOffCnt');
+dJuiceOffTicks = g_hTimeSync.ReadTagVEX('JuiceOffTimes',...
+                    0,nJuiceOffEvents,'I32','F64',1);
+
+dJuiceOnTimes = dJuiceOnTicks * g_dTsTicksToMs;
+dJuiceOffTimes = dJuiceOffTicks * g_dTsTicksToMs;
+
+
+
+ExperimentGlobalsInclude;
+TimeSyncGlobalsInclude;
+          
+nExtJuiceOnEvents = g_ExpData.hDev.GetTargetVal('tJuiceOnCnt');
+dExtJuiceOnTicks = g_ExpData.hDev.ReadTargetVEX('ExtJuiceOnTimes',...
+       0, nExtJuiceOnEvents,'I32','F64');
+nExtJuiceOffEvents = g_ExpData.hDev.GetTargetVal('ExtJuiceOffCnt');
+dExtJuiceOffTicks = g_ExpData.hDev.ReadTargetVEX('ExtJuiceOffTimes',...
+       0, nExtJuiceOffEvents,'I32','F64');
+
+dExtJuiceOnTimes = dExtJuiceOnTicks * g_dTsTicksToMs;
+dExtJuiceOffTimes = dExtJuiceOffTicks * g_dTsTicksToMs;
+

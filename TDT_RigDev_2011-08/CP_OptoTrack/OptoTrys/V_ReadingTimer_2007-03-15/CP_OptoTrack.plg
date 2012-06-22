@@ -1,0 +1,62 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: CP_OptoTrack - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\MOTORL~1.PHA\LOCALS~1\Temp\RSPC8.tmp" with contents
+[
+/nologo /G6 /MTd /W3 /Gm /GX /ZI /Od /I ".\Util" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR"Debug/" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\users\rebrik\CP_OptoTrack\ReadingTimer.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\MOTORL~1.PHA\LOCALS~1\Temp\RSPC8.tmp" 
+Creating temporary file "C:\DOCUME~1\MOTORL~1.PHA\LOCALS~1\Temp\RSPC9.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib Winmm.lib opto\oapi.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/CP_OptoTrack.pdb" /debug /machine:I386 /out:"Debug/CP_OptoTrack.exe" /pdbtype:sept /libpath:"Opto" 
+.\Debug\ClassFactory.obj
+.\Debug\Console.obj
+.\Debug\CP_OptoClass.obj
+.\Debug\CP_OptoTrack.obj
+.\Debug\CP_OptoTrackCom_i.obj
+.\Debug\CP_printf.obj
+.\Debug\OptoTrack.obj
+.\Debug\OptoTrackGlob.obj
+.\Debug\ReadingTimer.obj
+.\Debug\RegisterCom.obj
+.\Debug\SlideBuf.obj
+.\Debug\TimeStamp.obj
+.\Debug\CP_OptoTrack.res
+]
+Creating command line "link.exe @C:\DOCUME~1\MOTORL~1.PHA\LOCALS~1\Temp\RSPC9.tmp"
+<h3>Output Window</h3>
+Compiling...
+ReadingTimer.cpp
+Linking...
+Creating temporary file "C:\DOCUME~1\MOTORL~1.PHA\LOCALS~1\Temp\RSPCA.tmp" with contents
+[
+/nologo /o"Debug/CP_OptoTrack.bsc" 
+.\Debug\ClassFactory.sbr
+.\Debug\Console.sbr
+.\Debug\CP_OptoClass.sbr
+.\Debug\CP_OptoTrack.sbr
+.\Debug\CP_OptoTrackCom_i.sbr
+.\Debug\CP_printf.sbr
+.\Debug\OptoTrack.sbr
+.\Debug\OptoTrackGlob.sbr
+.\Debug\ReadingTimer.sbr
+.\Debug\RegisterCom.sbr
+.\Debug\SlideBuf.sbr
+.\Debug\TimeStamp.sbr]
+Creating command line "bscmake.exe @C:\DOCUME~1\MOTORL~1.PHA\LOCALS~1\Temp\RSPCA.tmp"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+CP_OptoTrack.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

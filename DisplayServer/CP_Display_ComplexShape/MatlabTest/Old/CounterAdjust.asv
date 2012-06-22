@@ -1,0 +1,36 @@
+% strVisServerName ='VisServer1';
+strVisServerName ='grappelli';
+hW = actxserver('VisServer.VisWindow',strVisServerName);  pause(.1);
+
+% Position and size are in fractions of the screen size 
+h   =.02;
+w   =.3;
+left   = 1-w-off;
+bottom = 1-h;
+off =.1;
+hW.counterpos=[left bottom]; 
+hW.countersize=[w h];
+hW.logmode =1;
+hW.counter=iCount;
+
+hW.drawnow();
+
+while 1
+reply = input('L - left R - right W - wider, N-narrower, Q - quit:', 's');
+if isempty(reply)
+    reply = 'Q';
+end  
+
+case
+  
+hW.drawnow();
+
+end
+
+h
+w
+
+
+if iscom(hW)  release(hW); end;
+
+

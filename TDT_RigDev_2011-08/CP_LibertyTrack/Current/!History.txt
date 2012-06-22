@@ -1,0 +1,20 @@
+CP_LibertyTrack history
+
+Ver 0.05 2008-03-31
+  - Changed SAFEARRAYs to VARIANTs (containing SAFEARRAYS). Matlab without JVM 
+    does not support SAFEARRAYs. Replaced SafeArrayLib.cpp with VariantLib.cpp
+
+Ver 0.04 2008-02-21
+  - Added GetFrameCount( long * pnFrames ) method. This will help to catch 
+    possible dissynchronization between the tracker and the external counter (RP2).
+  - Changed data collection startup procedure, now OnDataStart event is used. 
+    Hopefully this will resolve issues with Liberty startup (wrong frame count)
+
+Ver 0.03 2007-10-08
+  - Added frame print to the GUI window
+  - Added fix for spurious marked frame with high index (never happened in the tests, 
+    could have been due to bad WindowProc() which I fixed, see below)
+  - Fixed SetSensorsTransformIdx, which complained on valid input. 
+    It was due to an error in SafeArrayLib
+  - Changed message handling routine to be DialogProc, not WindowProc
+

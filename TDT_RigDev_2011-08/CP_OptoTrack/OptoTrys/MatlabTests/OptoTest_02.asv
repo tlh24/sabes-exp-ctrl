@@ -1,0 +1,19 @@
+srvname = 'CP_OptoTrack.Application';
+
+hTracker=actxserver(srvname);
+
+SensorsOn = int32([1 
+                   1]);
+hTracker.SetSensors(SensorsOn);
+
+hTracker.ConnectTracker;
+pause();
+
+iIdx  = int32(0);
+dData = single( 
+for i=1:10
+  [iIdx dTime dData] = hTracker.GetSensorLatest( 1 )  
+end
+hTracker.DisconnectTracker;
+% delete(hTracker);
+% clear functions;

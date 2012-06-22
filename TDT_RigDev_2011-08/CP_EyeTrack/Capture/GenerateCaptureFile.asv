@@ -1,0 +1,43 @@
+strFileName = 'IScanTestFile.txt';
+
+x1 = 1;
+x2 = 2;
+y1 = 3;
+y2 = 4;
+
+n1 = 100;
+n2 = 200;
+n3 = 300;
+n4 = 400;
+
+% vals = ones(3, n1+n2+n3+n4);
+
+
+s = 1;
+e = n1;
+vals (2, s:e) = ones (1, n1) * x1;
+vals (3, s:e) = ones (1, n1) * y1;
+
+s = n1 + 1;
+e = n1 + n2;
+vals (2, s:e) = ones (1, n2) * x1;
+vals (3, s:e) = ones (1, n2) * y2;
+
+s = n1 + n2 + 1;
+e = n1 + n2 + n3;
+vals (2, s:e) = ones (1, n3) * x2;
+vals (3, s:e) = ones (1, n3) * y1;
+
+s = n1 + n2 + n3 + 1;
+e = n1 + n2 + n3 + n4;
+vals (2, s:e) = ones (1, n4) * x2;
+vals (3, s:e) = ones (1, n4) * y2;
+
+
+vals 
+% hf=fopen( strFileName, 'w' );
+% fwrite(hf, vals, 'uchar' );
+% fclose(hf);
+% 
+
+

@@ -1,0 +1,14 @@
+function dTimeMs = GenerateSyncPulse()
+
+% iTime = g_hTimeSync.GetTagVal('SyncPulseTime');
+% dTimeMs = iTime * g_dTsTicksToMs;
+
+dTicks = g_hTimeSync.ReadTagVEX('SyncPulseTime',0,1,'I32','F64',1);
+dTimeMs = dTicks * g_dTsTicksToMs;
+
+
+ExperimentGlobalsInclude;
+
+% SoftTrg(7);  
+g_ExpData.hDev.SetTargetVal('Trig7', 1);
+g_ExpData.hDev.SetTargetVal('Trig7', 0);

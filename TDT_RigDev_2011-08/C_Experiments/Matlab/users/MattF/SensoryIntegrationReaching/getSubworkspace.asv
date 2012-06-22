@@ -1,0 +1,23 @@
+%  getSubworkspaces.m
+%function 
+%
+%
+%
+%  MF July 15, 2008.
+%
+global Params
+
+switch subwstype
+  
+  case 1  %  Left and Right subworkspaces each of whose
+    
+  otherwise
+    error('Unknown subWS type');    
+end
+
+
+
+
+
+
+

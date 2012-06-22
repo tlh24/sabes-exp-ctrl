@@ -1,0 +1,65 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: CP_LibertyTrack - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\rebrik\RSPD4.tmp" with contents
+[
+/nologo /G6 /MTd /W3 /Gm /GX /ZI /Od /I ".\Util" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR"Debug/" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\users\rebrik\work\Sabes\CP_LibertyTrack\Current\CP_LibertyClass.cpp"
+"C:\users\rebrik\work\Sabes\CP_LibertyTrack\Current\CP_LibertyTrack.cpp"
+]
+Creating command line "cl.exe @C:\TEMP\rebrik\RSPD4.tmp" 
+Creating temporary file "C:\TEMP\rebrik\RSPD5.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib pdi.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/CP_LibertyTrack.pdb" /debug /machine:I386 /out:"Debug/CP_LibertyTrack.exe" /pdbtype:sept /libpath:"Liberty" 
+.\Debug\ClassFactory.obj
+.\Debug\Console.obj
+.\Debug\CP_LibertyClass.obj
+.\Debug\CP_LibertyTrack.obj
+.\Debug\CP_LibertyTrackCom_i.obj
+.\Debug\CP_printf.obj
+.\Debug\LibertyTrack.obj
+.\Debug\LibertyTrackGlob.obj
+.\Debug\RegisterCom.obj
+.\Debug\SlideBuf.obj
+.\Debug\TimeStamp.obj
+.\Debug\VariantLib.obj
+.\Debug\CP_LibertyTrack.res
+]
+Creating command line "link.exe @C:\TEMP\rebrik\RSPD5.tmp"
+<h3>Output Window</h3>
+Compiling...
+CP_LibertyClass.cpp
+CP_LibertyTrack.cpp
+Generating Code...
+Linking...
+Creating temporary file "C:\TEMP\rebrik\RSPD6.tmp" with contents
+[
+/nologo /o"Debug/CP_LibertyTrack.bsc" 
+.\Debug\ClassFactory.sbr
+.\Debug\Console.sbr
+.\Debug\CP_LibertyClass.sbr
+.\Debug\CP_LibertyTrack.sbr
+.\Debug\CP_LibertyTrackCom_i.sbr
+.\Debug\CP_printf.sbr
+.\Debug\LibertyTrack.sbr
+.\Debug\LibertyTrackGlob.sbr
+.\Debug\RegisterCom.sbr
+.\Debug\SlideBuf.sbr
+.\Debug\TimeStamp.sbr
+.\Debug\VariantLib.sbr]
+Creating command line "bscmake.exe @C:\TEMP\rebrik\RSPD6.tmp"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+CP_LibertyTrack.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

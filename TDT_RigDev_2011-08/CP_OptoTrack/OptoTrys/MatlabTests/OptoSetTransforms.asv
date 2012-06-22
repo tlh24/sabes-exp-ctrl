@@ -1,0 +1,72 @@
+srvname = 'CP_OptoTrack.Application';
+nFrames = 100;
+nSensors = 6;
+hTracker=actxserver(srvname);
+
+% Set 6 sensors on port 2, transform 1
+SensorsOn = int32([1 2 3 4 5 6 
+                   2 2 2 2 2 2
+                   1 1 1 1 1 1 ]);
+hTracker.SetSensors(SensorsOn);
+
+% Set transform to identity
+TransformMtx = single([ 1 0 0
+                        0 1 0
+                        0 0 1
+                        0 0 0 ]);
+hTracker.SetTransformMatrix(1, TransformMtx);       
+
+hTracker.ConnectTracker;
+pause(1);
+
+[iIdx] = hTracker.GetLatestDataIndex;
+while iIdx < 100
+  pause(0.1);
+  [iIdx] = hTracker.GetLatestDataIndex;
+end
+
+[iIdx] = hTracker.GetLatestDataIndex;
+[dTime dData] = invoke( hTracker, 'GetAllSensorsBuffered', iIdx-nFrames, nFrames );  
+
+hTracker.DisconnectTracker;
+% we have to reshape the data since Matlab 
+% does not support 3D arrays in COM
+dData  = reshape(dData, [3 nSensors 10]);
+
+% v1 = [49.616 -285.50 -1579.75]';
+% v2 = [51.1085 284.197 -1574.20]';
+% v3 = [126.626 -393.422 -1887.76]';
+
+buf = dData(:,1,:);
+v1 = 
+
+
+% directional vector of X - axis
+% goes through points 1 and 2
+dirX = (v2-v1)/norm(v2-v1);   %normalize to length 1
+
+% directional vector of Y - axis
+% subtract X-component from v3->v1 vector
+% The remainder is the Y - component
+vY = (v1 - v3) - dirX * dot( dirX, (v1 - v3));
+dirY = vY/norm(vY);  %normalize to length 1
+
+% directional vector of Z - axis
+% subtract X and Y components from v1 vector
+% the remainder is the Z - component
+vZ = -v1 + dirX * dot(dirX, v1) + dirY * dot( dirY, v1);
+dirZ = vZ/norm(vZ);   %normalize to length 1
+
+
+rotMtx = [dirX dirY dirZ]';
+vTrans = -rotMtx * v1;
+
+% Sanity checks
+dot(dirX, dirY)  % should be 0
+dot(dirX, dirZ)  % should be 0
+dot(dirY, dirZ)  % should be 0
+det(rotMtx)      % should be 1
+
+v1p = rotMtx * v1 + vTrans  % should be 0 0 0 
+v2p = rotMtx * v2 + vTrans  % should be a 0 0
+v3p = rotMtx * v3 + vTrans  % should be c d 0

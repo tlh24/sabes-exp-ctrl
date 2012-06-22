@@ -1,0 +1,15 @@
+=========== Liberty info =============
+Polhemus Liberty HST
+4 Stations
+
+Bootloader Version:  1.0.1
+System Controller Version:  2.0.1
+Source Controller Version:  1.0.4
+Sensor Processor Version:  2.0.1
+I/O Processor Version: 2.0.1
+
+Firmware Packet Load: SWD-23402-13-201
+======================================
+
+Driver Version: 1.0.1.0
+File version: 1, 0, 2, 0

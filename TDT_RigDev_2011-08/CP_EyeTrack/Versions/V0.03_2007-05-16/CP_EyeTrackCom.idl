@@ -1,0 +1,109 @@
+// CP_EyeTrack.idl : IDL source for CP_EyeTrack.exe
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (CP_EyeTrack.tlb) and marshalling code.
+
+import "oaidl.idl";
+//import "ocidl.idl";
+
+
+//------------------------------------------------------------
+// IEyeTrack interface
+
+	[
+		object,  // tells MIDL to produce COM, not RPC interface
+		uuid(ebd33058-ceb1-11d5-9c3e-0050da2a68c8),
+		dual,
+    oleautomation,
+		helpstring("IEyeTrack Interface"),
+ 		pointer_default(unique)
+	]                                  
+	interface IEyeTrack  : IDispatch {
+
+    [propget, id(1), helpstring("Gets Program Version String")] 
+       HRESULT strProgramVersion([out, retval] BSTR * pVal);
+
+    [id(2), helpstring("Connects to ISCAN")] 
+      HRESULT ConnectISCAN( );
+
+    [id(3), helpstring("Disconnects from ISCAN")] 
+      HRESULT DisconnectISCAN();
+
+    [id(4), helpstring("Set zero time, clear data")] 
+      HRESULT ResetBuffer();
+
+		[propget, id(5), helpstring("COM port index (1-10)")] 
+      HRESULT lngCOM_Index([out, retval] long *pVal);
+ 		[propput, id(5), helpstring("COM port index (1-10)")] 
+      HRESULT lngCOM_Index([in] long newVal);
+
+		[propget, id(6), helpstring("COM port baud rate")] 
+      HRESULT lngBaudRate([out, retval] long *pVal);
+ 		[propput, id(6), helpstring("COM port baud rate")] 
+      HRESULT lngBaudRate([in] long newVal);
+
+		[id(7), helpstring("Calibration matrix")] 
+      HRESULT GetCalibrationMatrix([out, retval] SAFEARRAY(double) *padMatrix);
+
+ 		[id(8), helpstring("Calibration matrix")] 
+      HRESULT PutCalibrationMatrix([in] SAFEARRAY(double) adMatrix);
+
+    [propget, id(9), helpstring("Calibration matrix loaded")] 
+      HRESULT IsCalibrated([out, retval] long *pVal);
+ 		[propput, id(9), helpstring("Calibration matrix loaded")] 
+      HRESULT IsCalibrated([in] long newVal);
+
+    [propget, id(10), helpstring("Buffer size in items")] 
+      HRESULT lngBufferSize([out, retval] long *pnItems);
+
+    [propget, id(11), helpstring("Get latest data index")] 
+      HRESULT lngLatestDataIndex([out, retval] long *plIdx);
+
+    [id(12), helpstring("Get latest data index, timestamp in ms, and coordinates in ISCAN pixels")] 
+      HRESULT GetLatestData( [out] long *plIdx,
+                             [out] SAFEARRAY(double) * padData );
+
+    [id(13), helpstring("Get timestamps in ms, and coordinates in ISCAN pixels starting at requested index")] 
+      HRESULT GetDataBuffer( [in] long lngIdx,
+                             [in] long nItems,
+                             [out] SAFEARRAY(double) * padData );
+
+    [id(14), helpstring("Clear buffer, reset timestamp to 0")] 
+      HRESULT ResetDataBuffer( );
+
+/*
+		[propget, id(7), helpstring("COM port parity")] 
+      HRESULT lngParity([out, retval] long *pVal);
+ 		[propput, id(7), helpstring("COM port parity")] 
+      HRESULT lngParity([in] long newVal);
+*/
+  };
+
+
+[
+	// normally don't have to change this guid,
+	// it's used to label the type library
+	uuid(ebd33054-ceb1-11d5-9c3e-0050da2a68c8),
+  // Note: make sure to update code in LoadRegTypeLib() and UnRegisterTypeLib()
+  // on version change!
+	version(0.0),  
+	// this shows up in the "references" in VB
+	helpstring("CP_EyeTrack Type Library")
+]
+library CP_EyeTrackLib  // This is the lib name used by VB
+{
+	importlib("stdole32.tlb");
+	[
+		// This is the class (com object guid)
+		// Don't have to change it normally
+		uuid(ebd33050-ceb1-11d5-9c3e-0050da2a68c8),
+		helpstring("CP_EyeTrack Class")
+	]
+
+	coclass CP_ET_Class { // This is the object name used by VB
+	
+    [default] dispinterface IEyeTrack;
+	};
+
+};

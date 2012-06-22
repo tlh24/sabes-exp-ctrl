@@ -1,0 +1,21 @@
+HKCR
+{
+	VisServer.VisMouse.1 = s 'VisMouse Class'
+	{
+		CLSID = s '{1B381A2C-5AD5-4693-9552-31ED73EE4669}'
+	}
+	VisServer.VisMouse = s 'VisMouse Class'
+	{
+		CLSID = s '{1B381A2C-5AD5-4693-9552-31ED73EE4669}'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {1B381A2C-5AD5-4693-9552-31ED73EE4669} = s 'VisMouse Class'
+		{
+			ProgID = s 'VisServer.VisMouse.1'
+			VersionIndependentProgID = s 'VisServer.VisMouse'
+			val AppID = s '{550FD218-E639-41C8-A1DC-11C873341AC1}'
+			LocalServer32 = s '%Module%'
+		}
+	}
+}

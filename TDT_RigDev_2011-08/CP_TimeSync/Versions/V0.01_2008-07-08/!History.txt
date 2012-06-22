@@ -1,0 +1,6 @@
+CP_TimeSync history
+
+Ver 0.01 2008-07-08
+  - Added ConnectRX5() method, we want to use RX5-2 in TimeSync
+
+

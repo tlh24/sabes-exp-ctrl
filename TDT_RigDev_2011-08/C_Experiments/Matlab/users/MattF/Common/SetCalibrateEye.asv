@@ -1,0 +1,24 @@
+%  SetCalibrateEye.m
+%
+%  MF Oct. 18, 2007
+%
+
+
+H = CalibrateEye;
+
+set(H.txtCenterX,'string','30');
+
+set(H.txtCenterY,'string','-10');
+
+set(H.txtHalfWidth,'string','48');
+
+set(H.txtHalfHeight,'string','38');
+
+set(H.txtGridAxisXmin,'string','-35');
+
+set(H.txtGridAxisXmax,'string','85');
+
+set(H.txtGridAxisYmin,'string','-65');
+
+h = findobj(H,'Tag','txtGridAxisYmax');
+set(H.txtGridAzims,'string','40');

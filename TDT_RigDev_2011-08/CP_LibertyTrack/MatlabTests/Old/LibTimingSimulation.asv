@@ -1,0 +1,34 @@
+dTotalTime = 100;
+dSampInterval = 0.099; % 99 ms
+dFrameInterval = 1/240; % 240 Hz
+
+nSamps = floor(dTotalTime / dSampInterval);
+nFrames = floor(dTotalTime / dFrameInterval);
+
+iSamps = 1:nSamps;
+dSampTimes = iSamps * dSampInterval;
+
+iFrames = 1:nFrames;
+dFrameTimes = iFrames * dFrameInterval;
+
+
+iSampFrames = zeros(1,nSamps);
+for i=
+  idx = find( dFrameTimes >= dSampTimes(i));
+  iSampFrames(i) = min(idx);
+  
+end
+
+
+coeffs = polyfit(iSampFrames,dSampTimes,1); 
+a = coeffs(2);
+b = coeffs(1);
+
+dCalcFrameTimes = iFrames * b + a;
+
+stairs(iSampFrames,dSampTimes);
+hold on
+plot(iFrames, dFrameTimes, '.r');
+plot(iFrames, dCalcFrameTimes, 'xg');
+
+hist(diff(dCalcFrameTimes-dFrameTimes));

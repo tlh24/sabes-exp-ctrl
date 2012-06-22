@@ -1,0 +1,148 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAIN_DIALOG DIALOGEX 100, 1000, 297, 306
+STYLE DS_NOIDLEMSG | DS_CENTER | WS_MINIMIZEBOX | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "CP_OptoTrack"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Exit",IDC_CMD_EXIT,196,277,85,15
+    PUSHBUTTON      "Start",IDC_CMD_START,196,257,40,15
+    PUSHBUTTON      "Stop",IDC_CMD_STOP,242,257,40,15
+    CONTROL         "",IDC_PICTURE,"Static",SS_BLACKRECT,5,5,285,202,
+                    WS_EX_TRANSPARENT | WS_EX_STATICEDGE
+    RTEXT           "Frame:",IDC_STATIC,15,235,33,8
+    LTEXT           "0",IDC_LBL_IFRAME,55,235,99,8
+    RTEXT           "X:",IDC_STATIC,10,266,8,8
+    RTEXT           "Y:",IDC_STATIC,10,277,8,8
+    RTEXT           "Z:",IDC_STATIC,10,288,8,8
+    RTEXT           "0.0",IDC_LBL_X1,28,266,26,8
+    RTEXT           "0.0",IDC_LBL_Y1,28,277,26,8
+    RTEXT           "0.0",IDC_LBL_Z1,28,288,26,8
+    RTEXT           "0.0",IDC_LBL_X2,68,266,26,8
+    RTEXT           "0.0",IDC_LBL_Y2,68,277,26,8
+    RTEXT           "0.0",IDC_LBL_Z2,68,288,26,8
+    RTEXT           "0.0",IDC_LBL_X3,108,266,26,8
+    RTEXT           "0.0",IDC_LBL_Y3,108,277,26,8
+    RTEXT           "0.0",IDC_LBL_Z3,108,288,26,8
+    RTEXT           "0.0",IDC_LBL_X4,148,266,26,8
+    RTEXT           "0.0",IDC_LBL_Y4,148,277,26,8
+    RTEXT           "0.0",IDC_LBL_Z4,148,288,26,8
+    CONTROL         "",IDC_PIC_SENS1,"Static",SS_BLACKRECT | SS_SUNKEN,44,
+                    251,10,10
+    CONTROL         "",IDC_PIC_SENS2,"Static",SS_BLACKRECT | SS_SUNKEN,84,
+                    251,10,10
+    CONTROL         "",IDC_PIC_SENS3,"Static",SS_BLACKRECT | SS_SUNKEN,124,
+                    251,10,10
+    CONTROL         "",IDC_PIC_SENS4,"Static",SS_BLACKRECT | SS_SUNKEN,164,
+                    251,10,10
+    CONTROL         "Show Log Window",IDC_CHK_SHOWLOG,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,198,238,81,10
+    RTEXT           "Time, sec: ",IDC_STATIC,15,220,33,8
+    LTEXT           "0",IDC_LBL_TIME,55,221,99,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_MAIN_DIALOG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 302
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "1 TYPELIB ""CP_OptoTrackCom.tlb""\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON_APPL           ICON    DISCARDABLE     "CP_OptoTrack.ico"
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+1 TYPELIB "CP_OptoTrackCom.tlb"
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

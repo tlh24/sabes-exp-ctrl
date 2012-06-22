@@ -1,0 +1,58 @@
+strVisServerName ='grappelli';
+
+ArrowLength = 100;
+
+ArrowSpace = 120;
+NARROWX = 4;
+NARROWY = 3;
+NARROWS = NARROWX*NARROWY;
+
+hW = actxserver('VisServer.VisWindow',strVisServerName);  pause(.1);
+hW.calibrated = 0;
+
+% hArrow = CreateArrow(strVisServerName);
+% 
+% hArrow.pos = [500 500];
+% hArrow.scale = ArrowLength;
+% hArrow.fill = 1;
+% hArrow.Angle = 0;
+% hArrow.show = 1;
+
+for i=1:NARROWS
+  hArrows(i) =  CreateArrow(strVisServerName);
+  hArrows(i).scale = ArrowLength;
+  hArrows(i).fill = 1;
+  hArrows(i).Angle = 0;
+  hArrows(i).color = [1 0 0];
+end   
+% 
+% 
+% Origin = Params.ORIGIN;
+% %%%%%%%%% Arrows
+% % ARROW_CENTER = Origin + [0 300] + 2*(.5-rand(1,2)).*[200 100];
+% ARROW_CENTER = Origin + [0 100] + 2*(.5-rand(1,2)).*[200 100];
+%%%%%%%%%%%%%%%%%%Arrows position, mat ih
+% 
+% ARROW_CORNER = ARROW_CENTER - ARROW_SPACE*[(NARROWX-1) (NARROWY-1)]/2;
+% ArrowSpace = 80;
+% 
+ARROW_CORNER = [ 200 200 ];
+for i=1:NARROWX,  
+  for j=1:NARROWY;
+    hArrows((i-1)*3 + j).pos= ARROW_CORNER + ArrowSpace*[i-1, j-1];
+  end
+end 
+for i=1:NARROWS
+  hArrows(i).show = 1;
+end   
+return;
+
+hW.batchmode =
+for i=1:NARROWS
+  hArrows(i).scale = 80;
+end   
+
+for i=1:NARROWS
+  if iscom(hArrows(i))  release(hArrows(i)); end;
+end
+if iscom(hW)  release(hW); end;

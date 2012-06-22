@@ -1,0 +1,4 @@
+Check that the frames are consecutive
+
+Velocity
+Angles

@@ -1,0 +1,749 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%% REACH TRIAL FUNCTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [dat] = SensIntReaching_Trial( dat )
+
+global ORIGIN BUFFERTIME FRAMERATE
+global Params targArray V center
+global hStartTrg hReachTrg hFng hRightHandArrowField hText1 hBonusTrg hEyeTrg
+global hL hW hMou
+
+
+%%%%% Debug flags
+DEBUG     = 0;
+
+hL.active  = 1;  %% Activate Liberty
+
+%%%%% SETUP ALL VIS OBJECTS
+hW.batchmode = 1;
+
+%  Random Dot Field (monkey equivalent of arrow field)
+hRightHandDotField.show = 0;
+
+%%% FEEDBACK
+hFng.color  = dat.visFB.RGB.*dat.visFB.bright;%[1 1 1] * dat.feedbackfngbright;
+hFng.scale  = dat.visFB.rad;%dat.feedbackfngrad;
+hFng.fill   = 1;
+hFng.z      = 0.5;
+hFng.show   = 0;
+
+%%% START TARGET
+hStartTrg.pos    = dat.starttargetpos;
+hStartTrg.color  = dat.starttargetrgb * dat.starttargetbright;
+hStartTrg.scale  = dat.starttargetrad;
+hStartTrg.fill   = 1;
+hStartTrg.z      = .5;
+hStartTrg.show   = 0;
+
+%%% REACH TARGET
+hReachTrg.pos    = dat.reachtargetpos;
+hReachTrg.color  = dat.reachtargetrgb * dat.reachtargetbright;
+hReachTrg.scale  = dat.reachtargetrad;
+hReachTrg.fill   = 1;
+hReachTrg.z      = 0;
+hReachTrg.show   = 0;
+
+%%% EYE TARGET
+if ~isempty(dat.eyetargetpos)
+    hEyeTrg.pos    = dat.eyetargetpos;
+    hEyeTrg.color  = dat.eyetargetrgb .* dat.eyetargetbright;
+    hEyeTrg.scale  = dat.eyetargetrad;
+    hEyeTrg.fill   = 1;
+    hEyeTrg.z      = 1;
+    hEyeTrg.show   = 0;
+end
+%%% Arrow Field
+%setMultiVisObjects(hRightHandArrowField,'color',dat.righthandarrowfieldcolor);
+
+hW.drawnow;          %%% Chiara 03-30-05, the VisServer code will log
+invoke(hW,'clrlog');
+
+dat.trialtime = clock; % Start Trial Time
+dat.err = 0;
+dat.finalreward = 0; % Set final reward to zero
+dat.totalreward = 0;
+
+
+
+%%%%%%%%%%%%%% STEP 1 -
+% Hear the Start Tone, Hand Reach and Hold Start Target
+
+dat.starttargetwin =  Params.START_TARGET_WIN;
+dat.starttargetrad =  Params.START_TARGET_RAD;
+
+dat.starttargetshow     = Params.START_TARGET_SHOW;  % in this way we can change the
+%dat.starttargetfeedback = Params.START_TARGET_FEEDBACK; % initial parameters from keyboard
+dat.starttargetflashbright = Params.START_TARGET_FLASH_BRIGHT;
+dat.starttargethold = Params.START_TARGET_HOLD;
+
+if dat.trialtype == 1
+    %  Play a tone sequence to let the monk know that this trial will be a
+    %  reach trial with an instructed delay
+    for plsi = 1:Params.TRIAL_TYPE_TONE(1).NPULSES
+        tic;
+        while toc<Params.TRIAL_TYPE_TONE(1).PULSEDUR
+            tdtTone(Params.TRIAL_TYPE_TONE(1).FREQ);
+        end
+        tdtTone(0);
+        if plsi<Params.TRIAL_TYPE_TONE(1).NPULSES
+            tic;
+            while toc<Params.TRIAL_TYPE_TONE(1).IPI
+            end
+        end
+    end
+elseif dat.trialtype == 2
+    %  Play a tone sequence to let the monk know that this trial will be
+    %  a RT reach trial with NO instructed delay
+    for plsi = 1:Params.TRIAL_TYPE_TONE(2).NPULSES
+        tic;
+        while toc<Params.TRIAL_TYPE_TONE(2).PULSEDUR
+            tdtTone(Params.TRIAL_TYPE_TONE(2).FREQ);
+        end
+        tdtTone(0);
+        if plsi<Params.TRIAL_TYPE_TONE(2).NPULSES
+            tic;
+            while toc<Params.TRIAL_TYPE_TONE(2).IPI
+            end
+        end
+    end
+else
+
+end
+
+% flashstart = 1;
+% if (dat.starttargetshow) & rand(1)<Params.P_START_TARGET_FLASH
+%     hStartTrg.show = 1;
+%     if dat.starttargetflashbright
+%         hStartTrg.color = [0 1 0] * Params.START_TARGET_FLASH_BRIGHT;
+%         hW.drawnow;
+%         tic;
+%         while toc<0.1, end;
+%         hStartTrg.color = [0 1 0] * Params.START_TARGET_BRIGHT;
+%         hW.drawnow;
+%      %   disp('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
+%     else
+%         flashstart=0;
+%     end
+% else
+%     hStartTrg.show = 0;
+%   %  disp('---------------------------------------------------------------------');
+%     flashstart=0;
+% end  % Show start target
+% %tdtTone(Params.START_TONE_FREQ);  % Start tone on
+% %pause(Params.START_TONE_TIME);    % Time for which the start tone is on
+% %tdtTone(0);                       % Start tone off
+%
+% % Don't show start target on random trials.  Training for arrow field.
+% if rand(1) <= 1
+%     hStartTrg.show = 0;
+%     hW.drawnow;
+%   %  disp('00000000000000000000000000000000000000000000000000000000000000000000');
+%     starttrgshown = 0;
+% else
+%     hStartTrg.show = 1;
+%     hW.drawnow;
+%   %  disp('11111111111111111111111111111111111111111111111111111111111111111111');
+%     starttrgshown = 1;
+% end
+
+% if(dat.starttargetfeedback), % Show feedback if enabled
+%     pos = latest(1);
+%     feval(dat.fngfeedbackfunc, pos, 0, 1);
+%             %hFng.vertices = updateVisBlurVerts(dat.visBlur.N,dat.visBlur.Nverts,dat.visBlur.dotrad,dat.visBlur.C);
+% end
+setMultiVisObjects(hRightHandArrowField,'show',1);
+hW.drawnow;
+
+%%% Acquisition of Start Target.
+[pos,speed] = latest(1);
+initialLoc = pos; initialLocWin = 5; movestartedflag = 0; movestartedtime = inf;
+[dummy,initialDist] = cart2pol(dat.starttargetpos(1)-pos(1),dat.starttargetpos(2)-pos(2));
+done=0; err = 0; dat.errstring = '';
+tic; gotArm = 0; %dat.starttargethold = 0.5;
+%lastVBupdatetime = toc;
+loopct = 0;
+while (~done),
+    loopct = loopct+1;
+    [pos,speed] = latest(1);
+    %  Train with Arrow field.  Length and direction of each arrow in field is proportional
+    %  to difference vector, (tgtLoc - handLoc).
+    [cdang,cddist] = cart2pol(dat.starttargetpos(1)-pos(1),dat.starttargetpos(2)-pos(2));
+    asize = Params.arrowFieldLength(cddist);
+    setMultiVisObjects(hRightHandArrowField,'angle',cdang.*180/pi,'scale',asize, ...
+        'color',dat.righthandarrowfieldrgb*feval(dat.righthandarrowfieldbrightnessfunc,asize));
+    hW.drawnow;
+
+
+    %  DEBUG
+%     hText1.text = sprintf('%0.3f mm/sec',speed);
+%     hText1.show = 1;
+    %
+
+    %     if ~hStartTrg.show & Params.AFDeltaReward
+    %         if initialDist - cddist >= Params.deltaForReward
+    %             tdtJuice(Params.AFDeltaReward);
+    %             dat.totalreward = dat.totalreward+Params.AFDeltaReward;
+    %             initialDist = cddist;
+    %         end
+    %     end
+
+    if (dat.maxmovetimetostarttarget < inf ) & ~movestartedflag & ~INBOX(pos,initialLoc,initialLocWin)
+        %  Once he's moved a small distance away from his initial location,
+        %  we start counting time.  He has a max time to get to the start
+        %  target location.
+        movestartedflag = 1;
+        movestartedtime = toc;
+    end
+
+    %     if hFng.show  %(dat.starttargetfeedback)
+    %         feval(dat.fngfeedbackfunc, pos, 0, 2);
+    %         if (toc-lastVBupdatetime) > dat.visBlur.VBUP  %~mod(loopct,dat.visBlur.VBUP)
+    %             lastVBupdatetime = toc;
+    %             hFng.vertices = updateVisBlurVerts(dat.visBlur.N,dat.visBlur.Nverts,dat.visBlur.dotrad,dat.visBlur.C);
+    %         end
+    %         hW.drawnow;
+    %     end
+    % check for acquisition of start target
+    posOk = INBOX(pos,dat.starttargetpos,dat.starttargetwin);
+    speedOk = (speed <= dat.starttargetvelcrit);
+    if posOk
+        setMultiVisObjects(hRightHandArrowField,'show',0);
+    else
+        setMultiVisObjects(hRightHandArrowField,'show',1);
+    end
+
+    if (posOk & speedOk),
+        if (~gotArm),
+            gotArm = 1;
+            starthold = toc;
+            %             if dat.starttargetfeedback
+            %                 feval(dat.fngfeedbackfunc, pos, 0, 1);  %  Show the FB during the hold period.
+            %             end
+        elseif (toc>(starthold+dat.starttargethold))
+            done = 1;   % Reach to start target OK
+        end
+        setMultiVisObjects(hRightHandArrowField,'show',0);
+        % hW.drawnow;
+        %else
+        % gotArm = 0;
+        %setMultiVisObjects(hRightHandArrowField,'show',1);
+        %         if ~dat.starttargetfeedback
+        %        feval(dat.fngfeedbackfunc, pos, 0, 0);
+        %         end
+
+    end
+    hW.drawnow;
+
+    if gotArm & ~(posOk & speedOk)  %  Once target is acquired properly, it must remain acquired
+        done = 1;
+        err = 800;
+        dat.err = err;
+        dat.errstring = 'Start Target Not Held';
+    end
+
+
+    if (toc >= Params.REACH_START_TARGET_TIMEOUT),
+        err            = 1;
+        dat.err        = err;
+        dat.errstring  = 'Timeout at Start Position';
+        done           = 1;
+    elseif (toc - movestartedtime) > dat.maxmovetimetostarttarget
+        err = 5;
+        dat.err = err;
+        dat.errstring = 'Too slow to reach Start Target';
+        done = 1;
+    end
+end
+setMultiVisObjects(hRightHandArrowField,'show',0);
+hW.drawnow;
+%dtim = cputime;
+
+% if start target not acquired, turn off feedback, pause
+if (err ~=0),
+    %hText1.text = dat.errstring;
+    %hText1.show = 1;
+    feval(dat.fngfeedbackfunc, pos, 0, 0);
+    % hStartTrg.show = 0;
+    hW.drawnow;
+    %pause(Params.START_TARGET_PENALTY);
+    % return
+else, % if Start Target acquired, give reward with probability P_START_TARGET_REWARD
+    rewThresh = rand(1);
+    if(rewThresh<Params.P_START_TARGET_REWARD)
+        if starttrgshown | flashstart
+            tdtJuice(Params.SMALL_REWARD);
+            dat.totalreward = dat.totalreward+Params.SMALL_REWARD;
+        else
+            tdtJuice(Params.MEDIUM_REWARD);
+            dat.totalreward = dat.totalreward+Params.MEDIUM_REWARD;
+        end
+    end
+end
+
+%%%  Start Target has been acquired and held without FB.
+%%%  Tone signals next phase. Continue holding.  FB on for FB+ trials.
+if ~err
+    toneOff = 0; done = 0;
+    tic;
+    tdtTone(Params.EventTone(1).FREQ);
+    while ~err & ~done
+
+        if ~toneOff & (toc > Params.EventTone(1).DUR)
+            tdtTone(0);
+            toneOff = 1;
+        end
+
+        [pos,speed] = latest(1);
+        posOk = INBOX(pos,dat.starttargetpos,dat.starttargetwin);
+        speedOk = (speed <= dat.starttargetvelcrit);
+
+        if ~(posOk & speedOk)
+            done = 1;
+            err = 900;
+            dat.err = err;
+            dat.errstring = 'Released Start Target During FB Delay';
+        else
+            if dat.starttargetfeedback
+                feval(dat.fngfeedbackfunc, pos, 0, 1);  %  If he's still holding, and this is a FB+ trial, then turn FB on
+            end
+        end
+
+        if toc > dat.starttargetfbholddur
+            done = 1;
+        end
+        hW.drawnow;
+
+    end
+end
+
+
+
+%%% Reach next target
+%%% Wait at Start target for GO tone
+%%% Start position is current finger location
+tic;
+if (~err)
+
+
+    if rand(1) <= Params.P_NONZERO_REACH_DELAY %&& dat.test==0
+        dat.reachdelay = Params.REACH_DELAY_MIN + ...  %% 3 - Between max and min
+            rand*(Params.REACH_DELAY_MAX-Params.REACH_DELAY_MIN);
+    else
+        dat.reachdelay = 0;
+    end
+    fprintf(1,' Del=%.2f ',dat.reachdelay);
+
+    hReachTrg.show = 1;
+    %hFng.vertices = updateVisBlurVerts(dat.visBlur.N,dat.visBlur.Nverts,dat.visBlur.dotrad,dat.visBlur.C);
+    %lastVBupdatetime = 0;
+    feval(dat.fngfeedbackfunc, pos, 0, 2);
+    hW.drawnow;
+
+    %vbup = dat.visBlur.VBUP;
+    %while (((cputime-dtim) < dat.reachdelay)), %%  This is now a hold during target presentation
+    % loopct = 0;
+    while ((toc < dat.reachdelay)), %%  This is now a hold during target presentation
+        %loopct = loopct+1;
+        %%% get hand position at start target
+        pos = latest(0);
+        % check if hand still in start window
+        %  if(dat.starttargetfeedback), % Show feedback if enabled
+        feval(dat.fngfeedbackfunc, pos, 0, 2);
+        %if ~mod(loopct,dat.visBlur.VBUP)
+        %%%%%%%%           if (toc-lastVBupdatetime) >= vbup;%dat.visBlur.VBUP  %~mod(loopct,dat.visBlur.VBUP)
+        %%%%%%%%               lastVBupdatetime = toc
+        %hFng.vertices = updateVisBlurVerts(dat.visBlur.N,dat.visBlur.Nverts,dat.visBlur.dotrad,dat.visBlur.C);
+        %%%%%%%%           end
+        %   end
+        posOk = INBOX(pos,dat.starttargetpos,dat.starttargetwin);
+        if (~posOk),
+            err            = 2;
+            dat.err        = err;
+            dat.errstring  = 'Broke Hold at Start Position During Reach Delay';
+            hStartTrg.show = 0;
+            hReachTrg.show = 0;
+            %hRightHandDotField.show=0;
+        end
+        hW.drawnow;
+    end
+end
+
+
+if (~err), % If hold at Start Target while fixating is OK, give reward
+    if(Params.INTERMEDIATE_REWARDS), tdtJuice(Params.MEDIUM_REWARD); dat.totalreward = dat.totalreward+Params.MEDIUM_REWARD; end
+end
+
+% % % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % %%%%%%% 2: GET HAND TO REACH TARGET
+% % % % % Now do reach
+
+%hStartTrg.show   = 0;
+%hW.drawnow;
+
+
+%%%%%% ERROR CHECK BUFFER COMMANDS
+nE0 = hL.err;
+invoke(hL,'startBuffer');
+dat.bufferstarttime = clock;
+nE1 = hL.err;
+if(nE1>nE0)
+    for i=(nE0+1):nE1,
+        fprintf(1,'%d: %s',i,hL.getErr(i))
+    end
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%hFng.vertices = updateVisBlurVerts(dat.visBlur.N,dat.visBlur.Nverts,dat.visBlur.dotrad,dat.visBlur.C);
+hW.drawnow;
+
+if (~err)
+    tic;
+    dat.startpt = latest(0);  % position of hand before go tone
+    % hFng.show = 0; hW.drawnow;
+    tdtTone(Params.GO_TONE_FREQ);              %% go signal
+    % hFng.show = 1; hW.drawnow;
+    toneOn=1;
+    done = 0; target_time=0;
+    gotArm=0;
+    PRE_REACH_HOLD = Params.REACH_TARGET_TIMEOUT;
+
+    reach_vec = dat.reachtargetpos-dat.startpt;
+end
+
+%setMultiVisObjects(hRightHandArrowField,'show',1);
+%hW.drawnow;
+
+loopct = 0; %lastVBupdatetime = 0;
+while (~done & ~err),
+    loopct = loopct+1;
+    tim=toc;
+
+    %%% get pos
+    [pos,vel,velpct] = latest(0);
+
+    dist_pct = (pos - dat.startpt)*reach_vec' / (reach_vec*reach_vec');
+    if ~hFng.show & (dist_pct >= dat.fbonreachproportion)
+        % lastVBupdatetime = toc;
+        %hFng.vertices = updateVisBlurVerts(dat.visBlur.N,dat.visBlur.Nverts,dat.visBlur.dotrad,dat.visBlur.C);
+        feval(dat.fngfeedbackfunc, pos, 0, 1);
+        dat.fbpt = pos;
+    end
+
+    %dist_pct = (pos - dat.startpt)*reach_vec' / (reach_vec*reach_vec');
+    if hFng.show & (dist_pct >= dat.fboffreachproportion) & (dist_pct < dat.fbonreachproportion)
+        % dat.fbnonconstpt = pos;
+        % shiftshiftflag = 1;
+        feval(dat.fngfeedbackfunc, pos, 0, 0);
+        dat.fboffpt = pos;
+        % hEyeTrg.show = 0;
+    end
+
+    %   if hFng.show & (dist_pct >= dat.fboffreachproportion) & (dist_pct < dat.fbonreachproportion)
+    %         feval(dat.fngfeedbackfunc, pos, 0, 0);
+    %         dat.fboffpt = pos;
+    %     end
+
+    posOk = INBOX(pos,dat.reachtargetpos,dat.reachtargetwin);
+    velOk = (norm(vel)<dat.donecritspeed);%(vel <= 2);  %% MM/SEC
+
+
+    %     %  Train with Arrow field.  Length and direction of each arrow in field is proportional
+    %     %  to difference vector, (tgtLoc - handLoc).
+    %     [aang,asize] = cart2pol(dat.reachtargetpos(1)-pos(1),dat.reachtargetpos(2)-pos(2));
+    %     asize = Params.arrowFieldLength(asize);
+    %     setMultiVisObjects(hRightHandArrowField,'angle',aang.*180/pi,'scale',asize);
+
+
+    % if(vel>1500 & tim>1) err=10; continue; end  % Special swat error
+
+    %if ~mod(loopct,dat.visBlur.VBUP)
+    %     if (toc-lastVBupdatetime) > dat.visBlur.VBUP  %~mod(loopct,dat.visBlur.VBUP)
+    %         lastVBupdatetime = toc;
+    %         hFng.vertices = updateVisBlurVerts(dat.visBlur.N,dat.visBlur.Nverts,dat.visBlur.dotrad,dat.visBlur.C);
+    %     end
+
+    feval(dat.fngfeedbackfunc, pos, 0, 2);
+    hW.drawnow;
+
+    if(tim>Params.GO_TONE_TIME & toneOn),
+        tdtTone(0);
+        toneOn=0;
+    end
+
+    %% CHECK FOR ARM ACQ
+    %   if(velOk&posOk&~gotArm) % first time in arm target
+    %     gotArm=1;
+    %     gotArmTime=tim;
+    %   elseif(gotArm&~posOk)
+    %     err            = 3;
+    %     dat.err        = err;
+    %     dat.errstring  = 'Broke Hand Hold';
+    %     hReachTrg.show = 0;
+    %   end
+
+    if posOk & velOk %(dist_pct>0.5) & (norm(vel)<dat.donecritspeed) %posOk
+        done = 1;
+        dat.endpt = pos;
+        dat.endptspeed = norm(vel);
+    end
+
+    %%  DONE
+    %if (posOk & velOk), done=1; dat.endpt = pos; end
+    %if (posOk)
+    %  setMultiVisObjects(hRightHandArrowField,'show',0);
+    %  hW.drawnow;
+    %end
+
+    % check for TIMEOUT
+    if(~done & tim>Params.REACH_TARGET_TIMEOUT),
+        err           = 4;
+        dat.err       = err;
+        dat.errstring = 'Timeout to Reach Target';
+        done          = 1;
+        feval(dat.fngfeedbackfunc, pos, 0, 0);
+        hW.drawnow;
+    end
+
+end
+%setMultiVisObjects(hRightHandArrowField,'show',0);
+if err, feval(dat.fngfeedbackfunc, pos, 0, 0); end
+hW.drawnow;
+
+
+
+tdtTone(0);
+toneOn=0;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% 3: HOLD ALL: both start target and fixation
+%%% If target 1 acquired,  give reward
+
+if (~err),
+    %% if Reach Target acquired, give reward
+    if(Params.INTERMEDIATE_REWARDS) tdtJuice(Params.MEDIUM_REWARD); dat.totalreward = dat.totalreward+Params.MEDIUM_REWARD;end
+    tic;
+    %lastVBupdatetime = 0;
+    while ((toc < Params.REACH_TARGET_HOLD) & ~err),
+        loopct = loopct+1;
+
+        %% Arm Position
+        pos = latest;
+        feval(dat.fngfeedbackfunc, pos, 0, 2);
+        % if ~mod(loopct,dat.visBlur.VBUP)
+%         if (toc-lastVBupdatetime) > dat.visBlur.VBUP  %~mod(loopct,dat.visBlur.VBUP)
+%             lastVBupdatetime = toc;
+%             hFng.vertices = updateVisBlurVerts(dat.visBlur.N,dat.visBlur.Nverts,dat.visBlur.dotrad,dat.visBlur.C);
+%         end
+        posOk = INBOX(pos,dat.endpt,dat.reachtargetrad);
+
+        %         %  Dot Field
+        %         %lKin = hL.latest;
+        %         randomDotField(0,hRightHandDotField,pos,Params.NRandDots, ...
+        %         Params.wsCenter,Params.wsRadius,'lead',dat.reachtargetpos);
+        %         hRightHandDotField.show = 1;
+
+        if (~posOk)
+            err            = 10;
+            dat.err        = err;
+            dat.errstring  = 'Missed Hold at Reach Target';
+            hReachTrg.show = 0;
+            hEyeFix.show   = 0;
+            %  hRightHandDotField.show = 0;
+        end
+    end
+    hW.drawnow;
+end
+%hRightHandDotField.show=0;
+% Switch off all targets and FB and get actionlog
+hStartTrg.show = 0;
+hReachTrg.show = 0;
+hFng.show      = 0;
+%hText1.show    = 0;
+hW.drawnow;
+
+%%%%%%% ERROR CHECK BUFFER COMMANDS
+dat.bufferstoptime = clock;
+nE0 = hL.err;
+invoke(hL,'stopBuffer');
+nE1 = hL.err;
+if(nE1>nE0)
+    for i=(nE0+1):nE1,
+        fprintf(1,'%d: %s',i,hL.getErr(i))
+    end
+end
+%%%%
+
+% Get trajectory from Liberty Buffer and error check
+for i=1:Params.N_MARKERS
+    nE0 = hL.err;
+    traj     = invoke(hL,'getBuffer',i);
+    nE1 = hL.err;
+    if(nE1>nE0)
+        for i=(nE0+1):nE1,
+            fprintf(1,'%d: %s',i,hL.getErr(i))
+        end
+    end
+    dat.traj = [traj(:,4,i), traj(:,3,i)];
+    %sync = traj(:,8:9,1);
+end
+dat.time = [0:(size(dat.traj,1)-1)]' / FRAMERATE;
+%----------------------------
+
+
+% %  Give performance feedback
+% if ~isempty(dat.endpt) & ~dat.err & dat.givebonusfeedbackflag
+%     if any(dat.fbshift)  %  Give random bonus feedback for trials with a feedback shift
+%         disterr = norm(mvnrnd([0 0],dat.randbonusc));
+%     else
+%         disterr             = norm(dat.reachtargetpos - dat.endpt);
+%     end
+%     hBonusTrg.scale     = max(3,disterr);
+%     hBonusTrg.pos       = dat.reachtargetpos;
+%     hBonusTrg.show      = 1;
+%     dat.reachbonus = dat.reachbonusfunc(disterr,dat.reachbonustau);
+%     %     if dat.reachbonus >= 95
+%     %         rbs = ' :)';
+%     %     else
+%     %         rbs = '';
+%     %     end
+%     hText1.text         = sprintf('Bonus = %0.1f%%',dat.reachbonus);
+%     hText1.show         = 0;
+%     hW.drawnow;
+%     dat.disterr = disterr;
+% end
+% 
+% % if err == 9
+% %      hText1.text         = dat.errstring;
+% %      hText1.show         = 1;
+% %      hW.drawnow;
+% % end
+% 
+% pause(Params.performanceFBPause);
+% 
+% if (~err ), % Final reward during TUNING task
+%     tdtJuice(Params.LARGE_REWARD*dat.reachbonus/100);  %%%
+%     dat.totalreward = dat.totalreward+Params.LARGE_REWARD*dat.reachbonus/100;
+% end
+%hBonusTrg.show      = 0;
+%hW.drawnow;
+
+ if (~err ), % Final reward
+    tdtJuice(Params.LARGE_REWARD);  %%%
+    dat.totalreward = dat.totalreward+Params.LARGE_REWARD;
+end
+
+
+%disp('Where the heck am I?');
+
+% Switch off all targets and FB
+hStartTrg.show = 0;
+hReachTrg.show = 0;
+hFng.show      = 0;
+
+%  DEBUG
+%  hText1.text         = dat.errstring;
+%      hText1.show         = 1;
+%      hW.drawnow;
+% %  ---
+
+% Save some more stuff
+dat.err = err;
+
+hL.active = 0;
+
+% Pause at end of trials
+if(dat.err==10)
+%     pause((Params.INTER_TRIAL_DELAY + Params.SWAT_PENALTY)/1000);
+pause((dat.intertrialdelay + Params.SWAT_PENALTY)/1000);
+elseif(dat.err & dat.err~=1)
+    %pause((Params.INTER_TRIAL_DELAY + Params.ERR_PENALTY)/1000);
+    pause((dat.intertrialdelay + Params.ERR_PENALTY)/1000);
+else
+    %pause(Params.INTER_TRIAL_DELAY/1000);
+    pause(dat.intertrialdelay/1000);
+end
+
+hText1.show         = 0;
+hW.drawnow;
+hW.batchmode = 0;
+dat.actionlog = hW.actionlog;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% SUPPORT FUNCTIONS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% HAND LATEST %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [pos,vel,velpct] = latest(new)
+
+global hL Params
+persistent velmax started
+
+MINVELMAX = 20;
+IP  = [4,3]; % latest index for position
+IPV = [10,9]; % latest index for velocity
+
+if(nargin<1) new=0; end
+if(isempty(started)) started=0; end
+
+
+lKin = hL.latest;
+vel = lKin(Params.FINGER_MARKER,IPV);  %% mm/sec <- mm/msec ????
+pos = lKin(Params.FINGER_MARKER,IP);        %% mm
+
+vel = norm(vel);
+
+if(new | ~started),
+    %% First time, set to initialize values
+    velmax = 0;
+    velpct = 1;  %% default high value
+    started = 1;
+else
+    %% Look for maximum velocity during the reach
+    if(vel > velmax) velmax = vel; end
+    if(velmax<.01) velpct=1;
+    else           velpct = vel/velmax;
+    end
+
+    %% Check to make sure velmax isnt too small
+    %% i.e. if there is dip at start of reach
+    %% just set velpct to 1 (default high value)
+    if(velmax < MINVELMAX) velpct=1; end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% EYE LATEST %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [pos,frame] = eyelatest(new)
+
+global Params
+global eyeStruct
+
+if(nargin<1) new=0; end
+if(isempty(eyeStruct.started)) started=0; end
+
+[pos, frame] = EyeUpdate; % Get Eye Data
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% INBOX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function in = INBOX(pos,boxpos,win)
+
+if (length(win) == 1),
+    in = sqrt( (pos(:,1)-boxpos(1)).^2 + (pos(:,2)-boxpos(2)).^2 ) < win;
+else
+    in = abs(pos(:,1)-boxpos(:,1)) < win(1) & abs(pos(:,2)-boxpos(:,2)) < win(2);
+end
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EOF
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

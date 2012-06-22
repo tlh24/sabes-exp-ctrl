@@ -1,0 +1,707 @@
+function SensIntReaching(test)
+
+global ORIGIN BUFFERTIME FRAMERATE
+global Data Params Path
+global tdtTankName tdtBlockName
+global hL hW hMou
+global hStartTrg hReachTrg hFng hRightHandArrowField hText1
+
+DEBUG = 0;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%% Experiment Setup
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+hText1.pos = Params.wsCenter;
+hText1.scale = [1 1].*35;
+hText1.color = [0.6 0 0.4];
+hText1.show = 0;
+
+hBonusTrg.color = [0.8 0.8 0.8];
+hBonusTrg.z = 1;
+hBonusTrg.show = 0;
+
+hW.drawnow;
+
+
+%%%% Define Data structure
+
+clear dtmp
+
+dtmp.params = [];
+dtmp.trial        = [];
+dtmp.test         = 0;
+
+dtmp.starttargetpos             = [];
+dtmp.starttargetrad             = [];
+dtmp.starttargetwin             = [];
+dtmp.starttargetrgb             = [];
+dtmp.starttargetbright          = [];
+dtmp.starttargetshow            = [];
+dtmp.starttargetfeedback        = [];
+dtmp.starttargetnb              = [];
+dtmp.starttargetposfunc         = [];
+dtmp.movementnb                 = [];
+dtmp.starttargetflashbright     = [];
+dtmp.starttargetvelcrit         = [];
+dtmp.starttargetfbholddur       = [];
+
+dtmp.reachtargetnb     = [];
+dtmp.reachtargetpos    = [];
+dtmp.reachtargetrad    = [];
+dtmp.reachtargetwin    = [];
+dtmp.reachtargetrgb    = [];
+dtmp.reachtargetbright = [];
+dtmp.reachtargetposfunc = [];
+
+dtmp.eyetargetpos       = [];
+dtmp.eyetargetrad       = [];
+dtmp.eyetargetwin       = [];
+dtmp.eyetargetrgb       = [];
+dtmp.eyetargetbright    = [];
+dtmp.eyetargetposfunc   = [];
+
+dtmp.feedbackfngrad    = [];
+dtmp.feedbackfngbright = [];
+dtmp.fbvelcrit         = [];
+dtmp.fngfeedbackfunc   = [];
+
+dtmp.righthandarrowfieldrgb = [];
+dtmp.righthandarrowfieldbrightnessfunc = [];
+
+dtmp.smallreward         = [];
+dtmp.largereward         = [];
+dtmp.intermediaterewards = [];
+dtmp.finalreward         = [];
+dtmp.totalreward         = [];
+
+dtmp.starttargethold       = [];
+dtmp.reachtargethold       = [];
+dtmp.eyetargethold         = [];
+dtmp.reachdelay            = [];
+dtmp.maxmovetimetostarttarget = [];
+
+dtmp.eyetargettimeout       = [];
+
+dtmp.minreachdistance = [];
+dtmp.mineyetoreachdistance = [];
+
+dtmp.fbonreachproportion = [];
+dtmp.fboffreachproportion = [];
+dtmp.fbshift = [];
+
+dtmp.reachtrgshowdur = [];
+
+dtmp.reachbonus         = [];
+dtmp.donecritspeed      = [];
+dtmp.reachbonustau      = [];
+dtmp.reachbonusfunc      = [];
+dtmp.givebonusfeedbackflag  = [];
+dtmp.randbonusc         = [];
+dtmp.reachbonus         = [];
+dtmp.disterr            = [];
+
+dtmp.traj       = [];  %% hand reach trajectory
+dtmp.time       = [];  %% time stamp for each traj point
+dtmp.fbpt       = [];  %% point where visual feedback came on
+dtmp.fboffpt    = [];
+dtmp.endptspeed = [];
+dtmp.startpt    = [];  %% start point of reach right arm
+dtmp.endpt      = [];  %% end point of reach right arm
+
+dtmp.eyebufferatfixation = [];
+dtmp.eyebuffertimeatfixation = [];
+
+dtmp.err        = [];  %% error
+dtmp.errstring  = '';  %% error string
+dtmp.actionlog  = [];  %% VisServer Actionlog
+
+dtmp.trialtime  = [];  %% Trial start time
+dtmp.expttime   = [];  %% Experiment Time
+dtmp.absolutetime = [];
+dtmp.bufferstarttime    = [];
+dtmp.bufferstoptime     = [];
+dtmp.trialtype  = [];  %%
+dtmp.intertrialdelay    = [];
+
+dtmp.visFB            = [];
+
+perm([],-1);
+Data = [];
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%% GUI
+global pauseFlag keyboardFlag newfileFlag restartFlag newcalibFlag
+pauseFlag = 0;
+keyboardFlag = 0;
+newfileFlag = 0;
+restartFlag = 0;
+newcalibFlag = 0;
+newfiletemp = 0;
+restarttemp = 0;
+figure(1)
+set(gcf,'position',[24    71   560   201]);
+pauseGH = uicontrol(gcf,'style','toggle','units','normalized','position',[.1 .4 .3 .2],'string','PAUSE','callback',@pauseCallback);
+keyboardGH = uicontrol(gcf,'style','push','units','normalized','position',[.6 .4 .3 .2],'string','KEYBOARD','callback',@keyboardCallback);
+newfileGH = uicontrol(gcf,'style','push','units','normalized','position',[.4 .1 .2 .1],'string','NEW FILE','callback',@newfileCallback);
+restartGH = uicontrol(gcf,'style','push','units','normalized','position',[.7 .1 .2 .1],'string','RESTART','callback',@restartCallback);
+newcalibGH = uicontrol(gcf,'style','push','units','normalized','position',[.1 .1 .2 .1],'string','NEW EYE CAL','callback',@newcalibCallback);
+
+% %%%  Create Arrow Field(s)
+hRightHandArrowField = createArrowField(Params.NarrowsX,Params.NarrowsY,Params.wsBounds,Params.visServerIP);
+setMultiVisObjects(hRightHandArrowField,'z',Params.rightHandArrowFieldZ);
+% %%%%
+
+%       Create vis blur objects
+%hFng.color = dat.visBlur.RGB.*dat.visBlur.bright;
+
+%%%%  Trial Error Summary Figures
+% errSummH = figure;
+% set(errSummH,'position',[646   708   615   225],'name','Trial Error Summary');
+% crctTrialTimeH = figure;
+% set(gcf,'position',[181         404        1081         224]);
+% %%%%  Target Location Summary Figure
+% tgtLocH = figure;
+% set(gcf,'position',[762    43   447   282],'name','Target Location Summary');
+%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Experiment Trial Loop
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+TimeStamp = clock;
+
+%  Create the target array
+[targetlist] = SIRGetTargs(Params);
+
+%% Save Non-Data Variables to TEMP directory
+eval(sprintf('!mkdir %s_TEMP',Params.FILENAME));
+eval(sprintf('save %s_TEMP/VARS Params TimeStamp targetlist',Params.FILENAME));
+
+%%  Save all the .m files for this task into the data directory to keep a
+%%  record of the code used.
+fprintf('\nSaving .m files into data directory ...\n');
+D=dir('*.m');
+for fi = 1:length(D)
+    copyfile(D(fi).name,[Params.FILENAME '_TEMP']);
+    fileattrib(fullfile([Params.FILENAME '_TEMP'],D(fi).name),'-w');
+end
+
+%% Put all of the Params into the Data structure so that you can
+%% change them during the expt and keep the record of what happened.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  TUNING LOOP
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+clear Data
+
+NTRIALS = Params.N_TRIALS ;
+Data(NTRIALS) = dtmp;
+
+trial=0; done=0; trial_error = 0;
+iPath = 1; i = 0;
+totalPaths = size(Path,4);
+
+%%% MCS - Take into account that the monkey will make mistakes
+%%% and we need to repeat those trials
+%%% Therefore, just loop Params.N_TRIALS times, if trial not succesfull
+%%% the wrong trial is repeated for at least 4 times before skipping
+%%% to the next trial
+% % %     for iPath = 1:Params.N_PATHS_OCTAGON,
+% % %         for i = 1:Params.N_TRIALS_OCTAGON,
+
+startTrial = 1;
+for itrial = startTrial:Params.N_TRIALS,
+
+    trial = trial + 1;
+
+    Data(trial) = dtmp;  % create data
+
+    ttProbs = cumsum(Params.TRIAL_TYPE_PROBS);
+    ttype = min(find(rand(1)<=ttProbs));
+    Data(trial).trialtype       = ttype;
+    Data(trial).trial           = trial;
+    Data(trial).absolutetime    = clock;
+    Data(trial).expttime = [60 1 1/60]*[Data(trial).absolutetime(4:end)']-[60 1 1/60]*Data(1).absolutetime(4:end)';
+
+    Data(trial).starttargetposfunc = Params.START_TARGET_POS_FUNC;
+    Data(trial).reachtargetposfunc = Params.REACH_TARGET_POS_FUNC;
+    Data(trial).eyetargetposfunc = Params.EYE_TARGET_POS_FUNC;
+
+    %     %%% Assign start position, reach target position and eye fixation position
+    %     if (trial > 1 & trial_error < Params.MAX_TRIAL_ERR & Data(trial-1).err ~=0 )
+    %         trial_error = trial_error + 1;
+    %         startID                    = previous_startID;
+    %         stopID                     = previous_stopID;
+    %         Data(trial).movementnb     = moveID;
+    %         Data(trial).starttargetnb  = startID;
+    %         Data(trial).reachtargetnb  = stopID;
+    %         Data(trial).starttargetpos = previous_starttargetpos;
+    %         Data(trial).reachtargetpos = previous_reachtargetpos;
+    %     else
+    %         %         i = i + 1;
+    %         %         if (i == 33) % only 32 possible movement vectors on the octagon
+    %         %             i = 1;   % restart from 1 when arrive at the 32nd
+    %         %             iPath = iPath + 1;
+    %         %             if (iPath==totalPaths),
+    %         %                 fprintf(1,'+++ All %d Paths have been completed already.\n',iPath-1)
+    %         %                 fprintf(1,'    Restart Octagon Tuning from beginning.\n')
+    %         %                 done = 1;
+    %         %                 break
+    %         %             end
+    %         %         end
+    %
+    %         moveID                     = 0;%Path(1,1,i,iPath);                      % movement ID as defined on Octagon
+    %         startID                    = 0;%Path(1,6,i,iPath);                      % start Target ID
+    %         stopID                     = 0;%Path(1,7,i,iPath);                      % reach Target ID
+    %         Data(trial).movementnb     = moveID;
+    %         Data(trial).starttargetnb  = startID;
+    %         Data(trial).reachtargetnb  = stopID;
+    %
+    %         % save start and reach targets info for error trial:
+    %         % if monkey does not execute this trial succesfully, he will repeat it
+    %         trial_error = 0;
+    %         previous_moveID         = 0;%Path(1,1,i,iPath);
+    %         previous_startID        = 0;%Path(1,6,i,iPath);
+    %         previous_stopID         = 0;%Path(1,7,i,iPath);
+    %         previous_starttargetpos = Data(trial).starttargetpos;%[Path(1,2,i,iPath) Path(1,3,i,iPath)] ;
+    %         previous_reachtargetpos = Data(trial).reachtargetpos;%[Path(1,4,i,iPath) Path(1,5,i,iPath)] ;
+    %
+    %     end
+
+
+
+    %  Keep track of the Params changes
+    Data(trial).params = Params;
+
+    % Start Target
+    Data(trial).starttargetwin      = Params.START_TARGET_WIN;
+    Data(trial).starttargetrad      = Params.START_TARGET_RAD;
+    Data(trial).starttargetrgb      = Params.START_TARGET_RGB;
+    Data(trial).starttargetbright   = Params.START_TARGET_BRIGHT;
+    Data(trial).starttargetshow     = Params.START_TARGET_SHOW;
+    Data(trial).starttargetvelcrit = Params.START_TARGET_VEL_CRIT;
+
+    Data(trial).starttargetfeedback = (rand(1)<= Params.P_START_TARGET_FEEDBACK);
+    Data(trial).starttargetfbholddur = Params.START_TARGET_FB_HOLD_DUR;
+
+    % Reach Target
+    Data(trial).reachtargetrad    = Params.REACH_TARGET_RAD;
+    Data(trial).reachtargetwin    = [];  %  See below, this is now a function
+    Data(trial).reachtargetrgb    = Params.REACH_TARGET_RGB;
+    Data(trial).reachtargetbright = Params.REACH_TARGET_BRIGHT;
+
+    % Eye Target
+    Data(trial).eyetargetrad    = Params.EYE_TARGET_RAD;
+    Data(trial).eyetargetwin    = Params.EYE_TARGET_WIN;
+    Data(trial).eyetargetrgb    = Params.EYE_TARGET_RGB;
+    Data(trial).eyetargetbright = Params.EYE_TARGET_BRIGHT;
+
+
+    %  Dot Field
+    Data(trial).righthandarrowfieldrgb = Params.rightHandArrowFieldRGB;
+    Data(trial).righthandarrowfieldbrightnessfunc = Params.rightHandArrowFieldBrightnessFunc;
+
+    %  Performance feedback params
+    Data(trial).donecritspeed           = Params.doneCritSpeed;
+    Data(trial).reachbonustau           = Params.reachBonusTau;
+    Data(trial).reachbonusfunc          = Params.reachBonusFunc;
+    Data(trial).givebonusfeedbackflag   = Params.giveBonusFeedbackFlag;
+    Data(trial).randbonusc              = Params.randBonusC;
+    Data(trial).reachbonus              = 0;  %  Initialize to zero.
+
+    % Rewards
+    Data(trial).smallreward         = Params.SMALL_REWARD;
+    Data(trial).largereward         = Params.LARGE_REWARD;
+    Data(trial).intermediaterewards = Params.INTERMEDIATE_REWARDS;
+
+    % Delay and times
+    Data(trial).starttargethold           = Params.START_TARGET_HOLD;
+    Data(trial).reachtargethold           = Params.REACH_TARGET_HOLD;
+    Data(trial).eyetargethold             = Params.EYE_TARGET_HOLD;
+    Data(trial).maxmovetimetostarttarget  = Params.MAX_MOVE_TIME_TO_START_TARGET;
+
+    Data(trial).eyetargettimeout          = Params.EYE_TARGET_TIMEOUT;
+
+    Data(trial).intertrialdelay           = Params.INTER_TRIAL_DELAY;
+
+    %   %  Visual BLuR
+    %   Data(trial).visBlur.N = Params.visBlur.N;
+    %   Data(trial).visBlur.RGB = Params.visBlur.RGB;
+    %   Data(trial).visBlur.bright = Params.visBlur.bright;
+    %   Data(trial).visBlur.scale = Params.visBlur.scale;
+    %   Data(trial).visBlur.C = Params.visBlur.C;
+    %   Data(trial).visBlur.Nverts = Params.visBlur.Nverts;
+    %   Data(trial).visBlur.dotrad = Params.visBlur.dotrad;
+    %   Data(trial).visBlur.VBUP = Params.visBlur.VBUP;
+
+    if Data(trial).trialtype < 3
+        if Params.useRandomTargetsFlag & (Params.P_randomTarget>=rand(1))  % Non test trials
+            %         if any(Data(trial).fbshift)
+            %             vbki = min(find(cumsum(Params.P_visBlur)>=rand(1)));
+            %             %  Choose the start and reach targets from the premade list
+            %             Data(trial).starttargetpos = targetlist(trial,1:2);
+            %             Data(trial).reachtargetpos = targetlist(trial,3:4);
+            % %        else
+            Data(trial).fbshift = [0 0];
+            %  Visual BLuR
+            %vbki = unidrnd(length(Params.visBlur));%1;
+            vbki = min(find(cumsum(Params.P_visFB)>=rand(1)));
+            %vbki = 1;
+            Data(trial).minreachdistance = Params.MIN_REACH_DISTANCE;
+            Data(trial).starttargetpos = eval(Data(trial).starttargetposfunc);
+            rdist = 0;
+            while rdist < Data(trial).minreachdistance
+                Data(trial).reachtargetpos = eval(Data(trial).reachtargetposfunc);
+                rdist = norm(Data(trial).reachtargetpos - Data(trial).starttargetpos);
+            end
+
+            %       end
+            Data(trial).test = 0;
+            if rand(1)<=Params.P_FullFeedback
+                Data(trial).fboffreachproportion = inf;
+                vbki = 1;  %
+            end
+        else        %  Test trials
+            %             %  Shifts
+            %             if rand(1) <= Params.P_FBshift
+            %                 shiftdir = Params.FBshiftdirs(unidrnd(length(Params.FBshiftdirs)));
+            %                 shiftrad = Params.FBshiftradius(unidrnd(length(Params.FBshiftradius)));
+            %                 [sx,sy] = pol2cart(shiftdir,shiftrad);
+            %                 Data(trial).fbshift = [sx sy];
+            %             else
+            %                 Data(trial).fbshift = [0 0];
+            %             end
+            %             vbki = min(find(cumsum(Params.P_visBlur)>=rand(1)))+1;
+            %             %  Choose the start and reach targets from the premade list
+            %             Data(trial).starttargetpos = targetlist(trial,1:2);
+            %             Data(trial).reachtargetpos = targetlist(trial,3:4);
+            %
+            %             Data(trial).test = 1;
+        end
+        Data(trial).visFB = Params.visFB(vbki);
+        Data(trial).reachtargetwin    = Params.REACH_TARGET_WIN_FUNC(Data(trial).reachtargetrad,Data(trial).visFB.rad);
+        % Feedback
+        Data(trial).feedbackfngrad    = Data(trial).visFB.rad;
+        Data(trial).feedbackfngbright = Data(trial).visFB.bright;
+        Data(trial).fngfeedbackfunc   = Data(trial).visFB.FBFunc;
+        Data(trial).fbonreachproportion  = Params.FBonReachProportion;
+        Data(trial).fboffreachproportion  = Params.FBoffReachProportion;
+
+        %% Print Some Stuff
+        fprintf(1,'%d/%d - VB: %i, FBshift: [%0.2f %0.2f] - ',trial,NTRIALS,vbki,Data(trial).fbshift);
+        %fprintf(1,'P%d/T%d - ',iPath,i);
+        %fprintf(1,'Move %d-%d - ',startID,stopID);
+    elseif Data(trial).trialtype == 3
+        Data(trial).eyetargetpos = eval(Data(trial).eyetargetposfunc);
+    elseif Data(trial).trialtype == 4
+        Data(trial).eyetargetpos = eval(Data(trial).eyetargetposfunc);
+        Data(trial).starttargetpos = eval(Data(trial).starttargetposfunc);
+        %Data(trial).eyetargethold = 0.5
+    elseif Data(trial).trialtype == 5
+        Data(trial).mineyetoreachdistance = Params.MIN_EYE_TO_REACH_DISTANCE;
+        Data(trial).starttargetpos = eval(Data(trial).starttargetposfunc);
+        Data(trial).eyetargetpos = eval(Data(trial).eyetargetposfunc);
+        erdist = 0;
+        while erdist < Data(trial).mineyetoreachdistance
+            Data(trial).reachtargetpos = eval(Data(trial).reachtargetposfunc);
+            erdist = norm(Data(trial).reachtargetpos - Data(trial).eyetargetpos);
+        end
+        Data(trial).reachtrgshowdur = Params.reachTrgShowDur;
+        Data(trial).reachtargetbright = Data(trial).reachtargetbright*Params.reachTrgBrightMultiplier; % Dim it for fix learning
+    end
+
+
+
+    fprintf('\nTrial type: %i\n',Data(trial).trialtype);
+
+    %% RUN TRIAL ---------------------------------------- RUN TRIAL -----
+    %%% Call TDT to pass targets infos
+    %    tdtTrialSetup(1,startID,stopID,trial);
+    if Data(trial).trialtype == 3
+        Data(trial) = LearnToFixate_Trial(Data(trial));
+    elseif Data(trial).trialtype == 4
+        Data(trial) = LearnToFixate_Trial_w_HandHold(Data(trial));
+    elseif Data(trial).trialtype == 5
+        Data(trial) = LearnToFixate_Trial_w_HandHold_2(Data(trial));
+    else
+        Data(trial) = SensIntReaching_Trial( Data(trial) );
+    end
+    tdtTrialSetup(0);
+
+    %% Print More Stuff
+    fprintf(1,' Err %d: %s \n',Data(trial).err,Data(trial).errstring);
+    fprintf('Reach bonus: %0.3f; \tJuice: %0.3f\n\n',Data(trial).reachbonus,Data(trial).totalreward);
+
+    %Data(trial).actionlog
+
+    %%  SUMMARY FIGURES-----------------------------------
+    errlist = [Data(:).err];
+    trialTypeList = [Data(:).trialtype];
+    %% Update Error Summary figure
+    if trial > 1 %5
+        if ~exist('errSummH') | ~ishandle(errSummH)
+            errSummH = figure;
+            set(errSummH,'position',[646   708   615   225],'name','Trial Error Summary');
+        else
+            figure(errSummH);
+        end
+        if length(unique(errlist))>1
+            [eC,ebc] = hist(errlist,unique(errlist));
+            bar(ebc,eC);
+            ylabel('N trials');
+            xlabel('Error');
+            title(sprintf('Error Summary (after %i trials)',trial));
+        end
+
+        %  Correct trial times figure
+        if ~exist('crctTrialTimeH') | ~ishandle(crctTrialTimeH)
+            crctTrialTimeH = figure;
+            set(gcf,'position',[181         404        1081         224]);
+
+            cttAx1 = axes;
+            cttAx2 = axes('Position',get(cttAx1,'Position'));
+        else
+            figure(crctTrialTimeH);
+        end
+        set(gcf,'currentaxes',cttAx1);
+        ctidx = find(errlist==0);
+        ctetimes = cat(1,Data(ctidx).expttime);
+        plot([0;ctetimes], [0:length(ctidx)],'.-');
+        xlims = get(gca,'xlim');
+        set(gca,'xlim',[0 Data(trial).expttime]);
+        xlabel('Expt Time (mins)');
+        ylabel('# Correct Trials');
+        title(sprintf('%i correct trials; %0.1f total reward time',length(ctidx),sum([Data(:).totalreward])));
+
+        set(gcf,'currentaxes',cttAx2);
+        plot(cat(1,Data(:).expttime),cat(1,Data(:).largereward),'r--');
+        ylabel('Large reward setting');
+        set(gca,'xticklabel','','xlim',get(cttAx1,'xlim'), ...
+            'YAxisLocation','right',...
+            'Color','none',...
+            'YColor','r','Position',get(cttAx1,'Position'));
+        % ----------
+
+        %  Inter-trial delay figure
+        if ~exist('intertrialdelayH') | ~ishandle(intertrialdelayH)
+            intertrialdelayH = figure;
+            set(gcf,'position',[181         635        1081         200]);
+        else
+            figure(intertrialdelayH);
+        end
+        plot(cat(1,Data(1:trial).expttime),cat(1,Data(1:trial).intertrialdelay),'k');
+        xlabel('Expt Time (mins)');
+        ylabel('Inter-trial delay (ms)');
+        %  ------------
+
+        if 1
+            %  Summary of hand target locations figure
+            if ~exist('tgtLocH') | ~ishandle(tgtLocH)
+                tgtLocH = figure;
+                set(gcf,'position',[762    43   447   282],'name','Target Location Summary');
+            else
+                figure(tgtLocH);
+            end
+            startposes = cat(1,Data(:).starttargetpos);
+            reachposes = cat(1,Data(:).reachtargetpos);
+            %  [Xmin Ymin; Xmax Ymax]
+            pidx = [trialTypeList==1 & errlist==0];
+            if any(pidx) %any(errlist~=1)
+                stp = cat(1,Data(pidx).starttargetpos);
+                rtp = cat(1,Data(pidx).reachtargetpos);
+                plot(stp(:,1),stp(:,2),'go');
+                plot(rtp(:,1),rtp(:,2),'ro');
+                %plot(startposes(errlist~=1,1),startposes(errlist~=1,2),'go');
+                %plot(reachposes(errlist~=1&errlist~=4,1),reachposes(errlist~=1&errlist~=4,2),'ro');
+            end
+            hold on;
+            set(gca,'ydir','reverse');
+            pidx = [trialTypeList==1 & errlist==1];
+            if any(pidx) %any(errlist==1)
+                stp = cat(1,Data(pidx).starttargetpos);
+                plot(stp(:,1),stp(:,2),'gs');
+                %plot(startposes(errlist==1,1),startposes(errlist==1,2),'gs');
+            end
+
+            pidx = [trialTypeList==1 & errlist==4];
+            if any(pidx) %any(errlist==1)
+                rtp = cat(1,Data(pidx).reachtargetpos);
+                plot(rtp(:,1),rtp(:,2),'rs');
+                %plot(startposes(errlist==1,1),startposes(errlist==1,2),'gs');
+            end
+
+            %             if any(errlist==4)
+            %                 plot(reachposes(errlist==4,1),reachposes(errlist==4,2),'rs');
+            %             end
+            % legend('start acq''d', 'start ~acq''d','reach acq''d','reach ~acq''d','Location','Best');
+            wsb = Params.wsBounds;
+            bboxH = line([wsb(1) wsb(1) wsb(2,1) wsb(2,1); wsb(1,1) wsb(2,1) wsb(2,1) wsb(1,1)], ...
+                [wsb(1,2) wsb(2,2) wsb(2,2) wsb(1,2); wsb(2,2) wsb(2,2) wsb(1,2) wsb(1,2)]);
+            set(bboxH,'color',[0 0 0]);
+            xlabel('X'); ylabel('Y');
+            title('Locations of acquired hand targets');
+            axis equal;
+        end
+
+        %  Summary of EYE target locations figure
+        if ~exist('eyeTgtLocH') | ~ishandle(eyeTgtLocH)
+            eyeTgtLocH = figure;
+            set(gcf,'position',[378    66   447   282],'name','Eye Target Location Summary');
+        else
+            figure(eyeTgtLocH);
+        end
+        %eyetargetposes = cat(1,Data(:).eyetargetpos);
+
+        %  [Xmin Ymin; Xmax Ymax]
+        eyeTrgTrials = [trialTypeList==3 | trialTypeList==4 | trialTypeList==5];
+        pidx = [eyeTrgTrials & errlist==0];%setdiff([trialTypeList==3 & errlist~=21],0);
+        if any(pidx)
+            etp = cat(1,Data(pidx).eyetargetpos);
+            plot(etp(:,1),etp(:,2),'go');
+            %plot(reachposes(errlist~=1&errlist~=4,1),reachposes(errlist~=1&errlist~=4,2),'ro');
+        end
+        hold on;
+        set(gca,'ydir','reverse');
+        pidx = [eyeTrgTrials & errlist==21];%setdiff([trialTypeList==3 & errlist==21],0);
+        if any(pidx)
+            etp = cat(1,Data(pidx).eyetargetpos);
+            plot(etp(:,1),etp(:,2),'rs');
+        end
+        %             if any(errlist==4)
+        %                 plot(reachposes(errlist==4,1),reachposes(errlist==4,2),'rs');
+        %             end
+        % legend('start acq''d', 'start ~acq''d','reach acq''d','reach ~acq''d','Location','Best');
+        wsb = Params.wsBounds;
+        bboxH = line([wsb(1) wsb(1) wsb(2,1) wsb(2,1); wsb(1,1) wsb(2,1) wsb(2,1) wsb(1,1)], ...
+            [wsb(1,2) wsb(2,2) wsb(2,2) wsb(1,2); wsb(2,2) wsb(2,2) wsb(1,2) wsb(1,2)]);
+        set(bboxH,'color',[0 0 0]);
+        xlabel('X'); ylabel('Y');
+        title('Locations of acquired eye targets');
+        axis equal;
+        %        keyboard
+    end
+
+    %% Save to TEMP file
+    eval(sprintf('DATA_%d = Data(%d);',trial,trial));
+    eval(sprintf('save %s_TEMP/DATA_%d DATA_%d',Params.FILENAME,trial,trial));
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Functions on press button
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    drawnow;
+    while( pauseFlag | keyboardFlag ),
+        if(keyboardFlag) keyboard; keyboardFlag=0; end
+        pause(.1);
+    end
+
+    %%% Restart button
+    if (restartFlag),
+        restartinp = input('Are you sure you want to restart this task without saving the data? (Y/N)', 's');
+        if (restartinp == 'Y'),
+            restarttemp = 1;
+        else
+            restarttemp = 0;
+        end
+        eval(sprintf('!del /Q %s_TEMP\\*.*',Params.FILENAME));
+        eval(sprintf('save %s_TEMP/VARS Params TimeStamp',Params.FILENAME));
+        restartFlag = 0;
+    end
+
+    if (newfileFlag),
+        newfileinp = input('Are you sure you want to restart this task and save old data to file? (Y/N)', 's');
+        if (newfileinp == 'Y'),
+            newfiletemp = 1;
+        else
+            newfiletemp = 0;
+        end
+
+        if newfiletemp,
+            ct=1;
+            fname = sprintf('ReachTuning_%s-%s-%d',Params.NAME,date,ct);
+            while( exist([fname,'.mat']) | exist([fname,'_TEMP']) )
+                ct=ct+1;
+                fname = sprintf('ReachTuning_%s-%s-%d',Params.NAME,date,ct);
+            end
+            Params.FILENAME = sprintf('ReachTuning_%s-%s-%d',Params.NAME,date,ct);
+            eval(sprintf('!mkdir %s_TEMP',Params.FILENAME));
+            eval(sprintf('save %s_TEMP/VARS Params TimeStamp',Params.FILENAME));
+            fprintf(1,'Data will be stored to file %s\n\n',Params.FILENAME);
+        end
+        newfileFlag = 0;
+    end
+
+    if (restarttemp | newfiletemp),
+        trial = 0;
+        trial_error = 0;
+        iPath = 1;
+        i = 0;
+        clear Data;
+        restarttemp = 0;
+        newfiletemp = 0;
+    end
+
+    if (newcalibFlag),
+        while (newcalibFlag)
+            calibFile = input('Please input the name of an eye calibration \n','s');
+            tempname = sprintf('C:\\Lab\\matlab\\MonkeyEyeCalib\\%s_EyeCal.mat',calibFile);
+            newcalibFlag = ~exist(tempname);
+        end
+        EyeLoadCalibration(calibFile);
+        fprintf(1,'Load Eye Tracker Calibration File: %s_EyeCal.mat... \n',...
+            calibFile);
+    end
+
+    if(done) break; end
+
+end % end loop over N_TRIALS
+
+Data((trial+1):end)=[];  %% Get rid of rest
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% UTILITY FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function pauseCallback(hObject, eventdata, handles)
+
+global pauseFlag
+
+button_state = get(hObject,'Value');
+if button_state == get(hObject,'Max')
+    pauseFlag=1;
+elseif button_state == get(hObject,'Min')
+    pauseFlag=0;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function keyboardCallback(hObject, eventdata, handles)
+
+global keyboardFlag
+
+keyboardFlag=1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function restartCallback(hObject, eventdata, handles)
+
+global restartFlag
+
+restartFlag=1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function newfileCallback(hObject, eventdata, handles)
+
+global newfileFlag
+
+newfileFlag=1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function newcalibCallback(hObject, eventdata, handles)
+
+global newcalibFlag
+
+newcalibFlag=1;

@@ -1,0 +1,32 @@
+-- Check server state before changing the parameters (add check function). 
+   Return error if the state is not Idle. 
+-- Check system performance with many channels (RX5 only)
+-- Check all Examples in new location (relative path to tanks?)
+-- Publish on the Web, add install/test/use instructions
+-- Client time-out? Check: Count number of DCOM clients. (See old code for CP_DAQ)
+-- Add state info to the main window of CP_TDT
+-- Make sure that a single instance is running.
+-- Document (snapshot) and publish DCOM permissions
+-- Add error checking in the DCOM wrapper (disallow changes in recording and armed state)
+-- Restore Version 0.02 from the backup to the versions directory (Chiara was using it for a while)
+
+DONE:
+-----
+-- !!! Change Buffer size in all examples to 40000
+-- !!! Add Enable to iTime counter in all RPXes
+-- !!! Bug: CP_TDT_Stream is longer than the tank. 
+-- !!! Make sure all available points are saved when going from Record to Preview
+-- in the log output: "Timer Started" - change to "Timer enabled"
+-- In the log output: "Connect Server" add server name 
+-- Hide Test button
+-- Add muti-channel example
+-- Make ConvertToInt16 example (and test)
+-- Add tank example, use to debug the 1-point issue
+-- Rounding-off in the sample count. Shift by 1 tick
+-- Add conversion to ints option to the DCOM interface
+-- Figure out permissions for XP SP2 allowing to launch with desktop interaction
+-- !!! remove BLOCK_DATA_SIZE_FACTOR from the cpp code, add iSampleCount to the RCX file, 
+   do rate scaling in the firmware
+
+
+

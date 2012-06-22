@@ -1,0 +1,34 @@
+
+MeanH2O = 150; SDH2O = MeanH2O/10;
+MeanIJI = 60;
+RunTime = 3600;
+
+fprintf('\n\n - - - -  Running Random Waterer\n');
+tic; TotalJ = 0;
+while toc < RunTime
+  
+  IJI = exprnd(MeanIJI);
+  
+  pause(IJI);
+  Jdur = randn(1).*SDH2O + MeanH2O;
+  JuiceStart(Jdur);
+  TotalJ = TotalJ + Jdur;
+  
+  fprintf('Last IJI: %0.2f\tLast Juice: %0.2f\tTotal Juice Time: %0.2f\n',IJI,Jdur,TotalJ);
+  
+end
+
+% 
+%     tic
+% 
+% for i = 1:1000,
+%    
+%     fprintf(1,'> %d - ',i)
+%     if(rand>0.8), 
+%         JuiceStart(H2O); 
+%         fprintf(1,'H2O = %d\n',H2O)
+%         toc
+%     end
+% 
+%     pause(5)
+% end

@@ -1,0 +1,24 @@
+HKCR
+{
+	LibertyServer.Liberty.1 = s 'Liberty Class'
+	{
+		CLSID = s '{76066C59-8458-4251-AA8B-1B761BEC5E29}'
+	}
+	LibertyServer.Liberty = s 'Liberty Class'
+	{
+		CLSID = s '{76066C59-8458-4251-AA8B-1B761BEC5E29}'
+		CurVer = s 'LibertyServer.Liberty.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {76066C59-8458-4251-AA8B-1B761BEC5E29} = s 'Liberty Class'
+		{
+			ProgID = s 'LibertyServer.Liberty.1'
+			VersionIndependentProgID = s 'LibertyServer.Liberty'
+			ForceRemove 'Programmable'
+			LocalServer32 = s '%MODULE%'
+			val AppID = s '{261D0C06-0982-4F33-9921-30684C142CA6}'
+			'TypeLib' = s '{3CD16022-9D9F-4E00-A81D-8114D924B8F1}'
+		}
+	}
+}

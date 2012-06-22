@@ -1,0 +1,25 @@
+// common methods
+  STDMETHOD(GetXY)( VARIANT * pvXY);
+  STDMETHOD(SetXY)( VARIANT vXY, long iLogID);
+  STDMETHOD(GetZ)( double *pdZ);
+  STDMETHOD(SetZ)( double dZ, long iLogID);
+  STDMETHOD(GetScale)( double * pdScale);
+  STDMETHOD(SetScale)( double dScale, long iLogID);
+  STDMETHOD(GetAngle)( double * pdAngle);
+  STDMETHOD(SetAngle)( double dAngle, long iLogID);
+  STDMETHOD(GetColor)( VARIANT * pvRGB);
+  STDMETHOD(SetColor)( VARIANT vRGB, long iLogID );
+  STDMETHOD(GetAlpha)( double *pdAlpha);
+  STDMETHOD(SetAlpha)( double dAlpha, long iLogID );
+  STDMETHOD(GetFillFlag)( long * piFillFlag );
+  STDMETHOD(SetFillFlag)( long iFillFlag, long iLogID );
+  STDMETHOD(GetShowFlag)( long * piShowFlag );
+  STDMETHOD(SetShowFlag)( long iShowFlag, long iLogID);
+  STDMETHOD(GetGroupID)( long * piGroupID );
+  STDMETHOD(SetGroupID)( long iGroupID );
+  STDMETHOD(GetClippedCount)( long *piClippedCount);
+  STDMETHOD(Move)( VARIANT vXY, long iLogID );
+  STDMETHOD(Scale)( double dScale, long iLogID );
+  STDMETHOD(Rotate)( double dAngle, long iLogID );
+  STDMETHOD(Show)( long iLogID );
+  STDMETHOD(Hide)( long iLogID );

@@ -1,0 +1,145 @@
+function [start,reach,eye,swi,handcenter,nomrvect,pidx] = SIRGetTestTrialTargs(Params,dat)
+%
+%
+%
+%
+%
+%  MF Oct. 11, 2007
+%
+
+% if nargin < 2
+%     curshift = [];
+% end
+
+curshift = dat.fbshift;
+
+swi = min(find(cumsum(Params.P_subWorkspace) >= rand(1)));
+
+rad = Params.subWorkspace(swi).radius;
+% % % rdir = Params.reachdirs(unidrnd(length(Params.reachdirs),1,1));
+rdir = dat.nominalreachdirection;
+
+if Params.adjustStartLocForShiftFlag ==1
+  if isempty(curshift), error(sprintf('%s: no offset arg',mfilename)); end
+  handcenter = Params.subWorkspace(swi).center + curshift/2;
+elseif Params.adjustStartLocForShiftFlag ==2
+  if ~isempty(Params.startLocOffset)
+    handcenter = Params.subWorkspace(swi).center + Params.startLocOffset;
+  else
+    error('Start location offset empty');
+  end
+else
+  handcenter = Params.subWorkspace(swi).center;
+end
+
+%  Kloodgy way of drawing locations uniformly within a circle
+%  Draw positions uniformly within a square with sides of length 2*rad
+%  Discard the ones outside the circle.
+if isscalar(rad)
+  d = inf;
+  while d > rad
+    xy = [-rad + 2*rad*rand(1,2)];
+    d = norm(xy);
+  end
+else
+  if Params.doRelativeShiftFlag & ~Params.adaptationOnFlag
+
+    %  The long axis of the ellipse is chosen to be parallel to
+    %  the shift direction.
+    angd = rdir;
+    rotmat = [cos(angd) -sin(angd); sin(angd) cos(angd)];
+
+    if norm(dat.fbshift) < 1000*eps  % No shift trial
+      %  For no shift trials the hand location can be anywhere in the
+      %  ellipse.
+      xy0 = drawfromellipse(rad);
+      xy = (rotmat*xy0(:))';
+
+    else  %  Shift trial
+      %  For shift trials both the hand and the FB must be inside the
+      %  ellipse. In fact they must be inside a smaller ellipse, as defined
+      %  by
+      %  Params.subWorkspace(*).shiftTrialStartEllipseEdgeBufferProportion
+      %
+      rad2 = rad*Params.subWorkspace(swi).shiftTrialStartEllipseEdgeBufferProportion;
+      clear ebp;
+      done = 0;
+      while ~done
+        xy0 = drawfromellipse(rad2);
+        rshft = [cos(-angd) -sin(-angd); sin(-angd) cos(-angd)] * dat.fbshift(:);  % Rotate the shift into alignment with the ellipse.
+        xy0v = xy0 + rshft';  %  candidate FB location
+        if (sum(xy0v.^2./rad2.^2)<=1)  %  Inside ellipse?
+          xy = (rotmat*xy0(:))';
+          done = 1;
+        end
+      end
+
+    end
+  else
+    error(sprintf('%s: Not implemented for nonrelative shifts or adaptation',mfilename));
+  end
+end
+
+start = handcenter + xy;
+
+[reachx, reachy] = pol2cart(rdir,Params.reachradius);
+
+nomrvect = [reachx reachy];
+reach = nomrvect + Params.subWorkspace(swi).center;
+
+switch Params.whereToFixateFlag
+  %if Params.fixateRelativeToReachTrgFlag
+  case 2
+    pidx = find(mnrnd(1,Params.P_relativeFixationLoc));
+    %eye = Params.subWorkspace(swi).EyeTargetPosFunc(Params.subWorkspace(swi).center,reach,Params.relativeFixationLocParams{pidx});
+    if isnan(Params.relativeFixationLocParams{pidx,1})
+      eye = [nan nan];  %  Don't enforce fixation on this trial
+    else
+      efunc = Params.relativeFixationLocParams{pidx,2};
+      eyeposuseshift = curshift;
+      if Params.eyeFixationDrawShiftForNoShiftTrialsFlag
+        if ~sum(abs(curshift))
+          if isempty(dat.visFB.shiftdistfunc)
+            shdirlist = dat.visFB.shiftparams{1};
+            shdistlist = dat.visFB.shiftparams{2};
+            whdir = unidrnd(length(shdirlist),1,1);
+            shdist = min(shdistlist) + rand(1).*range(shdistlist);
+            shdir = shdirlist(whdir);
+            if Params.doRelativeShiftFlag
+              % [rang,dum] = cart2pol(rchvct(1),rchvct(2));
+              rang = dat.nominalreachdirection;
+              sang = rang + shdir;
+              [shx,shy] = pol2cart(sang,shdist);
+            else
+              [shx,shy] = pol2cart(shdir,shdist);
+            end
+            eyeposuseshift = [shx shy];
+          else
+            eyeposuseshift = dat.visFB.shiftdistfunc(dat.visFB.shiftparams{:});
+          end
+        end
+      end
+      eye = efunc(Params.subWorkspace(swi).center,reach,eyeposuseshift,Params.relativeFixationLocParams{pidx});
+    end
+  case 4
+
+    pidx = find(mnrnd(1,Params.P_relativeFixationLoc));
+    if isnan(Params.relativeFixationLocParams{pidx,1})
+      eye = [nan nan];  %  Don't enforce fixation on this trial
+    else
+      reldirdist = Params.relativeFixationLocParams{pidx,1};
+      [relx,rely] = pol2cart(reldirdist(1),reldirdist(2));
+      eye = Params.subWorkspace(swi).center + [relx rely];
+    end
+
+
+  otherwise
+    eye = Params.subWorkspace(swi).EyeTargetPos;
+end
+
+
+
+return;
+
+
+

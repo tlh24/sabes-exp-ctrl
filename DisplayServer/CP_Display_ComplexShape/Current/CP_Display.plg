@@ -1,0 +1,151 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: CP_Display - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "midl.exe /tlb ".\CP_Display.tlb" /h "CP_Display.h" /iid "CP_Display_i.c" /Oicf "D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\CP_Display.idl""
+Creating command line "rc.exe /l 0x409 /fo"Debug/CP_Display.res" /d "_DEBUG" "D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\CP_Display.rc"" 
+Creating temporary file "C:\Profiles\sabes\LOCALS~1\Temp\RSP2B77.tmp" with contents
+[
+/nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR"Debug/" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\ComUtils.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\Util\Console.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\CP_Display.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\Util\CP_printf.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\FrameCounter.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\GL_Engine.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\GL_Font.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\Util\PointerArray.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\Util\PortTalkGrantIO.c"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\RegisterCom.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\TDT_UDP.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\Util\VariantLib.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\VDisk.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\VMain.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\VMouse.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\VObject.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\VPolygon.cpp"
+"D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\VText.cpp"
+]
+Creating command line "cl.exe @C:\Profiles\sabes\LOCALS~1\Temp\RSP2B77.tmp" 
+Creating temporary file "C:\Profiles\sabes\LOCALS~1\Temp\RSP2B78.tmp" with contents
+[
+opengl32.lib glu32.lib glaux.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib ws2_32.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/CP_Display.pdb" /debug /machine:I386 /out:"Debug/CP_Display.exe" /pdbtype:sept /libpath:"../nr/release" 
+".\Debug\ComUtils.obj"
+".\Debug\ComUtils2.obj"
+".\Debug\Console.obj"
+".\Debug\CP_Display.obj"
+".\Debug\CP_printf.obj"
+".\Debug\FrameCounter.obj"
+".\Debug\GL_Engine.obj"
+".\Debug\GL_Font.obj"
+".\Debug\PointerArray.obj"
+".\Debug\PortTalkGrantIO.obj"
+".\Debug\RegisterCom.obj"
+".\Debug\TDT_UDP.obj"
+".\Debug\VariantLib.obj"
+".\Debug\VComplexShape.obj"
+".\Debug\VDisk.obj"
+".\Debug\VMain.obj"
+".\Debug\VMotion.obj"
+".\Debug\VMouse.obj"
+".\Debug\VObject.obj"
+".\Debug\VPolygon.obj"
+".\Debug\VText.obj"
+".\Debug\CP_Display.res"
+]
+Creating command line "link.exe @C:\Profiles\sabes\LOCALS~1\Temp\RSP2B78.tmp"
+<h3>Output Window</h3>
+Creating Type Library...
+Microsoft (R) MIDL Compiler Version 5.01.0164  
+Copyright (c) Microsoft Corp 1991-1997. All rights reserved.
+Processing D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\CP_Display.idl
+CP_Display.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\oaidl.idl
+oaidl.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\objidl.idl
+objidl.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\unknwn.idl
+unknwn.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\wtypes.idl
+wtypes.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\ocidl.idl
+ocidl.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\oleidl.idl
+oleidl.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\servprov.idl
+servprov.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\urlmon.idl
+urlmon.idl
+Processing C:\Program Files\Microsoft Visual Studio\VC98\INCLUDE\msxml.idl
+msxml.idl
+Compiling resources...
+Compiling...
+ComUtils.cpp
+ComUtils2.cpp
+Console.cpp
+CP_Display.cpp
+CP_printf.cpp
+FrameCounter.cpp
+GL_Engine.cpp
+GL_Font.cpp
+PointerArray.cpp
+Generating Code...
+Compiling...
+PortTalkGrantIO.c
+Generating Code...
+Compiling...
+RegisterCom.cpp
+TDT_UDP.cpp
+VariantLib.cpp
+VComplexShape.cpp
+VDisk.cpp
+VMain.cpp
+VMotion.cpp
+VMouse.cpp
+VObject.cpp
+VPolygon.cpp
+VText.cpp
+Generating Code...
+Linking...
+Creating temporary file "C:\Profiles\sabes\LOCALS~1\Temp\RSP2B84.tmp" with contents
+[
+/nologo /o"Debug/CP_Display.bsc" 
+".\Debug\ComUtils.sbr"
+".\Debug\ComUtils2.sbr"
+".\Debug\Console.sbr"
+".\Debug\CP_Display.sbr"
+".\Debug\CP_printf.sbr"
+".\Debug\FrameCounter.sbr"
+".\Debug\GL_Engine.sbr"
+".\Debug\GL_Font.sbr"
+".\Debug\PointerArray.sbr"
+".\Debug\PortTalkGrantIO.sbr"
+".\Debug\RegisterCom.sbr"
+".\Debug\TDT_UDP.sbr"
+".\Debug\VariantLib.sbr"
+".\Debug\VComplexShape.sbr"
+".\Debug\VDisk.sbr"
+".\Debug\VMain.sbr"
+".\Debug\VMotion.sbr"
+".\Debug\VMouse.sbr"
+".\Debug\VObject.sbr"
+".\Debug\VPolygon.sbr"
+".\Debug\VText.sbr"]
+Creating command line "bscmake.exe @C:\Profiles\sabes\LOCALS~1\Temp\RSP2B84.tmp"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+CP_Display.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

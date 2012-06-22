@@ -1,0 +1,102 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: CP_Display - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Profiles\sabes\LOCALS~1\Temp\RSP55A0.tmp" with contents
+[
+/nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR"Debug/" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp"
+]
+Creating command line "cl.exe @C:\Profiles\sabes\LOCALS~1\Temp\RSP55A0.tmp" 
+<h3>Output Window</h3>
+Compiling...
+VMotion.cpp
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.h(63) : error C2259: 'CVComplexShape' : cannot instantiate abstract class due to following members:
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(27) : see declaration of 'CVComplexShape'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.h(63) : warning C4259: 'long __stdcall CVComplexShape::QueryInterface(const struct _GUID &,void ** )' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'QueryInterface'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.h(63) : warning C4259: 'unsigned long __stdcall CVComplexShape::AddRef(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'AddRef'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.h(63) : warning C4259: 'unsigned long __stdcall CVComplexShape::Release(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'Release'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.h(63) : warning C4259: 'long __stdcall CVComplexShape::QueryInterface(const struct _GUID &,void ** )' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'QueryInterface'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.h(63) : warning C4259: 'unsigned long __stdcall CVComplexShape::AddRef(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'AddRef'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.h(63) : warning C4259: 'unsigned long __stdcall CVComplexShape::Release(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'Release'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.h(66) : error C2252: 'vertices' : pure specifier can only be specified for functions
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.h(67) : error C2252: 'vertexVel' : pure specifier can only be specified for functions
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.h(68) : error C2252: 'vertexTimes' : pure specifier can only be specified for functions
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.h(79) : error C2079: 'lastTime' uses undefined struct '_timeb'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(12) : error C2084: function 'int __cdecl GetDim(double *)' already has a body
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(16) : error C2084: function 'int __cdecl GetLength(double *)' already has a body
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(20) : error C2084: function 'int __cdecl GetLength(double *,int)' already has a body
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(24) : error C2084: function 'double &__cdecl GetAt(double *,int)' already has a body
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(28) : error C2084: function 'double &__cdecl GetAt(double *,int,int)' already has a body
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(29) : error C2264: 'GetLength' : error in function definition or declaration; function not called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(32) : error C2084: function 'double &__cdecl GetAt(double *,int,int,int)' already has a body
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(33) : error C2264: 'GetLength' : error in function definition or declaration; function not called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(33) : error C2264: 'GetLength' : error in function definition or declaration; function not called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(36) : error C2084: function 'double &__cdecl GetAt(double *,int,int,int,int)' already has a body
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(37) : error C2264: 'GetLength' : error in function definition or declaration; function not called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(37) : error C2264: 'GetLength' : error in function definition or declaration; function not called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(37) : error C2264: 'GetLength' : error in function definition or declaration; function not called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(40) : error C2084: function 'double &__cdecl GetAt(double *,int,int,int,int,int)' already has a body
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(41) : error C2264: 'GetLength' : error in function definition or declaration; function not called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(41) : error C2264: 'GetLength' : error in function definition or declaration; function not called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(41) : error C2264: 'GetLength' : error in function definition or declaration; function not called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\ComUtils2.h(41) : error C2264: 'GetLength' : error in function definition or declaration; function not called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(28) : error C2065: 'cirlce' : undeclared identifier
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(31) : error C2065: 'vX' : undeclared identifier
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(31) : error C2065: 'vY' : undeclared identifier
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : error C2259: 'CVComplexShape' : cannot instantiate abstract class due to following members:
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(27) : see declaration of 'CVComplexShape'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'long __stdcall CVComplexShape::QueryInterface(const struct _GUID &,void ** )' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'QueryInterface'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'unsigned long __stdcall CVComplexShape::AddRef(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'AddRef'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'unsigned long __stdcall CVComplexShape::Release(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'Release'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'long __stdcall CVComplexShape::QueryInterface(const struct _GUID &,void ** )' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'QueryInterface'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'unsigned long __stdcall CVComplexShape::AddRef(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'AddRef'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'unsigned long __stdcall CVComplexShape::Release(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'Release'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : error C2259: 'CVComplexShape' : cannot instantiate abstract class due to following members:
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(27) : see declaration of 'CVComplexShape'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'long __stdcall CVComplexShape::QueryInterface(const struct _GUID &,void ** )' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'QueryInterface'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'unsigned long __stdcall CVComplexShape::AddRef(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'AddRef'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'unsigned long __stdcall CVComplexShape::Release(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'Release'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'long __stdcall CVComplexShape::QueryInterface(const struct _GUID &,void ** )' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'QueryInterface'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'unsigned long __stdcall CVComplexShape::AddRef(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'AddRef'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : warning C4259: 'unsigned long __stdcall CVComplexShape::Release(void)' : pure virtual function was not defined
+        D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VComplexShape.h(39) : see declaration of 'Release'
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(33) : error C2679: binary '=' : no operator defined which takes a right-hand operand of type 'class CVComplexShape *' (or there is no acceptable conversion)
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(42) : error C2065: 'Stop' : undeclared identifier
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(43) : error C2065: 'vertices' : undeclared identifier
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(43) : error C2541: delete : cannot delete objects that are not pointers
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(44) : error C2451: conditional expression of type 'class CVComplexShape' is illegal
+        No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(44) : error C2440: 'delete' : cannot convert from 'class CVComplexShape' to ''
+        No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+D:\Sabes\Dropbox\2011-LabCode (1)\DisplayServer\CP_Display_ComplexShape\Current\VMotion.cpp(44) : fatal error C1903: unable to recover from previous error(s); stopping compilation
+Error executing cl.exe.
+
+
+
+<h3>Results</h3>
+VMotion.obj - 35 error(s), 18 warning(s)
+</pre>
+</body>
+</html>

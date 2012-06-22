@@ -1,0 +1,1106 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: nr - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP13.tmp" with contents
+[
+/nologo /ML /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /Fp"Release/nr.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\LAB\Source\NumRec\Nrutil.c"
+"C:\LAB\Source\NumRec\Odeint.c"
+"C:\LAB\Source\NumRec\Orthog.c"
+"C:\LAB\Source\NumRec\Pade.c"
+"C:\LAB\Source\NumRec\Pccheb.c"
+"C:\LAB\Source\NumRec\Pcshft.c"
+"C:\LAB\Source\NumRec\Pearsn.c"
+"C:\LAB\Source\NumRec\Period.c"
+"C:\LAB\Source\NumRec\Piksr2.c"
+"C:\LAB\Source\NumRec\Piksrt.c"
+"C:\LAB\Source\NumRec\Pinvs.c"
+"C:\LAB\Source\NumRec\Plgndr.c"
+"C:\LAB\Source\NumRec\Poidev.c"
+"C:\LAB\Source\NumRec\Polcoe.c"
+"C:\LAB\Source\NumRec\Polcof.c"
+"C:\LAB\Source\NumRec\Poldiv.c"
+"C:\LAB\Source\NumRec\Polin2.c"
+"C:\LAB\Source\NumRec\Polint.c"
+"C:\LAB\Source\NumRec\Powell.c"
+"C:\LAB\Source\NumRec\Predic.c"
+"C:\LAB\Source\NumRec\Probks.c"
+"C:\LAB\Source\NumRec\Psdes.c"
+"C:\LAB\Source\NumRec\Pwt.c"
+"C:\LAB\Source\NumRec\Pwtset.c"
+"C:\LAB\Source\NumRec\Pythag.c"
+"C:\LAB\Source\NumRec\Pzextr.c"
+"C:\LAB\Source\NumRec\Qgaus.c"
+"C:\LAB\Source\NumRec\Qrdcmp.c"
+"C:\LAB\Source\NumRec\Qromb.c"
+"C:\LAB\Source\NumRec\Qromo.c"
+"C:\LAB\Source\NumRec\Qroot.c"
+"C:\LAB\Source\NumRec\Qrsolv.c"
+"C:\LAB\Source\NumRec\Qrupdt.c"
+"C:\LAB\Source\NumRec\Qsimp.c"
+"C:\LAB\Source\NumRec\Qtrap.c"
+"C:\LAB\Source\NumRec\Quad3d.c"
+"C:\LAB\Source\NumRec\Quadct.c"
+"C:\LAB\Source\NumRec\Quadmx.c"
+"C:\LAB\Source\NumRec\Quadvl.c"
+"C:\LAB\Source\NumRec\Ran0.c"
+"C:\LAB\Source\NumRec\Ran1.c"
+"C:\LAB\Source\NumRec\Ran2.c"
+"C:\LAB\Source\NumRec\Ran3.c"
+"C:\LAB\Source\NumRec\Ran4.c"
+"C:\LAB\Source\NumRec\Rank.c"
+"C:\LAB\Source\NumRec\Ranpt.c"
+"C:\LAB\Source\NumRec\Ratint.c"
+"C:\LAB\Source\NumRec\Ratlsq.c"
+"C:\LAB\Source\NumRec\Ratval.c"
+"C:\LAB\Source\NumRec\Rc.c"
+"C:\LAB\Source\NumRec\Rd.c"
+"C:\LAB\Source\NumRec\Realft.c"
+"C:\LAB\Source\NumRec\Rebin.c"
+"C:\LAB\Source\NumRec\Red.c"
+"C:\LAB\Source\NumRec\Relax.c"
+"C:\LAB\Source\NumRec\Relax2.c"
+"C:\LAB\Source\NumRec\Resid.c"
+"C:\LAB\Source\NumRec\Revcst.c"
+"C:\LAB\Source\NumRec\Reverse.c"
+"C:\LAB\Source\NumRec\Rf.c"
+"C:\LAB\Source\NumRec\Rj.c"
+"C:\LAB\Source\NumRec\Rk4.c"
+"C:\LAB\Source\NumRec\Rkck.c"
+"C:\LAB\Source\NumRec\Rkdumb.c"
+"C:\LAB\Source\NumRec\Rkqs.c"
+"C:\LAB\Source\NumRec\Rlft3.c"
+"C:\LAB\Source\NumRec\Rofunc.c"
+"C:\LAB\Source\NumRec\Rotate.c"
+"C:\LAB\Source\NumRec\Rsolv.c"
+"C:\LAB\Source\NumRec\Rstrct.c"
+"C:\LAB\Source\NumRec\Rtbis.c"
+"C:\LAB\Source\NumRec\Rtflsp.c"
+"C:\LAB\Source\NumRec\Rtnewt.c"
+"C:\LAB\Source\NumRec\Rtsafe.c"
+"C:\LAB\Source\NumRec\Rtsec.c"
+"C:\LAB\Source\NumRec\Rzextr.c"
+"C:\LAB\Source\NumRec\Savgol.c"
+"C:\LAB\Source\NumRec\Scrsho.c"
+"C:\LAB\Source\NumRec\Select.c"
+"C:\LAB\Source\NumRec\Selip.c"
+"C:\LAB\Source\NumRec\Shell.c"
+"C:\LAB\Source\NumRec\Shoot.c"
+"C:\LAB\Source\NumRec\Shootf.c"
+"C:\LAB\Source\NumRec\Simp1.c"
+"C:\LAB\Source\NumRec\Simp2.c"
+"C:\LAB\Source\NumRec\Simp3.c"
+"C:\LAB\Source\NumRec\Simplx.c"
+"C:\LAB\Source\NumRec\Simpr.c"
+"C:\LAB\Source\NumRec\Sinft.c"
+"C:\LAB\Source\NumRec\Slvsm2.c"
+"C:\LAB\Source\NumRec\Slvsml.c"
+"C:\LAB\Source\NumRec\Sncndn.c"
+"C:\LAB\Source\NumRec\Snrm.c"
+"C:\LAB\Source\NumRec\Sobseq.c"
+"C:\LAB\Source\NumRec\Solvde.c"
+"C:\LAB\Source\NumRec\Sor.c"
+"C:\LAB\Source\NumRec\Sort.c"
+"C:\LAB\Source\NumRec\Sort2.c"
+"C:\LAB\Source\NumRec\Sort3.c"
+"C:\LAB\Source\NumRec\Spctrm.c"
+"C:\LAB\Source\NumRec\Spear.c"
+"C:\LAB\Source\NumRec\Sphbes.c"
+"C:\LAB\Source\NumRec\Splie2.c"
+"C:\LAB\Source\NumRec\Splin2.c"
+"C:\LAB\Source\NumRec\Spline.c"
+"C:\LAB\Source\NumRec\Splint.c"
+"C:\LAB\Source\NumRec\Spread.c"
+"C:\LAB\Source\NumRec\Sprsax.c"
+"C:\LAB\Source\NumRec\Sprsin.c"
+"C:\LAB\Source\NumRec\Sprspm.c"
+"C:\LAB\Source\NumRec\Sprstm.c"
+"C:\LAB\Source\NumRec\Sprstp.c"
+"C:\LAB\Source\NumRec\Sprstx.c"
+"C:\LAB\Source\NumRec\Stifbs.c"
+"C:\LAB\Source\NumRec\Stiff.c"
+"C:\LAB\Source\NumRec\Stoerm.c"
+"C:\LAB\Source\NumRec\Svbksb.c"
+"C:\LAB\Source\NumRec\Svdcmp.c"
+"C:\LAB\Source\NumRec\Svdfit.c"
+"C:\LAB\Source\NumRec\Svdvar.c"
+"C:\LAB\Source\NumRec\Toeplz.c"
+"C:\LAB\Source\NumRec\Tptest.c"
+"C:\LAB\Source\NumRec\Tqli.c"
+"C:\LAB\Source\NumRec\Trapzd.c"
+"C:\LAB\Source\NumRec\Tred2.c"
+"C:\LAB\Source\NumRec\Tridag.c"
+"C:\LAB\Source\NumRec\Trncst.c"
+"C:\LAB\Source\NumRec\Trnspt.c"
+"C:\LAB\Source\NumRec\Ttest.c"
+"C:\LAB\Source\NumRec\Tutest.c"
+"C:\LAB\Source\NumRec\Twofft.c"
+"C:\LAB\Source\NumRec\Vander.c"
+"C:\LAB\Source\NumRec\Vegas.c"
+"C:\LAB\Source\NumRec\Voltra.c"
+"C:\LAB\Source\NumRec\Wt1.c"
+"C:\LAB\Source\NumRec\Wtn.c"
+"C:\LAB\Source\NumRec\Wwghts.c"
+"C:\LAB\Source\NumRec\Zbrac.c"
+"C:\LAB\Source\NumRec\Zbrak.c"
+"C:\LAB\Source\NumRec\Zbrent.c"
+"C:\LAB\Source\NumRec\Zrhqr.c"
+"C:\LAB\Source\NumRec\Zriddr.c"
+"C:\LAB\Source\NumRec\Zroots.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP13.tmp" 
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP14.tmp" with contents
+[
+/nologo /out:"Release\nr.lib" 
+.\Release\Addint.obj
+.\Release\Airy.obj
+.\Release\Amebsa.obj
+.\Release\Amoeba.obj
+.\Release\Amotry.obj
+.\Release\Amotsa.obj
+.\Release\Anneal.obj
+.\Release\Anorm2.obj
+.\Release\Arcmak.obj
+.\Release\Arcode.obj
+.\Release\Arcsum.obj
+.\Release\Asolve.obj
+.\Release\Atimes.obj
+.\Release\Avevar.obj
+.\Release\Balanc.obj
+.\Release\Banbks.obj
+.\Release\Bandec.obj
+.\Release\Banmul.obj
+.\Release\Bcucof.obj
+.\Release\Bcuint.obj
+.\Release\Beschb.obj
+.\Release\Bessi.obj
+.\Release\Bessi0.obj
+.\Release\Bessi1.obj
+.\Release\Bessik.obj
+.\Release\Bessj.obj
+.\Release\Bessj0.obj
+.\Release\Bessj1.obj
+.\Release\Bessjy.obj
+.\Release\Bessk.obj
+.\Release\Bessk0.obj
+.\Release\Bessk1.obj
+.\Release\Bessy.obj
+.\Release\Bessy0.obj
+.\Release\Bessy1.obj
+.\Release\Beta.obj
+.\Release\Betacf.obj
+.\Release\Betai.obj
+.\Release\Bico.obj
+.\Release\Bksub.obj
+.\Release\Bnldev.obj
+.\Release\Brent.obj
+.\Release\Broydn.obj
+.\Release\Bsstep.obj
+.\Release\Caldat.obj
+.\Release\Chder.obj
+.\Release\Chebev.obj
+.\Release\Chebft.obj
+.\Release\Chebpc.obj
+.\Release\Chint.obj
+.\Release\Chixy.obj
+.\Release\Choldc.obj
+.\Release\Cholsl.obj
+.\Release\Chsone.obj
+.\Release\Chstwo.obj
+.\Release\Cisi.obj
+.\Release\Cntab1.obj
+.\Release\Cntab2.obj
+.\Release\Complex.obj
+.\Release\Convlv.obj
+.\Release\Copy.obj
+.\Release\Correl.obj
+.\Release\Cosft1.obj
+.\Release\Cosft2.obj
+.\Release\Covsrt.obj
+.\Release\Crank.obj
+.\Release\Cyclic.obj
+.\Release\Daub4.obj
+.\Release\Dawson.obj
+.\Release\Dbrent.obj
+.\Release\Ddpoly.obj
+.\Release\Decchk.obj
+.\Release\Df1dim.obj
+.\Release\Dfour1.obj
+.\Release\Dfpmin.obj
+.\Release\Dfridr.obj
+.\Release\Dftcor.obj
+.\Release\Dftint.obj
+.\Release\Difeq.obj
+.\Release\Dlinmin.obj
+.\Release\Dpythag.obj
+.\Release\Drealft.obj
+.\Release\Dsprsax.obj
+.\Release\Dsprstx.obj
+.\Release\Dsvbksb.obj
+.\Release\Dsvdcmp.obj
+.\Release\Eclass.obj
+.\Release\Eclazz.obj
+.\Release\Ei.obj
+.\Release\Eigsrt.obj
+.\Release\Elle.obj
+.\Release\Ellf.obj
+.\Release\Ellpi.obj
+.\Release\Elmhes.obj
+.\Release\Erfcc.obj
+.\Release\Erff.obj
+.\Release\Erffc.obj
+.\Release\Eulsum.obj
+.\Release\Evlmem.obj
+.\Release\Expdev.obj
+.\Release\Expint.obj
+.\Release\F1dim.obj
+.\Release\Factln.obj
+.\Release\Factrl.obj
+.\Release\Fasper.obj
+.\Release\Fdjac.obj
+.\Release\Fgauss.obj
+.\Release\Fill0.obj
+.\Release\Fit.obj
+.\Release\Fitexy.obj
+.\Release\Fixrts.obj
+.\Release\Fleg.obj
+.\Release\Flmoon.obj
+.\Release\Fmin.obj
+.\Release\Four1.obj
+.\Release\Fourew.obj
+.\Release\Fourfs.obj
+.\Release\Fourn.obj
+.\Release\Fpoly.obj
+.\Release\Fred2.obj
+.\Release\Fredin.obj
+.\Release\Frenel.obj
+.\Release\Frprmn.obj
+.\Release\Ftest.obj
+.\Release\Gamdev.obj
+.\Release\Gammln.obj
+.\Release\Gammp.obj
+.\Release\Gammq.obj
+.\Release\Gasdev.obj
+.\Release\Gaucof.obj
+.\Release\Gauher.obj
+.\Release\Gaujac.obj
+.\Release\Gaulag.obj
+.\Release\Gauleg.obj
+.\Release\Gaussj.obj
+.\Release\Gcf.obj
+.\Release\Golden.obj
+.\Release\Gser.obj
+.\Release\Hpsel.obj
+.\Release\Hpsort.obj
+.\Release\Hqr.obj
+.\Release\Hufapp.obj
+.\Release\Hufdec.obj
+.\Release\Hufenc.obj
+.\Release\Hufmak.obj
+.\Release\Hunt.obj
+.\Release\Hypdrv.obj
+.\Release\Hypgeo.obj
+.\Release\Hypser.obj
+.\Release\Icrc.obj
+.\Release\Icrc1.obj
+.\Release\Igray.obj
+.\Release\Iindexx.obj
+.\Release\Indexx.obj
+.\Release\Interp.obj
+.\Release\Irbit1.obj
+.\Release\Irbit2.obj
+.\Release\Jacobi.obj
+.\Release\Jacobn.obj
+.\Release\Julday.obj
+.\Release\Kendl1.obj
+.\Release\Kendl2.obj
+.\Release\Kermom.obj
+.\Release\Ks2d1s.obj
+.\Release\Ks2d2s.obj
+.\Release\Ksone.obj
+.\Release\Kstwo.obj
+.\Release\Laguer.obj
+.\Release\Lfit.obj
+.\Release\Linbcg.obj
+.\Release\Linmin.obj
+.\Release\Lnsrch.obj
+.\Release\Locate.obj
+.\Release\Lop.obj
+.\Release\Lubksb.obj
+.\Release\Ludcmp.obj
+.\Release\Machar.obj
+.\Release\Matadd.obj
+.\Release\Matsub.obj
+.\Release\Medfit.obj
+.\Release\Memcof.obj
+.\Release\Metrop.obj
+.\Release\Mgfas.obj
+.\Release\Mglin.obj
+.\Release\Midexp.obj
+.\Release\Midinf.obj
+.\Release\Midpnt.obj
+.\Release\Midsql.obj
+.\Release\Midsqu.obj
+.\Release\Miser.obj
+.\Release\Mmid.obj
+.\Release\Mnbrak.obj
+.\Release\Mnewt.obj
+.\Release\Moment.obj
+.\Release\Mp2dfr.obj
+.\Release\Mpdiv.obj
+.\Release\Mpinv.obj
+.\Release\Mpmul.obj
+.\Release\Mpops.obj
+.\Release\Mppi.obj
+.\Release\Mprove.obj
+.\Release\Mpsqrt.obj
+.\Release\Mrqcof.obj
+.\Release\Mrqmin.obj
+.\Release\MyStuff.obj
+.\Release\Newt.obj
+.\Release\Nrutil.obj
+.\Release\Odeint.obj
+.\Release\Orthog.obj
+.\Release\Pade.obj
+.\Release\Pccheb.obj
+.\Release\Pcshft.obj
+.\Release\Pearsn.obj
+.\Release\Period.obj
+.\Release\Piksr2.obj
+.\Release\Piksrt.obj
+.\Release\Pinvs.obj
+.\Release\Plgndr.obj
+.\Release\Poidev.obj
+.\Release\Polcoe.obj
+.\Release\Polcof.obj
+.\Release\Poldiv.obj
+.\Release\Polin2.obj
+.\Release\Polint.obj
+.\Release\Powell.obj
+.\Release\Predic.obj
+.\Release\Probks.obj
+.\Release\Psdes.obj
+.\Release\Pwt.obj
+.\Release\Pwtset.obj
+.\Release\Pythag.obj
+.\Release\Pzextr.obj
+.\Release\Qgaus.obj
+.\Release\Qrdcmp.obj
+.\Release\Qromb.obj
+.\Release\Qromo.obj
+.\Release\Qroot.obj
+.\Release\Qrsolv.obj
+.\Release\Qrupdt.obj
+.\Release\Qsimp.obj
+.\Release\Qtrap.obj
+.\Release\Quad3d.obj
+.\Release\Quadct.obj
+.\Release\Quadmx.obj
+.\Release\Quadvl.obj
+.\Release\Ran0.obj
+.\Release\Ran1.obj
+.\Release\Ran2.obj
+.\Release\Ran3.obj
+.\Release\Ran4.obj
+.\Release\Rank.obj
+.\Release\Ranpt.obj
+.\Release\Ratint.obj
+.\Release\Ratlsq.obj
+.\Release\Ratval.obj
+.\Release\Rc.obj
+.\Release\Rd.obj
+.\Release\Realft.obj
+.\Release\Rebin.obj
+.\Release\Red.obj
+.\Release\Relax.obj
+.\Release\Relax2.obj
+.\Release\Resid.obj
+.\Release\Revcst.obj
+.\Release\Reverse.obj
+.\Release\Rf.obj
+.\Release\Rj.obj
+.\Release\Rk4.obj
+.\Release\Rkck.obj
+.\Release\Rkdumb.obj
+.\Release\Rkqs.obj
+.\Release\Rlft3.obj
+.\Release\Rofunc.obj
+.\Release\Rotate.obj
+.\Release\Rsolv.obj
+.\Release\Rstrct.obj
+.\Release\Rtbis.obj
+.\Release\Rtflsp.obj
+.\Release\Rtnewt.obj
+.\Release\Rtsafe.obj
+.\Release\Rtsec.obj
+.\Release\Rzextr.obj
+.\Release\Savgol.obj
+.\Release\Scrsho.obj
+.\Release\Select.obj
+.\Release\Selip.obj
+.\Release\Shell.obj
+.\Release\Shoot.obj
+.\Release\Shootf.obj
+.\Release\Simp1.obj
+.\Release\Simp2.obj
+.\Release\Simp3.obj
+.\Release\Simplx.obj
+.\Release\Simpr.obj
+.\Release\Sinft.obj
+.\Release\Slvsm2.obj
+.\Release\Slvsml.obj
+.\Release\Sncndn.obj
+.\Release\Snrm.obj
+.\Release\Sobseq.obj
+.\Release\Solvde.obj
+.\Release\Sor.obj
+.\Release\Sort.obj
+.\Release\Sort2.obj
+.\Release\Sort3.obj
+.\Release\Spctrm.obj
+.\Release\Spear.obj
+.\Release\Sphbes.obj
+.\Release\Splie2.obj
+.\Release\Splin2.obj
+.\Release\Spline.obj
+.\Release\Splint.obj
+.\Release\Spread.obj
+.\Release\Sprsax.obj
+.\Release\Sprsin.obj
+.\Release\Sprspm.obj
+.\Release\Sprstm.obj
+.\Release\Sprstp.obj
+.\Release\Sprstx.obj
+.\Release\Stifbs.obj
+.\Release\Stiff.obj
+.\Release\Stoerm.obj
+.\Release\Svbksb.obj
+.\Release\Svdcmp.obj
+.\Release\Svdfit.obj
+.\Release\Svdvar.obj
+.\Release\Toeplz.obj
+.\Release\Tptest.obj
+.\Release\Tqli.obj
+.\Release\Trapzd.obj
+.\Release\Tred2.obj
+.\Release\Tridag.obj
+.\Release\Trncst.obj
+.\Release\Trnspt.obj
+.\Release\Ttest.obj
+.\Release\Tutest.obj
+.\Release\Twofft.obj
+.\Release\Vander.obj
+.\Release\Vegas.obj
+.\Release\Voltra.obj
+.\Release\Wt1.obj
+.\Release\Wtn.obj
+.\Release\Wwghts.obj
+.\Release\Zbrac.obj
+.\Release\Zbrak.obj
+.\Release\Zbrent.obj
+.\Release\Zrhqr.obj
+.\Release\Zriddr.obj
+.\Release\Zroots.obj
+]
+Creating command line "link.exe -lib @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP14.tmp"
+<h3>Output Window</h3>
+Compiling...
+Nrutil.c
+Odeint.c
+C:\LAB\Source\NumRec\Odeint.c(24) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Odeint.c(27) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Odeint.c(31) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Orthog.c
+Pade.c
+C:\LAB\Source\NumRec\Pade.c(22) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pade.c(24) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pade.c(30) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pade.c(36) : warning C4244: '+=' : conversion from 'const double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pade.c(39) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pade.c(41) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pade.c(41) : warning C4244: '-=' : conversion from 'double ' to 'float ', possible loss of data
+Pccheb.c
+C:\LAB\Source\NumRec\Pccheb.c(7) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Pcshft.c
+C:\LAB\Source\NumRec\Pcshft.c(6) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pcshft.c(12) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Pearsn.c
+C:\LAB\Source\NumRec\Pearsn.c(26) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pearsn.c(27) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pearsn.c(28) : warning C4244: '=' : conversion from 'unsigned long ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pearsn.c(29) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pearsn.c(30) : warning C4244: 'function' : conversion from 'double ' to 'float ', possible loss of data
+Period.c
+C:\LAB\Source\NumRec\Period.c(19) : warning C4244: '=' : conversion from 'double ' to 'int ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(28) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(30) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(33) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(42) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(43) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(47) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(48) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(49) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(52) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(53) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(64) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(66) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(68) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(69) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Period.c(71) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Piksr2.c
+Piksrt.c
+Pinvs.c
+C:\LAB\Source\NumRec\Pinvs.c(18) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pinvs.c(20) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pinvs.c(31) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pinvs.c(43) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Plgndr.c
+C:\LAB\Source\NumRec\Plgndr.c(13) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Poidev.c
+C:\LAB\Source\NumRec\Poidev.c(14) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Poidev.c(25) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Poidev.c(26) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Poidev.c(27) : warning C4244: 'function' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Poidev.c(31) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Poidev.c(34) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Poidev.c(35) : warning C4244: 'function' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Poidev.c(35) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Polcoe.c
+C:\LAB\Source\NumRec\Polcoe.c(18) : warning C4244: '=' : conversion from 'int ' to 'float ', possible loss of data
+Polcof.c
+C:\LAB\Source\NumRec\Polcof.c(19) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Polcof.c(23) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Poldiv.c
+Polin2.c
+Polint.c
+C:\LAB\Source\NumRec\Polint.c(11) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Polint.c(15) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Powell.c
+C:\LAB\Source\NumRec\Powell.c(28) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Powell.c(40) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Powell.c(46) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Predic.c
+Probks.c
+C:\LAB\Source\NumRec\Probks.c(10) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Probks.c(12) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Probks.c(16) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Psdes.c
+Pwt.c
+C:\LAB\Source\NumRec\Pwt.c(26) : warning C4018: '<=' : signed/unsigned mismatch
+C:\LAB\Source\NumRec\Pwt.c(39) : warning C4018: '<=' : signed/unsigned mismatch
+Pwtset.c
+C:\LAB\Source\NumRec\Pwtset.c(13) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(13) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(14) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(14) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(15) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(15) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(15) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(16) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(16) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(16) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(17) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(17) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(17) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(18) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(18) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(18) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(19) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(19) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(19) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(20) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(20) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(20) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(21) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(21) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(21) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(22) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(22) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(22) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(23) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(23) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(23) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(24) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(24) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(24) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(25) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Pwtset.c(25) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+Pythag.c
+C:\LAB\Source\NumRec\Pythag.c(8) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pythag.c(9) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pythag.c(10) : warning C4244: 'return' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Pythag.c(11) : warning C4244: 'return' : conversion from 'const double ' to 'float ', possible loss of data
+Pzextr.c
+C:\LAB\Source\NumRec\Pzextr.c(19) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Qgaus.c
+C:\LAB\Source\NumRec\Qgaus.c(5) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Qgaus.c(5) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Qgaus.c(6) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Qgaus.c(6) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Qgaus.c(6) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Qgaus.c(7) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Qgaus.c(7) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Qgaus.c(8) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Qgaus.c(8) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Qgaus.c(8) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Qgaus.c(10) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Qgaus.c(11) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Qrdcmp.c
+C:\LAB\Source\NumRec\Qrdcmp.c(12) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Qrdcmp.c(18) : warning C4244: '+=' : conversion from 'const double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Qrdcmp.c(19) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Qromb.c
+C:\LAB\Source\NumRec\Qromb.c(24) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Qromo.c
+C:\LAB\Source\NumRec\Qromo.c(23) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Qroot.c
+C:\LAB\Source\NumRec\Qroot.c(28) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Qrsolv.c
+Qrupdt.c
+C:\LAB\Source\NumRec\Qrupdt.c(16) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Qrupdt.c(18) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Qrupdt.c(19) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Qsimp.c
+C:\LAB\Source\NumRec\Qsimp.c(12) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Qsimp.c(15) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Qtrap.c
+C:\LAB\Source\NumRec\Qtrap.c(12) : warning C4305: '=' : truncation from 'const double ' to 'float '
+Quad3d.c
+Quadct.c
+C:\LAB\Source\NumRec\Quadct.c(14) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Quadmx.c
+C:\LAB\Source\NumRec\Quadmx.c(17) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Quadmx.c(21) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Quadmx.c(22) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Quadvl.c
+C:\LAB\Source\NumRec\Quadvl.c(8) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Quadvl.c(9) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Quadvl.c(10) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Quadvl.c(11) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Quadvl.c(12) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Quadvl.c(13) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Quadvl.c(14) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Quadvl.c(15) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Ran0.c
+C:\LAB\Source\NumRec\Ran0.c(17) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Ran1.c
+C:\LAB\Source\NumRec\Ran1.c(36) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Ran1.c(36) : warning C4305: 'return' : truncation from 'const double ' to 'float '
+Ran2.c
+C:\LAB\Source\NumRec\Ran2.c(47) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Ran2.c(47) : warning C4305: 'return' : truncation from 'const double ' to 'float '
+Ran3.c
+C:\LAB\Source\NumRec\Ran3.c(41) : warning C4244: 'return' : conversion from 'double ' to 'float ', possible loss of data
+Ran4.c
+C:\LAB\Source\NumRec\Ran4.c(23) : warning C4244: 'return' : conversion from 'double ' to 'float ', possible loss of data
+Rank.c
+Ranpt.c
+Ratint.c
+C:\LAB\Source\NumRec\Ratint.c(14) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Ratint.c(16) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Ratint.c(26) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Ratlsq.c
+Ratval.c
+Rc.c
+C:\LAB\Source\NumRec\Rc.c(30) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rc.c(33) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rc.c(34) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rc.c(35) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rc.c(36) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rc.c(39) : warning C4244: 'return' : conversion from 'double ' to 'float ', possible loss of data
+Rd.c
+C:\LAB\Source\NumRec\Rd.c(27) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(28) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(29) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(32) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(33) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(34) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(35) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(36) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(40) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(40) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(40) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(44) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rd.c(47) : warning C4244: 'return' : conversion from 'double ' to 'float ', possible loss of data
+Realft.c
+C:\LAB\Source\NumRec\Realft.c(30) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Realft.c(31) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Realft.c(32) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Realft.c(33) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Rebin.c
+Red.c
+Relax.c
+Relax2.c
+Resid.c
+Revcst.c
+C:\LAB\Source\NumRec\Revcst.c(16) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Revcst.c(17) : warning C4244: '-=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Revcst.c(18) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Revcst.c(19) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+Reverse.c
+Rf.c
+C:\LAB\Source\NumRec\Rf.c(24) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rf.c(25) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rf.c(26) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rf.c(28) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rf.c(29) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rf.c(30) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rf.c(31) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rf.c(35) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rf.c(35) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rf.c(35) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rf.c(38) : warning C4244: 'return' : conversion from 'double ' to 'float ', possible loss of data
+Rj.c
+C:\LAB\Source\NumRec\Rj.c(23) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(24) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(37) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(45) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(46) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(47) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(49) : warning C4244: '=' : conversion from 'const double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(50) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(52) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(53) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(54) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(55) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(56) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(57) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(63) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(63) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(63) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(63) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(67) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(68) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(70) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rj.c(71) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Rk4.c
+C:\LAB\Source\NumRec\Rk4.c(13) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rk4.c(14) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rk4.c(26) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Rkck.c
+C:\LAB\Source\NumRec\Rkck.c(8) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(8) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(8) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(8) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(9) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(9) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(9) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(9) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(9) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(10) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(10) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(10) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(11) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(11) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(12) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(12) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(13) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(13) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(13) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(14) : warning C4305: 'initializing' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkck.c(15) : warning C4244: 'initializing' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rkck.c(15) : warning C4244: 'initializing' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rkck.c(16) : warning C4244: 'initializing' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rkck.c(16) : warning C4244: 'initializing' : conversion from 'double ' to 'float ', possible loss of data
+Rkdumb.c
+Rkqs.c
+C:\LAB\Source\NumRec\Rkqs.c(24) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rkqs.c(27) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rkqs.c(28) : warning C4305: '*=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Rkqs.c(33) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rkqs.c(34) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Rlft3.c
+C:\LAB\Source\NumRec\Rlft3.c(12) : warning C4018: '!=' : signed/unsigned mismatch
+C:\LAB\Source\NumRec\Rlft3.c(15) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rlft3.c(54) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rlft3.c(55) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rlft3.c(56) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rlft3.c(57) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Rofunc.c
+C:\LAB\Source\NumRec\Rofunc.c(22) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rofunc.c(27) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rofunc.c(28) : warning C4244: '/=' : conversion from 'double ' to 'float ', possible loss of data
+Rotate.c
+C:\LAB\Source\NumRec\Rotate.c(12) : warning C4244: '=' : conversion from 'const double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rotate.c(15) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rotate.c(19) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Rsolv.c
+Rstrct.c
+Rtbis.c
+Rtflsp.c
+Rtnewt.c
+C:\LAB\Source\NumRec\Rtnewt.c(11) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Rtsafe.c
+C:\LAB\Source\NumRec\Rtsafe.c(25) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rtsafe.c(26) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Rtsafe.c(33) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Rtsec.c
+Rzextr.c
+Savgol.c
+C:\LAB\Source\NumRec\Savgol.c(18) : warning C4244: '=' : conversion from 'const double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Savgol.c(19) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Savgol.c(20) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Savgol.c(21) : warning C4244: '=' : conversion from 'int ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Savgol.c(21) : warning C4244: '=' : conversion from 'int ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Savgol.c(21) : warning C4244: '=' : conversion from 'float ' to 'int ', possible loss of data
+Scrsho.c
+C:\LAB\Source\NumRec\Scrsho.c(36) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Select.c
+Selip.c
+C:\LAB\Source\NumRec\Selip.c(17) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Selip.c(18) : warning C4305: '=' : truncation from 'const double ' to 'float '
+Shell.c
+Shoot.c
+C:\LAB\Source\NumRec\Shoot.c(29) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Shoot.c(31) : warning C4305: 'function' : truncation from 'const double ' to 'float '
+Shootf.c
+C:\LAB\Source\NumRec\Shootf.c(32) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Shootf.c(34) : warning C4305: 'function' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Shootf.c(37) : warning C4305: 'function' : truncation from 'const double ' to 'float '
+Simp1.c
+C:\LAB\Source\NumRec\Simp1.c(15) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Simp2.c
+Simp3.c
+C:\LAB\Source\NumRec\Simp3.c(6) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Simplx.c
+Simpr.c
+C:\LAB\Source\NumRec\Simpr.c(35) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+Sinft.c
+C:\LAB\Source\NumRec\Sinft.c(18) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sinft.c(19) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Slvsm2.c
+Slvsml.c
+Sncndn.c
+C:\LAB\Source\NumRec\Sncndn.c(15) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sncndn.c(16) : warning C4244: '/=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sncndn.c(17) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sncndn.c(24) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sncndn.c(25) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sncndn.c(31) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sncndn.c(32) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sncndn.c(43) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sncndn.c(54) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sncndn.c(56) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Snrm.c
+Sobseq.c
+C:\LAB\Source\NumRec\Sobseq.c(20) : warning C4018: '<=' : signed/unsigned mismatch
+Solvde.c
+C:\LAB\Source\NumRec\Solvde.c(61) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Solvde.c(73) : warning C4244: '=' : conversion from 'const double ' to 'float ', possible loss of data
+Sor.c
+Sort.c
+Sort2.c
+Sort3.c
+Spctrm.c
+C:\LAB\Source\NumRec\Spctrm.c(18) : warning C4244: '=' : conversion from 'int ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spctrm.c(19) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spctrm.c(20) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spctrm.c(20) : warning C4244: '+=' : conversion from 'const double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spctrm.c(38) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spctrm.c(43) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spctrm.c(47) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+Spear.c
+C:\LAB\Source\NumRec\Spear.c(27) : warning C4244: '+=' : conversion from 'const double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(28) : warning C4244: '=' : conversion from 'unsigned long ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(30) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(31) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(32) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(32) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(33) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(34) : warning C4244: 'function' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(35) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(36) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(38) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(39) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spear.c(40) : warning C4244: 'function' : conversion from 'double ' to 'float ', possible loss of data
+Sphbes.c
+C:\LAB\Source\NumRec\Sphbes.c(12) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sphbes.c(14) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sphbes.c(17) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Sphbes.c(18) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Splie2.c
+C:\LAB\Source\NumRec\Splie2.c(7) : warning C4305: 'function' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Splie2.c(7) : warning C4305: 'function' : truncation from 'const double ' to 'float '
+Splin2.c
+C:\LAB\Source\NumRec\Splin2.c(16) : warning C4305: 'function' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Splin2.c(16) : warning C4305: 'function' : truncation from 'const double ' to 'float '
+Spline.c
+C:\LAB\Source\NumRec\Spline.c(14) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spline.c(18) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spline.c(19) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spline.c(21) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spline.c(27) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Spline.c(29) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Splint.c
+C:\LAB\Source\NumRec\Splint.c(18) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Spread.c
+Sprsax.c
+Sprsin.c
+Sprspm.c
+Sprstm.c
+Sprstp.c
+Sprstx.c
+Stifbs.c
+C:\LAB\Source\NumRec\Stifbs.c(44) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Stifbs.c(45) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stifbs.c(46) : warning C4244: '=' : conversion from 'int ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stifbs.c(51) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stifbs.c(74) : warning C4244: '=' : conversion from 'const double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stifbs.c(77) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Stifbs.c(78) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stifbs.c(81) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stifbs.c(89) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stifbs.c(93) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stifbs.c(97) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stifbs.c(107) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Stifbs.c(108) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Stifbs.c(115) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Stifbs.c(117) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Stifbs.c(127) : warning C4305: '=' : truncation from 'const double ' to 'float '
+Stiff.c
+C:\LAB\Source\NumRec\Stiff.c(68) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(72) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(75) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(76) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(79) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(82) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(83) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(86) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(89) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(92) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(93) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(98) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(102) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(105) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Stiff.c(106) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Stoerm.c
+C:\LAB\Source\NumRec\Stoerm.c(12) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Svbksb.c
+Svdcmp.c
+C:\LAB\Source\NumRec\Svdcmp.c(18) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Svdcmp.c(25) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Svdcmp.c(39) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Svdcmp.c(46) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Svdcmp.c(57) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Svdcmp.c(80) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Svdcmp.c(111) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Svdcmp.c(136) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Svdcmp.c(138) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Svdcmp.c(163) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Svdfit.c
+C:\LAB\Source\NumRec\Svdfit.c(19) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Svdfit.c(27) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Svdvar.c
+C:\LAB\Source\NumRec\Svdvar.c(12) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Toeplz.c
+Tptest.c
+C:\LAB\Source\NumRec\Tptest.c(15) : warning C4244: '=' : conversion from 'unsigned long ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Tptest.c(16) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Tptest.c(18) : warning C4244: 'function' : conversion from 'double ' to 'float ', possible loss of data
+Tqli.c
+C:\LAB\Source\NumRec\Tqli.c(17) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Tqli.c(22) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Tqli.c(24) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Tqli.c(39) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Trapzd.c
+C:\LAB\Source\NumRec\Trapzd.c(10) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Trapzd.c(13) : warning C4244: '=' : conversion from 'int ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Trapzd.c(15) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Trapzd.c(17) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Tred2.c
+C:\LAB\Source\NumRec\Tred2.c(13) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Tred2.c(22) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Tridag.c
+Trncst.c
+C:\LAB\Source\NumRec\Trncst.c(17) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Trncst.c(18) : warning C4244: '-=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Trncst.c(19) : warning C4244: '-=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Trncst.c(20) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Trncst.c(21) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Trncst.c(22) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+Trnspt.c
+Ttest.c
+C:\LAB\Source\NumRec\Ttest.c(12) : warning C4244: '=' : conversion from 'unsigned long ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Ttest.c(14) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Ttest.c(15) : warning C4244: 'function' : conversion from 'double ' to 'float ', possible loss of data
+Tutest.c
+C:\LAB\Source\NumRec\Tutest.c(14) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Tutest.c(15) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Tutest.c(16) : warning C4244: 'function' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Tutest.c(16) : warning C4244: 'function' : conversion from 'double ' to 'float ', possible loss of data
+Twofft.c
+C:\LAB\Source\NumRec\Twofft.c(17) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Twofft.c(18) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Twofft.c(19) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Twofft.c(20) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Vander.c
+Vegas.c
+C:\LAB\Source\NumRec\Vegas.c(44) : warning C4244: '=' : conversion from 'int ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(45) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(47) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(48) : warning C4244: '=' : conversion from 'int ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(50) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(83) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(104) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(106) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Vegas.c(119) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(123) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(124) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(126) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(127) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(149) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(155) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(158) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Vegas.c(164) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Vegas.c(166) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Voltra.c
+C:\LAB\Source\NumRec\Voltra.c(22) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Voltra.c(25) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Wt1.c
+Wtn.c
+Wwghts.c
+C:\LAB\Source\NumRec\Wwghts.c(24) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Wwghts.c(28) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Wwghts.c(32) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Wwghts.c(36) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Wwghts.c(44) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Wwghts.c(45) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Wwghts.c(46) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Wwghts.c(49) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Wwghts.c(49) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Zbrac.c
+C:\LAB\Source\NumRec\Zbrac.c(17) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zbrac.c(19) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+Zbrak.c
+Zbrent.c
+C:\LAB\Source\NumRec\Zbrent.c(30) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zbrent.c(31) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zbrent.c(36) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zbrent.c(37) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zbrent.c(41) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zbrent.c(42) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zbrent.c(45) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zbrent.c(46) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zbrent.c(47) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zbrent.c(64) : warning C4244: '+=' : conversion from 'double ' to 'float ', possible loss of data
+Zrhqr.c
+Zriddr.c
+C:\LAB\Source\NumRec\Zriddr.c(17) : warning C4305: '=' : truncation from 'const double ' to 'float '
+C:\LAB\Source\NumRec\Zriddr.c(19) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zriddr.c(21) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+C:\LAB\Source\NumRec\Zriddr.c(23) : warning C4244: '=' : conversion from 'double ' to 'float ', possible loss of data
+Zroots.c
+Creating library...
+
+
+
+<h3>Results</h3>
+nr.lib - 0 error(s), 442 warning(s)
+</pre>
+</body>
+</html>

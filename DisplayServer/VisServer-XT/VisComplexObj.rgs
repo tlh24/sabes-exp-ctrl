@@ -1,0 +1,24 @@
+HKCR
+{
+	VisServer.VisComplexObj.1 = s 'VisComplexObj Class'
+	{
+		CLSID = s '{3049F781-8263-41E2-86FA-4D69CA9983F5}'
+	}
+	VisServer.VisComplexObj = s 'VisComplexObj Class'
+	{
+		CLSID = s '{3049F781-8263-41E2-86FA-4D69CA9983F5}'
+		CurVer = s 'VisServer.VisComplexObj.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {3049F781-8263-41E2-86FA-4D69CA9983F5} = s 'VisComplexObj Class'
+		{
+			ProgID = s 'VisServer.VisComplexObj.1'
+			VersionIndependentProgID = s 'VisServer.VisComplexObj'
+			ForceRemove 'Programmable'
+			LocalServer32 = s '%MODULE%'
+			val AppID = s '{550FD218-E639-41C8-A1DC-11C873341AC1}'
+			'TypeLib' = s '{28FEF39F-E9E6-4C49-9C0A-ABF568D1B70C}'
+		}
+	}
+}

@@ -1,0 +1,46 @@
+BUGS:
+-- Remove method ResetDataBuffer() it is equiv to ResetBuffer()
+-- lngBufferSize returns 0, when acquisition is not running. Should return ISCAN_BUFFER_SIZE
+
+TODO:
+-- Convert this file to HTML and put on the web page
+
+-- ? Add error counter to the main window, remove error message
+
+-- ? Add sync indicator to the main window, remove the message
+
+-- Add log messages to paramter set/read functions
+
+-- Find and fix the bug: sometimes the Paint message is not processed/issued, 
+   so the background is gray, not black
+
+-- Figure out how EyeStop.m and EyeBuffer.m are being used, they seem to be redundant  
+    
+
+    
+DONE:
+-- Rewrite EyeCalibration scripts to use CP_EyeTrack
+-- Implement CSerialThread methods:
+    int SetBaudRate( int iRate ); - check for the valid rate from the list
+    int GetBaudRate( int * ptRate );
+-- implement property lngBaudRate 
+-- Add Calibration calculation using CalibrationMatrix
+-- implement property lngBufferSize
+-- implement property saCalibrationMatrix
+-- implement flag blnCalibrated
+-- Add method ResetDataBuffer
+-- Change COM method GetLatestRawData to GetLatestData using SAFEARRAY(0:4)
+   keep GetLatestRawData method in the internal class 
+-- Implement get data buffer
+-- Implement get latest index
+-- For drawing add global function to get pupil coordinates (0-1 range)
+-- Draw Eye Position cursor on the screen
+-- Implement    int SetComPort( int iPortIdx);
+-- Implement    int GetComPort( int piPortIdx );
+
+
+Low priority:
+-- Implement CSerialThread method:  int SetComParity( int iParity );
+-- Implement CSerialThread method:  int GetComParity( int * piParity );
+-- implement property in DCOM object:  lngComParity
+

@@ -1,0 +1,23 @@
+HKCR
+{
+	CP_Display.VPolygon.1 = s 'VPolygon Class'
+	{
+		CLSID = s '{EBD33098-CEB1-11D5-9C3E-0050DA2A68C8}'
+	}
+	CP_Display.VPolygon = s 'VPolygon Class'
+	{
+		CLSID = s '{EBD33098-CEB1-11D5-9C3E-0050DA2A68C8}'
+		CurVer = s 'CP_Display.VPolygon.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {EBD33098-CEB1-11D5-9C3E-0050DA2A68C8} = s 'VPolygon Class'
+		{
+			ProgID = s 'CP_Display.VPolygon.1'
+			VersionIndependentProgID = s 'CP_Display.VPolygon'
+			ForceRemove 'Programmable'
+			LocalServer32 = s '%MODULE%'
+			val AppID = s '{EBD33080-CEB1-11D5-9C3E-0050DA2A68C8}'
+		}
+	}
+}

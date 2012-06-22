@@ -1,0 +1,25 @@
+srvname = 'CP_EyeTrack.Application'
+
+hITrack=actxserver(srvname);
+
+[ dCoe ] = hITrack.SetTransformMatrix(TstCalibMtx);
+
+hITrack.ConnectTracker();
+pause(0.1)
+
+for( i=1:100 )
+  [iIdx dTime dData] = hITrack.GetDataLatest; 
+  
+%   [iIdx dData] = invoke( hITrack, 'GetDataLatest', 1 ); 
+  if rem(i,10) == 0
+    fprintf('%d \t%d \t%g \t%g \t%g \n', ...
+             i, iIdx, dTime(1), dData(1), dData(2));
+  end
+  pause(0.05);
+end
+% hITrack.DisconnectTracker();
+
+% delete(hITrack)
+
+
+

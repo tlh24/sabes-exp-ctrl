@@ -1,0 +1,27 @@
+function SensIntReaching_updateParamSettings(pstruct)
+%
+%
+%
+%
+%  MF May 30, 2008.
+%
+
+global Params
+
+if ~isfield(pstruct,'Settings')
+    error('%s: No ''Settings'' field found');
+end
+
+pcell = pstruct.Settings;
+for i = 1:length(pcell)
+    try
+       eval(pcell{i}); 
+    catch
+        fprintf('\n%s: Couldn''t evaluate:\n\t"%s".\nSkipping.\n
+        
+    end
+
+    
+end
+
+return

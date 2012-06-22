@@ -1,0 +1,11 @@
+srvname = 'CP_OptoTrack.Application';
+hTracker=actxserver(srvname);
+
+SensorsOn = int32([ 1 2 3       % Sensor
+                    1 1 1
+                    1 2 3 ]);   % Marker
+hTracker.SetSensors(SensorsOn);
+
+
+% delete(hTracker);
+% clear functions;

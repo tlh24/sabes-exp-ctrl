@@ -1,0 +1,55 @@
+# Microsoft Developer Studio Generated Dependency File, included by CP_PO_Track.mak
+
+.\ClassFactory.cpp : \
+	".\ClassFactory.h"\
+	".\cp_po_class.h"\
+	".\CP_PO_TrackCom.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\CP_PO_Class.cpp : \
+	".\cp_po_class.h"\
+	".\CP_PO_TrackCom.h"\
+	".\PO_Track.h"\
+	".\SerialThread.h"\
+	".\SlideBuf.h"\
+	".\TimeStamp.h"\
+	".\Util\CP_printf.h"\
+	".\Util\tserial.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\CP_PO_Track.cpp : \
+	".\PO_TrackGlob.h"\
+	".\Util\CP_printf.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\PO_Track.cpp : \
+	".\PO_Track.h"\
+	".\PO_TrackGlob.h"\
+	".\SerialThread.h"\
+	".\SlideBuf.h"\
+	".\TimeStamp.h"\
+	".\Util\CP_printf.h"\
+	".\Util\tserial.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\PO_TrackGlob.cpp : \
+	".\ClassFactory.h"\
+	".\CP_PO_TrackCom.h"\
+	".\PO_Track.h"\
+	".\PO_TrackGlob.h"\
+	".\RegisterCom.h"\
+	".\SerialThread.h"\
+	".\SlideBuf.h"\
+	".\TimeStamp.h"\
+	".\Util\tserial.h"\
+	"c:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+.\CP_PO_Track.rc : \
+	".\CP_PO_Track.ico"\
+	".\Debug\CP_PO_TrackCom.tlb"\
+	

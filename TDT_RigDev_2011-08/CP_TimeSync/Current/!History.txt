@@ -1,0 +1,52 @@
+CP_TimeSync history
+
+
+Ver 0.01 2008-07-08
+  - Added ConnectRX5() method, we want to use RX5-2 in TimeSync
+
+Ver 1.00 2011-08-15
+  - Added a compile-time option to run with OpenDev / OpenWorkbench
+
+Ver 1.01 2011-08-16
+  - Made option to run with OpenDev / OpenWorkbench runtime
+    RPcoX / TDevAccX clients are new created when the Connect call is 
+    made (see point 1 below).
+
+  Changes from ActiveX-only Version:
+  
+1. Connection determines run-mode:  
+   Which mode you run in is determined by how you connect.
+   If you use "ConnectRX5" or "ConnectRP2", you will be 'ActiveX' mode,
+   and the code should run just as in Ver 0.01.
+   If you use "ConnectServer", which requires an argument giving the servers' 
+   name, then you will be in 'OpenDev' mode.
+
+2. For OpenDev: Run/Halt put the Devices/Workbench into Record/Ilde states, respectively
+
+3. Two commands are device-specific with OpenDev:
+   GetStatus(long *) should be replaced with GetDeviceStatus(BSTR deviceName, long *) and GetSysMode(long *)
+   GetSFreq(float *) should be replaced with GetDeviceSFreq(BSTR deviceName, float *)
+   Here, deviceName is the string used for the device in OpenWorkbench
+   
+4. Several other functions not defined for OpenDev mode:
+
+    HRESULT ClearCOF([out, retval] long * piResult );
+
+    HRESULT LoadCOF([in] BSTR bstFileName,
+                    [out, retval] long * piResult );
+
+    HRESULT ReadCOF([in] BSTR bstFileName,
+                    [out, retval] long * piResult );
+
+    HRESULT SoftTrg([in] long iBitIdx,
+                    [out, retval] long * piResult );
+
+    HRESULT ReadTagVEX( [in]  BSTR bstTag, 
+                        [in] long iStartIdx, 
+                        [in] long nItems, 
+                        [in] BSTR bstSrcType, 
+                        [in] BSTR bstDstType, 
+                        [in] long nChans, 
+                        [out, retval] VARIANT * pvArray );
+  
+

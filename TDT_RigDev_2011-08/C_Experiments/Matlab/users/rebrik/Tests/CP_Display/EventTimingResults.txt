@@ -1,0 +1,10 @@
+100 on and 100 off events
+
+On delay: 42.8372
+On delay std: 0.0507269
+Min On delay: 42.7166
+Max On delay: 42.9384
+Off delay: 43.2682
+Off delay std: 0.0512668
+Min Off delay: 43.1709
+Max Off delay: 43.3652

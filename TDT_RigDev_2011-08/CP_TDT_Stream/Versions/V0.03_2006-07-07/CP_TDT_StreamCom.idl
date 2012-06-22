@@ -1,0 +1,118 @@
+// CP_TDT_Stream.idl : IDL source for CP_TDT_Stream.exe
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (CP_TDT_Stream.tlb) and marshalling code.
+
+import "oaidl.idl";
+//import "ocidl.idl";
+
+
+//------------------------------------------------------------
+// ITDT_Stream interface
+
+	[
+		object,  // tells MIDL to produce COM, not RPC interface
+		uuid(ebd33040-ceb1-11d5-9c3e-0050da2a68c8),
+		dual,
+    oleautomation,
+		helpstring("ITDT_Stream Interface"),
+ 		pointer_default(unique)
+	]                                  
+	interface ITDT_Stream  : IDispatch {
+
+    [id(1), helpstring("Connects to TDT server")] 
+      HRESULT ConnectTDT_Server( );
+
+    [id(2), helpstring("Disconnects from TDT server")] 
+      HRESULT DisconnectTDT_Server();
+
+		[propput, id(3), helpstring("TDT server name, typically <Local>")] 
+      HRESULT strServerName([in] BSTR newVal);
+		[propget, id(3), helpstring("TDT server name, typically <Local>")] 
+      HRESULT strServerName([out, retval] BSTR *pVal);
+
+		[propput, id(4), helpstring("TDT device name")] 
+      HRESULT strDeviceName([in] BSTR newVal);
+		[propget, id(4), helpstring("TDT device name")] 
+      HRESULT strDeviceName([out, retval] BSTR *pVal);
+
+    [propget, id(5), helpstring("Gets OpenWorkbench state (see TDT help for details)")] 
+       HRESULT lngSystemMode([out, retval] long * pVal);
+
+		[propget, id(6), helpstring("Data file name, path not included")] 
+      HRESULT strFileName([out, retval] BSTR *pVal);
+		[propput, id(6), helpstring("Data file name, path not included")] 
+      HRESULT strFileName([in] BSTR newVal);
+
+		[propget, id(7), helpstring("SerialStore Block Size")] 
+      HRESULT lngBlockSize([out, retval] long *pVal);
+ 		[propput, id(7), helpstring("SerialStore Block Size")] 
+      HRESULT lngBlockSize([in] long newVal);
+
+ 		[id(8), helpstring("ARMED state: waiting for RECORD mode on TDT device")] 
+       HRESULT SetArmedState( );
+
+		[id(9), helpstring("Puts stream into IDLE state")] 
+      HRESULT SetIdleState( );
+
+		[propget, id(10), helpstring("Gets state: 1 - not connected, 2 - idle, 3 - armed, 4 - recording")] 
+      HRESULT lngStreamState([out, retval] long *pVal);
+
+		[propget, id(11), helpstring("Current number of samples written to file")] 
+      HRESULT lngN_Samples([out, retval] long *pVal);
+
+		[propget, id(12), helpstring("TDT tick counter")] 
+      HRESULT lngTimeTick([out, retval] long *pVal);
+
+    [propget, id(13), helpstring("Gets Program Version String")] 
+       HRESULT strProgramVersion([out, retval] BSTR * pVal);
+
+		[propget, id(14), helpstring("Serial buffer size")] 
+      HRESULT lngBufferSize([out, retval] long *pVal);
+
+		[propput, id(14), helpstring("Serial buffer size")] 
+      HRESULT lngBufferSize([in] long newVal);
+
+		[propget, id(15), helpstring("Sampling Rate (Hz)")] 
+      HRESULT fSampleRateHz([out, retval] float *fVal);
+
+ 		[propget, id(16), helpstring("Path to data file, name not included")] 
+      HRESULT strFilePath([out, retval] BSTR *pVal);
+		[propput, id(16), helpstring("Path to data file, name not included")] 
+      HRESULT strFilePath([in] BSTR newVal);
+
+ 		[propget, id(17), helpstring("Convert floats to ints flag")] 
+      HRESULT blnConvertToInt16([out, retval] long *pVal);
+		[propput, id(17), helpstring("Convert floats to ints flag")] 
+      HRESULT blnConvertToInt16([in] long newVal);
+
+  };
+
+
+[
+	// normally don't have to change this guid,
+	// it's used to label the type library
+	uuid(ebd33034-ceb1-11d5-9c3e-0050da2a68c8),
+  // Note: make sure to update code in LoadRegTypeLib() and UnRegisterTypeLib()
+  // on version change!
+	version(0.0),  
+	// this shows up in the "references" in VB
+	helpstring("CP_TDT_Stream Type Library")
+]
+library CP_TDT_Stream_Lib  // This is the lib name used by VB
+{
+	importlib("stdole32.tlb");
+	[
+		// This is the class (com object guid)
+		// Don't have to change it normally
+		uuid(ebd33030-ceb1-11d5-9c3e-0050da2a68c8),
+		helpstring("CP_TDT_Stream Class")
+	]
+
+	coclass CP_TS_Class { // This is the object name used by VB
+	
+    [default] dispinterface ITDT_Stream;
+	};
+
+};

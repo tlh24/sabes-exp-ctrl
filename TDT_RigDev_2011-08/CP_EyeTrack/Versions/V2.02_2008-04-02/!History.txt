@@ -1,0 +1,23 @@
+CP_EyeTrack history
+
+Version 2.02 2008-03-27
+  - Changed SAFEARRAYs to VARIANTs (containing SAFEARRAYS). 
+    Replaced SafeArrayLib.cpp with VariantLib.cpp
+
+  - Added GetFrameCount( long * pnFrames ) method. This will help to catch 
+    possible dissynchronization between the tracker and the external counter (RP2).
+
+Version 2.01 2007-10-08
+  - Masked for lower 4 bits of the counter coming from IScan. 
+    Unused 4 bits were creating errors when digital input on 
+	IScan was configured to more than 4 bits 
+
+  - Added printing of the final frame count on DisconnectTracker()
+
+  - Added mutex to insure a single instance of the application
+
+  - Added a checkmark to show/hide the log window
+
+  - Changed reset frame counter to output 2 reset pulses
+
+

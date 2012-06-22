@@ -1,0 +1,28 @@
+srvname = 'CP_OptoTrack.Application';
+nFrames = 10;
+hTracker=actxserver(srvname);
+
+SensorsOn = int32([1 
+                   1]);
+hTracker.SetSensors(SensorsOn);
+
+hTracker.ConnectTracker;
+pause(1);
+iSensor =  int32(1);
+iIdx  = int32(0);
+
+[iIdx] = hTracker.GetLatestDataIndex;
+while iIdx < 10
+  pause(0.1);
+  [iIdx] = hTracker.GetLatestDataIndex;
+end
+
+iIdx
+%for i=1:1000
+  [iIdx] = hTracker.GetLatestDataIndex;
+  [dTime dData] = invoke( hTracker, 'GetSensorBuffered', iSensor, iIdx-10, 10 );  
+%end
+iIdx
+hTracker.DisconnectTracker;
+% delete(hTracker);
+% clear functions;

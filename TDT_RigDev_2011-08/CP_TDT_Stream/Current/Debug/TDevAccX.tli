@@ -1,0 +1,262 @@
+// Created by Microsoft (R) C/C++ Compiler Version 12.00.9782.0 (49c825e1).
+//
+// y:\work\sabes\cp_tdt_stream\current\debug\TDevAccX.tli
+//
+// Wrapper implementations for Win32 type library TDevAccX.ocx
+// compiler-generated file created 04/17/06 at 19:08:08 - DO NOT EDIT!
+
+#pragma once
+
+//
+// dispinterface _DTDevAccX wrapper method implementations
+//
+
+inline long _DTDevAccX::ConnectServer ( _bstr_t ServerName ) {
+    long _result;
+    _com_dispatch_method(this, 0x1, DISPATCH_METHOD, VT_I4, (void*)&_result, 
+        L"\x0008", (BSTR)ServerName);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_ConnectServer ( BSTR ServerName, long * _presult ) {
+    return _com_dispatch_raw_method(this, 0x1, DISPATCH_METHOD, VT_I4, (void*)_presult, 
+        L"\x0008", ServerName);
+}
+
+inline long _DTDevAccX::CheckServerConnection ( ) {
+    long _result;
+    _com_dispatch_method(this, 0x2, DISPATCH_METHOD, VT_I4, (void*)&_result, NULL);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_CheckServerConnection ( long * _presult ) {
+    return _com_dispatch_raw_method(this, 0x2, DISPATCH_METHOD, VT_I4, (void*)_presult, NULL);
+}
+
+inline HRESULT _DTDevAccX::CloseConnection ( ) {
+    return _com_dispatch_method(this, 0x3, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
+}
+
+inline HRESULT _DTDevAccX::raw_CloseConnection ( ) {
+    return _com_dispatch_raw_method(this, 0x3, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
+}
+
+inline long _DTDevAccX::WriteTarget ( _bstr_t Target, long nOS, long nWords, float * pData ) {
+    long _result;
+    _com_dispatch_method(this, 0x4, DISPATCH_METHOD, VT_I4, (void*)&_result, 
+        L"\x0008\x0003\x0003\x4004", (BSTR)Target, nOS, nWords, pData);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_WriteTarget ( BSTR Target, long nOS, long nWords, float * pData, long * _presult ) {
+    return _com_dispatch_raw_method(this, 0x4, DISPATCH_METHOD, VT_I4, (void*)_presult, 
+        L"\x0008\x0003\x0003\x4004", Target, nOS, nWords, pData);
+}
+
+inline long _DTDevAccX::WriteTargetV ( _bstr_t Target, long nOS, const _variant_t & vData ) {
+    long _result;
+    _com_dispatch_method(this, 0x5, DISPATCH_METHOD, VT_I4, (void*)&_result, 
+        L"\x0008\x0003\x000c", (BSTR)Target, nOS, &vData);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_WriteTargetV ( BSTR Target, long nOS, const VARIANT & vData, long * _presult ) {
+    return _com_dispatch_raw_method(this, 0x5, DISPATCH_METHOD, VT_I4, (void*)_presult, 
+        L"\x0008\x0003\x000c", Target, nOS, &vData);
+}
+
+inline long _DTDevAccX::ReadTarget ( _bstr_t Target, long nOS, long nWords, float * pData ) {
+    long _result;
+    _com_dispatch_method(this, 0x6, DISPATCH_METHOD, VT_I4, (void*)&_result, 
+        L"\x0008\x0003\x0003\x4004", (BSTR)Target, nOS, nWords, pData);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_ReadTarget ( BSTR Target, long nOS, long nWords, float * pData, long * _presult ) {
+    return _com_dispatch_raw_method(this, 0x6, DISPATCH_METHOD, VT_I4, (void*)_presult, 
+        L"\x0008\x0003\x0003\x4004", Target, nOS, nWords, pData);
+}
+
+inline _variant_t _DTDevAccX::ReadTargetV ( _bstr_t Target, long nOS, long nWords ) {
+    VARIANT _result;
+    _com_dispatch_method(this, 0x7, DISPATCH_METHOD, VT_VARIANT, (void*)&_result, 
+        L"\x0008\x0003\x0003", (BSTR)Target, nOS, nWords);
+    return _variant_t(_result, false);
+}
+
+inline HRESULT _DTDevAccX::raw_ReadTargetV ( BSTR Target, long nOS, long nWords, VARIANT * _presult ) {
+    return _com_dispatch_raw_method(this, 0x7, DISPATCH_METHOD, VT_VARIANT, (void*)_presult, 
+        L"\x0008\x0003\x0003", Target, nOS, nWords);
+}
+
+inline long _DTDevAccX::GetTargetClass ( _bstr_t Target ) {
+    long _result;
+    _com_dispatch_method(this, 0x8, DISPATCH_METHOD, VT_I4, (void*)&_result, 
+        L"\x0008", (BSTR)Target);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_GetTargetClass ( BSTR Target, long * _presult ) {
+    return _com_dispatch_raw_method(this, 0x8, DISPATCH_METHOD, VT_I4, (void*)_presult, 
+        L"\x0008", Target);
+}
+
+inline HRESULT _DTDevAccX::ZeroTarget ( _bstr_t Target ) {
+    return _com_dispatch_method(this, 0x9, DISPATCH_METHOD, VT_EMPTY, NULL, 
+        L"\x0008", (BSTR)Target);
+}
+
+inline HRESULT _DTDevAccX::raw_ZeroTarget ( BSTR Target ) {
+    return _com_dispatch_raw_method(this, 0x9, DISPATCH_METHOD, VT_EMPTY, NULL, 
+        L"\x0008", Target);
+}
+
+inline float _DTDevAccX::GetDeviceSF ( _bstr_t Target ) {
+    float _result;
+    _com_dispatch_method(this, 0xa, DISPATCH_METHOD, VT_R4, (void*)&_result, 
+        L"\x0008", (BSTR)Target);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_GetDeviceSF ( BSTR Target, float * _presult ) {
+    return _com_dispatch_raw_method(this, 0xa, DISPATCH_METHOD, VT_R4, (void*)_presult, 
+        L"\x0008", Target);
+}
+
+inline long _DTDevAccX::GetTargetSize ( _bstr_t Target ) {
+    long _result;
+    _com_dispatch_method(this, 0xb, DISPATCH_METHOD, VT_I4, (void*)&_result, 
+        L"\x0008", (BSTR)Target);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_GetTargetSize ( BSTR Target, long * _presult ) {
+    return _com_dispatch_raw_method(this, 0xb, DISPATCH_METHOD, VT_I4, (void*)_presult, 
+        L"\x0008", Target);
+}
+
+inline double _DTDevAccX::GetTargetVal ( _bstr_t Target ) {
+    double _result;
+    _com_dispatch_method(this, 0xc, DISPATCH_METHOD, VT_R8, (void*)&_result, 
+        L"\x0008", (BSTR)Target);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_GetTargetVal ( BSTR Target, double * _presult ) {
+    return _com_dispatch_raw_method(this, 0xc, DISPATCH_METHOD, VT_R8, (void*)_presult, 
+        L"\x0008", Target);
+}
+
+inline long _DTDevAccX::SetTargetVal ( _bstr_t Target, double Val ) {
+    long _result;
+    _com_dispatch_method(this, 0xd, DISPATCH_METHOD, VT_I4, (void*)&_result, 
+        L"\x0008\x0005", (BSTR)Target, Val);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_SetTargetVal ( BSTR Target, double Val, long * _presult ) {
+    return _com_dispatch_raw_method(this, 0xd, DISPATCH_METHOD, VT_I4, (void*)_presult, 
+        L"\x0008\x0005", Target, Val);
+}
+
+inline long _DTDevAccX::GetDeviceStatus ( _bstr_t Target ) {
+    long _result;
+    _com_dispatch_method(this, 0xe, DISPATCH_METHOD, VT_I4, (void*)&_result, 
+        L"\x0008", (BSTR)Target);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_GetDeviceStatus ( BSTR Target, long * _presult ) {
+    return _com_dispatch_raw_method(this, 0xe, DISPATCH_METHOD, VT_I4, (void*)_presult, 
+        L"\x0008", Target);
+}
+
+inline long _DTDevAccX::GetTargetType ( _bstr_t Target ) {
+    long _result;
+    _com_dispatch_method(this, 0xf, DISPATCH_METHOD, VT_I4, (void*)&_result, 
+        L"\x0008", (BSTR)Target);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_GetTargetType ( BSTR Target, long * _presult ) {
+    return _com_dispatch_raw_method(this, 0xf, DISPATCH_METHOD, VT_I4, (void*)_presult, 
+        L"\x0008", Target);
+}
+
+inline long _DTDevAccX::GetSysMode ( ) {
+    long _result;
+    _com_dispatch_method(this, 0x10, DISPATCH_METHOD, VT_I4, (void*)&_result, NULL);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_GetSysMode ( long * _presult ) {
+    return _com_dispatch_raw_method(this, 0x10, DISPATCH_METHOD, VT_I4, (void*)_presult, NULL);
+}
+
+inline _bstr_t _DTDevAccX::GetDeviceName ( long Index ) {
+    BSTR _result;
+    _com_dispatch_method(this, 0x11, DISPATCH_METHOD, VT_BSTR, (void*)&_result, 
+        L"\x0003", Index);
+    return _bstr_t(_result, false);
+}
+
+inline HRESULT _DTDevAccX::raw_GetDeviceName ( long Index, BSTR * _presult ) {
+    return _com_dispatch_raw_method(this, 0x11, DISPATCH_METHOD, VT_BSTR, (void*)_presult, 
+        L"\x0003", Index);
+}
+
+inline long _DTDevAccX::GetDeviceType ( _bstr_t DeviceName ) {
+    long _result;
+    _com_dispatch_method(this, 0x12, DISPATCH_METHOD, VT_I4, (void*)&_result, 
+        L"\x0008", (BSTR)DeviceName);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_GetDeviceType ( BSTR DeviceName, long * _presult ) {
+    return _com_dispatch_raw_method(this, 0x12, DISPATCH_METHOD, VT_I4, (void*)_presult, 
+        L"\x0008", DeviceName);
+}
+
+inline _bstr_t _DTDevAccX::GetDeviceRCO ( _bstr_t DeviceName ) {
+    BSTR _result;
+    _com_dispatch_method(this, 0x13, DISPATCH_METHOD, VT_BSTR, (void*)&_result, 
+        L"\x0008", (BSTR)DeviceName);
+    return _bstr_t(_result, false);
+}
+
+inline HRESULT _DTDevAccX::raw_GetDeviceRCO ( BSTR DeviceName, BSTR * _presult ) {
+    return _com_dispatch_raw_method(this, 0x13, DISPATCH_METHOD, VT_BSTR, (void*)_presult, 
+        L"\x0008", DeviceName);
+}
+
+inline _bstr_t _DTDevAccX::GetNextTag ( _bstr_t DeviceName, long ReqType, long DoFirst ) {
+    BSTR _result;
+    _com_dispatch_method(this, 0x14, DISPATCH_METHOD, VT_BSTR, (void*)&_result, 
+        L"\x0008\x0003\x0003", (BSTR)DeviceName, ReqType, DoFirst);
+    return _bstr_t(_result, false);
+}
+
+inline HRESULT _DTDevAccX::raw_GetNextTag ( BSTR DeviceName, long ReqType, long DoFirst, BSTR * _presult ) {
+    return _com_dispatch_raw_method(this, 0x14, DISPATCH_METHOD, VT_BSTR, (void*)_presult, 
+        L"\x0008\x0003\x0003", DeviceName, ReqType, DoFirst);
+}
+
+inline long _DTDevAccX::SetSysMode ( long NewMode ) {
+    long _result;
+    _com_dispatch_method(this, 0x15, DISPATCH_METHOD, VT_I4, (void*)&_result, 
+        L"\x0003", NewMode);
+    return _result;
+}
+
+inline HRESULT _DTDevAccX::raw_SetSysMode ( long NewMode, long * _presult ) {
+    return _com_dispatch_raw_method(this, 0x15, DISPATCH_METHOD, VT_I4, (void*)_presult, 
+        L"\x0003", NewMode);
+}
+
+inline HRESULT _DTDevAccX::AboutBox ( ) {
+    return _com_dispatch_method(this, DISPID_ABOUTBOX, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
+}
+
+inline HRESULT _DTDevAccX::raw_AboutBox ( ) {
+    return _com_dispatch_raw_method(this, DISPID_ABOUTBOX, DISPATCH_METHOD, VT_EMPTY, NULL, NULL);
+}

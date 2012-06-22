@@ -1,0 +1,23 @@
+HKCR
+{
+	OptoServer.OptoServer.1 = s 'OptoServer Class'
+	{
+		CLSID = s '{858130AA-8F41-4B35-B8F0-04E358904B48}'
+	}
+	OptoServer.OptoServer = s 'OptoServer Class'
+	{
+		CLSID = s '{858130AA-8F41-4B35-B8F0-04E358904B48}'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {858130AA-8F41-4B35-B8F0-04E358904B48} = s 'OptoServer Class'
+		{
+			ProgID = s 'OptoServer.OptoServer.1'
+			VersionIndependentProgID = s 'OptoServer.OptoServer'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'both'
+			}
+		}
+	}
+}

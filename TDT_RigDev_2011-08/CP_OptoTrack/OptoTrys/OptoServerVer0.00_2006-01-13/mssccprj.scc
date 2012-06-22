@@ -1,0 +1,5 @@
+SCC = This is a Source Code Control file
+
+[OptoServer.dsp]
+SCC_Aux_Path = "\\Keck\keck16\sabes1\Lab\VSS"
+SCC_Project_Name = "$/OptoServer", ZAAAAAAA

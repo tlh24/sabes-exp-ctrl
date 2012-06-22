@@ -1,0 +1,21 @@
+HKCR
+{
+	CP_Display.VMain.1 = s 'VMain Class'
+	{
+		CLSID = s '{EBD33088-CEB1-11D5-9C3E-0050DA2A68C8}'
+	}
+	CP_Display.VMain = s 'VMain Class'
+	{
+		CLSID = s '{EBD33088-CEB1-11D5-9C3E-0050DA2A68C8}'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {EBD33088-CEB1-11D5-9C3E-0050DA2A68C8} = s 'VMain Class'
+		{
+			ProgID = s 'CP_Display.VMain.1'
+			VersionIndependentProgID = s 'CP_Display.VMain'
+			val AppID = s '{EBD33080-CEB1-11D5-9C3E-0050DA2A68C8}'
+			LocalServer32 = s '%Module%'
+		}
+	}
+}

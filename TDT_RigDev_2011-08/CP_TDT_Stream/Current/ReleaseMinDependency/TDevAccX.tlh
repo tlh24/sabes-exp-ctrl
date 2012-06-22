@@ -1,0 +1,190 @@
+// Created by Microsoft (R) C/C++ Compiler Version 12.00.9782.0 (848233b4).
+//
+// y:\work\sabes\cp_tdt_stream\current\releasemindependency\TDevAccX.tlh
+//
+// C++ source equivalent of Win32 type library TDevAccX.ocx
+// compiler-generated file created 04/20/06 at 13:20:30 - DO NOT EDIT!
+
+#pragma once
+#pragma pack(push, 8)
+
+#include <comdef.h>
+
+//
+// Forward references and typedefs
+//
+
+struct __declspec(uuid("f04fc131-d33b-45b7-bc22-cf58b06ca5cb"))
+/* dispinterface */ _DTDevAccX;
+struct __declspec(uuid("64e8c018-79f7-4c72-9244-6cae7315ba4f"))
+/* dispinterface */ _DTDevAccXEvents;
+struct /* coclass */ TDevAccX;
+
+//
+// Smart pointer typedef declarations
+//
+
+_COM_SMARTPTR_TYPEDEF(_DTDevAccX, __uuidof(IDispatch));
+_COM_SMARTPTR_TYPEDEF(_DTDevAccXEvents, __uuidof(IDispatch));
+
+//
+// Type library items
+//
+
+struct __declspec(uuid("f04fc131-d33b-45b7-bc22-cf58b06ca5cb"))
+_DTDevAccX : IDispatch
+{
+    //
+    // Wrapper methods for error-handling
+    //
+
+    // Methods:
+    long ConnectServer (
+        _bstr_t ServerName );
+    long CheckServerConnection ( );
+    HRESULT CloseConnection ( );
+    long WriteTarget (
+        _bstr_t Target,
+        long nOS,
+        long nWords,
+        float * pData );
+    long WriteTargetV (
+        _bstr_t Target,
+        long nOS,
+        const _variant_t & vData );
+    long ReadTarget (
+        _bstr_t Target,
+        long nOS,
+        long nWords,
+        float * pData );
+    _variant_t ReadTargetV (
+        _bstr_t Target,
+        long nOS,
+        long nWords );
+    long GetTargetClass (
+        _bstr_t Target );
+    HRESULT ZeroTarget (
+        _bstr_t Target );
+    float GetDeviceSF (
+        _bstr_t Target );
+    long GetTargetSize (
+        _bstr_t Target );
+    double GetTargetVal (
+        _bstr_t Target );
+    long SetTargetVal (
+        _bstr_t Target,
+        double Val );
+    long GetDeviceStatus (
+        _bstr_t Target );
+    long GetTargetType (
+        _bstr_t Target );
+    long GetSysMode ( );
+    _bstr_t GetDeviceName (
+        long Index );
+    long GetDeviceType (
+        _bstr_t DeviceName );
+    _bstr_t GetDeviceRCO (
+        _bstr_t DeviceName );
+    _bstr_t GetNextTag (
+        _bstr_t DeviceName,
+        long ReqType,
+        long DoFirst );
+    long SetSysMode (
+        long NewMode );
+    HRESULT AboutBox ( );
+
+    //
+    // Wrapper methods without error-handling
+    //
+
+    // Methods:
+    HRESULT raw_ConnectServer (
+        BSTR ServerName,
+        long * _result );
+    HRESULT raw_CheckServerConnection (
+        long * _result );
+    HRESULT raw_CloseConnection ( );
+    HRESULT raw_WriteTarget (
+        BSTR Target,
+        long nOS,
+        long nWords,
+        float * pData,
+        long * _result );
+    HRESULT raw_WriteTargetV (
+        BSTR Target,
+        long nOS,
+        const VARIANT & vData,
+        long * _result );
+    HRESULT raw_ReadTarget (
+        BSTR Target,
+        long nOS,
+        long nWords,
+        float * pData,
+        long * _result );
+    HRESULT raw_ReadTargetV (
+        BSTR Target,
+        long nOS,
+        long nWords,
+        VARIANT * _result );
+    HRESULT raw_GetTargetClass (
+        BSTR Target,
+        long * _result );
+    HRESULT raw_ZeroTarget (
+        BSTR Target );
+    HRESULT raw_GetDeviceSF (
+        BSTR Target,
+        float * _result );
+    HRESULT raw_GetTargetSize (
+        BSTR Target,
+        long * _result );
+    HRESULT raw_GetTargetVal (
+        BSTR Target,
+        double * _result );
+    HRESULT raw_SetTargetVal (
+        BSTR Target,
+        double Val,
+        long * _result );
+    HRESULT raw_GetDeviceStatus (
+        BSTR Target,
+        long * _result );
+    HRESULT raw_GetTargetType (
+        BSTR Target,
+        long * _result );
+    HRESULT raw_GetSysMode (
+        long * _result );
+    HRESULT raw_GetDeviceName (
+        long Index,
+        BSTR * _result );
+    HRESULT raw_GetDeviceType (
+        BSTR DeviceName,
+        long * _result );
+    HRESULT raw_GetDeviceRCO (
+        BSTR DeviceName,
+        BSTR * _result );
+    HRESULT raw_GetNextTag (
+        BSTR DeviceName,
+        long ReqType,
+        long DoFirst,
+        BSTR * _result );
+    HRESULT raw_SetSysMode (
+        long NewMode,
+        long * _result );
+    HRESULT raw_AboutBox ( );
+};
+
+struct __declspec(uuid("64e8c018-79f7-4c72-9244-6cae7315ba4f"))
+_DTDevAccXEvents : IDispatch
+{};
+
+struct __declspec(uuid("09efa19d-3ad0-49a8-8232-18d6f7512ce8"))
+TDevAccX;
+    // [ default ] dispinterface _DTDevAccX
+    // [ default, source ] dispinterface _DTDevAccXEvents
+
+//
+// Wrapper method implementations
+//
+
+#include "y:\work\sabes\cp_tdt_stream\current\releasemindependency\TDevAccX.tli"
+
+#pragma pack(pop)

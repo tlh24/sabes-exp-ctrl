@@ -1,0 +1,29 @@
+srvname = 'CP_EyeTrack.Application'
+
+hITrack=actxserver(srvname);
+
+hITrack.ConnectTracker();
+pause(0.1)
+iIdx0 = hITrack.GetIndexLatest;
+
+dDuration = 0;
+while( dDuration < 10000 ) % 10 seconds
+  [iIdx dTime dData] = hITrack.GetDataLatest; 
+  dDuration = dTime - dTime0;
+  
+  if rem(iIdx,10) == 0
+    fprintf('%d \t%g \t%g \t%g \n', ...
+             iIdx, dTime(1), dData(1), dData(2));
+  end
+  pause(0.05);
+end
+iIdx1 = hITrack.GetIndexLatest;
+nPoints = iIdx1 - iIdx0 + 1;
+[dTimeStamps, fTrajectory] = hITrack.GetDataBuffered( nPoints, iIdx0 );
+
+% hITrack.DisconnectTracker();
+
+% delete(hITrack)
+
+
+

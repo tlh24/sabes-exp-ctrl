@@ -1,0 +1,9 @@
+CP_Display history:
+
+0.02 2007-10-08
+  - Removed x_iCounterStarted flag and corresponding state errors
+  - Changed g_ResetFrameCounter() to output two reset pulses
+
+0.03 2008-03-18
+  - Added method GetFrameCount( [out] long * pnFrames );
+

@@ -1,0 +1,89 @@
+% strDisplayComputer = 'VisServer1';
+strDisplayComputer = 'localhost';
+
+hVMain = actxserver('CP_Display.VMain', strDisplayComputer); 
+% hVMain.GetVersion
+
+nFrames = 1000;
+
+ArrowLength = 100;
+
+ArrowSpace = 120;
+nArrowsX = 5;
+nArrowsY = 5;
+nArrows = nArrowsX*nArrowsY;
+
+hVMain.StartBatchDraw;
+for i=1:nArrows
+  hArrows(i) =  CreatePolyArrow(strDisplayComputer);
+  hArrows(i).SetScale(ArrowLength);
+  hArrows(i).SetAngle(0);
+  hArrows(i).SetColor([1 0 0]);
+  hArrows(i).SetGroupID(1);
+end
+
+for i=2:2:nArrows
+  hArrows(i).SetGroupID(2);
+end
+
+ARROW_CORNER = [ 200 200 ];
+for i=1:nArrowsX,  
+  for j=1:nArrowsY;
+    hArrows((i-1)*nArrowsY + j).SetXY( ARROW_CORNER + ArrowSpace*[i-1, j-1]);
+  end
+end 
+
+for i=1:nArrows
+  hArrows(i).SetTextureFlag(1);
+  hArrows(i).Show;
+end
+hVMain.FinishBatchDraw;
+
+dAngleStep = 360/nFrames;
+tic;
+for iFrame = 1:nFrames
+  hVMain.StartBatchDraw; 
+  for i=1:nArrows
+    hArrows(i).SetAngle( dAngleStep * iFrame );
+  end 
+  hVMain.FinishBatchDraw;
+end
+dT = toc/nFrames*1000;
+fprintf('%g ms per frame\n', dT);
+
+tic;
+for iFrame = 1:nFrames
+  hVMain.StartBatchDraw;
+  hVMain.RotateGroup(1,dAngleStep);
+  hVMain.RotateGroup(2,-dAngleStep);
+  hVMain.FinishBatchDraw;
+end
+dT = toc/nFrames*1000;
+fprintf('%g ms per frame\n', dT);
+
+tic;
+for iFrame = 1:nFrames
+  hVMain.StartBatchDraw;
+  hVMain.RotateGroup(1,dAngleStep);
+  hVMain.RotateGroup(2,-dAngleStep);
+  hVMain.FinishBatchDraw(11);
+end
+dT = toc/nFrames*1000;
+fprintf('%g ms per frame\n', dT);
+
+for iFrame = 1:nFrames
+  hVMain.StartBatchDraw;
+  hVMain.RotateGroup(1,dAngleStep);
+  hVMain.RotateGroup(2,-dAngleStep);
+  hVMain.FinishBatchDraw(11);
+end
+
+
+
+[EventID, EventT] = hVMain.GetEventLog;
+hVMain.HideGroup(0);
+for i=1:nArrows
+  if iscom(hArrows(i))  release(hArrows(i)); end;
+end
+
+if iscom(hVMain)  release(hVMain); end;

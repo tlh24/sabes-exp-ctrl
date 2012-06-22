@@ -1,0 +1,73 @@
+VisSrvName = 'VisServer1';
+% VisSrvName = 'grappelli';
+
+fprintf('Starting VisServer...\n')
+fprintf('VisWindow\n')
+hW = actxserver('VisServer.VisWindow',VisSrvName); 
+fprintf('VisDisk\n')
+hFng = actxserver('VisServer.VisDisk',VisSrvName); 
+
+fprintf('LibertyServer...checking status...\n')
+hL = actxserver('LibertyServer.Liberty');
+invoke(hL,'setup',BUFFERTIME,PREDTIME); pause(0.5);
+%%%%%%% ERROR CHECK BUFFER COMMANDS
+hL.startBuffer();
+nE = hL.err;
+  for i=1:nE,
+    fprintf('%d: %s',i,hL.getErr(i))
+  end
+else
+  fprintf(1,'No errors to report from Liberty.\n')
+end
+
+hL.stopBuffer();
+if ~hW.calibrated 
+  fprintf('VisServer is not calibrated. The test is stopped. \n');
+  if iscom(hMou)  release(hL); end;
+  if iscom(hFng)  release(hFng); end;
+  if iscom(hW)  release(hW); end;
+  
+  
+  
+end
+fprintf('Move the mouse on the VisServer. Click to start. \n')
+
+
+hW.batchmode = 0;
+fprintf('Pause\n');
+pause(5);
+
+hFng.show =1;
+
+tic
+for i=1:1000
+  batch_mode = hW.batchmode;  % just a read to get synchronized
+  pos = hMou.pos;
+  hFng.pos = [pos(1) 768 - pos(2)];
+  hW.drawnow();
+end
+toc/1000
+fprintf('Finished\n');
+if iscom(hMou)  release(hMou); end;
+if iscom(hFng)  release(hFng); end;
+if iscom(hW)  release(hW); end;
+
+
+% 
+%         fprintf(1,'Start Up LibertyServer...checking status...\n')
+%         hL = actxserver('LibertyServer.Liberty');
+%         invoke(hL,'setup',BUFFERTIME,PREDTIME); pause(0.5);  % setup
+%         %%%%%%% ERROR CHECK BUFFER COMMANDS
+%         nE0 = 0;
+%         invoke(hL,'startBuffer');
+%         nE1 = hL.err;
+%         if(nE1>nE0)
+%             for i=(nE0+1):nE1,
+%                 fprintf(1,'%d: %s',i,hL.getErr(i))
+%             end
+%         else
+%             fprintf(1,'No errors to report from Liberty.\n')
+%         end
+%         invoke(hL,'stopBuffer');
+%     end
+%         fprintf(1,'Liberty check done.\n')

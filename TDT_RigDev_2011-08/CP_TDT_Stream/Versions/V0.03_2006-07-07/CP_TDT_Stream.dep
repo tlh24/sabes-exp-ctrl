@@ -1,0 +1,80 @@
+# Microsoft Developer Studio Generated Dependency File, included by CP_TDT_Stream.mak
+
+.\CP_TDT_Stream.cpp : \
+	".\MainDialog.h"\
+	".\RegisterCom.h"\
+	".\ShadowPrint.h"\
+	".\VidInterface.h"\
+	".\VidWinVersion.h"\
+	
+
+.\MainDialog.cpp : \
+	".\MainDialog.h"\
+	".\RegisterCom.h"\
+	".\ShadowPrint.h"\
+	".\VidInterface.h"\
+	".\VidWinVersion.h"\
+	
+
+.\ShadowPrint.c : \
+	".\ShadowPrint.h"\
+	
+
+.\VidGrating.cpp : \
+	".\ShadowPrint.h"\
+	".\VidInterface.h"\
+	".\VidWinVersion.h"\
+	
+
+.\VidInteractiveBar.cpp : \
+	".\ShadowPrint.h"\
+	".\VidInterface.h"\
+	".\VidWinVersion.h"\
+	
+
+.\VidInteractiveCursor.cpp : \
+	".\ShadowPrint.h"\
+	".\VidInterface.h"\
+	".\VidWinVersion.h"\
+	
+
+.\VidInterface.cpp : \
+	".\ShadowPrint.h"\
+	".\VidInterface.h"\
+	".\VidWinVersion.h"\
+	
+
+.\VidMainLoop.cpp : \
+	".\ShadowPrint.h"\
+	".\VidInterface.h"\
+	".\VidWinVersion.h"\
+	
+
+.\VidMovie.cpp : \
+	".\ShadowPrint.h"\
+	".\VidInterface.h"\
+	".\VidWinVersion.h"\
+	
+
+.\VidMseq.cpp : \
+	".\ShadowPrint.h"\
+	".\VidInterface.h"\
+	".\VidWinVersion.h"\
+	
+
+.\VidNoise.cpp : \
+	".\ShadowPrint.h"\
+	".\VidInterface.h"\
+	".\VidWinVersion.h"\
+	
+
+.\VidSystem.c : \
+	".\ShadowPrint.h"\
+	".\VidWinVersion.h"\
+	
+
+.\VidUtil.cpp : \
+	".\ShadowPrint.h"\
+	".\VidInterface.h"\
+	".\VidWinVersion.h"\
+	

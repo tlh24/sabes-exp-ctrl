@@ -1,0 +1,21 @@
+HKCR
+{
+	VisServer.VisCalibrate.1 = s 'VisCalibrate Class'
+	{
+		CLSID = s '{8F9791E4-3208-11D5-AF95-00A0C9A51AF0}'
+	}
+	VisServer.VisCalibrate = s 'VisCalibrate Class'
+	{
+		CLSID = s '{8F9791E4-3208-11D5-AF95-00A0C9A51AF0}'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {8F9791E4-3208-11D5-AF95-00A0C9A51AF0} = s 'VisCalibrate Class'
+		{
+			ProgID = s 'VisServer.VisCalibrate.1'
+			VersionIndependentProgID = s 'VisServer.VisCalibrate'
+			val AppID = s '{550FD218-E639-41C8-A1DC-11C873341AC1}'
+			LocalServer32 = s '%Module%'
+		}
+	}
+}

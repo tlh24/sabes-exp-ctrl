@@ -1,0 +1,21 @@
+HKCR
+{
+	VisServer.VisDisk.1 = s 'VisDisk Class'
+	{
+		CLSID = s '{F8E14EF6-8745-492A-AE76-96634DE5AECA}'
+	}
+	VisServer.VisDisk = s 'VisDisk Class'
+	{
+		CLSID = s '{F8E14EF6-8745-492A-AE76-96634DE5AECA}'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {F8E14EF6-8745-492A-AE76-96634DE5AECA} = s 'VisDisk Class'
+		{
+			ProgID = s 'VisServer.VisDisk.1'
+			VersionIndependentProgID = s 'VisServer.VisDisk'
+			val AppID = s '{550FD218-E639-41C8-A1DC-11C873341AC1}'
+			LocalServer32 = s '%Module%'
+		}
+	}
+}

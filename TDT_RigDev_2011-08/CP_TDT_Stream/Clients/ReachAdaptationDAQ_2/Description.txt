@@ -1,0 +1,14 @@
+Single channel collection for extracellular type signals.  Supports online sorting and LFP extraction and saving.  Computes instantaneous firing rate for sorted activity and displays.
+
+Acqusition:
+Input          Extracellular
+Channels    1
+Storage      Snips,LPF,Plot,Raw
+
+Stimulation:
+None
+
+Devices:
+RA16         1
+
+

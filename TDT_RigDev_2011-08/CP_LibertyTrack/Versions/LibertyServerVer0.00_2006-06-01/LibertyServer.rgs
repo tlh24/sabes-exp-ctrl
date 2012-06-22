@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		{261D0C06-0982-4F33-9921-30684C142CA6} = s 'LibertyServer'
+		'LibertyServer.EXE'
+		{
+			val AppID = s {261D0C06-0982-4F33-9921-30684C142CA6}
+		}
+	}
+}

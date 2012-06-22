@@ -1,0 +1,24 @@
+HKCR
+{
+	CP_Display.VComplexShape.1 = s 'VComplexShape Class'
+	{
+		CLSID = s '{015EA1C0-B904-4D55-B4F7-C195665FEF69}'
+	}
+	CP_Display.VComplexShape = s 'VComplexShape Class'
+	{
+		CLSID = s '{015EA1C0-B904-4D55-B4F7-C195665FEF69}'
+		CurVer = s 'CP_Display.VComplexShape.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {015EA1C0-B904-4D55-B4F7-C195665FEF69} = s 'VComplexShape Class'
+		{
+			ProgID = s 'CP_Display.VComplexShape.1'
+			VersionIndependentProgID = s 'CP_Display.VComplexShape'
+			ForceRemove 'Programmable'
+			LocalServer32 = s '%MODULE%'
+			val AppID = s '{EBD33080-CEB1-11D5-9C3E-0050DA2A68C8}'
+			'TypeLib' = s '{ebd33084-ceb1-11d5-9c3e-0050da2a68c8}'
+		}
+	}
+}

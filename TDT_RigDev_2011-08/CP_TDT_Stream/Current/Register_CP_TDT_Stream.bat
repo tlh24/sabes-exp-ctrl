@@ -1,0 +1,1 @@
+CP_TDT_Stream.exe -RegServer

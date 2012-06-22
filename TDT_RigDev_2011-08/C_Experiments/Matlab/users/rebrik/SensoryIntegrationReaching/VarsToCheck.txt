@@ -1,0 +1,21 @@
+% vars to check
+
+tdtTone
+toneOff
+toneOn
+tdtJuice
+
+
+global hL hW hMou NO_ISCAN
+global hStartTrg hReachTrg hFng hRightHandArrowField hBonusTrg hText1 hEyeTrg
+global eyeStruct
+
+global DEBUG
+global BUFFERTIME PREDTIME FRAMERATE
+global Path V center % octagon properties
+
+
+%%% Liberty parameters
+BUFFERTIME = 600;
+PREDTIME   = 1/75;
+FRAMERATE  = 240;

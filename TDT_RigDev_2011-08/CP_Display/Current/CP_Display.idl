@@ -1,0 +1,227 @@
+// CP_Display interface definition
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+  [
+    object,
+    uuid(ebd3308c-ceb1-11d5-9c3e-0050da2a68c8),
+    dual,
+    helpstring("IVMain Interface"),
+    pointer_default(unique)
+  ]
+  interface IVMain : IDispatch {
+    // ?? SetVideoMode( nPixX, nPixY, iRefreshRateHz ); 
+    // ?? GetVideoMode( * pnPixX, * pnPixY, * piRefreshRateHz ); 
+
+    [helpstring("")] 
+      HRESULT GetVersion([out] BSTR * pbstVersion);
+    [helpstring("Starts counting frames and outputting frame pulses")] 
+      HRESULT StartSync( );
+    [helpstring("Stops counting frames and outputting frame pulses")] 
+      HRESULT StopSync( );
+    [helpstring("Returns current frame count.")] 
+      HRESULT GetFrameCount( [out] long * pnFrames );
+		[helpstring("Defines 2nd-order transform from physical to screen coordinates (calibration)")] 
+      HRESULT GetTransformMatrix([out] VARIANT * pvMatrix);
+ 		[helpstring("Defines 2nd-order transform from physical to screen coordinates (calibration)")] 
+      HRESULT SetTransformMatrix([in] VARIANT vMatrix);
+		[helpstring("Time scale coefficients")] 
+      HRESULT GetTimeScale([out] double *pdC0, [out] double *pdC1);
+ 		[helpstring("Time scale coefficients")] 
+      HRESULT SetTimeScale([in] double dC0, [in] double dC1);
+    [helpstring("After this call everything is drawn off-screen until FinishBatchDraw()")] 
+      HRESULT StartBatchDraw();
+    [helpstring("Shows all updates made after StartBatchDraw()")] 
+      HRESULT FinishBatchDraw( [in, defaultvalue(0)] long iLogID );
+    [helpstring("Moves all graphics objects")] 
+      HRESULT MoveGroup([in] long iGroupID, 
+                        [in] VARIANT vXY, 
+                        [in, defaultvalue(0)] long iLogID );
+    [helpstring("Scales all graphics objects")] 
+      HRESULT ScaleGroup([in] long iGroupID,
+                         [in] double dScale, 
+                         [in, defaultvalue(0)] long iLogID );
+    [helpstring("Rotates all graphics objects")] 
+      HRESULT RotateGroup([in] long iGroupID, 
+                          [in] double dAngle, 
+                          [in, defaultvalue(0)] long iLogID );
+    [helpstring("Hides all graphics objects")] 
+      HRESULT HideGroup([in] long iGroupID, [in, defaultvalue(0)] long iLogID );
+    [helpstring("Shows all graphics objects")] 
+      HRESULT ShowGroup([in] long iGroupID, [in, defaultvalue(0)] long iLogID );
+    [helpstring("All log events are cleared")] 
+      HRESULT ResetEventLog();
+    [helpstring("LogIDs and timestamps since the last ResetEventLog() call")] 
+      HRESULT GetEventLog( [out] VARIANT * pvLogID, 
+                             [out] VARIANT * pvTimeStampMs );
+  };
+
+  [
+    object,
+    uuid(ebd33094-ceb1-11d5-9c3e-0050da2a68c8),
+    dual,
+    helpstring("IVDisk Interface"),
+    pointer_default(unique)
+  ]
+  interface IVDisk : IDispatch {
+// common methods
+#include "VObject.idl"
+
+// disk-specific methods
+    [helpstring("Disk radius")] 
+      HRESULT GetRadius([out] double *pdRadius );
+    [helpstring("Disk radius")] 
+      HRESULT SetRadius([in] double dRadius, [in, defaultvalue(0)] long iLogID );
+    [helpstring("N of poins on the circle to represent the disc")] 
+      HRESULT GetN_Vertices([out] long *pnVertices);
+    [helpstring("N of poins on the circle to represent the disc")] 
+      HRESULT SetN_Vertices([in] long nVertices, [in, defaultvalue(0)] long iLogID );
+  };
+
+  [
+    object,
+    uuid(ebd3309c-ceb1-11d5-9c3e-0050da2a68c8),
+    dual,
+    helpstring("IVPolygon Interface"),
+    pointer_default(unique)
+  ]
+  interface IVPolygon : IDispatch  {
+// common methods
+#include "VObject.idl"
+
+// polygon-specific methods
+    [helpstring("Vertices of the polygon relative to its origin (X,Y)")] 
+      HRESULT GetVertices([out] VARIANT * pvVertices);
+    [helpstring("Vertices of the polygon relative to its origin (X,Y)")] 
+      HRESULT SetVertices([in] VARIANT vVertices, [in, defaultvalue(0)] long iLogID);
+    [helpstring("Texture image, 4 doubles per pixel, W x H x RGBA, 1D array!!!!")] 
+      HRESULT GetTexture([out] VARIANT * pvTexture,
+                         [out] long * pnPixelsW,
+                         [out] long * pnPixelH,
+                         [out] double * pdTexturePhysWidth );
+    [helpstring("Texture image, 4 doubles per pixel, W x H x RGBA, 3D array")] 
+      HRESULT SetTexture([in] VARIANT vTexture,
+                         [in] double dTexturePhysWidth,
+                         [in, defaultvalue(0)] long iLogID );
+    [helpstring("1 = apply texture, 0 = use color")] 
+      HRESULT GetTextureFlag([out] long * plngTextureFlag);
+    [helpstring("1 = apply texture, 0 = use color")] 
+      HRESULT SetTextureFlag([in] long lngTextureFlag, [in, defaultvalue(0)] long iLogID);
+  };
+
+  [
+    object,
+    uuid(ebd330a4-ceb1-11d5-9c3e-0050da2a68c8),
+    dual,
+    helpstring("IVText Interface"),
+    pointer_default(unique)
+  ]
+  interface IVText : IDispatch {
+// common methods
+#include "VObject.idl"
+
+// text-specific methods
+    [helpstring("Text string")] 
+      HRESULT GetText([out] BSTR * pbstText);
+    [helpstring("Text string")] 
+      HRESULT SetText([in] BSTR bstText, [in, defaultvalue(0)] long iLogID );
+    [helpstring("Text font name")]
+      HRESULT GetFontName([out] BSTR *pVal);
+    [helpstring("Text font name")]
+      HRESULT SetFontName([in] BSTR newVal, [in, defaultvalue(0)] long iLogID);
+    [helpstring("Font weight - 100:100:900")] 
+      HRESULT GetFontWeight([out] long  * lngWeight);
+    [helpstring("Font weight - 100:100:900")] 
+      HRESULT SetFontWeight([in] long  lngWeight, [in, defaultvalue(0)] long iLogID );
+    [helpstring("Font underline. 0 = not underlined")]
+      HRESULT GetFontUnderlineFlag([out] long *plngUnderlineFlag);
+    [helpstring("Font underline. 0 = not underlined")]
+      HRESULT SetFontUnderlineFlag([in] long lngUnderlineFlag, [in, defaultvalue(0)] long iLogID);
+    [helpstring("Font italic 0 = not italic")]
+      HRESULT GetFontItalicFlag([out] long *plngItalicFlag);
+    [helpstring("Font italic 0 = not italic")]
+      HRESULT SetFontItalicFlag([in] long lngItalicFlag, [in, defaultvalue(0)] long iLogID);
+  };
+
+  [
+    object,
+    uuid(ebd330ac-ceb1-11d5-9c3e-0050da2a68c8),
+    dual,
+    helpstring("IVMouse Interface"),
+    pointer_default(unique)
+  ]
+  interface IVMouse : IDispatch {
+    [helpstring("Mouse cursor: Show (=1) or Hide (=0)")] 
+      HRESULT GetShowFlag([out] long * piShowFlag );
+    [helpstring("Mouse cursor: Show (=1) or Hide (=0)")] 
+      HRESULT SetShowFlag([in] long iShowFlag);
+    [helpstring("Mouse position in pixels")] 
+      HRESULT GetXY([out] VARIANT * pvMtx);
+    [helpstring("Button up/down/dblclick (3 events x 3 buttons) 1 = TRUE")] 
+      HRESULT GetAllEvents([out] VARIANT * pvMtx);
+    [helpstring("Button down (3 buttons) 1 = TRUE")]  
+      HRESULT GetDownEvents([out] VARIANT * pvMtx);
+    [helpstring("Button up (3 buttons) 1 = TRUE")] 
+      HRESULT GetUpEvents([out] VARIANT * pvMtx);
+    [helpstring("Button dblclick (3 buttons) 1 = TRUE")] 
+      HRESULT GetDblclickEvents([out] VARIANT * pvMtx);
+    [helpstring("Clear all events to 0")] 
+      HRESULT ClearEvents();
+    [helpstring("Shows mouse cursor")] 
+      HRESULT Show();
+    [helpstring("Hides mouse cursor")] 
+      HRESULT Hide();
+
+  };
+  
+[
+  uuid(ebd33084-ceb1-11d5-9c3e-0050da2a68c8),
+  version(1.0),
+  helpstring("CP_Display 0.0 Type Library")
+]
+library CP_DISPLAYLib {
+  importlib("stdole32.tlb");
+  importlib("stdole2.tlb");
+
+  [
+    uuid(ebd33088-ceb1-11d5-9c3e-0050da2a68c8),
+    helpstring("VMain Class")
+  ]
+  coclass VMain {
+    [default] interface IVMain;
+  };
+  
+  [
+    uuid(ebd33090-ceb1-11d5-9c3e-0050da2a68c8),
+    helpstring("VDisk Class")
+  ]
+  coclass VDisk {
+    [default] interface IVDisk;
+  };
+    
+  [
+    uuid(ebd33098-ceb1-11d5-9c3e-0050da2a68c8),
+    helpstring("VPolygon Class")
+  ]
+  coclass VPolygon {
+    [default] interface IVPolygon;
+  };
+
+  [
+    uuid(ebd330a0-ceb1-11d5-9c3e-0050da2a68c8),
+    helpstring("VText Class")
+  ]
+  coclass VText {
+    [default] interface IVText;
+  };
+
+  [
+    uuid(ebd330a8-ceb1-11d5-9c3e-0050da2a68c8),
+    helpstring("VMouse Class")
+  ]
+  coclass VMouse {
+    [default] interface IVMouse;
+  };
+  
+};

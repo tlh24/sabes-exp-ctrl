@@ -1,0 +1,133 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAIN_DIALOG DIALOG DISCARDABLE  100, 1000, 211, 146
+STYLE DS_NOIDLEMSG | DS_CENTER | WS_MINIMIZEBOX | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "CP_TimeSync"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Exit",IDC_CMD_EXIT,60,125,85,15
+    PUSHBUTTON      "Test",IDC_CMD_TEST,155,125,38,15,NOT WS_VISIBLE
+    CONTROL         "",IDC_PICTURE,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,
+                    10,120,34,23
+    CONTROL         "Show Log",IDC_CHK_SHOWLOG,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,11,9,79,10
+    CONTROL         "Track Frame Count",IDC_CHK_TRACKFRAMES,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,27,79,10
+    GROUPBOX        "Frame Count",IDC_GROUP_COUNTERS,9,43,195,72,NOT 
+                    WS_VISIBLE
+    RTEXT           "Display:",IDC_LBL_1,25,60,44,10,NOT WS_VISIBLE | NOT 
+                    WS_GROUP
+    RTEXT           "Eye Track:",IDC_LBL_2,25,76,44,10,NOT WS_VISIBLE | NOT 
+                    WS_GROUP
+    RTEXT           "Tracker:",IDC_LBL_3,25,92,44,10,NOT WS_VISIBLE | NOT 
+                    WS_GROUP
+    RTEXT           "0",IDC_TXT_1,85,60,59,10,NOT WS_VISIBLE | NOT WS_GROUP
+    RTEXT           "0",IDC_TXT_2,85,76,59,10,NOT WS_VISIBLE | NOT WS_GROUP
+    RTEXT           "0",IDC_TXT_3,85,92,59,10,NOT WS_VISIBLE | NOT WS_GROUP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_MAIN_DIALOG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 142
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "1 TYPELIB ""CP_TimeSyncCom.tlb""\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON_APPL           ICON    DISCARDABLE     "CP_TimeSync.ico"
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+1 TYPELIB "CP_TimeSyncCom.tlb"
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

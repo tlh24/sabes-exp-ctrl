@@ -1,0 +1,24 @@
+HKCR
+{
+	VisServer.VisComplexShape.1 = s 'VisComplexShape Class'
+	{
+		CLSID = s '{2A837E88-C773-41D3-9F4A-BD7219866329}'
+	}
+	VisServer.VisComplexShape = s 'VisComplexShape Class'
+	{
+		CLSID = s '{2A837E88-C773-41D3-9F4A-BD7219866329}'
+		CurVer = s 'VisServer.VisComplexShape.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {2A837E88-C773-41D3-9F4A-BD7219866329} = s 'VisComplexShape Class'
+		{
+			ProgID = s 'VisServer.VisComplexShape.1'
+			VersionIndependentProgID = s 'VisServer.VisComplexShape'
+			ForceRemove 'Programmable'
+			LocalServer32 = s '%MODULE%'
+			val AppID = s '{550FD218-E639-41C8-A1DC-11C873341AC1}'
+			'TypeLib' = s '{28FEF39F-E9E6-4C49-9C0A-ABF568D1B70C}'
+		}
+	}
+}
