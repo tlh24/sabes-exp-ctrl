@@ -44,8 +44,7 @@ typedef unsigned int uint32_t;
 #define COMMAND_HEADER(cmd)     MAKE_HEADER(cmd, 0)
 
 int openSocket(char *strIPAddr);
-int setup_socket(int portno);
-bool checkRZ(int sock, char *strIPAddr);
+bool checkRZ(int sock);
 bool sendData(int sock, double *data, int count);
 void disconnectRZ(int sock);
 

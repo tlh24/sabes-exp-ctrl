@@ -21,7 +21,7 @@ int main(int argn, char** argc){
 	int sock; 
  	sock = openSocket("169.230.191.195"); 
 	//sock = setup_socket(LISTEN_PORT); // joey's RZ2. 
-	checkRZ(sock, "169.230.191.195"); 
+	checkRZ(sock); 
 	unsigned char buf[1024]; 
 	double mean = 0; 
 	double var = 0; 

@@ -53,39 +53,9 @@ setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 	return sock;
 }
 
-//sets up a UDP/TCP server socket. 
-int setup_socket(int portno){
-	int sock;
-	struct sockaddr_in serv_addr;
-
-	sock = socket(AF_INET, SOCK_DGRAM, 0);
-	if (sock < 0) {
-		fprintf(stderr, "ERROR opening socket\n");
-		return 0; 
-	}
-	fcntl(sock, F_SETFL, O_NONBLOCK); //set the socket to non-blocking. 
-	int optval = 1; // turn on address reuse. 
-	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)); 
-	bzero((char *) &serv_addr, sizeof(serv_addr));
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = INADDR_ANY ; 
-	serv_addr.sin_port = htons(portno);
-	if(bind(sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0){
-		fprintf(stderr,"error binding socket \n");
-		perror(":");
-	}
-	listen(sock, 5); 
-	return sock;
-}
-
-bool checkRZ(int sock, char *strIPAddr)
+bool checkRZ(int sock)
 {
-	sockaddr_in from;
-	from.sin_family = AF_INET;
-	from.sin_addr.s_addr = inet_addr(strIPAddr);
-	from.sin_port = htons(LISTEN_PORT);
 	char req[HEADER_BYTES] = COMMAND_HEADER(GET_VERSION), resp[1024];
-	//if( sendto(sock, req, HEADER_BYTES, 0, (sockaddr*)&from, sizeof(from))){
 	if (send(sock, req, HEADER_BYTES, 0) != HEADER_BYTES){
 		fprintf(stderr, "Failed to send GET_VERSION packet:\n"); 
 		perror(":");
