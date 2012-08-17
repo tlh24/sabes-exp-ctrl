@@ -8,9 +8,9 @@
 #include <string.h>
 
 //lua headers.
-#include <lua5.2/lua.h>
-#include <lua5.2/lauxlib.h>
-#include <lua5.2/lualib.h>
+#include <lua5.1/lua.h>
+#include <lua5.1/lauxlib.h>
+#include <lua5.1/lualib.h>
 
 //opengl headers. 
 #include <gtk/gtk.h>
@@ -25,7 +25,9 @@
 
 #define PI 3.141592653589793
 
-double g_startTime = 0.0;
+double 	g_startTime = 0.0;
+bool		g_die = false; 
+lua_State* g_lt; 
 
 double gettime(){ //in seconds!
 	timespec pt ;
@@ -80,9 +82,32 @@ bool 			g_glInitialized = false;
 float			g_viewportSize[2] = {640, 480}; //width, height.
 float			g_cursPos[2]; 
 
+void luaRun(double &x, double &y){
+	lua_getglobal(g_lt, "move"); 
+	if(g_die) printf("telling lua thread to quit..\n"); 
+	lua_pushnumber(g_lt, g_die ? 0.0 : 1.0); //tell the other thread to terminate.
+	lua_pushnumber(g_lt, g_cursPos[0]); //number = double in this case.
+	lua_pushnumber(g_lt, g_cursPos[1]); 
+	int r = lua_resume(g_lt,3); //call 'move' with 2 arguments. kinda bad this is in the same thread..
+	if(r == LUA_YIELD){
+		x = lua_tonumber(g_lt, -1); 
+		y = lua_tonumber(g_lt, -2); 
+		//printf("lua results: %f %f\n", x, y); 
+		lua_pop(g_lt, 2); //pop the results off the stack.
+	}else if(r == LUA_ERRRUN){
+		printf("%s\n", lua_tostring(g_lt, -1)); //print errors.
+	}else{
+		printf("lua function returned, not yielded.\n"); 
+	}
+}
+
 void destroy(GtkWidget *, gpointer){
 	//more cleanup later.
+	g_die = true;
 	KillFont(); 
+	double x,y;
+	luaRun(x,y); 
+	lua_close(g_lt); 
 	gtk_main_quit();
 }
 
@@ -110,7 +135,6 @@ static gint motion_notify_event( GtkWidget *,
 		y = event->y;
 		state = (GdkModifierType)(event->state);
 	}
-	printf("curs pos %f %f\n", x, y); 
 	updateCursPos(x,y); 
 	return TRUE;
 }
@@ -188,7 +212,12 @@ expose1 (GtkWidget *da, GdkEventExpose*, gpointer )
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glShadeModel(GL_FLAT);
 	glColor4f(1.f, 1.f, 1.f, 0.75);
-	drawCircle(0.f, 0.f, 0.5f); 
+	
+	// run some lua here. 
+	double x = 0.0; 
+	double y = 0.0; 
+	luaRun(x,y); 
+	drawCircle(x, y, 0.5f); 
 	
 	if (gdk_gl_drawable_is_double_buffered (gldrawable))
 		gdk_gl_drawable_swap_buffers (gldrawable);
@@ -197,6 +226,16 @@ expose1 (GtkWidget *da, GdkEventExpose*, gpointer )
 
 	gdk_gl_drawable_gl_end (gldrawable);
 
+	return TRUE;
+}
+
+static gboolean refresh (gpointer user_data){
+	GtkWidget *da = GTK_WIDGET (user_data);
+
+	gdk_window_invalidate_rect (da->window, &da->allocation, FALSE);
+	gdk_window_process_updates (da->window, FALSE);
+
+	//can do other pre-frame GUI update stuff here.
 	return TRUE;
 }
 
@@ -209,18 +248,21 @@ int main(int argn, char** argc){
 	/* Declare a Lua State, open the Lua State and load the libraries (see above). */
 	lua_State *l;
 	l = luaL_newstate(); 
+	luaopen_base(l);
+	luaopen_table(l); 
 	luaopen_math(l); 
 	luaopen_debug(l); 
-	luaopen_coroutine(l); 
 
+	// want to make a Lua function that yeilds() 
+	// instead of a big ugly switch statement. 
+	//first make a thread and push it on the stack.
+	g_lt = lua_newthread(l); 
+	int r; 
 	printf("This line in directly from C\n\n");
-	luaL_dofile(l, "script.lua");
-	printf("\nBack to C again\n\n");
-
-	/* Remember to destroy the Lua State */
-	lua_close(l);
-
-	return 0;
+	if(luaL_dofile(g_lt, "script.lua")) //inits the function.
+		printf("%s\n", lua_tostring(g_lt, -1)); //print errors.
+	double x, y; 
+	luaRun(x,y); 
 	
 	gtk_init (&argn, &argc);
 	gtk_gl_init (&argn, &argc);
@@ -281,9 +323,13 @@ int main(int argn, char** argc){
 	// http://forums.fedoraforum.org/archive/index.php/t-242963.html
 	GTK_WIDGET_SET_FLAGS(da1, GTK_CAN_FOCUS );
 	
+	//add a refresh timeout. 
+	g_timeout_add (1000 / 60, refresh, da1);
+	
 	gtk_widget_show_all (window);
 	gtk_main ();
 	
+	//lua_close(l);
 	return 0; 
 }
 

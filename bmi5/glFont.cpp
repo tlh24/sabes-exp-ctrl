@@ -1,3 +1,17 @@
+#include <string.h>
+#include <math.h>
+
+//opengl headers. 
+#include <gtk/gtk.h>
+#include <gtk/gtkgl.h>
+#include <GL/glut.h>    
+#include <GL/gl.h>	
+#include <GL/glu.h>	
+#include <GL/glx.h>    
+#include "glext.h"
+#include "glInfo.h"
+#include "glFont.h"
+
 GLuint 		g_base;            // base display list for the font set.
 
 void BuildFont(void) {
