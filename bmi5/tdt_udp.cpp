@@ -1,4 +1,4 @@
-#include "TDT_UDP.h"
+#include "tdt_udp.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -88,11 +88,10 @@ bool sendData(int sock, double *data, int count)
 	packet = new char[4+4*count];
 	
 	// Get header and load into packet
-	char header[4] = DATA_HEADER((unsigned char)count);
+	char header[4] = DATA_HEADER((char)count);
 	for(i=0; i<4; i++) packet[i]=header[i];
 
 	// Load data (as floats)
-    char offset = 0;
     for(i=0; i<count; i++)
 		((float*)(packet + HEADER_BYTES))[i] = (float)(data[i]);
 

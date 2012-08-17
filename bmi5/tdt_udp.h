@@ -30,9 +30,6 @@ enum
 
 #define BUFFER_SIZE (HEADER_BYTES + MAX_SAMPLES * 4)
 
-/* turn off: warning C4310: cast truncates constant value */
-#pragma warning( disable : 4310 )
-
 typedef short int16_t;
 typedef int int32_t;
 typedef unsigned char uint8_t;
