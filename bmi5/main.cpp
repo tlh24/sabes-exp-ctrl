@@ -14,22 +14,26 @@
 
 //opengl headers. 
 #include <gtk/gtk.h>
+#include <GL/glew.h>
 #include <GL/glut.h>    
 #include <GL/gl.h>	
 #include <GL/glu.h>	
-#include <GL/glx.h>    
-#include "glext.h"
+#include <GL/glx.h> 
+#include <GL/glext.h> 
+//#include "glext.h"
 #include "glInfo.h"
 #include "glFont.h"
 #include "gtkglx.h"
+#include "shape.h"
 
-#define PI 3.141592653589793
+//srcview headers. 
+#include <gtksourceview/gtksourceview.h>
+#include "srcView.h"
 
 double 	g_startTime = 0.0;
 bool		g_die = false; 
 lua_State* g_lt; 
-
-int main_sv(int argc, char **argv);
+Shape*	g_cursor; 
 
 double gettime(){ //in seconds!
 	timespec pt ;
@@ -165,6 +169,12 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer)
   	glLoadIdentity();
 	if(!g_glInitialized){
 	//now the vertex buffers.
+		glewExperimental = GL_TRUE;  //needed for glGenVertexArrays.
+		GLenum err = glewInit();
+		if(err != GLEW_OK){
+			/* Problem: glewInit failed, something is seriously wrong. */
+			printf("Error: %s\n", glewGetErrorString(err));
+		}
 		glInfo glInfo;
 		glInfo.getInfo();
 		printf("OpenGL version: %s\n", glInfo.version.c_str()); 
@@ -176,31 +186,20 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer)
 		}
 		g_glInitialized = true;
 	}
-	BuildFont(); //so we're in the right context?
+	BuildFont(); //so we're in the right context.
+	//have to create the shapes here -- context again.
+	g_cursor->makeCircle(64); 
+	g_cursor->scale(0.5); 
 
 	return TRUE;
 }
 
-void drawCircle(float x, float y, float r){
-	int n = 64; 
-	glBegin(GL_POLYGON);
-	glVertex2f(x,y); 
-	for(int i=0; i<n; i++){
-		float t = (float)i * PI * 2 / (n-1); 
-		glVertex2f(x+r*sinf(t), y+r*cosf(t)); 
-	}
-	glEnd(); 
-}
-
 static gboolean
-draw1 (GtkWidget *da, cairo_t *cr, gpointer )
-{
-
+draw1 (GtkWidget *da, cairo_t *cr, gpointer ){
 	if (!exposeGLX(da)){
 		g_assert_not_reached ();
 	}
 	
-	/* draw in here */
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -208,7 +207,7 @@ draw1 (GtkWidget *da, cairo_t *cr, gpointer )
   
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glClearColor(0,0,0,1);
+	glClearColor(0,0,0,1); 
 	
 	glShadeModel(GL_FLAT);
 	glColor4f(0.7f, 1.f, 1.f, 0.75);
@@ -217,7 +216,8 @@ draw1 (GtkWidget *da, cairo_t *cr, gpointer )
 	double x = 0.0; 
 	double y = 0.0; 
 	luaRun(x,y); 
-	drawCircle(x, y, 0.5f); 
+	g_cursor->translate(x,y); 
+	g_cursor->draw(); 
 	
 	swapGLX(); //always double buffered.
 
@@ -313,13 +313,15 @@ int main(int argn, char** argc){
 	
 	gtk_widget_show (da1);
 	
+	//can init the shapes ... here i guess (no opengl though!)
+	g_cursor = new Shape(); 
+	
 	//also add a SourceView widget (?)
-	GtkWidget* scrolled = gtk_scrolled_window_new(NULL,NULL); 
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
-                                    GTK_POLICY_AUTOMATIC, 
-                                    GTK_POLICY_AUTOMATIC);
+	GtkSourceBuffer *buffer = gtk_source_buffer_new (NULL);
+	open_file (buffer, "script.lua");
+	GtkWidget* srcview = create_main_window(window, buffer); 
 	label = gtk_label_new("source");
-	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), scrolled, label, 1);
+	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), srcview, label, 1);
 
 	gtk_widget_show (paned);
 	gtk_widget_show (notebook);
@@ -330,7 +332,7 @@ int main(int argn, char** argc){
 	gtk_widget_show (window);
 	
 	//add a refresh timeout. 
-	g_timeout_add (1000 / 60, refresh, da1);
+	g_timeout_add (1000 / 120, refresh, da1); //120 Hz refresh. twice as fast as needed.
 	
 	//editor?
  	//main_sv(argn, argc); 

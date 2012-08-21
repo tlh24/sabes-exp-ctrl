@@ -5,6 +5,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
+#include <GL/glew.h>
 #include <GL/glut.h>    
 #include <GL/gl.h>	
 #include <GL/glu.h>	
