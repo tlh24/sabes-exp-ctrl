@@ -182,8 +182,8 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer)
 }
 
 void drawCircle(float x, float y, float r){
-	int n = 32; 
-	glBegin(GL_TRIANGLE_FAN);
+	int n = 64; 
+	glBegin(GL_POLYGON);
 	glVertex2f(x,y); 
 	for(int i=0; i<n; i++){
 		float t = (float)i * PI * 2 / (n-1); 
@@ -193,19 +193,25 @@ void drawCircle(float x, float y, float r){
 }
 
 static gboolean
-expose1 (GtkWidget *da, GdkEventExpose* event, gpointer )
+draw1 (GtkWidget *da, cairo_t *cr, gpointer )
 {
-	if (event->count > 0) return TRUE;
-	
+
 	if (!exposeGLX(da)){
 		g_assert_not_reached ();
 	}
 	
 	/* draw in here */
-	glMatrixMode(GL_MODELVIEW);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-1.0,1.0,-1.0,1.0, 0.0,1.0);
+  
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glClearColor(0,0,0,1);
+	
 	glShadeModel(GL_FLAT);
-	glColor4f(1.f, 1.f, 1.f, 0.75);
+	glColor4f(0.7f, 1.f, 1.f, 0.75);
 	
 	// run some lua here. 
 	double x = 0.0; 
@@ -281,29 +287,31 @@ int main(int argn, char** argc){
 	label = gtk_label_new("tab1");
 	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), da1, label, 0);
 	
-	da2 = gtk_drawing_area_new ();
+	/*da2 = gtk_drawing_area_new ();
 	label = gtk_label_new("tab2");
-	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), da2, label, 1);
+	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), da2, label, 1);*/
 	
 	//setup the opengl context for da1.
 	gtk_widget_set_double_buffered (da1, FALSE);
 	setupGLX(da1); 
 	g_signal_connect (da1, "configure-event",
-			G_CALLBACK (configure1), NULL);
-	g_signal_connect (da1, "expose-event",
-			G_CALLBACK (expose1), NULL);
-	g_signal_connect (da1, "realize", G_CALLBACK (realizeGLX), window);
+			G_CALLBACK (configure1), window);
+	g_signal_connect (da1, "draw",
+			G_CALLBACK (draw1), window);
+	g_signal_connect (da1, "realize", G_CALLBACK(realizeGLX), window);
 	g_signal_connect (da1, "motion_notify_event",
 			G_CALLBACK (motion_notify_event), NULL);
 	gtk_widget_set_events(da1, GDK_EXPOSURE_MASK);
 	//in order to receive keypresses, must be focusable!
 	gtk_widget_set_can_focus(da1, TRUE);
-	/*
-	gtk_widget_set_events (da, GDK_EXPOSURE_MASK
+	
+	gtk_widget_set_events (da1, GDK_EXPOSURE_MASK
 			| GDK_LEAVE_NOTIFY_MASK
 			| GDK_BUTTON_PRESS_MASK
 			| GDK_POINTER_MOTION_MASK
-			| GDK_POINTER_MOTION_HINT_MASK); */
+			| GDK_POINTER_MOTION_HINT_MASK); 
+	
+	gtk_widget_show (da1);
 	
 	//also add a SourceView widget (?)
 	GtkWidget* scrolled = gtk_scrolled_window_new(NULL,NULL); 
@@ -311,7 +319,7 @@ int main(int argn, char** argc){
                                     GTK_POLICY_AUTOMATIC, 
                                     GTK_POLICY_AUTOMATIC);
 	label = gtk_label_new("source");
-	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), scrolled, label, 2);
+	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), scrolled, label, 1);
 
 	gtk_widget_show (paned);
 	gtk_widget_show (notebook);

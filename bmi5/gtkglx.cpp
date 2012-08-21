@@ -69,9 +69,8 @@ int configureGLX(GtkWidget *widget){
 	if (glXMakeCurrent (display, id, g->context) == TRUE){
 		gtk_widget_get_allocation (widget, &allocation);
 		glViewport (0, 0, allocation.width, allocation.height);
-		return 1; 
 	}
-	return 0; 
+	return TRUE; 
 }
 
 int realizeGLX(GtkWidget *w, void*){ //extra parameter so it can be a cb.
@@ -86,10 +85,13 @@ int realizeGLX(GtkWidget *w, void*){ //extra parameter so it can be a cb.
 	if (glXMakeCurrent (display, id, g->context) == TRUE){
 		glEnable (GL_DEPTH_TEST);
 		glDepthFunc (GL_LEQUAL);
-		glEnable (GL_CULL_FACE);
-		glCullFace (GL_BACK);
+		glDisable (GL_CULL_FACE);
+		//glCullFace (GL_BACK);
 		glDisable (GL_DITHER);
 		glShadeModel (GL_SMOOTH);
+		glEnable(GL_LINE_SMOOTH); 
+		//glEnable(GL_POLYGON_SMOOTH); looks bad -- triangles don't mesh well.
+		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST); 
 	}
 
 	return TRUE;
@@ -104,8 +106,8 @@ int exposeGLX(GtkWidget *widget){
 	g->xid = gdk_x11_window_get_xid (window);
 
 	if (glXMakeCurrent (display, g->xid, g->context) == TRUE)
-		return 1; //success!
-	return 0; 
+		return TRUE; //success!
+	return FALSE; 
 }
 
 void swapGLX(){
