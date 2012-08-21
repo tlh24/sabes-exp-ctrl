@@ -38,7 +38,7 @@ int openSocket(char *strIPAddr){
 	perror(":");
 	}
 	int optval = 1; // turn on address reuse. 
-setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)); 
+	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)); 
 
 	// Flip uses connect rather than bind here -- so outgoing packets have a default endpoint.
 	if (connect(sock, (struct sockaddr*)&sin, sizeof(sockaddr_in)) != 0)

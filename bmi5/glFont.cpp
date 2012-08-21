@@ -3,7 +3,6 @@
 
 //opengl headers. 
 #include <gtk/gtk.h>
-#include <gtk/gtkgl.h>
 #include <GL/glut.h>    
 #include <GL/gl.h>	
 #include <GL/glu.h>	

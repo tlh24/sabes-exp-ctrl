@@ -1,12 +1,12 @@
 CC = g++
-OBJS = main.o tdt_udp.o glInfo.o glFont.o
+OBJS = main.o tdt_udp.o gtkglx.o glInfo.o glFont.o srcView.o
 CFLAGS=-I/usr/local/include
 CFLAGS+=  -g
 CFLAGS+= -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare -Wformat=2 \
 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
 -Wextra -pedantic -std=c++0x
 LDFLAGS = -lrt -lGL -lGLU -llua5.1
-GLIBS = gtk+-2.0 gtkglext-1.0 gtkglext-x11-1.0
+GLIBS = gtk+-3.0 gtksourceview-3.0
 GTKFLAGS = `pkg-config --cflags $(GLIBS) `
 GTKLD = `pkg-config --libs $(GLIBS) `
 

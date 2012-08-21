@@ -14,7 +14,6 @@
 
 //opengl headers. 
 #include <gtk/gtk.h>
-#include <gtk/gtkgl.h>
 #include <GL/glut.h>    
 #include <GL/gl.h>	
 #include <GL/glu.h>	
@@ -22,12 +21,15 @@
 #include "glext.h"
 #include "glInfo.h"
 #include "glFont.h"
+#include "gtkglx.h"
 
 #define PI 3.141592653589793
 
 double 	g_startTime = 0.0;
 bool		g_die = false; 
 lua_State* g_lt; 
+
+int main_sv(int argc, char **argv);
 
 double gettime(){ //in seconds!
 	timespec pt ;
@@ -40,7 +42,7 @@ double gettime(){ //in seconds!
 
 void UDP_RZ2(){
 	int sock; 
- 	sock = openSocket("169.230.191.195"); 
+ 	sock = openSocket((char*)"169.230.191.195"); 
 	//sock = setup_socket(LISTEN_PORT); // joey's RZ2. 
 	checkRZ(sock); 
 	unsigned char buf[1024]; 
@@ -122,20 +124,19 @@ void updateCursPos(float x, float y){
 	g_cursPos[1] *= -1; //zero at the top for gtk; bottom for opengl.
 }
 
-static gint motion_notify_event( GtkWidget *,
-                                 GdkEventMotion *event ){
+static gint motion_notify_event( GtkWidget *w,
+                                 GdkEventMotion *){
 	float x, y;
 	int ix, iy;
-	GdkModifierType state;
-	if (event->is_hint){
-		gdk_window_get_pointer (event->window, &ix, &iy, &state);
-		x = ix; y = iy;
-	}else{
-		x = event->x;
-		y = event->y;
-		state = (GdkModifierType)(event->state);
-	}
+	GdkDeviceManager *device_manager;
+	GdkDevice *pointer;
+	
+	device_manager = gdk_display_get_device_manager (gtk_widget_get_display (w));
+	pointer = gdk_device_manager_get_client_pointer (device_manager);
+	gdk_window_get_device_position (gtk_widget_get_window (w), pointer, &ix, &iy, NULL);
+	x = ix; y = iy;
 	updateCursPos(x,y); 
+	printf("cursor position: %f %f\n", x, y); 
 	return TRUE;
 }
 
@@ -143,19 +144,15 @@ static gboolean
 configure1 (GtkWidget *da, GdkEventConfigure *, gpointer)
 {
 	//init the openGL context. 
-	GdkGLContext *glcontext = gtk_widget_get_gl_context (da);
-	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable (da);
-
-	if (!gdk_gl_drawable_gl_begin (gldrawable, glcontext)){
+	if(!configureGLX(da)){
 		g_assert_not_reached ();
 	}
+	//save the viewport size.
+	GtkAllocation allocation;
+	gtk_widget_get_allocation (da, &allocation);
+	g_viewportSize[0] = allocation.width;
+	g_viewportSize[1] = allocation.height;
 
-	glLoadIdentity();
-	glViewport (0, 0, da->allocation.width, da->allocation.height);
-	g_viewportSize[0] = (float)da->allocation.width;
-	g_viewportSize[1] = (float)da->allocation.height;
-	/*printf("allocation.width %d allocation_height %d\n",
-		da->allocation.width, da->allocation.height); */
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho (-1,1,-1,1,0,1);
@@ -181,8 +178,6 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer)
 	}
 	BuildFont(); //so we're in the right context?
 
-	gdk_gl_drawable_gl_end (gldrawable);
-
 	return TRUE;
 }
 
@@ -198,12 +193,11 @@ void drawCircle(float x, float y, float r){
 }
 
 static gboolean
-expose1 (GtkWidget *da, GdkEventExpose*, gpointer )
+expose1 (GtkWidget *da, GdkEventExpose* event, gpointer )
 {
-	GdkGLContext *glcontext = gtk_widget_get_gl_context (da);
-	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable (da);
-
-	if (!gdk_gl_drawable_gl_begin (gldrawable, glcontext)){
+	if (event->count > 0) return TRUE;
+	
+	if (!exposeGLX(da)){
 		g_assert_not_reached ();
 	}
 	
@@ -219,31 +213,28 @@ expose1 (GtkWidget *da, GdkEventExpose*, gpointer )
 	luaRun(x,y); 
 	drawCircle(x, y, 0.5f); 
 	
-	if (gdk_gl_drawable_is_double_buffered (gldrawable))
-		gdk_gl_drawable_swap_buffers (gldrawable);
-	else
-		glFlush ();
-
-	gdk_gl_drawable_gl_end (gldrawable);
+	swapGLX(); //always double buffered.
 
 	return TRUE;
 }
 
 static gboolean refresh (gpointer user_data){
 	GtkWidget *da = GTK_WIDGET (user_data);
-
-	gdk_window_invalidate_rect (da->window, &da->allocation, FALSE);
-	gdk_window_process_updates (da->window, FALSE);
+	gtk_widget_queue_draw (da);
 
 	//can do other pre-frame GUI update stuff here.
 	return TRUE;
 }
 
+static void notebookPageChangedCB(GtkWidget *,
+					gpointer, int page, gpointer){
+	printf("tab %d selected!\n", page); 
+}
+
 int main(int argn, char** argc){
 	//setup a window with openGL. 
 	GtkWidget *window;
-	GtkWidget *da1, *paned, *v1;
-	GdkGLConfig *glconfig;
+	GtkWidget *da1, *da2, *notebook, *paned, *v1, *label;
 
 	/* Declare a Lua State, open the Lua State and load the libraries (see above). */
 	lua_State *l;
@@ -257,7 +248,6 @@ int main(int argn, char** argc){
 	// instead of a big ugly switch statement. 
 	//first make a thread and push it on the stack.
 	g_lt = lua_newthread(l); 
-	int r; 
 	printf("This line in directly from C\n\n");
 	if(luaL_dofile(g_lt, "script.lua")) //inits the function.
 		printf("%s\n", lua_tostring(g_lt, -1)); //print errors.
@@ -265,66 +255,77 @@ int main(int argn, char** argc){
 	luaRun(x,y); 
 	
 	gtk_init (&argn, &argc);
-	gtk_gl_init (&argn, &argc);
 
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title (GTK_WINDOW (window), "sabes experimental control");
 	gtk_window_set_default_size (GTK_WINDOW (window), 850, 650);
-	da1 = gtk_drawing_area_new ();
-	gtk_widget_set_size_request(GTK_WIDGET(da1), 640, 650);
 
-	paned = gtk_hpaned_new();
+	paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_container_add (GTK_CONTAINER (window), paned);
 
-	v1 = gtk_vbox_new (FALSE, 0);
+	//left: gui etc. 
+	v1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_set_size_request(GTK_WIDGET(v1), 200, 600);
 	
+	//right: tabbed ('notebook') graphics windows. 
+	notebook = gtk_notebook_new(); 
+	gtk_notebook_set_tab_pos (GTK_NOTEBOOK (notebook), GTK_POS_TOP);
+	g_signal_connect(notebook, "switch-page",
+					 G_CALLBACK(notebookPageChangedCB), 0);
+	gtk_widget_set_size_request(GTK_WIDGET(notebook), 640, 650);
+	
 	gtk_paned_add1(GTK_PANED(paned), v1);
-	gtk_paned_add2(GTK_PANED(paned), da1);
-
-	gtk_widget_show (paned);
-
-	g_signal_connect_swapped (window, "destroy",
-			G_CALLBACK (destroy), NULL);
-	gtk_widget_set_events (da1, GDK_EXPOSURE_MASK);
-
-	gtk_widget_show (window);
-
-	/* prepare GL */
-	glconfig = gdk_gl_config_new_by_mode (GdkGLConfigMode(
-			GDK_GL_MODE_RGB |
-			GDK_GL_MODE_DEPTH |
-			GDK_GL_MODE_DOUBLE));
-
-	if (!glconfig)
-		g_assert_not_reached ();
-
-	if (!gtk_widget_set_gl_capability (da1, glconfig, NULL, TRUE,
-				GDK_GL_RGBA_TYPE)){
-		g_assert_not_reached ();
-	}
-
+	gtk_paned_add2(GTK_PANED(paned), notebook);
+	
+	da1 = gtk_drawing_area_new ();
+	label = gtk_label_new("tab1");
+	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), da1, label, 0);
+	
+	da2 = gtk_drawing_area_new ();
+	label = gtk_label_new("tab2");
+	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), da2, label, 1);
+	
+	//setup the opengl context for da1.
+	gtk_widget_set_double_buffered (da1, FALSE);
+	setupGLX(da1); 
 	g_signal_connect (da1, "configure-event",
 			G_CALLBACK (configure1), NULL);
 	g_signal_connect (da1, "expose-event",
 			G_CALLBACK (expose1), NULL);
-	g_signal_connect (G_OBJECT (da1), "motion_notify_event",
-		    G_CALLBACK (motion_notify_event), NULL);
-	//g_signal_connect (G_OBJECT (da1), "button_press_event",
-	//	    G_CALLBACK (button_press_event), NULL);
-
-	gtk_widget_set_events (da1, GDK_EXPOSURE_MASK
-			 | GDK_LEAVE_NOTIFY_MASK
-			 | GDK_BUTTON_PRESS_MASK
-			 | GDK_POINTER_MOTION_MASK
-			 | GDK_POINTER_MOTION_HINT_MASK);
-
+	g_signal_connect (da1, "realize", G_CALLBACK (realizeGLX), window);
+	g_signal_connect (da1, "motion_notify_event",
+			G_CALLBACK (motion_notify_event), NULL);
+	gtk_widget_set_events(da1, GDK_EXPOSURE_MASK);
 	//in order to receive keypresses, must be focusable!
-	// http://forums.fedoraforum.org/archive/index.php/t-242963.html
-	GTK_WIDGET_SET_FLAGS(da1, GTK_CAN_FOCUS );
+	gtk_widget_set_can_focus(da1, TRUE);
+	/*
+	gtk_widget_set_events (da, GDK_EXPOSURE_MASK
+			| GDK_LEAVE_NOTIFY_MASK
+			| GDK_BUTTON_PRESS_MASK
+			| GDK_POINTER_MOTION_MASK
+			| GDK_POINTER_MOTION_HINT_MASK); */
+	
+	//also add a SourceView widget (?)
+	GtkWidget* scrolled = gtk_scrolled_window_new(NULL,NULL); 
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
+                                    GTK_POLICY_AUTOMATIC, 
+                                    GTK_POLICY_AUTOMATIC);
+	label = gtk_label_new("source");
+	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), scrolled, label, 2);
+
+	gtk_widget_show (paned);
+	gtk_widget_show (notebook);
+
+	g_signal_connect_swapped (window, "destroy",
+			G_CALLBACK (destroy), NULL);
+
+	gtk_widget_show (window);
 	
 	//add a refresh timeout. 
 	g_timeout_add (1000 / 60, refresh, da1);
+	
+	//editor?
+ 	//main_sv(argn, argc); 
 	
 	gtk_widget_show_all (window);
 	gtk_main ();
