@@ -106,5 +106,8 @@ public:
 	void swap(){
 		glXSwapBuffers (m_display, m_xid);
 	}
+	float getAR(){
+		return m_size[0] / m_size[1]; 
+	}
 };
 #endif

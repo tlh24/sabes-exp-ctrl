@@ -13,14 +13,12 @@ class Shape{
 		unsigned int m_vao; 
 		unsigned int m_vbo; 
 		unsigned int m_drawmode; 
-		unsigned int m_drawN; 
 		float	m_color[4];
 		float m_scale[2]; 
 		float m_trans[2]; 
 	Shape(void){
 		m_vao = 0; 
 		m_vbo = 0; 
-		m_drawN = 0; 
 		m_color[0] = m_color[1] = m_color[2] = m_color[3] = 1.f; 
 		m_scale[0] = m_scale[1] = 1.f; 
 		m_trans[0] = m_trans[1] = 0.f; 
@@ -32,7 +30,7 @@ class Shape{
 	~Shape(){
 		deleteBuffers(); 
 	}
-	void makeVAO(float* vertices){
+	void makeVAO(float* vertices, bool del){
 		deleteBuffers(); 
 		glGenVertexArrays(1, &m_vao); // Create our Vertex Array Object
 		glBindVertexArray(m_vao); // Bind our Vertex Array Object so we can use it
@@ -45,7 +43,7 @@ class Shape{
 		
 		glEnableVertexAttribArray(0); // Disable our Vertex Array Object
 		glBindVertexArray(0); // Disable our Vertex Buffer Object
-		free(vertices);
+		if(del) free(vertices);
 	}
 	void makeCircle(int n){
 		//makes a circle, diameter 1, at the origin.
@@ -58,9 +56,8 @@ class Shape{
 			v[i*2+3] = 0.5f*cosf(t); 
 		}
 		m_n = n+1; 
-		makeVAO(v); 
+		makeVAO(v, true); 
 		m_drawmode = GL_TRIANGLE_FAN; 
-		m_drawN = n+1; 
 	}
 	void draw(){
 		glPushMatrix();
@@ -69,7 +66,7 @@ class Shape{
 		glScalef(m_scale[0], m_scale[1], 1.f); 
 		glColor4f(m_color[0], m_color[1], m_color[2], m_color[3]);
 		glBindVertexArray(m_vao);
-		glDrawArrays(m_drawmode, 0, m_drawN);  
+		glDrawArrays(m_drawmode, 0, m_n);  
 		glBindVertexArray(0);
 		glPopMatrix(); 
 	}
@@ -78,6 +75,55 @@ class Shape{
 	}
 	void scale(float s){
 		m_scale[0] = m_scale[1] = s;
+	}
+};
+class StarField : public Shape {
+public: //do something like the flow field common in the lab.
+	float m_vel[2]; //in screen units/second. 
+	float* m_v; //backing store.
+	
+	StarField(){
+		m_vel[0] = 0.2f; 
+		m_vel[1] = 0.1f; 
+		m_v = NULL; 
+	}
+	~StarField(){
+		if(m_v) free(m_v); m_v = NULL; 
+	}
+	void makeStars(int nstars, float ar){
+		//distribute the stars uniformly over w, h. 
+		//this just requires scaling some rand() s. 
+		if(m_v) free(m_v); m_v = NULL; 
+		m_v = (float*)malloc(nstars * 2 * sizeof(float)); 
+		for(int i=0; i<nstars; i++){
+			m_v[i*2+0] = (((float)rand() / (float)RAND_MAX) - 0.5)*ar*2.f;
+			m_v[i*2+1] = (((float)rand() / (float)RAND_MAX) - 0.5)*2.f; 
+		}
+		makeVAO(m_v, false); //keep around the b.s.
+		m_drawmode = GL_POINTS; 
+		m_n = nstars; 
+	}
+	void move(float dt, float ar){ //in seconds.
+		float a[2]; a[0] = ar; a[1] = 1.f; 
+		for(int i=0; i<m_n; i++){
+			for(int j=0; j<2; j++){
+				float f = m_v[i*2+j];
+				f += m_vel[j] * dt; 
+				if(f < a[j]) f += a[j]*2.f;
+				if(f > a[j]) f -= a[j]*2.f; 
+				m_v[i*2+j] = f;
+			}
+		}
+	}
+	void draw(){
+		//this is a little more complicated, as we need to do a memcpy. 
+		glPointSize(3.f); 
+		glBindVertexArray(m_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // Bind our Vertex Buffer Object
+		glBufferData(GL_ARRAY_BUFFER, m_n*2*sizeof(GLfloat), m_v, GL_STATIC_DRAW);
+		glColor4f(m_color[0], m_color[1], m_color[2], m_color[3]);
+		glDrawArrays(m_drawmode, 0, m_n);  
+		glBindVertexArray(0);
 	}
 };
 #endif

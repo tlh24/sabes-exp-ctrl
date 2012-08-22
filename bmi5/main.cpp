@@ -36,6 +36,7 @@ double 	g_startTime = 0.0;
 bool		g_die = false; 
 lua_State* g_lt; 
 Shape*	g_cursor; 
+StarField* g_stars; 
 gtkglx*  g_daglx[2]; //human, monkey.
 GtkWidget* g_da[2]; 
 
@@ -196,6 +197,7 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 	//have to create the shapes here -- context again.
 	g_cursor->makeCircle(64); 
 	g_cursor->scale(0.5); 
+	g_stars->makeStars(1000, g_daglx[1]->getAR()); 
 
 	return TRUE;
 }
@@ -223,6 +225,10 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	luaRun(x,y); 
 	g_cursor->translate(x,y); 
 	g_cursor->draw(); 
+	g_stars->m_vel[0] = g_cursPos[0] / -3.f;
+	g_stars->m_vel[1] = g_cursPos[1] / -3.f; 
+	g_stars->move(0.01, g_daglx[1]->getAR()); 
+	g_stars->draw(); 
 	
 	g_daglx[h]->swap(); //always double buffered.
 
@@ -352,6 +358,7 @@ int main(int argn, char** argc){
 	
 	//can init the shapes ... here i guess (no opengl though!)
 	g_cursor = new Shape(); 
+	g_stars = new StarField(); 
 	
 	//also add a SourceView widget (?)
 	GtkSourceBuffer *buffer = gtk_source_buffer_new (NULL);
