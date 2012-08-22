@@ -168,7 +168,7 @@ static GtkToggleActionEntry toggle_entries[] = {
 };
 
 static GtkRadioActionEntry tabs_radio_entries[] = {
-	{ "TabWidth2", NULL, "2", NULL, "Set tabulation width to 2 spaces", 2 },
+	{ "TabWidth3", NULL, "3", NULL, "Set tabulation width to 3 spaces", 3 },
 	{ "TabWidth4", NULL, "4", NULL, "Set tabulation width to 4 spaces", 4 },
 	{ "TabWidth6", NULL, "6", NULL, "Set tabulation width to 6 spaces", 6 },
 	{ "TabWidth8", NULL, "8", NULL, "Set tabulation width to 8 spaces", 8 },
@@ -219,11 +219,11 @@ static const gchar *view_ui_description =
 "      <menuitem action=\"InsertSpaces\"/>"
 "      <separator/>"
 "      <menu action=\"TabWidth\">"
+"        <menuitem action=\"TabWidth3\"/>"
 "        <menuitem action=\"TabWidth4\"/>"
 "        <menuitem action=\"TabWidth6\"/>"
 "        <menuitem action=\"TabWidth8\"/>"
 "        <menuitem action=\"TabWidth10\"/>"
-"        <menuitem action=\"TabWidth12\"/>"
 "      </menu>"
 "      <menu action=\"IndentWidth\">"
 "        <menuitem action=\"IndentWidthUnset\"/>"
@@ -1430,7 +1430,6 @@ create_view_window (GtkWidget* top, GtkSourceBuffer *buffer, GtkSourceView *from
 			GTK_TOGGLE_ACTION (action),
 			gtk_source_view_get_insert_spaces_instead_of_tabs (from));
 
-		gtk_source_view_set_tab_width(GTK_SOURCE_VIEW (from), 3); 
 		tmp = g_strdup_printf ("TabWidth%d", gtk_source_view_get_tab_width (from));
 		action = gtk_action_group_get_action (action_group, tmp);
 		if (action)
@@ -1444,7 +1443,7 @@ create_view_window (GtkWidget* top, GtkSourceBuffer *buffer, GtkSourceView *from
 			gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action), TRUE);
 		g_free (tmp);
 	}
-
+	gtk_source_view_set_tab_width(GTK_SOURCE_VIEW (view), 3); // set default tab width.
 	add_source_mark_pixbufs (GTK_SOURCE_VIEW (view));
 
 	gtk_widget_show_all (vbox);
@@ -1508,7 +1507,7 @@ create_main_window (GtkWidget* top, GtkSourceBuffer *buffer)
 	action = gtk_action_group_get_action (action_group, "InsertSpaces");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action), FALSE);
 
-	action = gtk_action_group_get_action (action_group, "TabWidth8");
+	action = gtk_action_group_get_action (action_group, "TabWidth3");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action), TRUE);
 
 	action = gtk_action_group_get_action (action_group, "IndentWidthUnset");
