@@ -11,6 +11,9 @@
 #include <lua5.1/lua.h>
 #include <lua5.1/lauxlib.h>
 #include <lua5.1/lualib.h>
+/*#include <luajit-2.0/lua.h>
+#include <luajit-2.0/lauxlib.h>
+#include <luajit-2.0/lualib.h> -- these don't work, ??? */
 
 //opengl headers. 
 #include <gtk/gtk.h>
@@ -227,7 +230,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	g_cursor->draw(); 
 	g_stars->m_vel[0] = g_cursPos[0] / -3.f;
 	g_stars->m_vel[1] = g_cursPos[1] / -3.f; 
-	g_stars->move(0.01, g_daglx[1]->getAR()); 
+	g_stars->move(0.01, g_daglx[1]->getAR()); //really should have the actual time here.
 	g_stars->draw(); 
 	
 	g_daglx[h]->swap(); //always double buffered.

@@ -1596,7 +1596,7 @@ init_mem_stuff (void)
 
 
 /* Program entry point ------------------------------------------------------------ */
-
+/*
 int main_sv(int argc, char **argv)
 {
 	GtkWidget *top;
@@ -1632,7 +1632,7 @@ int main_sv(int argc, char **argv)
 
 // 	gdk_window_set_debug_updates (TRUE);
 
-	/* we do not use defaults so we don't need to install the library */
+	// we do not use defaults so we don't need to install the library
 	dirs = use_default_paths ? NULL : builtin_lang_dirs;
 	lm = gtk_source_language_manager_get_default ();
 	gtk_source_language_manager_set_search_path (lm, dirs);
@@ -1678,7 +1678,7 @@ int main_sv(int argc, char **argv)
 	else
 		style_scheme = NULL;
 
-	/* create buffer */
+	// create buffer
 	buffer = gtk_source_buffer_new (NULL);
 
 	gtk_source_buffer_set_highlight_syntax (buffer, !no_syntax);
@@ -1688,16 +1688,15 @@ int main_sv(int argc, char **argv)
 	else
 		open_file (buffer, "script.lua");
 
-	/* create first window */
+	// create first window 
 	top = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	create_main_window (top, buffer);
 	gtk_window_set_default_size (GTK_WINDOW (top), 500, 500);
 	gtk_widget_show (top);
 
-	/* ... and action! */
 	//gtk_main ();
 
-	/* cleanup */
+	//cleanup 
 	g_list_foreach (windows, (GFunc) gtk_widget_destroy, NULL);
 	g_list_free (windows);
 	g_object_unref (buffer);
@@ -1705,4 +1704,4 @@ int main_sv(int argc, char **argv)
 	g_free (style_scheme_id);
 
 	return 0;
-}
+} */
