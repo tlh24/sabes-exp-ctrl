@@ -43,7 +43,6 @@
 
 /* Global list of open windows */
 
-static GList *windows = NULL;
 static GtkSourceStyleScheme *style_scheme = NULL;
 
 /* Private data structures */
@@ -636,7 +635,7 @@ smart_home_end_toggled_cb (GtkAction *action,
 
 
 static void
-new_view_cb (GtkAction *, gpointer user_data)
+new_view_cb (GtkAction *, gpointer )
 {
 	/*GtkSourceBuffer *buffer;
 	GtkSourceView *view;

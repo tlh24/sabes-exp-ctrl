@@ -25,11 +25,11 @@
 #include <GL/glu.h>	
 #include <GL/glx.h> 
 #include <GL/glext.h> 
-//#include "glext.h"
 #include "glInfo.h"
 #include "glFont.h"
 #include "gtkglx.h"
 #include "shape.h"
+#include "polhemus.h"
 
 //srcview headers. 
 #include <gtksourceview/gtksourceview.h>
@@ -247,7 +247,7 @@ static int realize1(GtkWidget *w, gpointer p){
 	return TRUE;
 }
 
-static gboolean refresh (gpointer user_data){
+static gboolean refresh (gpointer ){
 	//GtkWidget **da = GTK_WIDGET (user_data);
 	gtk_widget_queue_draw (g_da[0]);
 	gtk_widget_queue_draw (g_da[1]);
@@ -259,6 +259,126 @@ static void notebookPageChangedCB(GtkWidget *,
 					gpointer, int page, gpointer){
 	printf("tab %d selected!\n", page); 
 }
+
+/* Liberty / Polhemus. 
+ as reading from USB / serial will take some time, it makes sense to 
+ put this in a separate thread, with mutex so that the instant the data is 
+ available, we pass it through the task logic & display on screen
+ (or control microstimulation). 
+ There seems no lower latency way ... 
+ While writing floats is likely atomic, writing three floats is not -- 
+ hence the need for interlock. 
+ */
+#define BUF_SIZE 1000
+float g_sensors[2][6]; 
+char g_circBuff[1024]; 
+unsigned int g_cbPtr = 0; 
+unsigned int g_cbRN = 0; //pointer to the last carrige return.
+
+void* polhemusThread(void* ){
+	
+	unsigned char buf[BUF_SIZE];
+	int count, start, len, i;
+	
+	//init the communication obj.
+	polhemus* pol = new polhemus(); 
+	if(!pol){
+		printf("Memory Allocation Error creating tracker object\n");
+		return NULL;
+	}
+	int fail; 
+	//fail = pol->UsbConnect(TRKR_LIB); //see polhemus.h
+	fail = pol->Rs232Connect("/dev/ttyS2", 115200); 
+	if(fail){
+		printf("could not establish a rs232 connection to the Polhemus / liberty\n");
+	}else{
+		printf("polhemus connected via rs232!\n"); 
+	}
+	//flush the buffer, sync things up.
+	count = 0; 
+	do {
+		if(count <20)
+			pol->Write("p"); //request position data (and stop continuous..)
+		usleep(5000); 
+		len=pol->Read(buf,BUF_SIZE);  // keep trying till we get a response
+		count++; 
+	} while (len > 0);
+	// first establish comm and clear out any residual trash data
+	double starttime = gettime(); 
+	double frames = 0; 
+	//now put it in binary (faster than ascii!) mode:
+	pol->Write("f1\r"); 
+	usleep(5000);
+	len = pol->Read(buf, BUF_SIZE); //throw away.
+	usleep(5000);
+	// we only care about x, y, z -- faster (lower latency) transmission.
+	pol->Write("O*,2\r"); //this command turns off sending euler angles. 
+	pol->Write("c\r"); //request continuous data.
+	// and read the data in a loop.
+	g_cbPtr = g_cbRN = 0; 
+	while(!g_die){
+		if(1){ //binary communication. slow?
+			//pol->Write((void*)("p"), 1); //request position data.
+			start = count = 0;
+			memset(buf, 0, 40); 
+			usleep(200);
+			do {
+				len = pol->Read(buf+start, BUF_SIZE-start); 
+				if(len>0) start+=len;
+				usleep(100);
+			} while((len>0) || (count++ < 5));
+			if(start > 0){
+				printf("%d bytes Read\n",start);
+				//frame starts with 'LY_P', and is 8 bytes. This is followed by 3 4-byte floats.
+				//total frame is hence 20 bytes. 
+				for(i=0; i<start; i++){
+					g_circBuff[g_cbPtr % 1024] = buf[i]; 
+					g_cbPtr++; 
+				}
+				// align to frame.
+				while(((g_circBuff[g_cbRN % 1024] != 'L') || 
+					(g_circBuff[(g_cbRN+1) % 1024] != 'Y') || 
+					(g_circBuff[(g_cbRN+2) % 1024] != 0x01)) &&
+					g_cbRN + 20 < g_cbPtr){
+					g_cbRN++; 
+				}
+				//this will either leave us aligned at the start of a frame
+				//or waiting for more data.
+				//copy between the current /r/n. 
+				if(g_circBuff[g_cbRN % 1024] == 'L' && g_circBuff[(g_cbRN+1) % 1024] == 'Y'){
+					for(i=0; i<20 && (g_cbRN+i) < g_cbPtr; i++){
+						buf[i] = g_circBuff[(g_cbRN+i) % 1024]; 
+					}
+					buf[i] = 0; 
+					//this data is used, move the pointer forward one. 
+					g_cbRN++;
+					// check for proper format LY for Liberty;  PA for Patriot
+					float* pData=(float*)(buf+8);			// header is first 8 bytes
+					// print data
+					//printf("x= %.4f, y= %.4f, z= %.4f, az= %.4f, el= %.4f, roll= %.4f\n",
+					//	pData[0],pData[1],pData[2],pData[3],pData[4],pData[5]);
+					printf("x= %.4f, y= %.4f, z= %.4f,\n",
+								pData[0],pData[1],pData[2]);
+					frames += 1; 
+					printf("frame rate: %f\n", frames / (gettime() - starttime)); 
+					for(i=0; i<3; i++){
+						g_sensors[0][i] = pData[i]; 
+					}
+					if(g_sensors[0][2] > 0.0){
+						g_sensors[0][0] *= -1.f;
+						g_sensors[0][1] *= -1.f;
+						g_sensors[0][2] *= -1.f; 
+					}
+				}
+			}
+		}
+	}
+	pol->Write((void*)("p"), 1); //stop continuous mode.
+	usleep(500); 
+	pol->Close(); 
+	return NULL;
+}
+
 
 int main(int argn, char** argc){
 	//setup a window with openGL. 
@@ -384,13 +504,14 @@ int main(int argn, char** argc){
 	g_da[1] = da2; 
 	g_timeout_add (1000 / 120, refresh, da1); //120 Hz refresh. twice as fast as needed.
 	
-	//editor?
- 	//main_sv(argn, argc); 
+	pthread_t pthread; 
+	pthread_create(&pthread, NULL, polhemusThread, NULL); 
 	
 	gtk_widget_show_all (window);
 	gtk_main ();
 	
 	//lua_close(l);
+	pthread_join(pthread,NULL);  // wait for the read thread to complete
 	delete g_daglx[0];
 	delete g_daglx[1]; 
 	return 0; 
