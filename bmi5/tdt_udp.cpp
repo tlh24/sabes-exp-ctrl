@@ -115,7 +115,7 @@ void disconnectRZ(int sock)
     {
         char packet[HEADER_BYTES] = COMMAND_HEADER(FORGET_REMOTE_IP);
         if (send(sock, packet, HEADER_BYTES, 0) != HEADER_BYTES){
-            fprintf(stderr, "Failed to send \"stop sending\" packet: %d\n");
+            fprintf(stderr, "Failed to send \"stop sending\" packet.\n");
 		  		perror(":");
 	 		}
 
