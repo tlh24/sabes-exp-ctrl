@@ -6,6 +6,7 @@
 #include <time.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <stack>
 
 //lua headers.
 #include <lua5.1/lua.h>
@@ -35,15 +36,19 @@
 #include <gtksourceview/gtksourceview.h>
 #include "srcView.h"
 
+using namespace std;
+
 double 	g_startTime = 0.0;
 bool		g_die = false; 
+GtkWindow* g_mainWindow; //used for dialogs, etc. 
 lua_State* g_lt; 
 Shape*	g_cursor; 
 StarField* g_stars; 
 gtkglx*  g_daglx[2]; //human, monkey.
 GtkWidget* g_da[2]; 
+stack<string> g_luaExecStack; 
 
-double gettime(){ //in seconds!
+extern "C" double gettime(){ //in seconds!
 	timespec pt ;
 	clock_gettime(CLOCK_MONOTONIC, &pt);
 	double ret = (double)(pt.tv_sec) ;
@@ -95,31 +100,57 @@ void UDP_RZ2(){
 bool 			g_glInitialized = false;
 float			g_cursPos[2]; 
 
-void luaRun(double &x, double &y){
-	lua_getglobal(g_lt, "move"); 
-	if(g_die) printf("telling lua thread to quit..\n"); 
-	lua_pushnumber(g_lt, g_die ? 0.0 : 1.0); //tell the other thread to terminate.
-	lua_pushnumber(g_lt, g_cursPos[0]); //number = double in this case.
-	lua_pushnumber(g_lt, g_cursPos[1]); 
-	int r = lua_resume(g_lt,3); //call 'move' with 2 arguments. kinda bad this is in the same thread..
-	if(r == LUA_YIELD){
-		x = lua_tonumber(g_lt, -1); 
-		y = lua_tonumber(g_lt, -2); 
-		//printf("lua results: %f %f\n", x, y); 
-		lua_pop(g_lt, 2); //pop the results off the stack.
-	}else if(r == LUA_ERRRUN){
-		printf("%s\n", lua_tostring(g_lt, -1)); //print errors.
-	}else{
-		printf("lua function returned, not yielded.\n"); 
-	}
+void errorDialog(char* msg){
+	GtkWidget *dialog, *label, *content_area;
+	dialog = gtk_dialog_new_with_buttons ("Error",
+							g_mainWindow,
+							GTK_DIALOG_DESTROY_WITH_PARENT,
+							GTK_STOCK_OK,
+							GTK_RESPONSE_NONE,
+							NULL);
+	content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+	label = gtk_label_new (msg);
+	/* Ensure that the dialog box is destroyed when the user responds. */
+	g_signal_connect_swapped (dialog,
+							"response",
+							G_CALLBACK (gtk_widget_destroy),
+							dialog);
+	/* Add the label, and show everything we've added to the dialog. */
+	gtk_container_add (GTK_CONTAINER (content_area), label);
+	gtk_widget_show_all (dialog);
+}
+
+void luaRun(){
+	if(!g_luaExecStack.empty()){
+		string s = g_luaExecStack.top(); 
+		lua_getglobal(g_lt, s.c_str()); 
+		if(g_die) printf("telling lua thread to quit..\n"); 
+		lua_pushnumber(g_lt, g_die ? 0.0 : 1.0); //tell the other thread to terminate.
+		lua_pushnumber(g_lt, gettime()); //number = double in this case.
+		int r = lua_resume(g_lt,2); //call 'move' with 2 arguments. kinda bad this is in the same thread..
+		if(r == LUA_YIELD){
+			//should the API be to return something every time??
+			//x = lua_tonumber(g_lt, -1); 
+			//y = lua_tonumber(g_lt, -2); 
+			//printf("lua results: %f %f\n", x, y); 
+			//lua_pop(g_lt, 2); //pop the results off the stack.
+		}else if(r == LUA_ERRRUN){
+			const char* errstr = lua_tostring(g_lt, -1); 
+			printf("%s\n", errstr); //print errors.
+			errorDialog((char*)errstr); 
+			g_luaExecStack.pop();
+		}else{
+			printf("lua function returned, not yielded.\n"); 
+			g_luaExecStack.pop();
+		}
+ 	}
 }
 
 void destroy(GtkWidget *, gpointer){
 	//more cleanup later.
 	g_die = true;
 	KillFont(); 
-	double x,y;
-	luaRun(x,y); 
+	luaRun(); 
 	lua_close(g_lt); 
 	gtk_main_quit();
 }
@@ -223,10 +254,8 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	glColor4f(0.7f, 1.f, 1.f, 0.75);
 	
 	// run some lua here. 
-	double x = 0.0; 
-	double y = 0.0; 
-	luaRun(x,y); 
-	g_cursor->translate(x,y); 
+	luaRun(); 
+	//g_cursor->translate(x,y); 
 	g_cursor->draw(); 
 	g_stars->m_vel[0] = g_cursPos[0] / -3.f;
 	g_stars->m_vel[1] = g_cursPos[1] / -3.f; 
@@ -260,6 +289,12 @@ static void notebookPageChangedCB(GtkWidget *,
 	printf("tab %d selected!\n", page); 
 }
 
+static void luaCalibrateCB(GtkWidget*, gpointer){
+	g_luaExecStack.push("calibrate"); 
+}
+static void luaRunTaskCB(GtkWidget*, gpointer){
+	g_luaExecStack.push("move"); 
+}
 /* Liberty / Polhemus. 
  as reading from USB / serial will take some time, it makes sense to 
  put this in a separate thread, with mutex so that the instant the data is 
@@ -328,7 +363,7 @@ void* polhemusThread(void* ){
 				usleep(100);
 			} while((len>0) || (count++ < 5));
 			if(start > 0){
-				printf("%d bytes Read\n",start);
+				//printf("%d bytes Read\n",start);
 				//frame starts with 'LY_P', and is 8 bytes. This is followed by 3 4-byte floats.
 				//total frame is hence 20 bytes. 
 				for(i=0; i<start; i++){
@@ -357,10 +392,10 @@ void* polhemusThread(void* ){
 					// print data
 					//printf("x= %.4f, y= %.4f, z= %.4f, az= %.4f, el= %.4f, roll= %.4f\n",
 					//	pData[0],pData[1],pData[2],pData[3],pData[4],pData[5]);
-					printf("x= %.4f, y= %.4f, z= %.4f,\n",
-								pData[0],pData[1],pData[2]);
+					//printf("x= %.4f, y= %.4f, z= %.4f,\n",
+					//			pData[0],pData[1],pData[2]);
 					frames += 1; 
-					printf("frame rate: %f\n", frames / (gettime() - starttime)); 
+					//printf("frame rate: %f\n", frames / (gettime() - starttime)); 
 					for(i=0; i<3; i++){
 						g_sensors[0][i] = pData[i]; 
 					}
@@ -379,6 +414,23 @@ void* polhemusThread(void* ){
 	return NULL;
 }
 
+extern "C" void getPolhemus(float* res){
+	int i; 
+	for(i=0; i<3; i++){
+		res[i+1] = g_sensors[0][i]; //+1 b/c lua indexing via the FFI is still 1-based.
+	}
+	//printf("from c: %f %f %f\n", res[1], res[2], res[3]); 
+}
+//boilerplate. yecht.
+extern "C" void setShapeLoc(int , float x, float y){
+	g_cursor->translate(x,y); 
+}
+extern "C" void setShapeColor(int , float r, float g, float b){
+	g_cursor->setColor(r,g,b); 
+}
+extern "C" void setShapeAlpha(int , float a){
+	g_cursor->setAlpha(a); 
+}
 
 int main(int argn, char** argc){
 	//setup a window with openGL. 
@@ -388,21 +440,16 @@ int main(int argn, char** argc){
 	/* Declare a Lua State, open the Lua State and load the libraries (see above). */
 	lua_State *l;
 	l = luaL_newstate(); 
-	luaopen_base(l);
-	luaopen_table(l); 
-	luaopen_math(l); 
-	luaopen_debug(l); 
+	luaL_openlibs(l);
 
 	// want to make a Lua function that yeilds() 
 	// instead of a big ugly switch statement. 
 	//first make a thread and push it on the stack.
 	g_lt = lua_newthread(l); 
 	printf("This line in directly from C\n\n");
-	if(luaL_dofile(g_lt, "script.lua")) //inits the function.
+	if(luaL_dofile(g_lt, "script_ffi.lua")){ //inits the function.
 		printf("%s\n", lua_tostring(g_lt, -1)); //print errors.
-	double x, y; 
-	luaRun(x,y); 
-	
+	}
 	gtk_init (&argn, &argc);
 
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -415,6 +462,13 @@ int main(int argn, char** argc){
 	//left: gui etc. 
 	v1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_set_size_request(GTK_WIDGET(v1), 200, 600);
+	GtkWidget* button = gtk_button_new_with_label ("Calibrate liberty");
+	g_signal_connect(button, "clicked", G_CALLBACK(luaCalibrateCB), 0); 
+	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
+	
+	button = gtk_button_new_with_label ("run task");
+	g_signal_connect(button, "clicked", G_CALLBACK(luaRunTaskCB), 0); 
+	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
 	//right: tabbed ('notebook') graphics windows. 
 	notebook = gtk_notebook_new(); 
@@ -485,7 +539,7 @@ int main(int argn, char** argc){
 	
 	//also add a SourceView widget (?)
 	GtkSourceBuffer *buffer = gtk_source_buffer_new (NULL);
-	open_file (buffer, "script.lua");
+	open_file (buffer, "script_ffi.lua");
 	GtkWidget* srcview = create_main_window(window, buffer); 
 	label = gtk_label_new("source");
 	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), srcview, label, 1);
@@ -507,6 +561,7 @@ int main(int argn, char** argc){
 	pthread_t pthread; 
 	pthread_create(&pthread, NULL, polhemusThread, NULL); 
 	
+	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
 	gtk_main ();
 	

@@ -76,6 +76,14 @@ class Shape{
 	void scale(float s){
 		m_scale[0] = m_scale[1] = s;
 	}
+	void setColor(float r, float g, float b){
+		m_color[0] = r; 
+		m_color[1] = g; 
+		m_color[2] = b; 
+	}
+	void setAlpha(float a){
+		m_color[3] = a; 
+	}
 };
 class StarField : public Shape {
 public: //do something like the flow field common in the lab.
