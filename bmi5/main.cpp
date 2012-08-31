@@ -39,14 +39,17 @@
 using namespace std;
 
 double 	g_startTime = 0.0;
+double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
 bool		g_die = false; 
 GtkWindow* g_mainWindow; //used for dialogs, etc. 
-lua_State* g_lt; 
+lua_State *g_lua; //where the libraries are loaded etc.
+lua_State* g_lt; //the thread. needs to be recreated every time we reload. 
+stack<string> g_luaExecStack; 
 Shape*	g_cursor; 
 StarField* g_stars; 
 gtkglx*  g_daglx[2]; //human, monkey.
-GtkWidget* g_da[2]; 
-stack<string> g_luaExecStack; 
+GtkWidget* g_da[2]; //draw areas. 
+GtkWidget* g_luaTimeLabel; 
 
 extern "C" double gettime(){ //in seconds!
 	timespec pt ;
@@ -126,8 +129,14 @@ void luaRun(){
 		lua_getglobal(g_lt, s.c_str()); 
 		if(g_die) printf("telling lua thread to quit..\n"); 
 		lua_pushnumber(g_lt, g_die ? 0.0 : 1.0); //tell the other thread to terminate.
-		lua_pushnumber(g_lt, gettime()); //number = double in this case.
+		double t = gettime(); 
+		lua_pushnumber(g_lt,t); //number = double in this case.
 		int r = lua_resume(g_lt,2); //call 'move' with 2 arguments. kinda bad this is in the same thread..
+		double dt = gettime() - t; 
+		g_luaTime[0] += 1.0; 
+		g_luaTime[1] += dt; 
+		g_luaTime[2] = g_luaTime[2] < dt ? dt : g_luaTime[2]; 
+		g_luaTime[3] = dt; 
 		if(r == LUA_YIELD){
 			//should the API be to return something every time??
 			//x = lua_tonumber(g_lt, -1); 
@@ -145,13 +154,24 @@ void luaRun(){
 		}
  	}
 }
+void luaRunString(char* str){
+	//making a new thread -- to avoid 
+	//'cannot resume non-suspended thread' errors
+	//I hope the GC collects these abandoned threads
+	g_lt = lua_newthread(g_lua); 
+	//runs the string -- should replace existing functions.
+	if(luaL_dostring(g_lua, str)){ 
+		const char* errstr = lua_tostring(g_lua, -1); 
+		printf("%s\n", errstr); //print errors.
+		errorDialog((char*)errstr); 
+		luaL_dostring(g_lua, "print(debug.traceback())"); 
+	}
+}
 
 void destroy(GtkWidget *, gpointer){
 	//more cleanup later.
 	g_die = true;
 	KillFont(); 
-	luaRun(); 
-	lua_close(g_lt); 
 	gtk_main_quit();
 }
 
@@ -281,6 +301,14 @@ static gboolean refresh (gpointer ){
 	gtk_widget_queue_draw (g_da[0]);
 	gtk_widget_queue_draw (g_da[1]);
 	//can do other pre-frame GUI update stuff here.
+	char str[256];
+	double mean = (g_luaTime[1] / g_luaTime[0])*1000.0; 
+	double max = g_luaTime[2] * 1000.0; 
+	double frac = g_luaTime[1] / (gettime() - g_startTime); 
+	double last = g_luaTime[3] * 1000.0; 
+	snprintf(str, 256, "mean:%4.3f ms\nmax:%4.3f ms\nlast:%4.3f ms\nfrac:%4.5f",
+				mean, max, last, frac);
+	gtk_label_set_text(GTK_LABEL(g_luaTimeLabel), str); 
 	return TRUE;
 }
 
@@ -294,6 +322,18 @@ static void luaCalibrateCB(GtkWidget*, gpointer){
 }
 static void luaRunTaskCB(GtkWidget*, gpointer){
 	g_luaExecStack.push("move"); 
+}
+static void luaStopCB(GtkWidget*, gpointer){
+	if(!g_luaExecStack.empty()){
+		g_luaExecStack.pop(); 
+	}
+}
+static void fullscreenCB(GtkWidget* w, gpointer p){
+	GtkWindow* top = GTK_WINDOW(p); 
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+		gtk_window_fullscreen(top);
+	else
+		gtk_window_unfullscreen(top);
 }
 /* Liberty / Polhemus. 
  as reading from USB / serial will take some time, it makes sense to 
@@ -361,7 +401,7 @@ void* polhemusThread(void* ){
 				len = pol->Read(buf+start, BUF_SIZE-start); 
 				if(len>0) start+=len;
 				usleep(100);
-			} while((len>0) || (count++ < 5));
+			} while((len>0));
 			if(start > 0){
 				//printf("%d bytes Read\n",start);
 				//frame starts with 'LY_P', and is 8 bytes. This is followed by 3 4-byte floats.
@@ -374,19 +414,22 @@ void* polhemusThread(void* ){
 				while(((g_circBuff[g_cbRN % 1024] != 'L') || 
 					(g_circBuff[(g_cbRN+1) % 1024] != 'Y') || 
 					(g_circBuff[(g_cbRN+2) % 1024] != 0x01)) &&
-					g_cbRN + 20 < g_cbPtr){
+					g_cbRN + 20 <= g_cbPtr){
 					g_cbRN++; 
 				}
+				//printf("polhemus lag: %d\n", g_cbPtr - g_cbRN); 
 				//this will either leave us aligned at the start of a frame
 				//or waiting for more data.
 				//copy between the current /r/n. 
-				if(g_circBuff[g_cbRN % 1024] == 'L' && g_circBuff[(g_cbRN+1) % 1024] == 'Y'){
+				while(g_circBuff[g_cbRN % 1024] == 'L' && 
+					g_circBuff[(g_cbRN+1) % 1024] == 'Y' && 
+					g_cbRN + 20 <= g_cbPtr){
 					for(i=0; i<20 && (g_cbRN+i) < g_cbPtr; i++){
 						buf[i] = g_circBuff[(g_cbRN+i) % 1024]; 
 					}
 					buf[i] = 0; 
 					//this data is used, move the pointer forward one. 
-					g_cbRN++;
+					g_cbRN += 20;
 					// check for proper format LY for Liberty;  PA for Patriot
 					float* pData=(float*)(buf+8);			// header is first 8 bytes
 					// print data
@@ -399,11 +442,11 @@ void* polhemusThread(void* ){
 					for(i=0; i<3; i++){
 						g_sensors[0][i] = pData[i]; 
 					}
-					if(g_sensors[0][2] > 0.0){
+					/*if(g_sensors[0][2] > 0.0){
 						g_sensors[0][0] *= -1.f;
 						g_sensors[0][1] *= -1.f;
-						g_sensors[0][2] *= -1.f; 
-					}
+						//g_sensors[0][2] *= -1.f; 
+					}*/
 				}
 			}
 		}
@@ -438,18 +481,17 @@ int main(int argn, char** argc){
 	GtkWidget *da1, *da2, *notebook, *paned, *v1, *label;
 
 	/* Declare a Lua State, open the Lua State and load the libraries (see above). */
-	lua_State *l;
-	l = luaL_newstate(); 
-	luaL_openlibs(l);
+	g_lua = luaL_newstate(); 
+	luaL_openlibs(g_lua);
 
 	// want to make a Lua function that yeilds() 
 	// instead of a big ugly switch statement. 
 	//first make a thread and push it on the stack.
-	g_lt = lua_newthread(l); 
-	printf("This line in directly from C\n\n");
-	if(luaL_dofile(g_lt, "script_ffi.lua")){ //inits the function.
-		printf("%s\n", lua_tostring(g_lt, -1)); //print errors.
+	if(luaL_dofile(g_lua, "script_ffi.lua")){ //inits the function.
+		printf("%s\n", lua_tostring(g_lua, -1)); //print errors.
+		luaL_dostring(g_lua, "print(debug.traceback())"); 
 	}
+	g_lt = lua_newthread(g_lua); 
 	gtk_init (&argn, &argc);
 
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -461,7 +503,11 @@ int main(int argn, char** argc){
 
 	//left: gui etc. 
 	v1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_widget_set_size_request(GTK_WIDGET(v1), 200, 600);
+	gtk_widget_set_size_request(GTK_WIDGET(v1), 170, 650);
+	g_luaTimeLabel = gtk_label_new("mean: max: %:"); 
+	gtk_misc_set_alignment (GTK_MISC (g_luaTimeLabel), 0, 0);
+	gtk_box_pack_start (GTK_BOX (v1), g_luaTimeLabel, TRUE, TRUE, 0);
+	
 	GtkWidget* button = gtk_button_new_with_label ("Calibrate liberty");
 	g_signal_connect(button, "clicked", G_CALLBACK(luaCalibrateCB), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
@@ -469,6 +515,11 @@ int main(int argn, char** argc){
 	button = gtk_button_new_with_label ("run task");
 	g_signal_connect(button, "clicked", G_CALLBACK(luaRunTaskCB), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
+	
+	button = gtk_button_new_with_label ("stop");
+	g_signal_connect(button, "clicked", G_CALLBACK(luaStopCB), 0); 
+	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
+	
 	
 	//right: tabbed ('notebook') graphics windows. 
 	notebook = gtk_notebook_new(); 
@@ -532,6 +583,13 @@ int main(int argn, char** argc){
 			| GDK_POINTER_MOTION_HINT_MASK); 
 	
 	gtk_widget_show (da2);
+	//add a fullscreen checkbox to the gui.
+	button = gtk_check_button_new_with_label("Fullscreen");
+	gtk_box_pack_start (GTK_BOX (v1), button, TRUE, TRUE, 0);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (button), FALSE); 
+	gtk_widget_show (button);
+	g_signal_connect (button, "clicked",
+		G_CALLBACK (fullscreenCB), (gpointer*)top);
 	
 	//can init the shapes ... here i guess (no opengl though!)
 	g_cursor = new Shape(); 
@@ -556,7 +614,7 @@ int main(int argn, char** argc){
 	//add a refresh timeout. 
 	g_da[0] = da1; 
 	g_da[1] = da2; 
-	g_timeout_add (1000 / 120, refresh, da1); //120 Hz refresh. twice as fast as needed.
+	g_timeout_add (1000 / 240, refresh, da1); //240 Hz refresh. twice as fast as needed.
 	
 	pthread_t pthread; 
 	pthread_create(&pthread, NULL, polhemusThread, NULL); 
@@ -565,8 +623,8 @@ int main(int argn, char** argc){
 	gtk_widget_show_all (window);
 	gtk_main ();
 	
-	//lua_close(l);
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
+	lua_close(g_lua); //note: you can't close a thread.  GC should take care of it.
 	delete g_daglx[0];
 	delete g_daglx[1]; 
 	return 0; 

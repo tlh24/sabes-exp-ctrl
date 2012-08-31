@@ -44,6 +44,7 @@
 /* Global list of open windows */
 
 static GtkSourceStyleScheme *style_scheme = NULL;
+extern void luaRunString(char* str); 
 
 /* Private data structures */
 
@@ -55,8 +56,9 @@ static GtkSourceStyleScheme *style_scheme = NULL;
 
 /* Private prototypes -------------------------------------------------------- */
 
-static void       open_file_cb                   (GtkAction       *action,
-						  gpointer         user_data);
+static void       open_file_cb(GtkAction  *action, gpointer user_data);
+static void       save_file_cb(GtkAction *action, gpointer user_data);
+static void       execute_buffer_cb(GtkAction *action, gpointer user_data);
 static void       print_file_cb                  (GtkAction       *action,
 						  gpointer         user_data);
 static void       find_cb			 (GtkAction       *action,
@@ -109,6 +111,10 @@ static GtkWidget *create_view_window             (GtkWidget* top, GtkSourceBuffe
 static GtkActionEntry buffer_action_entries[] = {
 	{ "Open", GTK_STOCK_OPEN, "_Open", "<control>O",
 	  "Open a file", G_CALLBACK (open_file_cb) },
+	{ "Save", GTK_STOCK_SAVE, "_Save", "<control>S",
+	  "Save this file", G_CALLBACK (save_file_cb) },
+	{ "Execute", GTK_STOCK_SAVE, "_Execute", "F5",
+	  "Run this file", G_CALLBACK (execute_buffer_cb) },
 	{ "Quit", GTK_STOCK_QUIT, "_Quit", "<control>Q",
 	  "Exit the application", G_CALLBACK (gtk_main_quit) }
 };
@@ -251,6 +257,8 @@ static const gchar *buffer_ui_description =
 "  <menubar name=\"MainMenu\">"
 "    <menu action=\"FileMenu\">"
 "      <menuitem action=\"Open\"/>"
+"      <menuitem action=\"Save\"/>"
+"      <menuitem action=\"Execute\"/>"
 "      <menuitem action=\"Print\"/>"
 "      <menuitem action=\"Find\"/>"
 "      <menuitem action=\"Replace\"/>"
@@ -493,6 +501,30 @@ out:
 	return success;
 }
 
+gboolean
+save_file (GtkSourceBuffer *buffer)
+{
+	gboolean success = FALSE; 
+	GtkTextIter start, end;
+	char *text;
+	gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(buffer), 
+										&start, &end);
+	text = gtk_text_buffer_get_text(GTK_TEXT_BUFFER(buffer), 
+											 &start, &end, TRUE);
+	// get the filename stored in the gobject properties.
+	char* filename = (char*)g_object_get_data (G_OBJECT (buffer), "filename"); 
+	
+	FILE* fid = fopen(filename, "w"); 
+	if(fid){
+		fwrite(text, 1, strlen(text), fid); 
+		success = TRUE; 
+		fclose(fid); 
+	}else{
+		printf("could not save file %s\n", filename); 
+	}
+	g_free (text);
+	return success;
+}
 
 /* View action callbacks -------------------------------------------------------- */
 
@@ -894,6 +926,26 @@ open_file_cb (GtkAction *, gpointer user_data)
 	}
 
 	gtk_widget_destroy (chooser);
+}
+
+static void
+save_file_cb (GtkAction *, gpointer user_data){
+	save_file(GTK_SOURCE_BUFFER(user_data)); 
+}
+
+static void
+execute_buffer_cb (GtkAction *, gpointer user_data){
+
+	GtkSourceBuffer *buffer = GTK_SOURCE_BUFFER(user_data); 
+	gboolean success = FALSE; 
+	GtkTextIter start, end;
+	char *text;
+	gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(buffer), 
+										&start, &end);
+	text = gtk_text_buffer_get_text(GTK_TEXT_BUFFER(buffer), 
+											 &start, &end, TRUE);
+	luaRunString(text); 
+	g_free (text);
 }
 
 #define NON_BLOCKING_PAGINATION

@@ -85,14 +85,15 @@ function move(live, time)
 		-- print polhemus?  to test?!
 		px,py,pz = getPolhemus()
 		local a = matrix.ones(1,4)
-		a[2] = px
-		a[3] = py
-		a[4] = pz
+		a[1][2] = px
+		a[1][3] = py
+		a[1][4] = pz
 		local b = a * calibrate
-		print(matrix.shape(b))
-		print(b[1][1] .. " " .. b[1][2])
+		--print(matrix.shape(b))
+		--print(b[1][1] .. " " .. b[1][2])
 		setShapeLoc(0, b[1][1], b[1][2])
-		print("x " .. px .. " y " .. py .. " z " .. pz .. " t " .. time); 
+		setShapeColor(0, px, pz, 1, 1)
+		--print(string.format("x %4.2f y %4.2f z %4.2f t %f", px, py, pz, time))
 		live,time = coroutine.yield()
 	end
 	return
