@@ -41,6 +41,7 @@ using namespace std;
 double 	g_startTime = 0.0;
 double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
 bool		g_die = false; 
+bool		g_polhemusConnected = false; 
 GtkWindow* g_mainWindow; //used for dialogs, etc. 
 lua_State *g_lua; //where the libraries are loaded etc.
 lua_State* g_lt; //the thread. needs to be recreated every time we reload. 
@@ -101,7 +102,7 @@ void UDP_RZ2(){
 }
 
 bool 			g_glInitialized = false;
-float			g_cursPos[2]; 
+float			g_mousePos[2]; 
 
 void errorDialog(char* msg){
 	GtkWidget *dialog, *label, *content_area;
@@ -177,14 +178,14 @@ void destroy(GtkWidget *, gpointer){
 
 void updateCursPos(float x, float y){
 	//always relative to the human view.
-	g_cursPos[0] = x/(g_daglx[0]->m_size[0]);
-	g_cursPos[1] = y/(g_daglx[0]->m_size[1]);
+	g_mousePos[0] = x/(g_daglx[0]->m_size[0]);
+	g_mousePos[1] = y/(g_daglx[0]->m_size[1]);
 	//convert to -1 to +1
 	for(int i=0; i<2; i++){
-		g_cursPos[i] -= 0.5f;
-		g_cursPos[i] *= 2.f;
+		g_mousePos[i] -= 0.5f;
+		g_mousePos[i] *= 2.f;
 	}
-	g_cursPos[1] *= -1; //zero at the top for gtk; bottom for opengl.
+	g_mousePos[1] *= -1; //zero at the top for gtk; bottom for opengl.
 }
 
 static gint motion_notify_event( GtkWidget *w,
@@ -199,7 +200,7 @@ static gint motion_notify_event( GtkWidget *w,
 	gdk_window_get_device_position (gtk_widget_get_window (w), pointer, &ix, &iy, NULL);
 	x = ix; y = iy;
 	updateCursPos(x,y); 
-	printf("cursor position: %f %f\n", x, y); 
+	//printf("cursor position: %f %f\n", x, y); 
 	return TRUE;
 }
 
@@ -277,8 +278,8 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	luaRun(); 
 	//g_cursor->translate(x,y); 
 	g_cursor->draw(); 
-	g_stars->m_vel[0] = g_cursPos[0] / -3.f;
-	g_stars->m_vel[1] = g_cursPos[1] / -3.f; 
+	g_stars->m_vel[0] = g_mousePos[0] / -3.f;
+	g_stars->m_vel[1] = g_mousePos[1] / -3.f; 
 	g_stars->move(0.01, g_daglx[1]->getAR()); //really should have the actual time here.
 	g_stars->draw(); 
 	
@@ -366,8 +367,11 @@ void* polhemusThread(void* ){
 	fail = pol->Rs232Connect("/dev/ttyS2", 115200); 
 	if(fail){
 		printf("could not establish a rs232 connection to the Polhemus / liberty\n");
+		g_polhemusConnected = false; 
+		return NULL; 
 	}else{
 		printf("polhemus connected via rs232!\n"); 
+ 		g_polhemusConnected = true;
 	}
 	//flush the buffer, sync things up.
 	count = 0; 
@@ -387,7 +391,7 @@ void* polhemusThread(void* ){
 	len = pol->Read(buf, BUF_SIZE); //throw away.
 	usleep(5000);
 	// we only care about x, y, z -- faster (lower latency) transmission.
-	pol->Write("O*,2\r"); //this command turns off sending euler angles. 
+	pol->Write("O*,2\r"); //this command turns off sending Euler angles. 
 	pol->Write("c\r"); //request continuous data.
 	// and read the data in a loop.
 	g_cbPtr = g_cbRN = 0; 
@@ -459,10 +463,25 @@ void* polhemusThread(void* ){
 
 extern "C" void getPolhemus(float* res){
 	int i; 
-	for(i=0; i<3; i++){
-		res[i+1] = g_sensors[0][i]; //+1 b/c lua indexing via the FFI is still 1-based.
+	if(g_polhemusConnected){
+		for(i=0; i<3; i++){
+			res[i+1] = g_sensors[0][i]; 
+			//+1 b/c lua indexing via the FFI is 1-based.
+		}
+	}else{
+		for(i=0; i<3; i++){
+			res[i+1] = 0.f;
+		}
 	}
-	//printf("from c: %f %f %f\n", res[1], res[2], res[3]); 
+}
+extern "C" bool polhemusConnected(){
+	return g_polhemusConnected; 
+}
+extern "C" void getMouse(float* res){
+	int i; 
+	for(i=0; i<2; i++){
+		res[i+1] = g_mousePos[i]; 
+	}
 }
 //boilerplate. yecht.
 extern "C" void setShapeLoc(int , float x, float y){

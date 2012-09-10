@@ -7,20 +7,27 @@ require "numlua.matrix"
 require "persistence"
 
 ffi.cdef[[
+	double gettime(); 
 	void getPolhemus(float* res); 
+	bool polhemusConnected(); 
+	void getMouse(float* res); 
 	void setShapeLoc(int shp, float x, float y); 
 	void setShapeColor(int shp, float r, float g, float b); 
 	void setShapeAlpha(int shp, float a); 
-	double gettime(); 
 	]]
 
+function gettime()
+	return ffi.C.gettime()
+end
 function getPolhemus()
 	local xyz = ffi.new("float[?]", 4); --4 because FFI indexing in C is also 1-based. 
 	ffi.C.getPolhemus(xyz); 
 	return xyz[1], xyz[2], xyz[3]
 end
-function gettime()
-	return ffi.C.gettime()
+function getMouse()
+	local p = ffi.new("float[?]", 3)
+	ffi.C.getMouse(p)
+	return p[1], p[2]
 end
 function wait(sec)
 	--waits with a granularity of the current frame rate.
@@ -83,16 +90,23 @@ function move(live, time)
 	calibrate = matrix.fromtable(persistence.load("calibrate.lua"))
 	while live > 0.0 do
 		-- print polhemus?  to test?!
-		px,py,pz = getPolhemus()
-		local a = matrix.ones(1,4)
-		a[1][2] = px
-		a[1][3] = py
-		a[1][4] = pz
-		local b = a * calibrate
-		--print(matrix.shape(b))
-		--print(b[1][1] .. " " .. b[1][2])
-		setShapeLoc(0, b[1][1], b[1][2])
-		setShapeColor(0, px, pz, 1, 1)
+		if ffi.C.polhemusConnected() then
+			px,py,pz = getPolhemus()
+			local a = matrix.ones(1,4)
+			a[1][2] = px
+			a[1][3] = py
+			a[1][4] = pz
+			local b = a * calibrate
+			--print(matrix.shape(b))
+			--print(b[1][1] .. " " .. b[1][2])
+			setShapeLoc(0, b[1][1], b[1][2])
+			setShapeColor(0, px, pz, 1, 1)
+		else
+			-- cursor controlled by the mouse, since polhemus not connected.
+			local mx,my = getMouse()
+			print("mouse control:" ..  mx .. " " .. my )
+			setShapeLoc(0, mx, my); 
+		end
 		--print(string.format("x %4.2f y %4.2f z %4.2f t %f", px, py, pz, time))
 		live,time = coroutine.yield()
 	end
