@@ -104,7 +104,7 @@ function move(live, time)
 		else
 			-- cursor controlled by the mouse, since polhemus not connected.
 			local mx,my = getMouse()
-			print("mouse control:" ..  mx .. " " .. my )
+			-- print("mouse control:" ..  mx .. " " .. my )
 			setShapeLoc(0, mx, my); 
 		end
 		--print(string.format("x %4.2f y %4.2f z %4.2f t %f", px, py, pz, time))

@@ -17,7 +17,7 @@ all: bmi5
 
 bmi5: $(OBJS)
 	$(CC) -o $@ $(GTKLD) $(LDFLAGS) -lmatio $(OBJS)
-	luac script_ffi.lua # to catch any script errors. 
+	luac script_ffi.lua 
 	
 clean:
 	rm -rf *.o bmi5

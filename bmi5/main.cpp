@@ -40,6 +40,8 @@ using namespace std;
 
 double 	g_startTime = 0.0;
 double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
+double 	g_frameRate = 0.0; 
+double	g_lastFrame = 0.0; 
 bool		g_die = false; 
 bool		g_polhemusConnected = false; 
 GtkWindow* g_mainWindow; //used for dialogs, etc. 
@@ -51,6 +53,7 @@ StarField* g_stars;
 gtkglx*  g_daglx[2]; //human, monkey.
 GtkWidget* g_da[2]; //draw areas. 
 GtkWidget* g_luaTimeLabel; 
+GtkWidget* g_openglTimeLabel; 
 
 extern "C" double gettime(){ //in seconds!
 	timespec pt ;
@@ -264,7 +267,12 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	if (!(g_daglx[h]->expose(da))){
 		g_assert_not_reached ();
 	}
-	
+	if(da == g_da[1]){ //monkey view
+		double t = gettime(); 
+		double dt = t - g_lastFrame; 
+		g_lastFrame = t; 
+		g_frameRate = 0.9 * g_frameRate + 0.1 / dt; 
+	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
 	glMatrixMode(GL_MODELVIEW);
@@ -310,6 +318,9 @@ static gboolean refresh (gpointer ){
 	snprintf(str, 256, "mean:%4.3f ms\nmax:%4.3f ms\nlast:%4.3f ms\nfrac:%4.5f",
 				mean, max, last, frac);
 	gtk_label_set_text(GTK_LABEL(g_luaTimeLabel), str); 
+	
+	snprintf(str, 256, "frame rate: %4.1f Hz", g_frameRate); 
+	gtk_label_set_text(GTK_LABEL(g_openglTimeLabel), str); 
 	return TRUE;
 }
 
@@ -497,7 +508,7 @@ extern "C" void setShapeAlpha(int , float a){
 int main(int argn, char** argc){
 	//setup a window with openGL. 
 	GtkWidget *window;
-	GtkWidget *da1, *da2, *notebook, *paned, *v1, *label;
+	GtkWidget *da1, *da2, *notebook, *paned, *v1, *label, *frame, *vbox2;
 
 	/* Declare a Lua State, open the Lua State and load the libraries (see above). */
 	g_lua = luaL_newstate(); 
@@ -523,9 +534,20 @@ int main(int argn, char** argc){
 	//left: gui etc. 
 	v1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_set_size_request(GTK_WIDGET(v1), 170, 650);
+	
+	frame = gtk_frame_new("Lua stats");
+	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+	gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
 	g_luaTimeLabel = gtk_label_new("mean: max: %:"); 
-	gtk_misc_set_alignment (GTK_MISC (g_luaTimeLabel), 0, 0);
-	gtk_box_pack_start (GTK_BOX (v1), g_luaTimeLabel, TRUE, TRUE, 0);
+	//gtk_misc_set_alignment (GTK_MISC (g_luaTimeLabel), 0, 0);
+	gtk_container_add (GTK_CONTAINER (frame), g_luaTimeLabel );
+	
+	frame = gtk_frame_new("OpenGL stats");
+	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+	gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
+	g_openglTimeLabel = gtk_label_new("mean: max: %:"); 
+	//gtk_misc_set_alignment (GTK_MISC (g_openglTimeLabel), 0, 0);
+	gtk_container_add (GTK_CONTAINER (frame), g_openglTimeLabel );
 	
 	GtkWidget* button = gtk_button_new_with_label ("Calibrate liberty");
 	g_signal_connect(button, "clicked", G_CALLBACK(luaCalibrateCB), 0); 
@@ -555,6 +577,9 @@ int main(int argn, char** argc){
 	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), da1, label, 0);
 	
 	//setup the opengl context for da1.
+	//before we do this, tun on FSAA. 
+	putenv( "__GL_FSAA_MODE=10" ); //http://www.opengl.org/discussion_boards/showthread.php/172000-Programmatically-controlling-level-of-AA
+	putenv("__GL_SYNC_TO_VBLANK=0"); //don't sync to vertical blanking.  set to 1 to sync. 
 	gtk_widget_set_double_buffered (da1, FALSE);
 	g_daglx[0] = new gtkglx(da1); 
  
@@ -633,7 +658,7 @@ int main(int argn, char** argc){
 	//add a refresh timeout. 
 	g_da[0] = da1; 
 	g_da[1] = da2; 
-	g_timeout_add (1000 / 240, refresh, da1); //240 Hz refresh. twice as fast as needed.
+	g_timeout_add (4, refresh, da1); //250 Hz, approximate. 
 	
 	pthread_t pthread; 
 	pthread_create(&pthread, NULL, polhemusThread, NULL); 
