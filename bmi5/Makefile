@@ -23,6 +23,4 @@ clean:
 	
 deps:
 	sudo apt-get install libgtk2.0-dev libgtkgl2.0-dev liblua5.1-dev \
-	libgtkglext1-dev freeglut3-dev nvidia-cg-toolkit libmatio-dev libsqlite3-dev
-	echo "make sure /usr/lib64 is in /etc/ld.so.conf.d/libc.conf"
-	echo "otherwise Cg may not be found. "
+	libgtkglext1-dev freeglut3-dev libmatio-dev libsqlite3-dev
