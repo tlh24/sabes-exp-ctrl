@@ -113,4 +113,12 @@ function move(live, time)
 	return
 end
 
+function saveMatFile(live, time)
+	-- goal: to save a matlab file from lua. 
+	-- can worry about making things elegant and encapsulated later. 
+	-- probably we want to store things in Lua tables atm? 
+	-- what do we want stored in the arrays -- the position of the cursor, target, 
+	-- all tagged with times. 
+end
+
 -- End

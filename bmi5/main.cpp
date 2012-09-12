@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <stack>
+#include "matio.h"
 
 //lua headers.
 #include <lua5.1/lua.h>
@@ -29,6 +30,8 @@
 #include "glInfo.h"
 #include "glFont.h"
 #include "gtkglx.h"
+
+//local.
 #include "shape.h"
 #include "polhemus.h"
 
