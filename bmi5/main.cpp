@@ -9,14 +9,6 @@
 #include <stack>
 #include "matio.h"
 
-//lua headers.
-#include <lua5.1/lua.h>
-#include <lua5.1/lauxlib.h>
-#include <lua5.1/lualib.h>
-/*#include <luajit-2.0/lua.h>
-#include <luajit-2.0/lauxlib.h>
-#include <luajit-2.0/lualib.h> -- these don't work, ??? */
-
 //opengl headers. 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
@@ -35,9 +27,6 @@
 #include "shape.h"
 #include "polhemus.h"
 
-//srcview headers. 
-#include <gtksourceview/gtksourceview.h>
-#include "srcView.h"
 
 using namespace std;
 
@@ -48,9 +37,6 @@ double	g_lastFrame = 0.0;
 bool		g_die = false; 
 bool		g_polhemusConnected = false; 
 GtkWindow* g_mainWindow; //used for dialogs, etc. 
-lua_State *g_lua; //where the libraries are loaded etc.
-lua_State* g_lt; //the thread. needs to be recreated every time we reload. 
-stack<string> g_luaExecStack; 
 Shape*	g_cursor; 
 StarField* g_stars; 
 gtkglx*  g_daglx[2]; //human, monkey.
@@ -128,51 +114,6 @@ void errorDialog(char* msg){
 	/* Add the label, and show everything we've added to the dialog. */
 	gtk_container_add (GTK_CONTAINER (content_area), label);
 	gtk_widget_show_all (dialog);
-}
-
-void luaRun(){
-	if(!g_luaExecStack.empty()){
-		string s = g_luaExecStack.top(); 
-		lua_getglobal(g_lt, s.c_str()); 
-		if(g_die) printf("telling lua thread to quit..\n"); 
-		lua_pushnumber(g_lt, g_die ? 0.0 : 1.0); //tell the other thread to terminate.
-		double t = gettime(); 
-		lua_pushnumber(g_lt,t); //number = double in this case.
-		int r = lua_resume(g_lt,2); //call 'move' with 2 arguments. kinda bad this is in the same thread..
-		double dt = gettime() - t; 
-		g_luaTime[0] += 1.0; 
-		g_luaTime[1] += dt; 
-		g_luaTime[2] = g_luaTime[2] < dt ? dt : g_luaTime[2]; 
-		g_luaTime[3] = dt; 
-		if(r == LUA_YIELD){
-			//should the API be to return something every time??
-			//x = lua_tonumber(g_lt, -1); 
-			//y = lua_tonumber(g_lt, -2); 
-			//printf("lua results: %f %f\n", x, y); 
-			//lua_pop(g_lt, 2); //pop the results off the stack.
-		}else if(r == LUA_ERRRUN){
-			const char* errstr = lua_tostring(g_lt, -1); 
-			printf("%s\n", errstr); //print errors.
-			errorDialog((char*)errstr); 
-			g_luaExecStack.pop();
-		}else{
-			printf("lua function returned, not yielded.\n"); 
-			g_luaExecStack.pop();
-		}
- 	}
-}
-void luaRunString(char* str){
-	//making a new thread -- to avoid 
-	//'cannot resume non-suspended thread' errors
-	//I hope the GC collects these abandoned threads
-	g_lt = lua_newthread(g_lua); 
-	//runs the string -- should replace existing functions.
-	if(luaL_dostring(g_lua, str)){ 
-		const char* errstr = lua_tostring(g_lua, -1); 
-		printf("%s\n", errstr); //print errors.
-		errorDialog((char*)errstr); 
-		luaL_dostring(g_lua, "print(debug.traceback())"); 
-	}
 }
 
 void destroy(GtkWidget *, gpointer){
@@ -254,12 +195,15 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 		}
 		g_glInitialized = true;
 	}
+	printf("OpenGL initialized.\n"); 
 	BuildFont(); //so we're in the right context.
+	printf("font built.\n"); 
 	//have to create the shapes here -- context again.
 	g_cursor->makeCircle(64); 
+	printf("circle made.\n"); 
 	g_cursor->scale(0.5); 
-	g_stars->makeStars(1000, g_daglx[1]->getAR()); 
-
+	//g_stars->makeStars(1000, g_daglx[1]->getAR()); 
+	printf("stars made. done with configure1\n"); 
 	return TRUE;
 }
 
@@ -285,14 +229,12 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	glShadeModel(GL_FLAT);
 	glColor4f(0.7f, 1.f, 1.f, 0.75);
 	
-	// run some lua here. 
-	luaRun(); 
 	//g_cursor->translate(x,y); 
 	g_cursor->draw(); 
-	g_stars->m_vel[0] = g_mousePos[0] / -3.f;
+	/*g_stars->m_vel[0] = g_mousePos[0] / -3.f;
 	g_stars->m_vel[1] = g_mousePos[1] / -3.f; 
 	g_stars->move(0.01, g_daglx[1]->getAR()); //really should have the actual time here.
-	g_stars->draw(); 
+	g_stars->draw(); */
 	
 	g_daglx[h]->swap(); //always double buffered.
 
@@ -327,22 +269,13 @@ static gboolean refresh (gpointer ){
 	return TRUE;
 }
 
-static void notebookPageChangedCB(GtkWidget *,
-					gpointer, int page, gpointer){
-	printf("tab %d selected!\n", page); 
-}
-
 static void luaCalibrateCB(GtkWidget*, gpointer){
-	g_luaExecStack.push("calibrate"); 
 }
 static void luaRunTaskCB(GtkWidget*, gpointer){
-	g_luaExecStack.push("move"); 
 }
 static void luaStopCB(GtkWidget*, gpointer){
-	if(!g_luaExecStack.empty()){
-		g_luaExecStack.pop(); 
-	}
 }
+
 static void fullscreenCB(GtkWidget* w, gpointer p){
 	GtkWindow* top = GTK_WINDOW(p); 
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
@@ -511,20 +444,8 @@ extern "C" void setShapeAlpha(int , float a){
 int main(int argn, char** argc){
 	//setup a window with openGL. 
 	GtkWidget *window;
-	GtkWidget *da1, *da2, *notebook, *paned, *v1, *label, *frame, *vbox2;
+	GtkWidget *da1, *da2, *paned, *v1, *frame;
 
-	/* Declare a Lua State, open the Lua State and load the libraries (see above). */
-	g_lua = luaL_newstate(); 
-	luaL_openlibs(g_lua);
-
-	// want to make a Lua function that yeilds() 
-	// instead of a big ugly switch statement. 
-	//first make a thread and push it on the stack.
-	if(luaL_dofile(g_lua, "script_ffi.lua")){ //inits the function.
-		printf("%s\n", lua_tostring(g_lua, -1)); //print errors.
-		luaL_dostring(g_lua, "print(debug.traceback())"); 
-	}
-	g_lt = lua_newthread(g_lua); 
 	gtk_init (&argn, &argc);
 
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -565,19 +486,9 @@ int main(int argn, char** argc){
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
 	
-	//right: tabbed ('notebook') graphics windows. 
-	notebook = gtk_notebook_new(); 
-	gtk_notebook_set_tab_pos (GTK_NOTEBOOK (notebook), GTK_POS_TOP);
-	g_signal_connect(notebook, "switch-page",
-					 G_CALLBACK(notebookPageChangedCB), 0);
-	gtk_widget_set_size_request(GTK_WIDGET(notebook), 640, 650);
-	
 	gtk_paned_add1(GTK_PANED(paned), v1);
-	gtk_paned_add2(GTK_PANED(paned), notebook);
-	
 	da1 = gtk_drawing_area_new ();
-	label = gtk_label_new("task");
-	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), da1, label, 0);
+	gtk_paned_add2(GTK_PANED(paned), da1);
 	
 	//setup the opengl context for da1.
 	//before we do this, tun on FSAA. 
@@ -606,6 +517,7 @@ int main(int argn, char** argc){
 	gtk_widget_show (da1);
 	
 	//make the aux / monkey window. 
+	
 	GtkWidget* top = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title (GTK_WINDOW (top), "m0nkey view");
 	gtk_window_set_default_size (GTK_WINDOW (top), 640, 480);
@@ -630,27 +542,18 @@ int main(int argn, char** argc){
 			| GDK_POINTER_MOTION_HINT_MASK); 
 	
 	gtk_widget_show (da2);
+	
 	//add a fullscreen checkbox to the gui.
 	button = gtk_check_button_new_with_label("Fullscreen");
 	gtk_box_pack_start (GTK_BOX (v1), button, TRUE, TRUE, 0);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (button), FALSE); 
 	gtk_widget_show (button);
 	g_signal_connect (button, "clicked",
-		G_CALLBACK (fullscreenCB), (gpointer*)top);
+		G_CALLBACK (fullscreenCB), (gpointer*)top); 
 	
 	//can init the shapes ... here i guess (no opengl though!)
 	g_cursor = new Shape(); 
-	g_stars = new StarField(); 
-	
-	//also add a SourceView widget (?)
-	GtkSourceBuffer *buffer = gtk_source_buffer_new (NULL);
-	open_file (buffer, "script_ffi.lua");
-	GtkWidget* srcview = create_main_window(window, buffer); 
-	label = gtk_label_new("source");
-	gtk_notebook_insert_page(GTK_NOTEBOOK(notebook), srcview, label, 1);
-
-	gtk_widget_show (paned);
-	gtk_widget_show (notebook);
+	//g_stars = new StarField(); 
 
 	g_signal_connect_swapped (window, "destroy",
 			G_CALLBACK (destroy), NULL);
@@ -671,7 +574,7 @@ int main(int argn, char** argc){
 	gtk_main ();
 	
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
-	lua_close(g_lua); //note: you can't close a thread.  GC should take care of it.
+
 	delete g_daglx[0];
 	delete g_daglx[1]; 
 	return 0; 
