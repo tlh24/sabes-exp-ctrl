@@ -25,6 +25,10 @@ clean:
 deps:
 	sudo apt-get install libgtk2.0-dev libgtkgl2.0-dev liblua5.1-dev \
 	libgtkglext1-dev freeglut3-dev libmatio-dev libsqlite3-dev libusb-1.0-0.dev \
-	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev
-	echo "make sure /usr/lib64 is in /etc/ld.so.conf.d/libc.conf"
-	echo "otherwise Cg may not be found. "
+	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev libgtksourceview-3.0-dev \
+	libglew-dev gdb
+	echo "you must install luajit manually."
+	echo " -- and remember to run ldconfig after installing the libraries."
+	
+	
+	
