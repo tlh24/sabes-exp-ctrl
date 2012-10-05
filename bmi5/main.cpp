@@ -30,10 +30,10 @@
 
 using namespace std;
 
-double 	g_startTime = 0.0;
+long double 	g_startTime = 0.0;
 double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
 double 	g_frameRate = 0.0; 
-double	g_lastFrame = 0.0; 
+long double		g_lastFrame = 0.0; 
 bool		g_die = false; 
 bool		g_polhemusConnected = false; 
 GtkWindow* g_mainWindow; //used for dialogs, etc. 
@@ -44,11 +44,11 @@ GtkWidget* g_da[2]; //draw areas.
 GtkWidget* g_luaTimeLabel; 
 GtkWidget* g_openglTimeLabel; 
 
-extern "C" double gettime(){ //in seconds!
+extern "C" long double gettime(){ //in seconds!
 	timespec pt ;
 	clock_gettime(CLOCK_MONOTONIC, &pt);
-	double ret = (double)(pt.tv_sec) ;
-	ret += (double)(pt.tv_nsec) / 1e9 ;
+	long double ret = (double)(pt.tv_sec) ;
+	ret += (long double)(pt.tv_nsec) / 1e9 ;
 	return ret - g_startTime;
 	//printf( "present time: %d s %d ns \n", pt.tv_sec, pt.tv_nsec ) ;
 }
@@ -70,7 +70,7 @@ void UDP_RZ2(){
 		//currently the socket is blocking -- will wait for data.
 		unsigned int n = recv(sock, buf, 1024, 0);
 		if(n > 0 && n < 1024){
-			double now = gettime(); 
+			long double now = gettime(); 
  			np++; 
 			double d = now - last; 
 			mean += d; 
@@ -93,6 +93,24 @@ void UDP_RZ2(){
 	}
 }
 
+void UDP_timing(){
+	int sock; 
+ 	sock = openSocket((char*)"GEDDA.local"); 
+	unsigned char buf[1024]; 
+	while(1){
+		snprintf((char*)buf, 1024, "hello there."); 
+		unsigned int len = strlen((char*)buf); 
+		unsigned int n = send(sock, buf, len, 0); 
+		if(n != len) printf("sent length %d\n", n); 
+		//currently the socket is blocking -- will wait for data.
+		n = recv(sock, buf, 1024, 0);
+		if(n > 0 && n < 1024){
+			buf[n]= 0; 
+			printf("reply: %s\n", buf); 
+		}
+		sleep(1); 
+	}
+}
 bool 			g_glInitialized = false;
 float			g_mousePos[2]; 
 
@@ -215,7 +233,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 		g_assert_not_reached ();
 	}
 	if(da == g_da[1]){ //monkey view
-		double t = gettime(); 
+		long double t = gettime(); 
 		double dt = t - g_lastFrame; 
 		g_lastFrame = t; 
 		g_frameRate = 0.9 * g_frameRate + 0.1 / dt; 
@@ -445,7 +463,20 @@ int main(int argn, char** argc){
 	//setup a window with openGL. 
 	GtkWidget *window;
 	GtkWidget *da1, *da2, *paned, *v1, *frame;
-
+	
+	printf("sizeof long double %d\n", sizeof(long double)); 
+	printf("sizeof double %d\n", sizeof(double)); 
+	
+	long double ld = 0.0; 
+	double d = 0.0; 
+	for(unsigned int i=0; i<100000000; i++){ //one billion!
+		ld += 0.001234567; 
+ 		d += 0.001234567;
+	}
+	long double ld2 = (long double)d; 
+	ld2 -= ld; 
+	printf("sum ld: %llf, d: %f difference %llf\n", ld, d, ld2); 
+	
 	gtk_init (&argn, &argc);
 
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
