@@ -202,7 +202,7 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 	g_cursor->makeCircle(64); 
 	printf("circle made.\n"); 
 	g_cursor->scale(0.5); 
-	//g_stars->makeStars(1000, g_daglx[1]->getAR()); 
+	g_stars->makeStars(1000, g_daglx[1]->getAR()); 
 	printf("stars made. done with configure1\n"); 
 	return TRUE;
 }
@@ -231,10 +231,10 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	
 	//g_cursor->translate(x,y); 
 	g_cursor->draw(); 
-	/*g_stars->m_vel[0] = g_mousePos[0] / -3.f;
+	g_stars->m_vel[0] = g_mousePos[0] / -3.f;
 	g_stars->m_vel[1] = g_mousePos[1] / -3.f; 
 	g_stars->move(0.01, g_daglx[1]->getAR()); //really should have the actual time here.
-	g_stars->draw(); */
+	g_stars->draw(); 
 	
 	g_daglx[h]->swap(); //always double buffered.
 
@@ -553,7 +553,7 @@ int main(int argn, char** argc){
 	
 	//can init the shapes ... here i guess (no opengl though!)
 	g_cursor = new Shape(); 
-	//g_stars = new StarField(); 
+	g_stars = new StarField(); 
 
 	g_signal_connect_swapped (window, "destroy",
 			G_CALLBACK (destroy), NULL);

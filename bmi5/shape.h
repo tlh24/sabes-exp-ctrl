@@ -31,19 +31,23 @@ class Shape{
 		deleteBuffers(); 
 	}
 	void makeVAO(float* vertices, bool del){
-		deleteBuffers(); 
-		glGenVertexArrays(1, &m_vao); // Create our Vertex Array Object
-		glBindVertexArray(m_vao); // Bind our Vertex Array Object so we can use it
-		glGenBuffers(1, &m_vbo); // Generate our Vertex Buffer Object
-		// VBOs are children of VAOs, apparently.
-		
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // Bind our Vertex Buffer Object
-		glBufferData(GL_ARRAY_BUFFER, m_n*2*sizeof(GLfloat), vertices, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
-		glVertexAttribPointer((GLuint)0, 2, GL_FLOAT, GL_FALSE, 0, 0); // Set up our vertex attributes pointer
-		
-		glEnableVertexAttribArray(0); // Disable our Vertex Array Object
-		glBindVertexArray(0); // Disable our Vertex Buffer Object
-		if(del) free(vertices);
+		if(m_n > 0){
+			deleteBuffers(); 
+			glGenVertexArrays(1, &m_vao); // Create our Vertex Array Object
+			glBindVertexArray(m_vao); // Bind our Vertex Array Object so we can use it
+			glGenBuffers(1, &m_vbo); // Generate our Vertex Buffer Object
+			// VBOs are children of VAOs, apparently.
+			
+			glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // Bind our Vertex Buffer Object
+			glBufferData(GL_ARRAY_BUFFER, m_n*2*sizeof(GLfloat), vertices, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
+			glVertexAttribPointer((GLuint)0, 2, GL_FLOAT, GL_FALSE, 0, 0); // Set up our vertex attributes pointer
+			
+			glEnableVertexAttribArray(0); // Disable our Vertex Array Object
+			glBindVertexArray(0); // Disable our Vertex Buffer Object
+			if(del) free(vertices);
+		}else{
+			printf("error: makeVAO: m_n < 0\n"); 	
+		}
 	}
 	void makeCircle(int n){
 		//makes a circle, diameter 1, at the origin.
@@ -88,32 +92,57 @@ class Shape{
 class StarField : public Shape {
 public: //do something like the flow field common in the lab.
 	float m_vel[2]; //in screen units/second. 
-	float* m_v; //backing store.
+	float* m_v; //vertices, backing store.
+	float* m_pvel; //individual point velocities for variable coherence. 
+	float	m_coherence; 
+	GLuint	m_colorbuffer; 
 	
 	StarField(){
 		m_vel[0] = 0.2f; 
 		m_vel[1] = 0.1f; 
 		m_v = NULL; 
+		m_pvel = NULL; 
+		m_coherence = 0.5f; 
 	}
 	~StarField(){
-		if(m_v) free(m_v); m_v = NULL; 
+		if(m_v) free(m_v); m_v = NULL;
+		if(m_pvel) free(m_pvel); m_pvel = NULL; 
 	}
 	void makeStars(int nstars, float ar){
 		//distribute the stars uniformly over w, h. 
 		//this just requires scaling some rand() s. 
 		if(m_v) free(m_v); m_v = NULL; 
 		m_v = (float*)malloc(nstars * 2 * sizeof(float)); 
+		m_pvel = (float*)malloc(nstars * 2 * sizeof(float)); 
 		for(int i=0; i<nstars; i++){
 			m_v[i*2+0] = (((float)rand() / (float)RAND_MAX) - 0.5)*ar*2.f;
 			m_v[i*2+1] = (((float)rand() / (float)RAND_MAX) - 0.5)*2.f; 
+			float angle = 3.141592653589793 * 2.0 * ((float)rand() / (float)RAND_MAX); 
+			m_pvel[i*2+0] = sinf(angle); 
+			m_pvel[i*2+1] = cosf(angle); 
 		}
+		m_n = nstars; 
 		makeVAO(m_v, false); //keep around the b.s.
 		m_drawmode = GL_POINTS; 
-		m_n = nstars; 
+		//and the color buffers. 
+		glGenBuffers(1, &m_colorbuffer); 
+		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
 	}
-	void move(float dt, float ar){ //in seconds.
+	void move(float dt, float ar){ //dt in seconds.
 		float a[2]; a[0] = ar; a[1] = 1.f; 
-		for(int i=0; i<m_n; i++){
+		int j = (int)(m_n * m_coherence);
+		float speed = sqrtf(m_vel[0]*m_vel[0] + m_vel[1]*m_vel[1]); 
+		for(int i=0; i<j; i++){
+			for(int j=0; j<2; j++){
+				float f = m_v[i*2+j];
+				float v = m_pvel[i*2+j]; 
+				f += v * speed * dt; 
+				if(f < a[j]) f += a[j]*2.f;
+				if(f > a[j]) f -= a[j]*2.f; 
+				m_v[i*2+j] = f;
+			}
+		}
+		for(int i=j; i<m_n; i++){
 			for(int j=0; j<2; j++){
 				float f = m_v[i*2+j];
 				f += m_vel[j] * dt; 
