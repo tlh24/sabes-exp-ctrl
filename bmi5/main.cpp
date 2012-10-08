@@ -23,14 +23,21 @@
 #include "glFont.h"
 #include "gtkglx.h"
 
+long double 	g_startTime = 0.0;
+extern "C" long double gettime(){ //in seconds!
+	timespec pt ;
+	clock_gettime(CLOCK_MONOTONIC, &pt);
+	long double ret = (long double)(pt.tv_sec) ;
+	ret += (long double)(pt.tv_nsec) / 1e9 ;
+	return ret - g_startTime;
+}
+
 //local.
 #include "shape.h"
 #include "polhemus.h"
 
 
 using namespace std;
-
-long double 	g_startTime = 0.0;
 double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
 double 	g_frameRate = 0.0; 
 long double		g_lastFrame = 0.0; 
@@ -44,15 +51,6 @@ GtkWidget* g_da[2]; //draw areas.
 GtkWidget* g_luaTimeLabel; 
 GtkWidget* g_openglTimeLabel; 
 
-extern "C" long double gettime(){ //in seconds!
-	timespec pt ;
-	clock_gettime(CLOCK_MONOTONIC, &pt);
-	long double ret = (double)(pt.tv_sec) ;
-	ret += (long double)(pt.tv_nsec) / 1e9 ;
-	return ret - g_startTime;
-	//printf( "present time: %d s %d ns \n", pt.tv_sec, pt.tv_nsec ) ;
-}
-
 void UDP_RZ2(){
 	int sock; 
  	sock = openSocket((char*)"169.230.191.195"); 
@@ -62,7 +60,6 @@ void UDP_RZ2(){
 	double mean = 0; 
 	double var = 0; 
 	int np = 1; 
-	g_startTime = gettime(); 
 	double last = 0; 
 	unsigned int oldpak = 0; 
 	unsigned int dropped = 0; 
@@ -220,20 +217,21 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 	g_cursor->makeCircle(64); 
 	printf("circle made.\n"); 
 	g_cursor->scale(0.5); 
-	g_stars->makeStars(1000, g_daglx[1]->getAR()); 
+	g_stars->makeStars(3000, g_daglx[1]->getAR()); 
+	g_stars->makeShaders(h); 
 	printf("stars made. done with configure1\n"); 
 	return TRUE;
 }
 
 static gboolean
 draw1 (GtkWidget *da, cairo_t *, gpointer p){
+	long double t = gettime() - g_startTime; 
 	int h = (int)((long long)p & 0xf);
 	if(h <0 || h>1) g_assert_not_reached ();
 	if (!(g_daglx[h]->expose(da))){
 		g_assert_not_reached ();
 	}
 	if(da == g_da[1]){ //monkey view
-		long double t = gettime(); 
 		double dt = t - g_lastFrame; 
 		g_lastFrame = t; 
 		g_frameRate = 0.9 * g_frameRate + 0.1 / dt; 
@@ -251,8 +249,8 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	g_cursor->draw(); 
 	g_stars->m_vel[0] = g_mousePos[0] / -3.f;
 	g_stars->m_vel[1] = g_mousePos[1] / -3.f; 
-	g_stars->move(0.01, g_daglx[1]->getAR()); //really should have the actual time here.
-	g_stars->draw(); 
+	g_stars->move(g_daglx[1]->getAR()); //really should have the actual time here.
+	g_stars->draw(h); 
 	
 	g_daglx[h]->swap(); //always double buffered.
 
@@ -348,7 +346,6 @@ void* polhemusThread(void* ){
 		count++; 
 	} while (len > 0);
 	// first establish comm and clear out any residual trash data
-	double starttime = gettime(); 
 	double frames = 0; 
 	//now put it in binary (faster than ascii!) mode:
 	pol->Write("f1\r"); 
@@ -464,8 +461,10 @@ int main(int argn, char** argc){
 	GtkWidget *window;
 	GtkWidget *da1, *da2, *paned, *v1, *frame;
 	
-	printf("sizeof long double %d\n", sizeof(long double)); 
-	printf("sizeof double %d\n", sizeof(double)); 
+	g_startTime = gettime(); 
+	
+	printf("sizeof long double %ld\n", sizeof(long double)); 
+	printf("sizeof double %ld\n", sizeof(double)); 
 	
 	long double ld = 0.0; 
 	double d = 0.0; 
@@ -475,7 +474,7 @@ int main(int argn, char** argc){
 	}
 	long double ld2 = (long double)d; 
 	ld2 -= ld; 
-	printf("sum ld: %llf, d: %f difference %llf\n", ld, d, ld2); 
+	printf("sum ld: %Lf, d: %f difference %Lf\n", ld, d, ld2); 
 	
 	gtk_init (&argn, &argc);
 
