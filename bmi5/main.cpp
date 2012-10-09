@@ -5,6 +5,7 @@
 #include <math.h>
 #include <time.h>
 #include <arpa/inet.h>
+#include <netdb.h> 
 #include <string.h>
 #include <stack>
 #include "matio.h"
@@ -53,7 +54,7 @@ GtkWidget* g_openglTimeLabel;
 
 void UDP_RZ2(){
 	int sock; 
- 	sock = openSocket((char*)"169.230.191.195"); 
+ 	sock = openSocket((char*)"169.230.191.195", LISTEN_PORT); 
 	//sock = setup_socket(LISTEN_PORT); // joey's RZ2. 
 	checkRZ(sock); 
 	unsigned char buf[1024]; 
@@ -89,24 +90,88 @@ void UDP_RZ2(){
 		}
 	}
 }
-
-void UDP_timing(){
+int hostname_to_ip(char * hostname , char* ip)
+{
+	struct hostent *he;
+	struct in_addr **addr_list;
+	int i;
+	if ( (he = gethostbyname( hostname ) ) == NULL){
+		// get the host info
+		herror("gethostbyname");
+		return 1;
+	}
+	addr_list = (struct in_addr **) he->h_addr_list;
+	for(i = 0; addr_list[i] != NULL; i++){
+		//Return the first one;
+		strcpy(ip , inet_ntoa(*addr_list[i]) );
+		return 0;
+	}
+	return 1;
+}
+void* syncThread(void*){
 	int sock; 
- 	sock = openSocket((char*)"GEDDA.local"); 
+	//need to do host resolution here ..
+	char ipaddr[256]; 
+	if(hostname_to_ip("GEDDA.local", ipaddr)){
+		printf("could not resolve GEDDA.local\n"); 
+ 		return 0; 
+	}
+ 	sock = openSocket(ipaddr, 27707); 
+	// set a timeout of 1 sec..
+	struct timeval tv;
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
+	if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv,  sizeof tv)){
+		perror("setsockopt");
+		return NULL;
+	}
 	unsigned char buf[1024]; 
-	while(1){
-		snprintf((char*)buf, 1024, "hello there."); 
-		unsigned int len = strlen((char*)buf); 
-		unsigned int n = send(sock, buf, len, 0); 
-		if(n != len) printf("sent length %d\n", n); 
+	long double skew = 0.0; 
+	long double delay = 0.0; 
+	long double gain = 0.001; 
+	long double lastupdate, fabsupdate; 
+	lastupdate = 0.0; fabsupdate = 0.0; 
+	while(!g_die){
+		//send the time, as a double.
+		double time = (double)gettime(); 
+		int n = send(sock, &time, 8, 0); 
+		if(n != 8) printf("sent length %d\n", n); 
 		//currently the socket is blocking -- will wait for data.
 		n = recv(sock, buf, 1024, 0);
-		if(n > 0 && n < 1024){
-			buf[n]= 0; 
-			printf("reply: %s\n", buf); 
+		long double recvtime = gettime(); 
+		if(n != 32){
+			if(n > 0){
+				buf[n]= 0; 
+				printf("unexpected reply: %s\n", buf); 
+			}
+		}else{
+			double* recv = (double*)buf; 
+			long double skew_delay = recvtime - recv[0]; 
+			//windows will report a skew_delay as well -- add them
+			long double ld = (recv[1] + skew_delay)/2.0; 
+			long double ls = (recv[1] - skew_delay)/2.0; 
+			long double update = ls - skew; 
+			skew = skew + gain*update; 
+			delay = 0.999*delay + 0.001*ld; //this is purely diagnostic.
+			printf("skew:%Lf delay %Lf gain %Lf metric %Lf update %Lf\n", skew, delay, gain, 
+					 lastupdate/fabsupdate, update); 
+			double g_offset = recv[2]; 
+			double g_slope = recv[3]; 
+			//use this to estimate the TDT clock. 
+			long double ticks = ((recvtime + skew)*1000.0*g_slope + g_offset); 
+			printf("estimated TDT ticks: %Lf offset %f slope %f\n", ticks, g_offset, g_slope); 
+			//update the gain.
+			if(fabsupdate > 0.0){
+				if(fabs(lastupdate)/fabsupdate > 0.2) gain += 2.1861058423e-5; 
+				else gain -= 1.2745310745e-5; 
+			}
+			if(gain > 0.5674529345) gain = 0.5674529345; if(gain < 1e-6) gain = 1e-6; 
+			lastupdate = 0.95 * lastupdate + 0.05 * update; 
+			fabsupdate = 0.95 * fabsupdate + 0.05 * fabs(update); 
+			usleep(1000); 
 		}
-		sleep(1); 
 	}
+	return NULL; 
 }
 bool 			g_glInitialized = false;
 float			g_mousePos[2]; 
@@ -598,6 +663,8 @@ int main(int argn, char** argc){
 	
 	pthread_t pthread; 
 	pthread_create(&pthread, NULL, polhemusThread, NULL); 
+	pthread_t syncthread; 
+	pthread_create(&syncthread, NULL, syncThread, NULL); 
 	
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);

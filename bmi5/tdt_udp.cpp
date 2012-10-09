@@ -14,9 +14,7 @@
 #define CP_printf printf
 #define INVALID_SOCKET 0
 
-
-
-int openSocket(char *strIPAddr){
+int openSocket(char *strIPAddr, int port){
 	sockaddr_in sin;
 	int sock= INVALID_SOCKET;
 
@@ -27,7 +25,7 @@ int openSocket(char *strIPAddr){
 	// sin.sin_addr.S_un.S_addr = ipAddr; //inet_addr("tdt_udp_0000000");
 	sin.sin_addr.s_addr = inet_addr(strIPAddr);
 
-	sin.sin_port = htons(LISTEN_PORT);
+	sin.sin_port = htons(port);
 
 	CP_printf("UDP: Attempting to open UDP %s\n", strIPAddr);
 
