@@ -1,0 +1,33 @@
+﻿Build started 10/8/2012 6:31:06 PM.
+     1>Project "C:\Profiles\tlh24\sabes-exp-ctrl\bmi5\syncServer\TDT_ActiveX_Console.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\syncServer.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         All outputs are up-to-date.
+         C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"StdAfx.h" /Fp"Debug\syncServer.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         All outputs are up-to-date.
+         C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Debug\syncServer.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt syncServer.cpp
+         syncServer.cpp
+       ManifestResourceCompile:
+         C:\Program Files\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\syncServer.exe.embed.manifest.res" Debug\syncServer_manifest.rc 
+       Link:
+         C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Profiles\tlh24\sabes-exp-ctrl\bmi5\syncServer\Debug\syncServer.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\syncServer.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Profiles\tlh24\sabes-exp-ctrl\bmi5\syncServer\Debug\syncServer.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Profiles\tlh24\sabes-exp-ctrl\bmi5\syncServer\Debug\syncServer.lib" /MACHINE:X86 Debug\syncServer.exe.embed.manifest.res
+         Debug\stdafx.obj
+         Debug\syncServer.obj
+       Manifest:
+         C:\Program Files\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\syncServer.exe.embed.manifest" /manifest Debug\syncServer.exe.intermediate.manifest
+         C:\Program Files\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\syncServer.exe.embed.manifest.res" Debug\syncServer_manifest.rc 
+       LinkEmbedManifest:
+         C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Profiles\tlh24\sabes-exp-ctrl\bmi5\syncServer\Debug\syncServer.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\syncServer.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Profiles\tlh24\sabes-exp-ctrl\bmi5\syncServer\Debug\syncServer.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Profiles\tlh24\sabes-exp-ctrl\bmi5\syncServer\Debug\syncServer.lib" /MACHINE:X86 Debug\syncServer.exe.embed.manifest.res
+         Debug\stdafx.obj
+         Debug\syncServer.obj
+         TDT_ActiveX_Console.vcxproj -> C:\Profiles\tlh24\sabes-exp-ctrl\bmi5\syncServer\Debug\syncServer.exe
+       FinalizeBuildStatus:
+         Deleting file "Debug\syncServer.unsuccessfulbuild".
+         Touching "Debug\syncServer.lastbuildstate".
+     1>Done Building Project "C:\Profiles\tlh24\sabes-exp-ctrl\bmi5\syncServer\TDT_ActiveX_Console.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:03.43

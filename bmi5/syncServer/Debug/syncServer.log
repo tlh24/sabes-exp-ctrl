@@ -1,0 +1,21 @@
+﻿Build started 10/8/2012 6:35:51 PM.
+     1>Project "C:\Profiles\tlh24\sabes-exp-ctrl\bmi5\syncServer\syncServer.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\syncServer.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         All outputs are up-to-date.
+         All outputs are up-to-date.
+       ManifestResourceCompile:
+         All outputs are up-to-date.
+       Link:
+         All outputs are up-to-date.
+       Manifest:
+         All outputs are up-to-date.
+       FinalizeBuildStatus:
+         Deleting file "Debug\syncServer.unsuccessfulbuild".
+         Touching "Debug\syncServer.lastbuildstate".
+     1>Done Building Project "C:\Profiles\tlh24\sabes-exp-ctrl\bmi5\syncServer\syncServer.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.07
