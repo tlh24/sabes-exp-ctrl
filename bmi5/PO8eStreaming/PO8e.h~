@@ -129,7 +129,7 @@ extern "C"
     typedef int bool;
     enum
     {
-        false = 0,
+        false = 0
         true = 1
     };
 #endif

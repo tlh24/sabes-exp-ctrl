@@ -18,7 +18,6 @@ extern "C" long double gettime(){ //in seconds!
 int main(int argc, char **argv)
 {
     int count = 0, total;
-    long long totalBytes;
     PO8e *cards[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
     total = PO8e::cardCount();
@@ -60,24 +59,23 @@ int main(int argc, char **argv)
 
     // start the timer used to compute the speed and set the collected bytes to 0
     long double starttime = gettime(); 
-    totalBytes = 0;
-	 
-	 int sum[96] = {0}; 
-
+	 long long bytes = 0; 
+	 unsigned int frame = 0; 
+	 unsigned int bps = cards[0]->dataSampleSize(); 
+		unsigned int nchan = cards[0]->numChannels(); 
     int stoppedCount = 0, pos = 0;
     while(stoppedCount < count)
     {
-        // compute the rate in megabytes per second
-        long double t = gettime(); 
-        double rate = totalBytes / (t - starttime) / (1024 * 1024);
-        char posChar = "|/-\\"[pos];
-        pos = (pos + 1) % 4;
+        //char posChar = "|/-\\"[pos];
+        //pos = (pos + 1) % 4;
 
         // if we are working with just one card, work with it much more efficiently
-        if (count == 1 &&
-            ! cards[0]->waitForDataReady())
-            break;
-
+        
+        //printf("waiting for data ready.\n"); 
+        //if (count == 1 &&
+        //    ! cards[0]->waitForDataReady())
+        //    break;
+		
         int waitCount = 0;
         stoppedCount = 0;
         for(int x = 0; x < count; x++)
@@ -88,45 +86,22 @@ int main(int argc, char **argv)
                 stoppedCount++;
             else if (numSamples > 0)
             {
-                int channel = 0; //random() % cards[x]->numChannels();
-
-               // printf("Card %d has %4d samples of %4d channels.  Current rate: %.2lf MB/s %c \n", x, numSamples, cards[x]->numChannels(), rate, posChar);
-                fflush(stdout);
-
-                int bufferA[8192] = {42};
-                if (cards[x]->readChannel(channel,
-                                          bufferA, (int)numSamples) != numSamples)
-                    printf("  reading %d samples from channel %d failed\n",
-                           numSamples, channel);
-					printf("channel 0[0]: %d\n", bufferA[0]); 
-                totalBytes += numSamples * cards[x]->numChannels() * cards[x]->dataSampleSize();
-
-                int bufferB[8192];
-                int temp[1024];
+                short bufferB[8192];
+                short temp[8192];
 					 cards[x]->readBlock(temp, numSamples);
 					 cards[x]->flushBufferedData(numSamples);
-                for(int i = 0; i < (int)numSamples; i++){
-						  printf("%d\t%d \t %d \t %d\n", numSamples, temp[0], temp[1], cards[x]->numChannels()); 
-                		for(int j=0; j<96; j++){
-								sum[j] += temp[j+4]; 
-								printf(" %02x", sum[j] & 0xff);
-							}
-						 	printf("\n"); 
-					}
-
-                // print a comparison of the two ways of reading data
-                /*for(int y = 0; y < (int)numSamples; y++)
-                {
-                    short a, b;
-                    a = bufferA[y];
-                    b = bufferB[y];
-                    if (a != b)
-                        fprintf(stderr, "Sample mismatch on channel %d! %d\t!=\t%d\t\n", channel, a, b);
-                }*/
+					 bytes += numSamples * nchan * bps; 
+					 if(frame %10 == 0){
+					 	printf("%d samples at %d bps of %d chan: %Lf MB/sec\n", numSamples, bps, nchan,
+								 ((long double)bytes) / ((gettime() - starttime)*(1024.0*1024.0))); 
+					 }
             }
-            else
+            else{
+					//printf("wait count %d\n", waitCount); 
                 waitCount++;
+				}
         }
+        frame++; 
     }
     printf("\n");
 
