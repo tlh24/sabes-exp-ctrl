@@ -80,6 +80,9 @@ class Shape{
 	void scale(float s){
 		m_scale[0] = m_scale[1] = s;
 	}
+	void scale(float x, float y){
+		m_scale[0] = x; m_scale[1] = y; 
+	}
 	void setColor(float r, float g, float b){
 		m_color[0] = r; 
 		m_color[1] = g; 
@@ -87,6 +90,11 @@ class Shape{
 	}
 	void setAlpha(float a){
 		m_color[3] = a; 
+	}
+	void setColor4d(double* c){
+		for(int i=0; i<4; i++){
+			m_color[i] = (float)c[i]; 
+		}
 	}
 };
 struct starStruct {
@@ -114,14 +122,17 @@ static const char *fragment_source = {
 class StarField : public Shape {
 public: //do something like the flow field common in the lab.
 	float m_vel[2]; //in screen units/second. 
-	float* m_age; //arb. units.
+	double* m_age; //arb. units.
 	starStruct* m_v; //vertices, backing store.
 	float* m_pvel; //individual point velocities for variable coherence. 
 	float	m_coherence; 
+	float	m_starSize; 
 	GLuint	m_colorbuffer; 
 	GLuint 	m_program[2]; 
 	long double m_lastTime; //oh god it's been years...
 	long double m_startTime; 
+	bool	m_awesome = false; 
+	bool	m_fade = false; 
 	
 	StarField(){
 		m_vel[0] = 0.2f; 
@@ -131,6 +142,7 @@ public: //do something like the flow field common in the lab.
 		m_age = 0; 
 		m_coherence = 0.5f; 
 		m_lastTime = 0.0; 
+		m_starSize = 3.0; 
 		m_startTime = gettime(); 
 	}
 	~StarField(){
@@ -211,11 +223,14 @@ public: //do something like the flow field common in the lab.
 		if(m_pvel) free(m_pvel); m_pvel = NULL; 
 		m_v = (starStruct*)malloc(nstars * sizeof(starStruct)); 
 		m_pvel = (float*)malloc(nstars * 2 * sizeof(float));
-		m_age = (float*)malloc(nstars * sizeof(float)); 
+		m_age = (double*)malloc(nstars * sizeof(double)); 
 		for(int i=0; i<nstars; i++){
 			m_v[i].position[0] = (uniform() - 0.5)*ar*2.f;
 			m_v[i].position[1] = (uniform() - 0.5)*2.f; 
-			m_v[i].color = (unsigned int)(255*uniform() + 255*255*uniform() + 255*255*255*uniform());
+			if(m_awesome)
+				m_v[i].color = (unsigned int)(255*uniform() + 255*255*uniform() + 255*255*255*uniform());
+			else 
+				m_v[i].color = 0xffffffff; 
 			float angle = PI * 2.0 * ((float)rand() / (float)RAND_MAX); 
 			m_pvel[i*2+0] = sinf(angle); 
 			m_pvel[i*2+1] = cosf(angle); 
@@ -252,26 +267,34 @@ public: //do something like the flow field common in the lab.
 			}
 		}
 		for(int i=0; i<m_n; i++){
-			double d = fmod(time+m_age[i], PI*2.0);
-			unsigned int c = (unsigned int)(255.0 * 
-				(-0.5 * cos(d) + 0.5)); 
+			double d = time-m_age[i];
+			int c = (int)(255.0 * 
+				(-0.52 * cos(d) + 0.5)); 
+			c = c > 255 ? 255: c; c = c < 0 ? 0 : c; 
+			if(!m_fade){if(c) c = 255;}
 			c &= 0xff; 
 			m_v[i].color &= 0x00ffffff; 
 			m_v[i].color += (c << 24); 
 			// if it's completely transparent, update the position. 
-			if(d < 0.01){
+			if(d > PI*2.0){
+				m_age[i] += PI*2.0; 
 				for(int j=0; j<2; j++){
 					float f = (uniform() - 0.5)*a[j]*2.f;
 					m_v[i].position[j] = f;
 				}
-				m_v[i].color &= 0xffff5fff; //debug!  you should not see this.
+				if(m_awesome){
+					m_v[i].color = (unsigned int)(255*uniform() + 255*255*uniform() + 255*255*255*uniform());
+					m_v[i].color &= 0xffff5fff; //debug!  you should not see this.
+				} else {
+					m_v[i].color = 0x00ffffff; 
+				}
 			}
 		}
 		m_lastTime = time; 
 	}
 	void draw(int index){
 		//this is a little more complicated, as we need to do a memcpy and user shaders.
-		glPointSize(30.f); 
+		glPointSize(m_starSize); 
 		glUseProgram(m_program[index]); 
 		glBindVertexArray(m_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // Bind our Vertex Buffer Object
@@ -287,5 +310,13 @@ public: //do something like the flow field common in the lab.
 		glBindVertexArray(0);
 		glUseProgram(0); 
 	}
+	void setVel(double x, double y){ m_vel[0] = x; m_vel[1] = y; }
+	void setCoherence(double c){ m_coherence = c; }
+	void setStarSize(double ss){ m_starSize = ss;}
+	void setAwesome(bool s){ 
+		m_awesome = s; 
+		if(s){ m_starSize = 30.0; m_fade = true; }
+	}
+	void setFade(bool s){ m_fade = s; }
 };
 #endif

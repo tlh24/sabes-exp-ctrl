@@ -8,6 +8,8 @@
 #include <netdb.h> 
 #include <string.h>
 #include <stack>
+#include <sys/mman.h>
+#include <fcntl.h>
 #include "matio.h"
 
 //opengl headers. 
@@ -37,13 +39,13 @@ extern "C" long double gettime(){ //in seconds!
 #include "shape.h"
 #include "polhemus.h"
 
-
 using namespace std;
 double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
 double 	g_frameRate = 0.0; 
 long double		g_lastFrame = 0.0; 
 bool		g_die = false; 
 bool		g_polhemusConnected = false; 
+float 	g_sensors[2][6]; 
 GtkWindow* g_mainWindow; //used for dialogs, etc. 
 Shape*	g_cursor; 
 StarField* g_stars; 
@@ -51,6 +53,26 @@ gtkglx*  g_daglx[2]; //human, monkey.
 GtkWidget* g_da[2]; //draw areas. 
 GtkWidget* g_luaTimeLabel; 
 GtkWidget* g_openglTimeLabel; 
+
+struct ShapeInfo{
+	double position[2]; 
+	double size[2]; 
+	double color[4]; 
+}; 
+struct StarInfo{
+	double velocity[2]; 
+	double coherence;
+	double size; 
+	double awesome; //binary, set on > 0
+	double fade; // binary, set > 0.
+};
+struct SharedInfo{
+	double		frame; 
+	ShapeInfo	cursor; 
+	ShapeInfo	target;
+	StarInfo		stars; 
+	double		polhemus[3]; 
+}; 
 
 void UDP_RZ2(){
 	int sock; 
@@ -231,6 +253,9 @@ static gint motion_notify_event( GtkWidget *w,
 	return TRUE;
 }
 
+typedef GLvoid  
+(*glXSwapIntervalSGIFunc) (GLint);  
+
 static gboolean
 configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 {
@@ -240,6 +265,15 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 	if(!(g_daglx[h]->configure(da))){
 		g_assert_not_reached ();
 	}
+	//sync? only want for one monitor.
+	if(h == 1){
+		glXSwapIntervalSGIFunc glXSwapIntervalSGI = 0;  
+		glXSwapIntervalSGI = (glXSwapIntervalSGIFunc)  
+		glXGetProcAddressARB((const GLubyte*)"glXSwapIntervalSGI");  
+		if (glXSwapIntervalSGI)  
+				glXSwapIntervalSGI (1); 
+	}
+	
 	//save the viewport size.
 	GtkAllocation allocation;
 	gtk_widget_get_allocation (da, &allocation);
@@ -311,12 +345,11 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	glColor4f(0.7f, 1.f, 1.f, 0.75);
 	
 	//g_cursor->translate(x,y); 
-	g_cursor->draw(); 
-	g_stars->m_vel[0] = g_mousePos[0] / -3.f;
-	g_stars->m_vel[1] = g_mousePos[1] / -3.f; 
+	//g_stars->m_vel[0] = g_mousePos[0] / -3.f;
+	//g_stars->m_vel[1] = g_mousePos[1] / -3.f; 
 	g_stars->move(g_daglx[1]->getAR()); //really should have the actual time here.
 	g_stars->draw(h); 
-	
+	g_cursor->draw(); 
 	g_daglx[h]->swap(); //always double buffered.
 
 	return TRUE;
@@ -364,6 +397,86 @@ static void fullscreenCB(GtkWidget* w, gpointer p){
 	else
 		gtk_window_unfullscreen(top);
 }
+void flush_pipe(int fid){
+	fcntl(fid, F_SETFL, O_NONBLOCK);
+	char* d = (char*)malloc(1024*8); 
+	int r = read(fid, d, 1024*8); 
+	printf("flushed %d bytes\n", r); 
+	free(d); 
+	int opts = fcntl(fid,F_GETFL);
+	opts ^= O_NONBLOCK;
+	fcntl(fid, F_SETFL, opts);
+}
+/* matlab interaction -- through shared memory. */
+void* mmap_thread(void*){
+	size_t length = sizeof(SharedInfo); 
+	int fd = 0; 
+	fd = open("/tmp/bmi5_control", O_RDWR | O_CREAT); 
+	if (fd == -1){
+		perror("could not open /tmp/bmi5_control\n"); 
+		return NULL; 
+	}
+	int* s = (int*)malloc(length); 
+	write(fd, s, length); //not buffered. fill the file out.
+	free(s); 
+	
+	void* addr = mmap(NULL, length, /*PROT_READ |*/ PROT_WRITE, 
+							MAP_SHARED, fd, 0); 
+	if (addr == MAP_FAILED){
+		close(fd);
+		perror("Error mmapping the file");
+		exit(EXIT_FAILURE);
+	}
+	int pipe_out = open("bmi5_out", O_RDWR); 
+	if(pipe_out <= 0){
+		perror("could not open ./bmi5_out (make with mkfifo)\n"); 
+		return NULL; 
+	}
+	int pipe_in = open("bmi5_in", O_RDWR); 
+	if(pipe_in <= 0){
+		perror("could not open ./bmi5_in (make with mkfifo)\n"); 
+		return NULL; 
+	}
+	volatile SharedInfo* si = (SharedInfo*)addr; 
+	printf("mmap address: %lx\n", (long unsigned int)addr); 
+
+	char buf[32]; int bufn = 0; 
+	flush_pipe(pipe_out); 
+	int frame = 0; 
+	while(!g_die){
+		//printf("%d waiting for matlab...\n", frame); 
+		int r = read(pipe_in, &(buf[bufn]), 5);
+		if(r > 0) bufn += r; 
+		buf[bufn] = 0; 
+		//printf("%d read %d %s\n", frame, r, buf); 
+		if(r >= 3){
+			//react to changes requested. 
+			g_cursor->translate(si->cursor.position[0],si->cursor.position[1]);
+			g_cursor->scale(si->cursor.size[0],si->cursor.size[1]); 
+			g_cursor->setColor4d((double*)&(si->cursor.color[0])); 
+			g_stars->setVel(si->stars.velocity[0], si->stars.velocity[1]); 
+			g_stars->setCoherence(si->stars.coherence); 
+			g_stars->setStarSize(si->stars.size);
+			g_stars->setFade(si->stars.fade > 0); 
+			g_stars->setAwesome(si->stars.awesome > 0);
+			//supply new information. time sync provided by gtkclient.
+			for(int i=0; i<3; i++)
+				si->polhemus[i] = g_sensors[0][i]; 
+			si->frame = frame; 
+			usleep(100); //let the kernel sync memory.
+			write(pipe_out, "go\n", 3); 
+			//printf("sent pipe_out 'go'\n"); 
+			bufn = 0; 
+		}else
+			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
+		frame++; 
+	}
+	munmap(addr, length); 
+	close(fd); 
+	close (pipe_in);
+	close (pipe_out); 
+	return NULL; 
+}
 /* Liberty / Polhemus. 
  as reading from USB / serial will take some time, it makes sense to 
  put this in a separate thread, with mutex so that the instant the data is 
@@ -374,7 +487,6 @@ static void fullscreenCB(GtkWidget* w, gpointer p){
  hence the need for interlock. 
  */
 #define BUF_SIZE 1000
-float g_sensors[2][6]; 
 char g_circBuff[1024]; 
 unsigned int g_cbPtr = 0; 
 unsigned int g_cbRN = 0; //pointer to the last carrige return.
@@ -588,7 +700,8 @@ int main(int argn, char** argc){
 	//setup the opengl context for da1.
 	//before we do this, tun on FSAA. 
 	putenv( "__GL_FSAA_MODE=10" ); //http://www.opengl.org/discussion_boards/showthread.php/172000-Programmatically-controlling-level-of-AA
-	putenv("__GL_SYNC_TO_VBLANK=0"); //don't sync to vertical blanking.  set to 1 to sync. 
+	putenv("__GL_SYNC_TO_VBLANK=0"); //don't sync to vertical blanking.  individually per window.
+	putenv("__GL_SYNC_DISPLAY_DEVICE=CRT-1"); //sync to this display device. 
 	gtk_widget_set_double_buffered (da1, FALSE);
 	g_daglx[0] = new gtkglx(da1); 
  
@@ -664,7 +777,7 @@ int main(int argn, char** argc){
 	pthread_t pthread; 
 	pthread_create(&pthread, NULL, polhemusThread, NULL); 
 	pthread_t syncthread; 
-	pthread_create(&syncthread, NULL, syncThread, NULL); 
+	pthread_create(&syncthread, NULL, mmap_thread, NULL); 
 	
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
