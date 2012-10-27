@@ -1,5 +1,5 @@
 CC = g++
-OBJS = main.o tdt_udp.o glInfo.o glFont.o polhemus.o
+OBJS = main.o tdt_udp.o glInfo.o glFont.o polhemus.o ../../myopen/common/gettime.o
 CFLAGS=-I/usr/local/include
 CFLAGS+=  -g
 CFLAGS+= -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare -Wformat=2 \

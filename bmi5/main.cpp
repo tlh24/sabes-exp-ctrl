@@ -26,18 +26,14 @@
 #include "glFont.h"
 #include "gtkglx.h"
 
-long double 	g_startTime = 0.0;
-extern "C" long double gettime(){ //in seconds!
-	timespec pt ;
-	clock_gettime(CLOCK_MONOTONIC, &pt);
-	long double ret = (long double)(pt.tv_sec) ;
-	ret += (long double)(pt.tv_nsec) / 1e9 ;
-	return ret - g_startTime;
-}
+#include "../../myopen/common/mmaphelp.h"
+#include "../../myopen/common/gettime.h"
+#include "../../myopen/gtkclient_tdt/timesync.h"
 
 //local.
 #include "shape.h"
 #include "polhemus.h"
+#include "savedata.h"
 
 using namespace std;
 double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
@@ -53,26 +49,8 @@ gtkglx*  g_daglx[2]; //human, monkey.
 GtkWidget* g_da[2]; //draw areas. 
 GtkWidget* g_luaTimeLabel; 
 GtkWidget* g_openglTimeLabel; 
-
-struct ShapeInfo{
-	double position[2]; 
-	double size[2]; 
-	double color[4]; 
-}; 
-struct StarInfo{
-	double velocity[2]; 
-	double coherence;
-	double size; 
-	double awesome; //binary, set on > 0
-	double fade; // binary, set > 0.
-};
-struct SharedInfo{
-	double		frame; 
-	ShapeInfo	cursor; 
-	ShapeInfo	target;
-	StarInfo		stars; 
-	double		polhemus[3]; 
-}; 
+TimeSyncClient * g_tsc; 
+unsigned char			g_writeBuffer[1024*1024]; 
 
 void UDP_RZ2(){
 	int sock; 
@@ -324,7 +302,7 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 
 static gboolean
 draw1 (GtkWidget *da, cairo_t *, gpointer p){
-	long double t = gettime() - g_startTime; 
+	long double t = gettime(); 
 	int h = (int)((long long)p & 0xf);
 	if(h <0 || h>1) g_assert_not_reached ();
 	if (!(g_daglx[h]->expose(da))){
@@ -372,7 +350,7 @@ static gboolean refresh (gpointer ){
 	char str[256];
 	double mean = (g_luaTime[1] / g_luaTime[0])*1000.0; 
 	double max = g_luaTime[2] * 1000.0; 
-	double frac = g_luaTime[1] / (gettime() - g_startTime); 
+	double frac = g_luaTime[1] / gettime(); 
 	double last = g_luaTime[3] * 1000.0; 
 	snprintf(str, 256, "mean:%4.3f ms\nmax:%4.3f ms\nlast:%4.3f ms\nfrac:%4.5f",
 				mean, max, last, frac);
@@ -463,6 +441,7 @@ void* mmap_thread(void*){
 			for(int i=0; i<3; i++)
 				si->polhemus[i] = g_sensors[0][i]; 
 			si->frame = frame; 
+			si->ticks = g_tsc->getTicks() + 2.4414; //2.4 samples = 100us.
 			usleep(100); //let the kernel sync memory.
 			write(pipe_out, "go\n", 3); 
 			//printf("sent pipe_out 'go'\n"); 
@@ -779,6 +758,8 @@ int main(int argn, char** argc){
 	pthread_t syncthread; 
 	pthread_create(&syncthread, NULL, mmap_thread, NULL); 
 	
+	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
+	
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
 	gtk_main ();
@@ -787,6 +768,7 @@ int main(int argn, char** argc){
 
 	delete g_daglx[0];
 	delete g_daglx[1]; 
+	delete g_tsc; 
 	return 0; 
 }
 
