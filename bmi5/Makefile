@@ -1,11 +1,12 @@
 CC = g++
-OBJS = main.o tdt_udp.o glInfo.o glFont.o polhemus.o ../../myopen/common/gettime.o
+OBJS = main.o tdt_udp.o glInfo.o glFont.o polhemus.o writematlab.o \
+	../../myopen/common/gettime.o
 CFLAGS=-I/usr/local/include
 CFLAGS+=  -g
 CFLAGS+= -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare -Wformat=2 \
 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
 -Wextra -pedantic -std=c++0x -rdynamic
-LDFLAGS = -rdynamic -lrt -lGL -lGLU -lGLEW -lusb-1.0
+LDFLAGS = -rdynamic -lrt -lGL -lGLU -lGLEW -lusb-1.0 -lhdf5
 GLIBS = gtk+-3.0
 GTKFLAGS = `pkg-config --cflags $(GLIBS) `
 GTKLD = `pkg-config --libs $(GLIBS) `

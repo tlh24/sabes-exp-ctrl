@@ -8,6 +8,7 @@
 #include <netdb.h> 
 #include <string.h>
 #include <stack>
+#include <string>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include "matio.h"
@@ -31,6 +32,7 @@
 #include "../../myopen/gtkclient_tdt/timesync.h"
 
 //local.
+#include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
 #include "savedata.h"
@@ -39,18 +41,24 @@ using namespace std;
 double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
 double 	g_frameRate = 0.0; 
 long double		g_lastFrame = 0.0; 
+int		g_frame = 0;
+bool 		g_glInitialized = false;
+float		g_mousePos[2]; 
 bool		g_die = false; 
 bool		g_polhemusConnected = false; 
 float 	g_sensors[2][6]; 
 GtkWindow* g_mainWindow; //used for dialogs, etc. 
-Shape*	g_cursor; 
-StarField* g_stars; 
 gtkglx*  g_daglx[2]; //human, monkey.
 GtkWidget* g_da[2]; //draw areas. 
 GtkWidget* g_luaTimeLabel; 
 GtkWidget* g_openglTimeLabel; 
 TimeSyncClient * g_tsc; 
 unsigned char			g_writeBuffer[1024*1024]; 
+
+// matlab-interactive objects. 
+TimeSerialize* g_timeSerialize; 
+Shape*		g_cursor; 
+StarField* 	g_stars; 
 
 void UDP_RZ2(){
 	int sock; 
@@ -90,8 +98,7 @@ void UDP_RZ2(){
 		}
 	}
 }
-int hostname_to_ip(char * hostname , char* ip)
-{
+int hostname_to_ip(char * hostname , char* ip){
 	struct hostent *he;
 	struct in_addr **addr_list;
 	int i;
@@ -173,8 +180,6 @@ void* syncThread(void*){
 	}
 	return NULL; 
 }
-bool 			g_glInitialized = false;
-float			g_mousePos[2]; 
 
 void errorDialog(char* msg){
 	GtkWidget *dialog, *label, *content_area;
@@ -195,14 +200,12 @@ void errorDialog(char* msg){
 	gtk_container_add (GTK_CONTAINER (content_area), label);
 	gtk_widget_show_all (dialog);
 }
-
 void destroy(GtkWidget *, gpointer){
 	//more cleanup later.
 	g_die = true;
 	KillFont(); 
 	gtk_main_quit();
 }
-
 void updateCursPos(float x, float y){
 	//always relative to the human view.
 	g_mousePos[0] = x/(g_daglx[0]->m_size[0]);
@@ -214,7 +217,6 @@ void updateCursPos(float x, float y){
 	}
 	g_mousePos[1] *= -1; //zero at the top for gtk; bottom for opengl.
 }
-
 static gint motion_notify_event( GtkWidget *w,
                                  GdkEventMotion *){
 	float x, y;
@@ -230,10 +232,8 @@ static gint motion_notify_event( GtkWidget *w,
 	//printf("cursor position: %f %f\n", x, y); 
 	return TRUE;
 }
-
 typedef GLvoid  
 (*glXSwapIntervalSGIFunc) (GLint);  
-
 static gboolean
 configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 {
@@ -348,24 +348,13 @@ static gboolean refresh (gpointer ){
 	gtk_widget_queue_draw (g_da[1]);
 	//can do other pre-frame GUI update stuff here.
 	char str[256];
-	double mean = (g_luaTime[1] / g_luaTime[0])*1000.0; 
-	double max = g_luaTime[2] * 1000.0; 
-	double frac = g_luaTime[1] / gettime(); 
-	double last = g_luaTime[3] * 1000.0; 
-	snprintf(str, 256, "mean:%4.3f ms\nmax:%4.3f ms\nlast:%4.3f ms\nfrac:%4.5f",
-				mean, max, last, frac);
+
+	snprintf(str, 256, "matlab time:");
 	gtk_label_set_text(GTK_LABEL(g_luaTimeLabel), str); 
 	
 	snprintf(str, 256, "frame rate: %4.1f Hz", g_frameRate); 
 	gtk_label_set_text(GTK_LABEL(g_openglTimeLabel), str); 
 	return TRUE;
-}
-
-static void luaCalibrateCB(GtkWidget*, gpointer){
-}
-static void luaRunTaskCB(GtkWidget*, gpointer){
-}
-static void luaStopCB(GtkWidget*, gpointer){
 }
 
 static void fullscreenCB(GtkWidget* w, gpointer p){
@@ -388,23 +377,8 @@ void flush_pipe(int fid){
 /* matlab interaction -- through shared memory. */
 void* mmap_thread(void*){
 	size_t length = sizeof(SharedInfo); 
-	int fd = 0; 
-	fd = open("/tmp/bmi5_control", O_RDWR | O_CREAT); 
-	if (fd == -1){
-		perror("could not open /tmp/bmi5_control\n"); 
-		return NULL; 
-	}
-	int* s = (int*)malloc(length); 
-	write(fd, s, length); //not buffered. fill the file out.
-	free(s); 
+	mmapHelp mmh(length, "/tmp/bmi5_control"); 
 	
-	void* addr = mmap(NULL, length, /*PROT_READ |*/ PROT_WRITE, 
-							MAP_SHARED, fd, 0); 
-	if (addr == MAP_FAILED){
-		close(fd);
-		perror("Error mmapping the file");
-		exit(EXIT_FAILURE);
-	}
 	int pipe_out = open("bmi5_out", O_RDWR); 
 	if(pipe_out <= 0){
 		perror("could not open ./bmi5_out (make with mkfifo)\n"); 
@@ -415,12 +389,10 @@ void* mmap_thread(void*){
 		perror("could not open ./bmi5_in (make with mkfifo)\n"); 
 		return NULL; 
 	}
-	volatile SharedInfo* si = (SharedInfo*)addr; 
-	printf("mmap address: %lx\n", (long unsigned int)addr); 
+	mmh.prinfo(); 
 
 	char buf[32]; int bufn = 0; 
 	flush_pipe(pipe_out); 
-	int frame = 0; 
 	while(!g_die){
 		//printf("%d waiting for matlab...\n", frame); 
 		int r = read(pipe_in, &(buf[bufn]), 5);
@@ -429,6 +401,11 @@ void* mmap_thread(void*){
 		//printf("%d read %d %s\n", frame, r, buf); 
 		if(r >= 3){
 			//react to changes requested. 
+			void* b = mmh.m_addr; 
+			b = g_timeSerialize->mmapRead(b); 
+			b = g_cursor->mmapRead(b); 
+			b = g_stars->mmapRead(b); 
+			/*
 			g_cursor->translate(si->cursor.position[0],si->cursor.position[1]);
 			g_cursor->scale(si->cursor.size[0],si->cursor.size[1]); 
 			g_cursor->setColor4d((double*)&(si->cursor.color[0])); 
@@ -442,16 +419,15 @@ void* mmap_thread(void*){
 				si->polhemus[i] = g_sensors[0][i]; 
 			si->frame = frame; 
 			si->ticks = g_tsc->getTicks() + 2.4414; //2.4 samples = 100us.
+			*/
 			usleep(100); //let the kernel sync memory.
 			write(pipe_out, "go\n", 3); 
 			//printf("sent pipe_out 'go'\n"); 
 			bufn = 0; 
 		}else
 			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
-		frame++; 
+		g_frame++; 
 	}
-	munmap(addr, length); 
-	close(fd); 
 	close (pipe_in);
 	close (pipe_out); 
 	return NULL; 
@@ -612,13 +588,7 @@ extern "C" void setShapeAlpha(int , float a){
 	g_cursor->setAlpha(a); 
 }
 
-int main(int argn, char** argc){
-	//setup a window with openGL. 
-	GtkWidget *window;
-	GtkWidget *da1, *da2, *paned, *v1, *frame;
-	
-	g_startTime = gettime(); 
-	
+void longDoubleTest(){
 	printf("sizeof long double %ld\n", sizeof(long double)); 
 	printf("sizeof double %ld\n", sizeof(double)); 
 	
@@ -631,6 +601,14 @@ int main(int argn, char** argc){
 	long double ld2 = (long double)d; 
 	ld2 -= ld; 
 	printf("sum ld: %Lf, d: %f difference %Lf\n", ld, d, ld2); 
+}
+
+int main(int argn, char** argc){
+	//setup a window with openGL. 
+	GtkWidget *window;
+	GtkWidget *da1, *da2, *paned, *v1, *frame;
+	
+	g_startTime = gettime(); 
 	
 	gtk_init (&argn, &argc);
 
@@ -645,7 +623,7 @@ int main(int argn, char** argc){
 	v1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_set_size_request(GTK_WIDGET(v1), 170, 650);
 	
-	frame = gtk_frame_new("Lua stats");
+	frame = gtk_frame_new("Running stats");
 	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
 	g_luaTimeLabel = gtk_label_new("mean: max: %:"); 
@@ -660,15 +638,15 @@ int main(int argn, char** argc){
 	gtk_container_add (GTK_CONTAINER (frame), g_openglTimeLabel );
 	
 	GtkWidget* button = gtk_button_new_with_label ("Calibrate liberty");
-	g_signal_connect(button, "clicked", G_CALLBACK(luaCalibrateCB), 0); 
+	//g_signal_connect(button, "clicked", G_CALLBACK(luaCalibrateCB), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
 	button = gtk_button_new_with_label ("run task");
-	g_signal_connect(button, "clicked", G_CALLBACK(luaRunTaskCB), 0); 
+	//g_signal_connect(button, "clicked", G_CALLBACK(luaRunTaskCB), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
 	button = gtk_button_new_with_label ("stop");
-	g_signal_connect(button, "clicked", G_CALLBACK(luaStopCB), 0); 
+	//g_signal_connect(button, "clicked", G_CALLBACK(luaStopCB), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
 	
@@ -739,6 +717,7 @@ int main(int argn, char** argc){
 		G_CALLBACK (fullscreenCB), (gpointer*)top); 
 	
 	//can init the shapes ... here i guess (no opengl though!)
+	g_timeSerialize = new TimeSerialize(); 
 	g_cursor = new Shape(); 
 	g_stars = new StarField(); 
 
@@ -765,10 +744,19 @@ int main(int argn, char** argc){
 	gtk_main ();
 	
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
+	
+	//save data!!
+	vector<Serialize*> vs; 
+	vs.push_back(g_timeSerialize); 
+	vs.push_back(g_cursor); 
+	vs.push_back(g_stars); 
+	writeMatlab(vs); 
 
 	delete g_daglx[0];
 	delete g_daglx[1]; 
 	delete g_tsc; 
+	delete g_timeSerialize; 
+	delete g_cursor; 
+	delete g_stars; 
 	return 0; 
 }
-

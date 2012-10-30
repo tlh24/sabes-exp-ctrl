@@ -7,15 +7,18 @@
 #include <GL/glext.h> 
 */
 #define PI 3.141592653589793
-class Shape{
+class Shape : public Serialize {
 	public:
 		int 	m_n; 
 		unsigned int m_vao; 
 		unsigned int m_vbo; 
 		unsigned int m_drawmode; 
-		float	m_color[4];
-		float m_scale[2]; 
-		float m_trans[2]; 
+		array<float,4>	m_color;
+		array<float,2> m_scale; 
+		array<float,2> m_trans; 
+		vector<array<unsigned char,4>> v_color; 
+		vector<array<float,2>> v_scale; 
+		vector<array<float,2>> v_trans; 
 	Shape(void){
 		m_vao = 0; 
 		m_vbo = 0; 
@@ -29,6 +32,9 @@ class Shape{
 	}
 	~Shape(){
 		deleteBuffers(); 
+		v_color.clear(); 
+		v_scale.clear(); 
+		v_trans.clear();
 	}
 	void makeVAO(float* vertices, bool del){
 		if(m_n > 0){
@@ -96,6 +102,63 @@ class Shape{
 			m_color[i] = (float)c[i]; 
 		}
 	}
+	//serialization. 
+	unsigned char floatToU8(float in){
+		in *= 255; 
+		in = in > 255.f ? 255.f : in; 
+		in = in < 0.f ? 0.f : in; 
+		return (unsigned char)in; 
+	}
+	virtual void store(){
+		array<unsigned char,4> color; 
+		for(int i=0; i<4; i++)
+			color[i] = floatToU8(m_color[i]); 
+		v_color.push_back(color);
+		v_scale.push_back(m_scale); 
+		v_trans.push_back(m_trans); 
+	}
+	virtual int nstored(){ return v_color.size(); }
+	virtual string storeName(int indx){
+		switch(indx){
+			case 0: return string("shape_color");
+			case 1: return string("shape_scale");
+			case 2: return string("shape_trans");
+		} return string("none"); 
+	}
+	virtual int getStoreClass(int indx){
+		switch(indx){ 
+			case 0: return MAT_C_UINT8;
+			case 1: return MAT_C_SINGLE;
+			case 2: return MAT_C_SINGLE;
+		} return 0; 
+	}
+	virtual void getStoreDims(int indx, size_t* dims){
+		switch(indx){
+			case 0: dims[0] = 4; dims[1] = 1; break; 
+			case 1: dims[0] = 2; dims[1] = 1; break;
+			case 2: dims[0] = 2; dims[1] = 1; break; 
+			default: dims[0] = 0; dims[1] = 0; break;
+		}
+	}
+	virtual void* getStore(int indx, int i){
+		switch(indx){
+			case 0: return (void*)&((v_color[i]))[0]; 
+			case 1: return (void*)&((v_scale[i]))[0]; 
+			case 2: return (void*)&((v_trans[i]))[0]; 
+		} return NULL; 
+	}
+	virtual int numStores() {return 3;}
+	virtual void* mmapRead(void* addr){
+		double* d = (double*)addr; 
+		int i; 
+		for(i=0; i<4; i++)
+			m_color[i] = *d++;
+		for(i=0; i<2; i++)
+			m_scale[i] = *d++; 
+		for(i=0; i<2; i++)
+			m_trans[i] = *d++; 
+		return (void*)d; 
+	}
 };
 struct starStruct {
 	float	position[2]; 
@@ -121,7 +184,7 @@ static const char *fragment_source = {
 }; 
 class StarField : public Shape {
 public: //do something like the flow field common in the lab.
-	float m_vel[2]; //in screen units/second. 
+	array<float,2> m_vel; //in screen units/second. 
 	double* m_age; //arb. units.
 	starStruct* m_v; //vertices, backing store.
 	float* m_pvel; //individual point velocities for variable coherence. 
@@ -133,6 +196,9 @@ public: //do something like the flow field common in the lab.
 	long double m_startTime; 
 	bool	m_awesome = false; 
 	bool	m_fade = false; 
+	vector<array<float,2>> v_vel; 
+	vector<float> v_coherence; 
+	// we can assume that the other parts don't change during the experiment.
 	
 	StarField(){
 		m_vel[0] = 0.2f; 
@@ -151,6 +217,8 @@ public: //do something like the flow field common in the lab.
 		if(m_age) free(m_age); m_age = NULL; 
 		if(m_program[0]) glDeleteProgram(m_program[0]);
 		if(m_program[1]) glDeleteProgram(m_program[1]);
+		v_vel.clear(); 
+		v_coherence.clear(); 
 	}
 	void makeVAO(starStruct* vertices, bool del){
 		if(m_n > 0){
@@ -318,5 +386,64 @@ public: //do something like the flow field common in the lab.
 		if(s){ m_starSize = 30.0; m_fade = true; }
 	}
 	void setFade(bool s){ m_fade = s; }
+	// serialization
+	void store(){
+		Shape::store(); 
+		v_vel.push_back(m_vel); 
+		v_coherence.push_back(m_coherence); 
+	}
+	string storeName(int indx){
+		if(indx < Shape::numStores()){
+			return Shape::storeName(indx); 
+		}else{
+			indx -= Shape::numStores(); 
+			switch(indx){
+				case 0: return string("vel"); 
+				case 1: return string("coherence"); 
+			} return string("none"); 
+		}
+	}
+	int getStoreClass(int indx){
+		if(indx < Shape::numStores()){
+			return Shape::getStoreClass(indx); 
+		}else{
+			indx -= Shape::numStores(); 
+			switch(indx){
+				case 0: return MAT_C_SINGLE; 
+				case 1: return MAT_C_SINGLE; 
+			} return 0; 
+		}
+	}
+	void getStoreDims(int indx, size_t* dims){
+		if(indx < Shape::numStores()){
+			Shape::getStoreDims(indx, dims); 
+		}else{
+			indx -= Shape::numStores(); 
+			switch(indx){
+				case 0: dims[0] = 2; dims[1] = 1; break; 
+				case 1: dims[0] = 1; dims[1] = 1; break; 
+			}
+		}
+	}
+	void* getStore(int indx, int i){
+		if(indx < Shape::numStores()){
+			return Shape::getStore(indx, i); 
+		}else{
+			indx -= Shape::numStores(); 
+			switch(indx){
+				case 0: return (void*)&((v_vel[i]))[0]; 
+				case 1: return (void*)&((v_coherence[i]));
+			} return NULL; 
+		}
+	}
+	int numStores() { return Shape::numStores() + 2; }
+	void* mmapRead(void* addr){
+		void* b = Shape::mmapRead(addr); 
+		double* d = (double*)b; 
+		for(int i=0; i<2; i++)
+			m_vel[i] = *d++; 
+		m_coherence = *d++; 
+		return (void*)d; 
+	}
 };
 #endif
