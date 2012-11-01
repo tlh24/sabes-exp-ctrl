@@ -25,6 +25,7 @@ class Shape : public Serialize {
 		m_color[0] = m_color[1] = m_color[2] = m_color[3] = 1.f; 
 		m_scale[0] = m_scale[1] = 1.f; 
 		m_trans[0] = m_trans[1] = 0.f; 
+		m_name = {"shape_"}; 
 	}
 	void deleteBuffers(){
 		if(m_vbo) glDeleteBuffers(1, &m_vbo); m_vbo = 0; 
@@ -120,9 +121,9 @@ class Shape : public Serialize {
 	virtual int nstored(){ return v_color.size(); }
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return string("shape_color");
-			case 1: return string("shape_scale");
-			case 2: return string("shape_trans");
+			case 0: return m_name + string("color");
+			case 1: return m_name + string("scale");
+			case 2: return m_name + string("trans");
 		} return string("none"); 
 	}
 	virtual int getStoreClass(int indx){
@@ -210,6 +211,7 @@ public: //do something like the flow field common in the lab.
 		m_lastTime = 0.0; 
 		m_starSize = 3.0; 
 		m_startTime = gettime(); 
+		m_name = string{"stars_"}; 
 	}
 	~StarField(){
 		if(m_v) free(m_v); m_v = NULL;
@@ -387,23 +389,23 @@ public: //do something like the flow field common in the lab.
 	}
 	void setFade(bool s){ m_fade = s; }
 	// serialization
-	void store(){
+	virtual void store(){
 		Shape::store(); 
 		v_vel.push_back(m_vel); 
 		v_coherence.push_back(m_coherence); 
 	}
-	string storeName(int indx){
+	virtual string storeName(int indx){
 		if(indx < Shape::numStores()){
 			return Shape::storeName(indx); 
 		}else{
 			indx -= Shape::numStores(); 
 			switch(indx){
-				case 0: return string("vel"); 
-				case 1: return string("coherence"); 
+				case 0: return m_name + string("vel"); 
+				case 1: return m_name + string("coherence"); 
 			} return string("none"); 
 		}
 	}
-	int getStoreClass(int indx){
+	virtual int getStoreClass(int indx){
 		if(indx < Shape::numStores()){
 			return Shape::getStoreClass(indx); 
 		}else{
@@ -414,7 +416,7 @@ public: //do something like the flow field common in the lab.
 			} return 0; 
 		}
 	}
-	void getStoreDims(int indx, size_t* dims){
+	virtual void getStoreDims(int indx, size_t* dims){
 		if(indx < Shape::numStores()){
 			Shape::getStoreDims(indx, dims); 
 		}else{
@@ -425,7 +427,7 @@ public: //do something like the flow field common in the lab.
 			}
 		}
 	}
-	void* getStore(int indx, int i){
+	virtual void* getStore(int indx, int i){
 		if(indx < Shape::numStores()){
 			return Shape::getStore(indx, i); 
 		}else{
@@ -436,8 +438,8 @@ public: //do something like the flow field common in the lab.
 			} return NULL; 
 		}
 	}
-	int numStores() { return Shape::numStores() + 2; }
-	void* mmapRead(void* addr){
+	virtual int numStores() { return Shape::numStores() + 2; }
+	virtual void* mmapRead(void* addr){
 		void* b = Shape::mmapRead(addr); 
 		double* d = (double*)b; 
 		for(int i=0; i<2; i++)

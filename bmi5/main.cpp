@@ -37,6 +37,12 @@
 #include "polhemus.h"
 #include "savedata.h"
 
+// C++11? 
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <functional>
+
 using namespace std;
 double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
 double 	g_frameRate = 0.0; 
@@ -59,6 +65,7 @@ unsigned char			g_writeBuffer[1024*1024];
 TimeSerialize* g_timeSerialize; 
 Shape*		g_cursor; 
 StarField* 	g_stars; 
+vector<Serialize*> g_objs; //container for each of these.
 
 void UDP_RZ2(){
 	int sock; 
@@ -402,9 +409,10 @@ void* mmap_thread(void*){
 		if(r >= 3){
 			//react to changes requested. 
 			void* b = mmh.m_addr; 
-			b = g_timeSerialize->mmapRead(b); 
-			b = g_cursor->mmapRead(b); 
-			b = g_stars->mmapRead(b); 
+			for(unsigned int i=0; i<g_objs.size(); i++)
+				b = g_objs[i]->mmapRead(b); 
+			for(unsigned int i=0; i<g_objs.size(); i++)
+				g_objs[i]->store(); 
 			/*
 			g_cursor->translate(si->cursor.position[0],si->cursor.position[1]);
 			g_cursor->scale(si->cursor.size[0],si->cursor.size[1]); 
@@ -568,25 +576,6 @@ extern "C" void getPolhemus(float* res){
 		}
 	}
 }
-extern "C" bool polhemusConnected(){
-	return g_polhemusConnected; 
-}
-extern "C" void getMouse(float* res){
-	int i; 
-	for(i=0; i<2; i++){
-		res[i+1] = g_mousePos[i]; 
-	}
-}
-//boilerplate. yecht.
-extern "C" void setShapeLoc(int , float x, float y){
-	g_cursor->translate(x,y); 
-}
-extern "C" void setShapeColor(int , float r, float g, float b){
-	g_cursor->setColor(r,g,b); 
-}
-extern "C" void setShapeAlpha(int , float a){
-	g_cursor->setAlpha(a); 
-}
 
 void longDoubleTest(){
 	printf("sizeof long double %ld\n", sizeof(long double)); 
@@ -601,6 +590,16 @@ void longDoubleTest(){
 	long double ld2 = (long double)d; 
 	ld2 -= ld; 
 	printf("sum ld: %Lf, d: %f difference %Lf\n", ld, d, ld2); 
+}
+
+void lambdaTest() {
+	char s[]="Hello World!";
+	int Uppercase = 0; //modified by the lambda
+	for_each(s, s+sizeof(s), [&Uppercase] (char c) {
+		if (isupper(c))
+		Uppercase++;
+		});
+	cout<< Uppercase<<" uppercase letters in: "<< s<<endl;
 }
 
 int main(int argn, char** argc){
@@ -720,6 +719,15 @@ int main(int argn, char** argc){
 	g_timeSerialize = new TimeSerialize(); 
 	g_cursor = new Shape(); 
 	g_stars = new StarField(); 
+	g_objs.push_back(g_timeSerialize); 
+	g_objs.push_back(g_cursor); 
+	g_objs.push_back(g_stars); 
+	//print the relevant matlab mmap infos. 
+	printf("m2 = memmapfile('/tmp/bmi5_control', 'Format', {...\n"); 
+	for(unsigned int i=0; i<g_objs.size(); i++){
+		g_objs[i]->printMmapInfo(); 
+	}
+	printf("\t});\n"); 
 
 	g_signal_connect_swapped (window, "destroy",
 			G_CALLBACK (destroy), NULL);
@@ -746,11 +754,7 @@ int main(int argn, char** argc){
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
 	
 	//save data!!
-	vector<Serialize*> vs; 
-	vs.push_back(g_timeSerialize); 
-	vs.push_back(g_cursor); 
-	vs.push_back(g_stars); 
-	writeMatlab(vs); 
+	writeMatlab(g_objs); 
 
 	delete g_daglx[0];
 	delete g_daglx[1]; 

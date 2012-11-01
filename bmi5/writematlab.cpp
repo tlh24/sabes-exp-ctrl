@@ -50,26 +50,50 @@ void writeMatlab(vector<Serialize*> tosave){
 		Mat_Close(matfp);
 		return;
 	}
-	
-	//write out in chronological order ...
 	matvar_t *field; 
-	size_t dims[2] = {1,1}; 
-	for(unsigned int j=0; j<tosave.size(); j++){
+	//two ways of formatting the file. 
+	if(0){
+		//1. in a structure. 
+		// write out in chronological order ...
+		size_t dims[2] = {1,1}; 
 		for(int i=0; i<nstored; i++){
-			for(int indx=0; indx < tosave[j]->numStores(); indx++){
-				void* f = tosave[j]->getStore(indx, i, dims); 
-				int cls = tosave[j]->getStoreClass(indx); 
-				int typ = matlabClassToType(cls); 
-				field = Mat_VarCreate(NULL, (matio_classes)cls, (matio_types)typ, 2, dims, f, 0); 
-				string s = tosave[j]->storeName(indx);
-				Mat_VarSetStructFieldByName(matvar, s.c_str(), 0, field);
+			for(unsigned int j=0; j<tosave.size(); j++){
+				for(int indx=0; indx < tosave[j]->numStores(); indx++){
+					void* f = tosave[j]->getStore(indx, i); 
+					int cls = tosave[j]->getStoreClass(indx); 
+					tosave[j]->getStoreDims(indx, dims); 
+					int typ = matlabClassTo	Type(cls); 
+					field = Mat_VarCreate(NULL, (matio_classes)cls, (matio_types)typ, 2, dims, f, 0); 
+					string s = tosave[j]->storeName(indx);
+					Mat_VarSetStructFieldByName(matvar, s.c_str(), i, field);
+				}
 			}
 		}
+		//write it all out. 
+		Mat_VarWrite(matfp,matvar,MAT_COMPRESSION_NONE);
+		Mat_VarFree(matvar);
+		Mat_Close(matfp);
+	} else {
+		//2. individual variables. 
+		// write out individual feilds, one at a time, to save memory.
+		for(unsigned int j=0; j<tosave.size(); j++){
+			for(int indx=0; indx < tosave[j]->numStores(); indx++){
+				void* f = tosave[j]->getStore(indx, 0); //vectors are stored in a strictly linear array.
+				int cls = tosave[j]->getStoreClass(indx); 
+				size_t dims[2]; 
+				tosave[j]->getStoreDims(indx, dims); 
+				dims[1] = nstored; 
+				int typ = matlabClassToType(cls); 
+				string s = tosave[j]->storeName(indx);
+				string t = string{"d_"} + s; //prevent namespace pollution? 
+				field = Mat_VarCreate(t.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims, f, 0); 
+				Mat_VarWrite(matfp,field,MAT_COMPRESSION_NONE);
+				Mat_VarFree(field);
+			}
+		}
+		Mat_VarFree(matvar);
+		Mat_Close(matfp);
 	}
-	//write it all out. 
-	Mat_VarWrite(matfp,matvar,MAT_COMPRESSION_NONE);
-	Mat_VarFree(matvar);
-	Mat_Close(matfp);
 	while(nfn > 0){
 		nfn--; 
 		free((void*)fieldnames[nfn]); 
