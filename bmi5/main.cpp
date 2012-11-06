@@ -701,7 +701,7 @@ int main(int argn, char** argc){
 	//before we do this, tun on FSAA. 
 	putenv( "__GL_FSAA_MODE=10" ); //http://www.opengl.org/discussion_boards/showthread.php/172000-Programmatically-controlling-level-of-AA
 	putenv("__GL_SYNC_TO_VBLANK=0"); //don't sync to vertical blanking.  individually per window.
-	putenv("__GL_SYNC_DISPLAY_DEVICE=CRT-1"); //sync to this display device. 
+	putenv("__GL_SYNC_DISPLAY_DEVICE=DFP-3"); //sync to this display device. 
 	gtk_widget_set_double_buffered (da1, FALSE);
 	g_daglx[0] = new gtkglx(da1); 
  
