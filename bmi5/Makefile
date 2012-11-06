@@ -1,7 +1,7 @@
 CC = g++
 OBJS = main.o tdt_udp.o glInfo.o glFont.o polhemus.o writematlab.o \
-	../../myopen/common/gettime.o
-CFLAGS=-I/usr/local/include
+	../../myopen/common_host/gettime.o
+CFLAGS=-I/usr/local/include -I../../myopen/common_host
 CFLAGS+=  -g
 CFLAGS+= -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare -Wformat=2 \
 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
@@ -16,6 +16,9 @@ all: bmi5
 main.o : main.cpp shape.h
 
 %.o : %.cpp 
+	$(CC) -c -o $@ $(CFLAGS) $(GTKFLAGS) $<
+	
+%.o: ../../myopen/common_host/%.cpp\
 	$(CC) -c -o $@ $(CFLAGS) $(GTKFLAGS) $<
 
 bmi5: $(OBJS)

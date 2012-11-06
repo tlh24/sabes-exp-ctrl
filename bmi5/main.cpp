@@ -27,10 +27,10 @@
 #include "glFont.h"
 #include "gtkglx.h"
 
-#include "../../myopen/common/mmaphelp.h"
-#include "../../myopen/common/gettime.h"
-#include "../../myopen/gtkclient_tdt/timesync.h"
-#include "../../myopen/common/perftimer.h"
+#include "mmaphelp.h"
+#include "gettime.h"
+#include "timesync.h"
+#include "perftimer.h"
 
 //local.
 #include "serialize.h"
