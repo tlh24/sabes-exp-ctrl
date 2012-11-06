@@ -311,9 +311,8 @@ public: //do something like the flow field common in the lab.
 		m_drawmode = GL_POINTS; 
 		//and the GLSL shaders. 
 	}
-	void move(float ar){
-		long double time = gettime(); 
-		float dt = (float)(gettime() - m_lastTime); 
+	void move(float ar, long double time){
+		float dt = (float)(time - m_lastTime); 
 		float a[2]; a[0] = ar*1.1f; a[1] = 1.1f; 
 		int k = (int)(m_n * (1.0-m_coherence));
 		float speed = sqrtf(m_vel[0]*m_vel[0] + m_vel[1]*m_vel[1]); 

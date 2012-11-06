@@ -13,7 +13,7 @@ GTKLD = `pkg-config --libs $(GLIBS) `
 
 all: bmi5
 
-main.o : main.cpp shape.h
+main.o : main.cpp shape.h gtkglx.h
 
 %.o : %.cpp 
 	$(CC) -c -o $@ $(CFLAGS) $(GTKFLAGS) $<

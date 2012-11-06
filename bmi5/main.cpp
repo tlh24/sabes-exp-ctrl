@@ -332,15 +332,18 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	glClearColor(0,0,0,1); 
 	
 	glShadeModel(GL_FLAT);
-	glColor4f(0.7f, 1.f, 1.f, 0.75);
 	
 	//g_cursor->translate(x,y); 
 	//g_stars->m_vel[0] = g_mousePos[0] / -3.f;
 	//g_stars->m_vel[1] = g_mousePos[1] / -3.f; 
-	g_stars->move(g_daglx[1]->getAR()); //really should have the actual time here.
 	g_stars->draw(h); 
 	g_cursor->draw(); 
 	g_daglx[h]->swap(); //always double buffered.
+	if(da == g_da[1]){ //update here, after the swap, for the 'smoothest' motion (?)
+		t = gettime(); 
+		g_stars->move(g_daglx[1]->getAR(), t);
+		g_cursor->translate(sin(t),cos(t)); 
+	}
 	g_openGLTimer.exit(); 
 	return TRUE;
 }
@@ -374,7 +377,14 @@ static gboolean refresh (gpointer ){
 	gtk_label_set_text(GTK_LABEL(g_openglTimeLabel), str); 
 	return TRUE;
 }
-
+static void printMmapStructure(GtkWidget*, gpointer ){
+	//print the relevant matlab mmap infos. 
+	printf("m2 = memmapfile('/tmp/bmi5_control', 'Format', {...\n"); 
+	for(unsigned int i=0; i<g_objs.size(); i++){
+		g_objs[i]->printMmapInfo(); 
+	}
+	printf("\t});\n"); 
+}
 static void fullscreenCB(GtkWidget* w, gpointer p){
 	GtkWindow* top = GTK_WINDOW(p); 
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
@@ -649,8 +659,8 @@ int main(int argn, char** argc){
 	g_signal_connect(button, "clicked", G_CALLBACK(saveMatlabData), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
-	button = gtk_button_new_with_label ("run task");
-	//g_signal_connect(button, "clicked", G_CALLBACK(luaRunTaskCB), 0); 
+	button = gtk_button_new_with_label ("print mmap structure");
+	g_signal_connect(button, "clicked", G_CALLBACK(printMmapStructure), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
 	button = gtk_button_new_with_label ("stop");
@@ -737,12 +747,6 @@ int main(int argn, char** argc){
 	g_objs.push_back(g_cursor); 
 	g_objs.push_back(g_stars);
 	g_objs.push_back(g_polhemus); 
-	//print the relevant matlab mmap infos. 
-	printf("m2 = memmapfile('/tmp/bmi5_control', 'Format', {...\n"); 
-	for(unsigned int i=0; i<g_objs.size(); i++){
-		g_objs[i]->printMmapInfo(); 
-	}
-	printf("\t});\n"); 
 
 	g_signal_connect_swapped (window, "destroy",
 			G_CALLBACK (destroy), NULL);

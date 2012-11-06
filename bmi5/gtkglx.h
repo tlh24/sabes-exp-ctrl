@@ -31,7 +31,7 @@ public:
 		Window 			root;
 		
 		int attributes[] = { GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1,
-			GLX_BLUE_SIZE, 1, GLX_DOUBLEBUFFER, True, GLX_DEPTH_SIZE, 12, None };
+			GLX_BLUE_SIZE, 1, GLX_DOUBLEBUFFER, False, GLX_DEPTH_SIZE, 12, None };
 		
 		m_display = gdk_x11_get_default_xdisplay ();
 		xscreen = DefaultScreen (m_display);
@@ -104,6 +104,7 @@ public:
 		return FALSE; 
 	}
 	void swap(){
+		glFlush(); 
 		glXSwapBuffers (m_display, m_xid);
 	}
 	float getAR(){
