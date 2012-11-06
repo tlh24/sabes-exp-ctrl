@@ -8,6 +8,7 @@
 #include <netdb.h> 
 #include <string.h>
 #include <stack>
+#include <string>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include "matio.h"
@@ -26,53 +27,49 @@
 #include "glFont.h"
 #include "gtkglx.h"
 
-long double 	g_startTime = 0.0;
-extern "C" long double gettime(){ //in seconds!
-	timespec pt ;
-	clock_gettime(CLOCK_MONOTONIC, &pt);
-	long double ret = (long double)(pt.tv_sec) ;
-	ret += (long double)(pt.tv_nsec) / 1e9 ;
-	return ret - g_startTime;
-}
+#include "mmaphelp.h"
+#include "gettime.h"
+#include "timesync.h"
+#include "perftimer.h"
 
 //local.
+#include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
+#include "savedata.h"
+
+// C++11? 
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <functional>
 
 using namespace std;
 double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
 double 	g_frameRate = 0.0; 
 long double		g_lastFrame = 0.0; 
+int		g_frame = 0;
+bool 		g_glInitialized = false;
+bool		g_glvsync = false; 
+float		g_mousePos[2]; 
 bool		g_die = false; 
 bool		g_polhemusConnected = false; 
-float 	g_sensors[2][6]; 
 GtkWindow* g_mainWindow; //used for dialogs, etc. 
-Shape*	g_cursor; 
-StarField* g_stars; 
 gtkglx*  g_daglx[2]; //human, monkey.
 GtkWidget* g_da[2]; //draw areas. 
 GtkWidget* g_luaTimeLabel; 
 GtkWidget* g_openglTimeLabel; 
+TimeSyncClient * g_tsc; 
+unsigned char			g_writeBuffer[1024*1024]; 
+PerfTimer	g_matlabTimer; 
+PerfTimer	g_openGLTimer; 
 
-struct ShapeInfo{
-	double position[2]; 
-	double size[2]; 
-	double color[4]; 
-}; 
-struct StarInfo{
-	double velocity[2]; 
-	double coherence;
-	double size; 
-	double awesome; //binary, set on > 0
-	double fade; // binary, set > 0.
-};
-struct SharedInfo{
-	double		frame; 
-	ShapeInfo	cursor; 
-	ShapeInfo	target;
-	StarInfo		stars; 
-	double		polhemus[3]; 
-}; 
+// matlab-interactive objects. 
+TimeSerialize* g_timeSerialize; 
+Shape*		g_cursor; 
+StarField* 	g_stars; 
+PolhemusSerialize* g_polhemus; 
+vector<Serialize*> g_objs; //container for each of these.
 
 void UDP_RZ2(){
 	int sock; 
@@ -112,8 +109,7 @@ void UDP_RZ2(){
 		}
 	}
 }
-int hostname_to_ip(char * hostname , char* ip)
-{
+int hostname_to_ip(char * hostname , char* ip){
 	struct hostent *he;
 	struct in_addr **addr_list;
 	int i;
@@ -195,8 +191,6 @@ void* syncThread(void*){
 	}
 	return NULL; 
 }
-bool 			g_glInitialized = false;
-float			g_mousePos[2]; 
 
 void errorDialog(char* msg){
 	GtkWidget *dialog, *label, *content_area;
@@ -217,14 +211,12 @@ void errorDialog(char* msg){
 	gtk_container_add (GTK_CONTAINER (content_area), label);
 	gtk_widget_show_all (dialog);
 }
-
 void destroy(GtkWidget *, gpointer){
 	//more cleanup later.
 	g_die = true;
 	KillFont(); 
 	gtk_main_quit();
 }
-
 void updateCursPos(float x, float y){
 	//always relative to the human view.
 	g_mousePos[0] = x/(g_daglx[0]->m_size[0]);
@@ -236,7 +228,6 @@ void updateCursPos(float x, float y){
 	}
 	g_mousePos[1] *= -1; //zero at the top for gtk; bottom for opengl.
 }
-
 static gint motion_notify_event( GtkWidget *w,
                                  GdkEventMotion *){
 	float x, y;
@@ -252,10 +243,8 @@ static gint motion_notify_event( GtkWidget *w,
 	//printf("cursor position: %f %f\n", x, y); 
 	return TRUE;
 }
-
 typedef GLvoid  
 (*glXSwapIntervalSGIFunc) (GLint);  
-
 static gboolean
 configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 {
@@ -269,9 +258,9 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 	if(h == 1){
 		glXSwapIntervalSGIFunc glXSwapIntervalSGI = 0;  
 		glXSwapIntervalSGI = (glXSwapIntervalSGIFunc)  
-		glXGetProcAddressARB((const GLubyte*)"glXSwapIntervalSGI");  
+			glXGetProcAddressARB((const GLubyte*)"glXSwapIntervalSGI");  
 		if (glXSwapIntervalSGI)  
-				glXSwapIntervalSGI (1); 
+				glXSwapIntervalSGI (g_glvsync ? 1 : 0); 
 	}
 	
 	//save the viewport size.
@@ -324,7 +313,8 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 
 static gboolean
 draw1 (GtkWidget *da, cairo_t *, gpointer p){
-	long double t = gettime() - g_startTime; 
+	long double t = gettime(); 
+	g_openGLTimer.enter(); 
 	int h = (int)((long long)p & 0xf);
 	if(h <0 || h>1) g_assert_not_reached ();
 	if (!(g_daglx[h]->expose(da))){
@@ -351,7 +341,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	g_stars->draw(h); 
 	g_cursor->draw(); 
 	g_daglx[h]->swap(); //always double buffered.
-
+	g_openGLTimer.exit(); 
 	return TRUE;
 }
 
@@ -370,24 +360,19 @@ static gboolean refresh (gpointer ){
 	gtk_widget_queue_draw (g_da[1]);
 	//can do other pre-frame GUI update stuff here.
 	char str[256];
-	double mean = (g_luaTime[1] / g_luaTime[0])*1000.0; 
-	double max = g_luaTime[2] * 1000.0; 
-	double frac = g_luaTime[1] / (gettime() - g_startTime); 
-	double last = g_luaTime[3] * 1000.0; 
-	snprintf(str, 256, "mean:%4.3f ms\nmax:%4.3f ms\nlast:%4.3f ms\nfrac:%4.5f",
-				mean, max, last, frac);
+	size_t n = matlabFileSize(g_objs); 
+	snprintf(str, 256, "time:%.1f ms (mean)\n%.1f ms (last)\nfile size:%.2f MB", 
+				g_matlabTimer.meanTime()*1000.0,
+				g_matlabTimer.lastTime()*1000.0, 
+				(float)n/(1024.f*1024.f));
 	gtk_label_set_text(GTK_LABEL(g_luaTimeLabel), str); 
 	
-	snprintf(str, 256, "frame rate: %4.1f Hz", g_frameRate); 
+ 	snprintf(str, 256, "frame rate: %4.1f Hz\nOpenGL run %.1f ms (mean)\n%.1f ms (last)", 
+				g_frameRate, 
+				g_openGLTimer.meanTime()*1000.0, 
+				g_openGLTimer.lastTime()*1000.0); 
 	gtk_label_set_text(GTK_LABEL(g_openglTimeLabel), str); 
 	return TRUE;
-}
-
-static void luaCalibrateCB(GtkWidget*, gpointer){
-}
-static void luaRunTaskCB(GtkWidget*, gpointer){
-}
-static void luaStopCB(GtkWidget*, gpointer){
 }
 
 static void fullscreenCB(GtkWidget* w, gpointer p){
@@ -396,6 +381,12 @@ static void fullscreenCB(GtkWidget* w, gpointer p){
 		gtk_window_fullscreen(top);
 	else
 		gtk_window_unfullscreen(top);
+}
+static void vsyncCB(GtkWidget* w, gpointer){
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+		g_glvsync = true; 
+	else
+		g_glvsync = false; 
 }
 void flush_pipe(int fid){
 	fcntl(fid, F_SETFL, O_NONBLOCK);
@@ -410,23 +401,8 @@ void flush_pipe(int fid){
 /* matlab interaction -- through shared memory. */
 void* mmap_thread(void*){
 	size_t length = sizeof(SharedInfo); 
-	int fd = 0; 
-	fd = open("/tmp/bmi5_control", O_RDWR | O_CREAT); 
-	if (fd == -1){
-		perror("could not open /tmp/bmi5_control\n"); 
-		return NULL; 
-	}
-	int* s = (int*)malloc(length); 
-	write(fd, s, length); //not buffered. fill the file out.
-	free(s); 
+	mmapHelp mmh(length, "/tmp/bmi5_control"); 
 	
-	void* addr = mmap(NULL, length, /*PROT_READ |*/ PROT_WRITE, 
-							MAP_SHARED, fd, 0); 
-	if (addr == MAP_FAILED){
-		close(fd);
-		perror("Error mmapping the file");
-		exit(EXIT_FAILURE);
-	}
 	int pipe_out = open("bmi5_out", O_RDWR); 
 	if(pipe_out <= 0){
 		perror("could not open ./bmi5_out (make with mkfifo)\n"); 
@@ -437,12 +413,10 @@ void* mmap_thread(void*){
 		perror("could not open ./bmi5_in (make with mkfifo)\n"); 
 		return NULL; 
 	}
-	volatile SharedInfo* si = (SharedInfo*)addr; 
-	printf("mmap address: %lx\n", (long unsigned int)addr); 
+	mmh.prinfo(); 
 
 	char buf[32]; int bufn = 0; 
 	flush_pipe(pipe_out); 
-	int frame = 0; 
 	while(!g_die){
 		//printf("%d waiting for matlab...\n", frame); 
 		int r = read(pipe_in, &(buf[bufn]), 5);
@@ -451,28 +425,22 @@ void* mmap_thread(void*){
 		//printf("%d read %d %s\n", frame, r, buf); 
 		if(r >= 3){
 			//react to changes requested. 
-			g_cursor->translate(si->cursor.position[0],si->cursor.position[1]);
-			g_cursor->scale(si->cursor.size[0],si->cursor.size[1]); 
-			g_cursor->setColor4d((double*)&(si->cursor.color[0])); 
-			g_stars->setVel(si->stars.velocity[0], si->stars.velocity[1]); 
-			g_stars->setCoherence(si->stars.coherence); 
-			g_stars->setStarSize(si->stars.size);
-			g_stars->setFade(si->stars.fade > 0); 
-			g_stars->setAwesome(si->stars.awesome > 0);
-			//supply new information. time sync provided by gtkclient.
-			for(int i=0; i<3; i++)
-				si->polhemus[i] = g_sensors[0][i]; 
-			si->frame = frame; 
+			g_matlabTimer.exit(); 
+			void* b = mmh.m_addr; 
+			for(unsigned int i=0; i<g_objs.size(); i++)
+				b = g_objs[i]->mmapRead(b); 
+			for(unsigned int i=0; i<g_objs.size(); i++)
+				g_objs[i]->store(); 
+			
 			usleep(100); //let the kernel sync memory.
+			g_matlabTimer.enter(); 
 			write(pipe_out, "go\n", 3); 
 			//printf("sent pipe_out 'go'\n"); 
 			bufn = 0; 
 		}else
 			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
-		frame++; 
+		g_frame++; 
 	}
-	munmap(addr, length); 
-	close(fd); 
 	close (pipe_in);
 	close (pipe_out); 
 	return NULL; 
@@ -575,6 +543,7 @@ void* polhemusThread(void* ){
 					g_cbRN += 20;
 					// check for proper format LY for Liberty;  PA for Patriot
 					float* pData=(float*)(buf+8);			// header is first 8 bytes
+					g_polhemus->store(pData); 
 					// print data
 					//printf("x= %.4f, y= %.4f, z= %.4f, az= %.4f, el= %.4f, roll= %.4f\n",
 					//	pData[0],pData[1],pData[2],pData[3],pData[4],pData[5]);
@@ -582,9 +551,6 @@ void* polhemusThread(void* ){
 					//			pData[0],pData[1],pData[2]);
 					frames += 1; 
 					//printf("frame rate: %f\n", frames / (gettime() - starttime)); 
-					for(i=0; i<3; i++){
-						g_sensors[0][i] = pData[i]; 
-					}
 					/*if(g_sensors[0][2] > 0.0){
 						g_sensors[0][0] *= -1.f;
 						g_sensors[0][1] *= -1.f;
@@ -600,46 +566,27 @@ void* polhemusThread(void* ){
 	return NULL;
 }
 
-extern "C" void getPolhemus(float* res){
-	int i; 
-	if(g_polhemusConnected){
-		for(i=0; i<3; i++){
-			res[i+1] = g_sensors[0][i]; 
-			//+1 b/c lua indexing via the FFI is 1-based.
-		}
-	}else{
-		for(i=0; i<3; i++){
-			res[i+1] = 0.f;
-		}
+static void saveMatlabData(gpointer parent_window) {
+	GtkWidget *dialog;
+	dialog = gtk_file_chooser_dialog_new ("Save Data File",
+						(GtkWindow*)parent_window,
+						GTK_FILE_CHOOSER_ACTION_SAVE,
+						GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+						GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+						NULL);
+	gtk_file_chooser_set_do_overwrite_confirmation(
+				GTK_FILE_CHOOSER (dialog), TRUE);
+	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (dialog),"data.mat");
+	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT){
+		char *filename;
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
+		writeMatlab(g_objs, filename); 
+		g_free (filename);
 	}
-}
-extern "C" bool polhemusConnected(){
-	return g_polhemusConnected; 
-}
-extern "C" void getMouse(float* res){
-	int i; 
-	for(i=0; i<2; i++){
-		res[i+1] = g_mousePos[i]; 
-	}
-}
-//boilerplate. yecht.
-extern "C" void setShapeLoc(int , float x, float y){
-	g_cursor->translate(x,y); 
-}
-extern "C" void setShapeColor(int , float r, float g, float b){
-	g_cursor->setColor(r,g,b); 
-}
-extern "C" void setShapeAlpha(int , float a){
-	g_cursor->setAlpha(a); 
+	gtk_widget_destroy (dialog);
 }
 
-int main(int argn, char** argc){
-	//setup a window with openGL. 
-	GtkWidget *window;
-	GtkWidget *da1, *da2, *paned, *v1, *frame;
-	
-	g_startTime = gettime(); 
-	
+void longDoubleTest(){
 	printf("sizeof long double %ld\n", sizeof(long double)); 
 	printf("sizeof double %ld\n", sizeof(double)); 
 	
@@ -652,6 +599,24 @@ int main(int argn, char** argc){
 	long double ld2 = (long double)d; 
 	ld2 -= ld; 
 	printf("sum ld: %Lf, d: %f difference %Lf\n", ld, d, ld2); 
+}
+
+void lambdaTest() {
+	char s[]="Hello World!";
+	int Uppercase = 0; //modified by the lambda
+	for_each(s, s+sizeof(s), [&Uppercase] (char c) {
+		if (isupper(c))
+		Uppercase++;
+		});
+	cout<< Uppercase<<" uppercase letters in: "<< s<<endl;
+}
+
+int main(int argn, char** argc){
+	//setup a window with openGL. 
+	GtkWidget *window;
+	GtkWidget *da1, *da2, *paned, *v1, *frame;
+	
+	g_startTime = gettime(); 
 	
 	gtk_init (&argn, &argc);
 
@@ -666,7 +631,7 @@ int main(int argn, char** argc){
 	v1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_set_size_request(GTK_WIDGET(v1), 170, 650);
 	
-	frame = gtk_frame_new("Lua stats");
+	frame = gtk_frame_new("Running stats");
 	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
 	g_luaTimeLabel = gtk_label_new("mean: max: %:"); 
@@ -680,16 +645,16 @@ int main(int argn, char** argc){
 	//gtk_misc_set_alignment (GTK_MISC (g_openglTimeLabel), 0, 0);
 	gtk_container_add (GTK_CONTAINER (frame), g_openglTimeLabel );
 	
-	GtkWidget* button = gtk_button_new_with_label ("Calibrate liberty");
-	g_signal_connect(button, "clicked", G_CALLBACK(luaCalibrateCB), 0); 
+	GtkWidget* button = gtk_button_new_with_label ("Save");
+	g_signal_connect(button, "clicked", G_CALLBACK(saveMatlabData), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
 	button = gtk_button_new_with_label ("run task");
-	g_signal_connect(button, "clicked", G_CALLBACK(luaRunTaskCB), 0); 
+	//g_signal_connect(button, "clicked", G_CALLBACK(luaRunTaskCB), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
 	button = gtk_button_new_with_label ("stop");
-	g_signal_connect(button, "clicked", G_CALLBACK(luaStopCB), 0); 
+	//g_signal_connect(button, "clicked", G_CALLBACK(luaStopCB), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
 	
@@ -751,17 +716,33 @@ int main(int argn, char** argc){
 	
 	gtk_widget_show (da2);
 	
+	auto makeCheckbox = [&](const char* lbl, bool ic, GCallback cb){
+		button = gtk_check_button_new_with_label(lbl);
+		gtk_box_pack_start (GTK_BOX (v1), button, TRUE, TRUE, 0);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (button), ic ? TRUE:FALSE); 
+		gtk_widget_show (button);
+		g_signal_connect (button, "clicked", cb, (gpointer*)top); 
+	}; 
+	
 	//add a fullscreen checkbox to the gui.
-	button = gtk_check_button_new_with_label("Fullscreen");
-	gtk_box_pack_start (GTK_BOX (v1), button, TRUE, TRUE, 0);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (button), FALSE); 
-	gtk_widget_show (button);
-	g_signal_connect (button, "clicked",
-		G_CALLBACK (fullscreenCB), (gpointer*)top); 
+	makeCheckbox("Fullscreen", false, G_CALLBACK(fullscreenCB)); 
+	makeCheckbox("sync to Vblank", g_glvsync, G_CALLBACK(vsyncCB));  
 	
 	//can init the shapes ... here i guess (no opengl though!)
+	g_timeSerialize = new TimeSerialize(); 
 	g_cursor = new Shape(); 
 	g_stars = new StarField(); 
+	g_polhemus = new PolhemusSerialize(); 
+	g_objs.push_back(g_timeSerialize); 
+	g_objs.push_back(g_cursor); 
+	g_objs.push_back(g_stars);
+	g_objs.push_back(g_polhemus); 
+	//print the relevant matlab mmap infos. 
+	printf("m2 = memmapfile('/tmp/bmi5_control', 'Format', {...\n"); 
+	for(unsigned int i=0; i<g_objs.size(); i++){
+		g_objs[i]->printMmapInfo(); 
+	}
+	printf("\t});\n"); 
 
 	g_signal_connect_swapped (window, "destroy",
 			G_CALLBACK (destroy), NULL);
@@ -779,14 +760,22 @@ int main(int argn, char** argc){
 	pthread_t syncthread; 
 	pthread_create(&syncthread, NULL, mmap_thread, NULL); 
 	
+	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
+	
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
 	gtk_main ();
 	
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
+	
+	//save data!!
+	writeMatlab(g_objs, "backup.mat"); 
 
 	delete g_daglx[0];
 	delete g_daglx[1]; 
+	delete g_tsc; 
+	for(unsigned int i=0; i<g_objs.size(); i++){
+		delete (g_objs[i]); 
+	}
 	return 0; 
 }
-
