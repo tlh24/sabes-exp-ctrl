@@ -192,4 +192,5 @@ public:
 
 void writeMatlab(vector<Serialize*> tosave, char* filename);
 size_t matlabFileSize(vector<Serialize*> tosave); 
+size_t mmapFileSize(vector<Serialize*> tosave); 
 #endif
