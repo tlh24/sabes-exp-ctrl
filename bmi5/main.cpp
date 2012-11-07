@@ -36,7 +36,6 @@
 #include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
-#include "savedata.h"
 
 // C++11? 
 #include <algorithm>
@@ -410,7 +409,7 @@ void flush_pipe(int fid){
 }
 /* matlab interaction -- through shared memory. */
 void* mmap_thread(void*){
-	size_t length = sizeof(SharedInfo); 
+	size_t length = mmapFileSize(g_objs); 
 	mmapHelp mmh(length, "/tmp/bmi5_control"); 
 	
 	int pipe_out = open("bmi5_out", O_RDWR); 
