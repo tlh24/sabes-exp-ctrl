@@ -341,7 +341,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	if(da == g_da[1]){ //update here, after the swap, for the 'smoothest' motion (?)
 		t = gettime(); 
 		g_stars->move(g_daglx[1]->getAR(), t);
-		g_cursor->translate(sin(t),cos(t)); 
+		//g_cursor->translate(sin(t),cos(t)); 
 	}
 	g_openGLTimer.exit(); 
 	return TRUE;

@@ -340,7 +340,7 @@ public: //do something like the flow field common in the lab.
 			int c = (int)(255.0 * 
 				(-0.52 * cos(d) + 0.5)); 
 			c = c > 255 ? 255: c; c = c < 0 ? 0 : c; 
-			if(!m_fade){if(c) c = 255;}
+			if(!m_fade){if(c) c = 255;}//saturate.
 			c &= 0xff; 
 			m_v[i].color &= 0x00ffffff; 
 			m_v[i].color += (c << 24); 
