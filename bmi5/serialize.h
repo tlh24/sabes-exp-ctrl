@@ -144,7 +144,7 @@ public:
 			out[i] = m_sensors[i] + m_vel[i] * dt; 
 	}
 	virtual void store(){
-		printf("error: you must call store(float*)\n"); 
+		//printf("error: you must call store(float*)\n"); 
 	}
 	virtual int nstored(){return v_sensors.size();}
 	virtual string storeName(int indx){

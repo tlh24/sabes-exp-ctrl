@@ -297,16 +297,12 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 		}
 		g_glInitialized = true;
 	}
-	printf("OpenGL initialized.\n"); 
-	BuildFont(); //so we're in the right context.
-	printf("font built.\n"); 
+	BuildFont(); //so we're in the right context. 
 	//have to create the shapes here -- context again.
 	g_cursor->makeCircle(64); 
-	printf("circle made.\n"); 
 	g_cursor->scale(0.5); 
 	g_stars->makeStars(3000, g_daglx[1]->getAR()); 
 	g_stars->makeShaders(h); 
-	printf("stars made. done with configure1\n"); 
 	return TRUE;
 }
 
