@@ -42,27 +42,33 @@ n = 5000;
 tic
 skip = 0; 
 prev = 0; 
+aa = zeros(n,1); 
 for i=1:n
 	% first, ping gtkclient to sample the binned spike data. 
-	disp('writing to pipe_in') 
 	fwrite(pipe_in, 'go.'); 
-	disp('reading from pipe_out'); 
 	msg = fread(pipe_out, 3, 'uchar'); % uncertain if this interlock is strictly necessary.
 	% disp([num2str(i) ' ' num2str(A(1,193))]); 
 	if A(1,193) - prev ~= 1
 		skip = skip + 1; 
 	end
 	prev = A(1,193); 
+    % bin counts are fixed-point, base 256.
+    aa(i) = double(A(2,1)); 
+    % A(1,33)
+    bin = double(A); 
+    bin = bin ./ 256; 
+    cpx = (bin(2,1)-0.5)*1.0;
+    cpy = (bin(2,33)-0.5)*1.0;
 	% now interact with the display (bmi5).
-	m2.Data(1).stars_shape_vel = 0.1*[sin(toc()); cos(toc())]; 
-	m2.Data(1).shape_trans =  0.5*[sin(toc()); cos(toc())]; 
+	m2.Data(1).stars_vel = 0.1*[sin(toc()); cos(toc())]; 
+	m2.Data(1).shape_trans =  [cpx;cpy]; 
 	% tell bmi5 to set these parameters -- its read is blocking.
 	fwrite(bmi5_in, 'go.'); 
 	% if bmi5 has to do anything, it will block on this read. 
 	% could e.g. wait for vsync.
 	msg = fread(bmi5_out, 3, 'uchar');
-	disp(['frame ' num2str(m2.Data(1).frame)]); 
-	disp(['ticks ' num2str(m2.Data(1).ticks)]); 
+	% disp(['frame ' num2str(m2.Data(1).frame)]); 
+	%disp(['ticks ' num2str(m2.Data(1).ticks)]); 
 	if 0
 		image(A(:,1:192)/300); 
 		ylabel('lag')

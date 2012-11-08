@@ -5,6 +5,9 @@
 #include <iostream>
 #include <math.h>
 #include <string.h>
+#include <string>
+#include <sstream>
+#include <iostream>
 #include "mmaphelp.h"
 #include "gettime.h"
 #include "timesync.h"
@@ -124,7 +127,6 @@ size_t mmapFileSize(vector<Serialize*> tosave){
 	size_t n = 0; 
 	for(unsigned int j=0; j<tosave.size(); j++){
 		for(int indx=0; indx < tosave[j]->numStores(); indx++){
-			int cls = tosave[j]->getStoreClass(indx); 
 			size_t dims[2]; 
 			tosave[j]->getStoreDims(indx, dims); 
 			n += 8 * dims[0]; 

@@ -27,6 +27,15 @@
 #include "glFont.h"
 #include "gtkglx.h"
 
+// C++11? 
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <functional>
+
+// myopen common
 #include "mmaphelp.h"
 #include "gettime.h"
 #include "timesync.h"
@@ -36,12 +45,6 @@
 #include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
-
-// C++11? 
-#include <algorithm>
-#include <iostream>
-#include <vector>
-#include <functional>
 
 using namespace std;
 double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
@@ -650,7 +653,7 @@ int main(int argn, char** argc){
 	//gtk_misc_set_alignment (GTK_MISC (g_openglTimeLabel), 0, 0);
 	gtk_container_add (GTK_CONTAINER (frame), g_openglTimeLabel );
 	
-	GtkWidget* button = gtk_button_new_with_label ("Save");
+	GtkWidget* button = gtk_button_new_with_label ("Save data");
 	g_signal_connect(button, "clicked", G_CALLBACK(saveMatlabData), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
