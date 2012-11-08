@@ -51,7 +51,7 @@ double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
 double 	g_frameRate = 0.0; 
 long double		g_lastFrame = 0.0; 
 int		g_frame = 0;
-bool 		g_glInitialized = false;
+bool 		g_glInitialized[2] = {false};
 bool		g_glvsync = false; 
 float		g_mousePos[2]; 
 bool		g_die = false; 
@@ -281,7 +281,7 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 	//glDepthMask(GL_TRUE);
 	glMatrixMode(GL_MODELVIEW);
   	glLoadIdentity();
-	if(!g_glInitialized){
+	if(!g_glInitialized[h]){
 	//now the vertex buffers.
 		glewExperimental = GL_TRUE;  //needed for glGenVertexArrays.
 		GLenum err = glewInit();
@@ -298,14 +298,13 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 		}else{
 			printf("Video card does NOT support GL_ARB_vertex_buffer_object.\n");
 		}
-		g_glInitialized = true;
+		g_glInitialized[h] = true;
+		g_cursor->makeCircle(64); 
+		g_stars->makeStars(3000, g_daglx[1]->getAR()); 
+		g_stars->makeShaders(h); 
 	}
 	BuildFont(); //so we're in the right context. 
 	//have to create the shapes here -- context again.
-	g_cursor->makeCircle(64); 
-	g_cursor->scale(0.5); 
-	g_stars->makeStars(3000, g_daglx[1]->getAR()); 
-	g_stars->makeShaders(h); 
 	return TRUE;
 }
 
@@ -701,7 +700,7 @@ int main(int argn, char** argc){
 	
 	GtkWidget* top = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title (GTK_WINDOW (top), "m0nkey view");
-	gtk_window_set_default_size (GTK_WINDOW (top), 640, 480);
+	gtk_window_set_default_size (GTK_WINDOW (top), 320, 240);
 	da2 = gtk_drawing_area_new ();
 	gtk_container_add (GTK_CONTAINER (top), da2);
 	gtk_widget_set_double_buffered (da2, FALSE);
