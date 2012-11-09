@@ -59,6 +59,7 @@ bool		g_polhemusConnected = false;
 GtkWindow* g_mainWindow; //used for dialogs, etc. 
 gtkglx*  g_daglx[2]; //human, monkey.
 GtkWidget* g_da[2]; //draw areas. 
+GtkWidget* g_timeLabel; 
 GtkWidget* g_luaTimeLabel; 
 GtkWidget* g_openglTimeLabel; 
 TimeSyncClient * g_tsc; 
@@ -359,6 +360,9 @@ static gboolean refresh (gpointer ){
 	gtk_widget_queue_draw (g_da[0]);
 	gtk_widget_queue_draw (g_da[1]);
 	//can do other pre-frame GUI update stuff here.
+	g_tsc->getTicks(); //force mmap update.
+	string s = g_tsc->getInfo(); 
+	gtk_label_set_text(GTK_LABEL(g_timeLabel), s.c_str()); 
 	char str[256];
 	size_t n = matlabFileSize(g_objs); 
 	snprintf(str, 256, "time:%.1f ms (mean)\n%.1f ms (last)\nfile size:%.2f MB", 
@@ -637,8 +641,10 @@ int main(int argn, char** argc){
 	//left: gui etc. 
 	v1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_set_size_request(GTK_WIDGET(v1), 170, 650);
+	g_timeLabel = gtk_label_new("time: "); 
+	gtk_container_add (GTK_CONTAINER (v1), g_timeLabel );
 	
-	frame = gtk_frame_new("Running stats");
+	frame = gtk_frame_new("Matlab stats");
 	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
 	g_luaTimeLabel = gtk_label_new("mean: max: %:"); 
