@@ -34,6 +34,7 @@ prev = 0;
 % initial settings. 
 m2.Data(1).shape_scale = [0.1; 0.1]; 
 m2.Data(1).shape_color = [1; 0.7; 1; 1]; 
+m2.Data(1).shape_trans = [0.5; 0.5]; 
 m2.Data(1).stars_coherence = 0.5; 
 fwrite(bmi5_in, 'go.'); 
 msg = fread(bmi5_out, 3, 'uchar');
