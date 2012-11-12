@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stack>
 #include <string>
+#include <boost/tokenizer.hpp>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include "matio.h"
@@ -47,7 +48,8 @@
 #include "polhemus.h"
 
 using namespace std;
-double	g_luaTime[4] = {0.0, 0.0, 0.0, 0.0}; //n, total time, max time, last time
+using namespace boost;
+
 double 	g_frameRate = 0.0; 
 long double		g_lastFrame = 0.0; 
 int		g_frame = 0;
@@ -69,8 +71,6 @@ PerfTimer	g_openGLTimer;
 
 // matlab-interactive objects. 
 TimeSerialize* g_timeSerialize; 
-Shape*		g_cursor; 
-StarField* 	g_stars; 
 PolhemusSerialize* g_polhemus; 
 vector<Serialize*> g_objs; //container for each of these.
 
@@ -300,9 +300,6 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 			printf("Video card does NOT support GL_ARB_vertex_buffer_object.\n");
 		}
 		g_glInitialized[h] = true;
-		g_cursor->makeCircle(64); 
-		g_stars->makeStars(3000, g_daglx[1]->getAR()); 
-		g_stars->makeShaders(h); 
 	}
 	BuildFont(); //so we're in the right context. 
 	//have to create the shapes here -- context again.
@@ -324,24 +321,23 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 		g_frameRate = 0.9 * g_frameRate + 0.1 / dt; 
 	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClearColor(0,0,0,1); 
-	
 	glShadeModel(GL_FLAT);
 	
-	//g_cursor->translate(x,y); 
-	//g_stars->m_vel[0] = g_mousePos[0] / -3.f;
-	//g_stars->m_vel[1] = g_mousePos[1] / -3.f; 
-	g_stars->draw(h); 
-	g_cursor->draw(); 
-	g_daglx[h]->swap(); //always double buffered.
-	if(da == g_da[1]){ //update here, after the swap, for the 'smoothest' motion (?)
+	/// draw objects
+	//update before the swap (smoother motion?)
+	if(da == g_da[1]){ 
 		t = gettime(); 
-		g_stars->move(g_daglx[1]->getAR(), t);
-		//g_cursor->translate(sin(t),cos(t)); 
+		for(unsigned int i=0; i<g_objs.size(); i++)
+			g_objs[i]->move(g_daglx[1]->getAR(), t);
 	}
+	for(unsigned int i=0; i<g_objs.size(); i++)
+		g_objs[i]->draw(h); 
+	/// end
+
+	g_daglx[h]->swap(); //always double buffered.
 	g_openGLTimer.exit(); 
 	return TRUE;
 }
@@ -434,7 +430,7 @@ void* mmap_thread(void*){
 		if(r > 0) bufn += r; 
 		buf[bufn] = 0; 
 		//printf("%d read %d %s\n", frame, r, buf); 
-		if(r >= 3){
+		if(r >= 3 && buf[0] == 'g' && buf[1] == 'o'){
 			//react to changes requested. 
 			g_matlabTimer.exit(); 
 			void* b = mmh.m_addr; 
@@ -448,8 +444,46 @@ void* mmap_thread(void*){
 			write(pipe_out, "go\n", 3); 
 			//printf("sent pipe_out 'go'\n"); 
 			bufn = 0; 
-		}else
+		} else {
+			//setup command? 
+			string txt = string(buf); 
+			char_separator<char> sep("\", "); 
+			tokenizer<char_separator<char> > tokens(txt, sep);
+			auto beg = tokens.begin(); 
+			if((*beg) == string("make")){
+				beg++; 
+				if((*beg) == string("circle")){
+					beg++; 
+					Shape* shp = new Shape(); 
+					shp->makeCircle(64); 
+					if(beg != tokens.end())
+						shp->m_name = (*beg); //name of the circle.
+					g_objs.push_back(shp); 
+					string resp = {"made a circle named "}; 
+					resp += shp->m_name; 
+					resp += {"\n"}; 
+					write(pipe_out, resp.c_str(), resp.size()); 
+				}
+				if((*beg) == string("stars")){
+					beg++; 
+					StarField* sf = new StarField(); 
+					sf->makeStars(3000, g_daglx[1]->getAR());
+					if(beg != tokens.end())
+						sf->m_name = (*beg); //name of the circle.
+					g_objs.push_back(sf); 
+					string resp = {"made a starfield named "}; 
+					resp += sf->m_name; 
+					resp += {"\n"}; 
+					write(pipe_out, resp.c_str(), resp.size()); 
+				}
+			}
+			for (const auto& t : tokens) {
+				cout << t << "." << endl;
+			}
 			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
+		}
+
+			
 		g_frame++; 
 	}
 	close (pipe_in);
@@ -619,7 +653,7 @@ void lambdaTest() {
 		if (isupper(c))
 		Uppercase++;
 		});
-	cout<< Uppercase<<" uppercase letters in: "<< s<<endl;
+	cout<< Uppercase<<" uppercase letters in: "<< s << endl;
 }
 
 int main(int argn, char** argc){
@@ -742,13 +776,9 @@ int main(int argn, char** argc){
 	makeCheckbox("sync to Vblank", g_glvsync, G_CALLBACK(vsyncCB));  
 	
 	//can init the shapes ... here i guess (no opengl though!)
-	g_timeSerialize = new TimeSerialize(); 
-	g_cursor = new Shape(); 
-	g_stars = new StarField(); 
+	g_timeSerialize = new TimeSerialize(); //synchronize with gtkclient_tdt.
 	g_polhemus = new PolhemusSerialize(); 
 	g_objs.push_back(g_timeSerialize); 
-	g_objs.push_back(g_cursor); 
-	g_objs.push_back(g_stars);
 	g_objs.push_back(g_polhemus); 
 
 	g_signal_connect_swapped (window, "destroy",

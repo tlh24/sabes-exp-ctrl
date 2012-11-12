@@ -9,6 +9,7 @@
 #define PI 3.141592653589793
 class Shape : public Serialize {
 	public:
+		bool	m_needConfig; 
 		int 	m_n; 
 		unsigned int m_vao; 
 		unsigned int m_vbo; 
@@ -26,6 +27,7 @@ class Shape : public Serialize {
 		m_scale[0] = m_scale[1] = 1.f; 
 		m_trans[0] = m_trans[1] = 0.f; 
 		m_name = {"shape_"}; 
+		m_needConfig = false; 
 	}
 	void deleteBuffers(){
 		if(m_vbo) glDeleteBuffers(1, &m_vbo); m_vbo = 0; 
@@ -57,20 +59,27 @@ class Shape : public Serialize {
 		}
 	}
 	void makeCircle(int n){
-		//makes a circle, diameter 1, at the origin.
-		float* v = (float*)malloc((n+1)*sizeof(float)*2); 
-		v[0] = 0.f; 
-		v[1] = 0.f; 
-		for(int i=0; i<n; i++){
-			float t = (float)i * PI * 2 / (n-1); 
-			v[i*2+2] = 0.5f*sinf(t); 
-			v[i*2+3] = 0.5f*cosf(t); 
-		}
 		m_n = n+1; 
-		makeVAO(v, true); 
-		m_drawmode = GL_TRIANGLE_FAN; 
+		m_needConfig = true; 
 	}
-	void draw(){
+	void configure(int){
+		if(m_needConfig){
+			//makes a circle, diameter 1, at the origin.
+			float* v = (float*)malloc((m_n)*sizeof(float)*2); 
+			v[0] = 0.f; 
+			v[1] = 0.f; 
+			for(int i=0; i<m_n-1; i++){
+				float t = (float)i * PI * 2 / (m_n-2); 
+				v[i*2+2] = 0.5f*sinf(t); 
+				v[i*2+3] = 0.5f*cosf(t); 
+			}
+			makeVAO(v, true); 
+			m_drawmode = GL_TRIANGLE_FAN; 
+			m_needConfig = false; 
+		}
+	}
+	virtual void draw(int display){
+		configure(display); //if we need it.
 		glPushMatrix();
 		glLoadIdentity();
 		glTranslatef(m_trans[0], m_trans[1], 0.f); 
@@ -81,6 +90,7 @@ class Shape : public Serialize {
 		glBindVertexArray(0);
 		glPopMatrix(); 
 	}
+	virtual void move(float, long double){}
 	void translate(float x, float y){
 		m_trans[0] = x; m_trans[1] = y; 
 	}
@@ -307,11 +317,17 @@ public: //do something like the flow field common in the lab.
 			m_age[i] = uniform()*PI*2.0;
 		}
 		m_n = nstars; 
-		makeVAO(m_v, false); //keep around the b.s.
+		m_needConfig = true; 
 		m_drawmode = GL_POINTS; 
-		//and the GLSL shaders. 
 	}
-	void move(float ar, long double time){
+	void configure(int display){
+		if(m_needConfig){
+			makeVAO(m_v, false); //keep around the b.s.
+			makeShaders(display); 
+			m_needConfig = false; 
+		}
+	}
+	virtual void move(float ar, long double time){
 		float dt = (float)(time - m_lastTime); 
 		float a[2]; a[0] = ar*1.1f; a[1] = 1.1f; 
 		int k = (int)(m_n * (1.0-m_coherence));
@@ -361,10 +377,11 @@ public: //do something like the flow field common in the lab.
 		}
 		m_lastTime = time; 
 	}
-	void draw(int index){
+	virtual void draw(int display){
+		configure(display); 
 		//this is a little more complicated, as we need to do a memcpy and user shaders.
 		glPointSize(m_starSize); 
-		glUseProgram(m_program[index]); 
+		glUseProgram(m_program[display]); 
 		glBindVertexArray(m_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // Bind our Vertex Buffer Object
 		glBufferData(GL_ARRAY_BUFFER, m_n*sizeof(starStruct), m_v, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW

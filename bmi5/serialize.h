@@ -20,6 +20,9 @@ public:
 	virtual void*	getStore(int , int){ return NULL; }
 	virtual int 	numStores(){ return 0; }
 	virtual void* 	mmapRead(void* ){ return NULL;}
+		//drawing routines -- opengl.
+	virtual void	draw(int) {}
+	virtual void	move(float, long double){}
 		// reads/writes parameters from a mmaped file (address).
 		// all mmap variables are doubles, for convenience.
 	virtual void printMmapInfo(){
