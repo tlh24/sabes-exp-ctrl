@@ -10,6 +10,7 @@ LDFLAGS = -rdynamic -lrt -lGL -lGLU -lGLEW -lusb-1.0 -lhdf5
 GLIBS = gtk+-3.0
 GTKFLAGS = `pkg-config --cflags $(GLIBS) `
 GTKLD = `pkg-config --libs $(GLIBS) `
+FIFOS = bmi5_in bmi5_out
 
 all: bmi5
 
@@ -21,16 +22,22 @@ main.o : main.cpp shape.h gtkglx.h
 %.o: ../../myopen/common_host/%.cpp\
 	$(CC) -c -o $@ $(CFLAGS) $(GTKFLAGS) $<
 
-bmi5: $(OBJS)
+bmi5: $(OBJS) $(FIFOS)
 	$(CC) -o $@ $(GTKLD) $(LDFLAGS) -lmatio $(OBJS)
 	
 clean:
 	rm -rf *.o bmi5
 	
+bmi5_in: 
+	mkfifo $@
+	
+bmi5_out:
+	mkfifo $@
+	
 deps:
-	sudo apt-get install libgtk2.0-dev libgtkgl2.0-dev liblua5.1-dev \
-	libgtkglext1-dev freeglut3-dev libmatio-dev libsqlite3-dev libusb-1.0-0.dev \
+	sudo apt-get install gdb libgtk-3-dev libgtkglext1-dev freeglut3-dev \
+	libmatio-dev libusb-1.0-0-dev libglew-dev \
 	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev
-	echo "make sure /usr/lib64 is in /etc/ld.so.conf.d/libc.conf"
-	echo "otherwise Cg may not be found. "
+	mkfifo bmi5_out
+	mkfifo bmi5_in
 	
