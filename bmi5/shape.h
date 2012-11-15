@@ -62,7 +62,7 @@ class Shape : public Serialize {
 		m_n = n+1; 
 		m_needConfig = true; 
 	}
-	void configure(int){
+	void configure(int display){
 		if(m_needConfig){
 			//makes a circle, diameter 1, at the origin.
 			float* v = (float*)malloc((m_n)*sizeof(float)*2); 

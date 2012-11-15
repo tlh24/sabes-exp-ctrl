@@ -422,11 +422,12 @@ void* mmap_thread(void*){
 	}
 	mmh.prinfo(); 
 
-	char buf[32]; int bufn = 0; 
+	char buf[128]; int bufn = 0; 
 	flush_pipe(pipe_out); 
+	int code = 0; 
 	while(!g_die){
 		//printf("%d waiting for matlab...\n", frame); 
-		int r = read(pipe_in, &(buf[bufn]), 5);
+		int r = read(pipe_in, &(buf[bufn]), 128);
 		if(r > 0) bufn += r; 
 		buf[bufn] = 0; 
 		//printf("%d read %d %s\n", frame, r, buf); 
@@ -441,9 +442,10 @@ void* mmap_thread(void*){
 			
 			usleep(100); //let the kernel sync memory.
 			g_matlabTimer.enter(); 
-			write(pipe_out, "go\n", 3); 
-			//printf("sent pipe_out 'go'\n"); 
+			code = 0; // = OK.
+			write(pipe_out, (void*)&code, 4); 
 			bufn = 0; 
+			//printf("sent pipe_out 'go'\n"); 
 		} else {
 			//setup command? 
 			string txt = string(buf); 
@@ -462,6 +464,8 @@ void* mmap_thread(void*){
 					string resp = {"made a circle named "}; 
 					resp += shp->m_name; 
 					resp += {"\n"}; 
+					code = resp.size(); 
+					write(pipe_out, (void*)&code, 4); //this so we know how much to seek in matlab.
 					write(pipe_out, resp.c_str(), resp.size()); 
 				}
 				if((*beg) == string("stars")){
@@ -474,6 +478,8 @@ void* mmap_thread(void*){
 					string resp = {"made a starfield named "}; 
 					resp += sf->m_name; 
 					resp += {"\n"}; 
+					code = resp.size(); 
+					write(pipe_out, (void*)&code, 4);
 					write(pipe_out, resp.c_str(), resp.size()); 
 				}
 			}
@@ -481,9 +487,8 @@ void* mmap_thread(void*){
 				cout << t << "." << endl;
 			}
 			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
+			bufn = 0; 
 		}
-
-			
 		g_frame++; 
 	}
 	close (pipe_in);
