@@ -25,13 +25,16 @@ public:
 	virtual void	move(float, long double){}
 		// reads/writes parameters from a mmaped file (address).
 		// all mmap variables are doubles, for convenience.
-	virtual void printMmapInfo(){
+	virtual string getMmapInfo(){
+		std::stringstream oss;
 		size_t dims[2]; 
 		for(int indx = 0; indx < numStores(); indx++){
 			getStoreDims(indx, dims); 
 			string stor = storeName(indx); 
-			printf("\t'double' [%ld %ld] '%s';...\n", dims[0], dims[1], stor.c_str()); 
+			oss << "\t'double' [" << dims[0] << " " << dims[1] << "] '" << stor << "';...\n"; 
+			//printf("\t'double' [%ld %ld] '%s';...\n", dims[0], dims[1], stor.c_str()); 
 		}
+		return oss.str(); 
 	}
 }; 
 

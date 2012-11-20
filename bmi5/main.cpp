@@ -374,13 +374,20 @@ static gboolean refresh (gpointer ){
 	gtk_label_set_text(GTK_LABEL(g_openglTimeLabel), str); 
 	return TRUE;
 }
+string getMmapStructure(){
+	std::stringstream oss; 
+	oss << "m2 = memmapfile('/tmp/bmi5_control', 'Format', {...\n"; 
+	for(unsigned int i=0; i<g_objs.size(); i++){
+		oss << g_objs[i]->getMmapInfo(); 
+	}
+	oss << "\t});\n"; 
+	oss << "m2.Writable = true;"; 
+	return oss.str();
+}
 static void printMmapStructure(GtkWidget*, gpointer ){
 	//print the relevant matlab mmap infos. 
-	printf("m2 = memmapfile('/tmp/bmi5_control', 'Format', {...\n"); 
-	for(unsigned int i=0; i<g_objs.size(); i++){
-		g_objs[i]->printMmapInfo(); 
-	}
-	printf("\t});\n"); 
+	string s = getMmapStructure(); 
+	printf("%s", s.c_str()); 
 }
 static void fullscreenCB(GtkWidget* w, gpointer p){
 	GtkWindow* top = GTK_WINDOW(p); 
@@ -407,7 +414,7 @@ void flush_pipe(int fid){
 }
 /* matlab interaction -- through shared memory. */
 void* mmap_thread(void*){
-	size_t length = mmapFileSize(g_objs); 
+	size_t length = 256*8; //mmapFileSize(g_objs); 
 	mmapHelp mmh(length, "/tmp/bmi5_control"); 
 	
 	int pipe_out = open("bmi5_out", O_RDWR); 
@@ -482,6 +489,13 @@ void* mmap_thread(void*){
 					write(pipe_out, (void*)&code, 4);
 					write(pipe_out, resp.c_str(), resp.size()); 
 				}
+			}
+			if(*beg == string("mmap")){
+				// return the mmapinfo.
+				string resp = getMmapStructure();
+				code = resp.size(); 
+				write(pipe_out, (void*)&code, 4);
+				write(pipe_out, resp.c_str(), resp.size()); 
 			}
 			for (const auto& t : tokens) {
 				cout << t << "." << endl;
