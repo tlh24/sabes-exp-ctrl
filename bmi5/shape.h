@@ -9,10 +9,10 @@
 #define PI 3.141592653589793
 class Shape : public Serialize {
 	public:
-		bool	m_needConfig; 
+		bool	m_needConfig[2]; 
 		int 	m_n; 
-		unsigned int m_vao; 
-		unsigned int m_vbo; 
+		unsigned int m_vao[2]; 
+		unsigned int m_vbo[2]; 
 		unsigned int m_drawmode; 
 		array<float,4>	m_color;
 		array<float,2> m_scale; 
@@ -21,17 +21,19 @@ class Shape : public Serialize {
 		vector<array<float,2>> v_scale; 
 		vector<array<float,2>> v_trans; 
 	Shape(void){
-		m_vao = 0; 
-		m_vbo = 0; 
+		m_vao[0] = m_vao[1] = 0; 
+		m_vbo[0] = m_vbo[1] = 0; 
 		m_color[0] = m_color[1] = m_color[2] = m_color[3] = 1.f; 
 		m_scale[0] = m_scale[1] = 1.f; 
 		m_trans[0] = m_trans[1] = 0.f; 
 		m_name = {"shape_"}; 
-		m_needConfig = false; 
+		m_needConfig[0] = m_needConfig[1] = false; 
 	}
 	void deleteBuffers(){
-		if(m_vbo) glDeleteBuffers(1, &m_vbo); m_vbo = 0; 
-		if(m_vao) glDeleteVertexArrays(1, &m_vao); m_vao = 0; 
+		for(int i=0; i<2; i++){
+			if(m_vbo[i]) glDeleteBuffers(1, &(m_vbo[i])); m_vbo[i] = 0; 
+			if(m_vao[i]) glDeleteVertexArrays(1, &(m_vao[i])); m_vao[i] = 0; 
+		}
 	}
 	~Shape(){
 		deleteBuffers(); 
@@ -39,20 +41,19 @@ class Shape : public Serialize {
 		v_scale.clear(); 
 		v_trans.clear();
 	}
-	void makeVAO(float* vertices, bool del){
+	void makeVAO(float* vertices, bool del, int display){
 		if(m_n > 0){
-			deleteBuffers(); 
-			glGenVertexArrays(1, &m_vao); // Create our Vertex Array Object
-			glBindVertexArray(m_vao); // Bind our Vertex Array Object so we can use it
-			glGenBuffers(1, &m_vbo); // Generate our Vertex Buffer Object
+			glGenVertexArrays(1, &(m_vao[display])); // Create our Vertex Array Object
+			glBindVertexArray(m_vao[display]); // Bind our Vertex Array Object so we can use it
+			glGenBuffers(1, &(m_vbo[display])); // Generate our Vertex Buffer Object
 			// VBOs are children of VAOs, apparently.
 			
-			glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // Bind our Vertex Buffer Object
+			glBindBuffer(GL_ARRAY_BUFFER, m_vbo[display]); // Bind our Vertex Buffer Object
 			glBufferData(GL_ARRAY_BUFFER, m_n*2*sizeof(GLfloat), vertices, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
 			glVertexAttribPointer((GLuint)0, 2, GL_FLOAT, GL_FALSE, 0, 0); // Set up our vertex attributes pointer
 			
-			glEnableVertexAttribArray(0); // enable our Vertex Array Object
-			glBindVertexArray(0); // bind our Vertex Buffer Object
+			glEnableVertexAttribArray(0); 
+			glBindVertexArray(0); 
 			if(del) free(vertices);
 		}else{
 			printf("error: makeVAO: m_n < 0\n"); 	
@@ -60,10 +61,11 @@ class Shape : public Serialize {
 	}
 	void makeCircle(int n){
 		m_n = n+1; 
-		m_needConfig = true; 
+		m_needConfig[0] = m_needConfig[1] = true; 
 	}
 	void configure(int display){
-		if(m_needConfig){
+		if(m_needConfig[display]){
+			printf("Shape: configuring display [%d]\n", display); 
 			//makes a circle, diameter 1, at the origin.
 			float* v = (float*)malloc((m_n)*sizeof(float)*2); 
 			v[0] = 0.f; 
@@ -73,9 +75,9 @@ class Shape : public Serialize {
 				v[i*2+2] = 0.5f*sinf(t); 
 				v[i*2+3] = 0.5f*cosf(t); 
 			}
-			makeVAO(v, true); 
+			makeVAO(v, true, display); 
 			m_drawmode = GL_TRIANGLE_FAN; 
-			m_needConfig = false; 
+			m_needConfig[display] = false; 
 		}
 	}
 	virtual void draw(int display){
@@ -85,7 +87,7 @@ class Shape : public Serialize {
 		glTranslatef(m_trans[0], m_trans[1], 0.f); 
 		glScalef(m_scale[0], m_scale[1], 1.f); 
 		glColor4f(m_color[0], m_color[1], m_color[2], m_color[3]);
-		glBindVertexArray(m_vao);
+		glBindVertexArray(m_vao[display]);
 		glDrawArrays(m_drawmode, 0, m_n);  
 		glBindVertexArray(0);
 		glPopMatrix(); 
@@ -211,7 +213,7 @@ public: //do something like the flow field common in the lab.
 	vector<float> v_coherence; 
 	// we can assume that the other parts don't change during the experiment.
 	
-	StarField(){
+	StarField() : Shape() {
 		m_vel[0] = 0.2f; 
 		m_vel[1] = 0.1f; 
 		m_v = NULL; 
@@ -229,18 +231,18 @@ public: //do something like the flow field common in the lab.
 		if(m_age) free(m_age); m_age = NULL; 
 		if(m_program[0]) glDeleteProgram(m_program[0]);
 		if(m_program[1]) glDeleteProgram(m_program[1]);
+		deleteBuffers(); 
 		v_vel.clear(); 
 		v_coherence.clear(); 
 	}
-	void makeVAO(starStruct* vertices, bool del){
+	void makeVAO(starStruct* vertices, bool del, int display){
 		if(m_n > 0){
-			deleteBuffers(); 
-			glGenVertexArrays(1, &m_vao); // Create our Vertex Array Object
-			glBindVertexArray(m_vao); // Bind our Vertex Array Object so we can use it
-			glGenBuffers(1, &m_vbo); // Generate our Vertex Buffer Object
+			glGenVertexArrays(1, &(m_vao[display])); // Create our Vertex Array Object
+			glBindVertexArray(m_vao[display]); // Bind our Vertex Array Object so we can use it
+			glGenBuffers(1, &(m_vbo[display])); // Generate our Vertex Buffer Object
 			// VBOs are children of VAOs, apparently.
 			
-			glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // Bind our Vertex Buffer Object
+			glBindBuffer(GL_ARRAY_BUFFER, m_vbo[display]); // Bind our Vertex Buffer Object
 			glBufferData(GL_ARRAY_BUFFER, m_n*sizeof(starStruct), vertices, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
 			glVertexAttribPointer((GLuint)0, 2, GL_FLOAT, GL_FALSE, sizeof(starStruct), 0); // Set up our vertex attributes pointer
 			glVertexAttribPointer((GLuint)1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(starStruct), (void*)8); 
@@ -317,14 +319,14 @@ public: //do something like the flow field common in the lab.
 			m_age[i] = uniform()*PI*2.0;
 		}
 		m_n = nstars; 
-		m_needConfig = true; 
+		m_needConfig[0] = m_needConfig[1] = true; 
 		m_drawmode = GL_POINTS; 
 	}
 	void configure(int display){
-		if(m_needConfig){
-			makeVAO(m_v, false); //keep around the b.s.
+		if(m_needConfig[display]){
+			makeVAO(m_v, false, display); //keep around the b.s.
 			makeShaders(display); 
-			m_needConfig = false; 
+			m_needConfig[display] = false; 
 		}
 	}
 	virtual void move(float ar, long double time){
@@ -382,8 +384,8 @@ public: //do something like the flow field common in the lab.
 		//this is a little more complicated, as we need to do a memcpy and user shaders.
 		glPointSize(m_starSize); 
 		glUseProgram(m_program[display]); 
-		glBindVertexArray(m_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // Bind our Vertex Buffer Object
+		glBindVertexArray(m_vao[display]);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo[display]); // Bind our Vertex Buffer Object
 		glBufferData(GL_ARRAY_BUFFER, m_n*sizeof(starStruct), m_v, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
 		
 		glEnableVertexAttribArray(0);
