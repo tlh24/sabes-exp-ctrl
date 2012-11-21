@@ -34,8 +34,12 @@ public:
 	float		m_s2; 
 	double	m_phase; 
 	double	m_pincr; 
+	double	m_poff; 
 	long		m_start; //in samples
 	long		m_duration; // in samples; 
+	long		m_attack; 
+	long		m_release; 
+	float		m_distortion; 
 	bool		m_dead; 
 	
 	Tone(float freq, float pan, float scale, long start, long duration){
@@ -50,23 +54,36 @@ public:
 		m_dead = false; 
 		m_start = start; 
 		m_duration = duration; 
+		m_attack = 1000; 
+		m_release = 1000; 
+		m_distortion = 0.f; 
+		m_poff = 0.0;
 	}
 	~Tone(){}
 	
 	void sample(long s, float* d1, float* d2, float* sine){
-		if(m_dead || s > m_start + m_duration){
+		if(m_dead || s > m_start + m_duration + m_release){
 			m_dead = true; 
 		} else {
 			if(m_start == -1) m_start = s; 
 			if(m_start <= s){
+				float env = 1.f;
+				if(s-m_start < m_attack)
+					env = (float)(s-m_start) / (float)m_attack; 
+				else if(s-m_start >= m_duration)
+					env = 1.f - (float)(s-m_start-m_duration) / (float)m_release; 
+				env < 0.f ? 0.f : env; 
+				env > 1.f ? 1.f : env; 
 				double phase = m_phase * TABLE_SIZE; 
 				int bot = (int)floor(phase); 
 				if(bot > TABLE_SIZE-1) bot = TABLE_SIZE-1; 
 				int top = bot+1; 
 				double lerp = phase - floor(phase); 
 				float a = (1-lerp)*sine[bot] + lerp*sine[top]; 
-				*d1 += a * m_s1; 
-				*d2 += a * m_s2; 
+				if(m_distortion > 0.f)
+					a = atan(a * (1 + m_distortion)) / atan(1+m_distortion); 
+				*d1 += a * m_s1 * env; 
+				*d2 += a * m_s2 * env; 
 				m_phase += m_pincr; 
 				if(m_phase > 1.0) m_phase -= 1.0; 
 			}
@@ -122,7 +139,6 @@ int process (jack_nframes_t nframes, void *arg)
 			Tone* t = (*it); 
 			it = data->tones.erase(it); 
 			delete t; 
-			printf("deleting tone!\n"); 
 		} else {
 			it++; 
 		}
@@ -148,7 +164,7 @@ void addTones(paTestData * data, long offset){
 	if(scl > 1) scl = 1; 
 	float scl2 = scl * 0.15; 
 	scl += 0.1;
-	float mel = 0.35f;
+	float mel = 0.18f;
 	Tone* t; 
 	t = new Tone(500.f, uniformPan(), mel*0.25, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t); u += ui; 
@@ -160,14 +176,54 @@ void addTones(paTestData * data, long offset){
 	data->tones.push_back(t); u += ui; 
 	t = new Tone(400.f, uniformPan(), mel*0.22, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
 	data->tones.push_back(t); u += ui; 
-	t = new Tone(800.f, uniformPan(), mel*scl2, offset+u*SAMPFREQ, SAMPFREQ*2*scl); 
+	t = new Tone(800.f, uniformPan(), mel*scl2*0.5, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
 	data->tones.push_back(t); 
-	t = new Tone(300.f, uniformPan(), mel*0.25, offset+u*SAMPFREQ, SAMPFREQ*scl); 
+	t = new Tone(300.f, uniformPan(), mel*0.29, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t);
+	long bar = offset / (SAMPFREQ*3); 
+	float distortion = (bar&15) - 4; 
+	if(bar < 4) bar = 0;  
+	float freqs[] = {150.f, 125.f, 100.f, 133.f}; 
 	for(int i=0; i< 12; i++){
-		t = new Tone(150.f, 0.0, scl*(0.35+0.1*sin(i/2)), offset+((float)i*ui+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.8); 
+		t = new Tone(freqs[bar&3], 0.0, scl*(0.25+0.1*sin(i/2)), offset+((float)i*ui+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.8); 
+		t->m_distortion = distortion; 
 		data->tones.push_back(t);
 	}
+	float freqs2[] = {112.5f, 93.75f, 75.f, 100.f}; 
+	if(bar&31 > 15){
+		for(int i=0; i< 12; i++){
+			t = new Tone(freqs2[bar&3], 0.0, scl*(0.15+0.1*sin(i/2)), offset+((float)i*ui+ui)*SAMPFREQ, SAMPFREQ*ui*0.6); 
+			t->m_distortion = distortion; 
+			data->tones.push_back(t);
+		}
+		for(int i=0; i<6; i++){
+			t = new Tone(9000, 0.0, scl*(0.02+0.01*cos(i)), offset+((float)i*ui*2+ui)*SAMPFREQ, SAMPFREQ*ui*0.05); 
+			t->m_attack = 200; 
+			t->m_release = 2500; 
+			data->tones.push_back(t);
+		}
+	}
+	for(int i=0; i<6; i++){
+		t = new Tone(8000, 0.0, scl*(0.04+0.02*cos(i)), offset+((float)i*ui*2)*SAMPFREQ, SAMPFREQ*ui*0.05); 
+		t->m_attack = 200; 
+		t->m_release = 2500; 
+		data->tones.push_back(t);
+	}
+	t = new Tone(8000, 0.0, scl*(0.03), offset+((float)2*ui*2+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.08); 
+	t->m_attack = 200; 
+	t->m_release = 2500; 
+	data->tones.push_back(t);
+		t = new Tone(8000, 0.0, scl*(0.03), offset+((float)5*ui*2+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.08); 
+	t->m_attack = 200; 
+	t->m_release = 2500; 
+	data->tones.push_back(t);
+	float fb = 50.f; 
+	if(bar & 1) fb = 66.f; 
+	t = new Tone(fb, uniformPan(), 0.3, offset+SAMPFREQ, SAMPFREQ*2); 
+	t->m_attack = SAMPFREQ; 
+	t->m_release = SAMPFREQ;
+	t->m_distortion = 2 + bar/16; 
+	data->tones.push_back(t);
 }
 
 int main (int argc, char *argv[])
