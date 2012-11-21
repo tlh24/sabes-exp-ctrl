@@ -148,20 +148,26 @@ void addTones(paTestData * data, long offset){
 	if(scl > 1) scl = 1; 
 	float scl2 = scl * 0.15; 
 	scl += 0.1;
-	Tone* t = new Tone(500.f, uniformPan(), 0.25, offset+u*SAMPFREQ, SAMPFREQ*scl); 
+	float mel = 0.35f;
+	Tone* t; 
+	t = new Tone(500.f, uniformPan(), mel*0.25, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t); u += ui; 
-	t = new Tone(600.f, uniformPan(), 0.15, offset+u*SAMPFREQ, SAMPFREQ*scl); 
+	t = new Tone(600.f, uniformPan(), mel*0.15, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t); u += ui; 
-	t = new Tone(750.f, uniformPan(), 0.23, offset+u*SAMPFREQ, SAMPFREQ*scl); 
+	t = new Tone(750.f, uniformPan(), mel*0.23, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t); u += ui; 
-	t = new Tone(300.f, uniformPan(), 0.2, offset+u*SAMPFREQ, SAMPFREQ*scl); 
+	t = new Tone(300.f, uniformPan(), mel*0.2, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t); u += ui; 
-	t = new Tone(400.f, uniformPan(), 0.22, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
+	t = new Tone(400.f, uniformPan(), mel*0.22, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
 	data->tones.push_back(t); u += ui; 
-	t = new Tone(800.f, uniformPan(), scl2, offset+u*SAMPFREQ, SAMPFREQ*2*scl); 
+	t = new Tone(800.f, uniformPan(), mel*scl2, offset+u*SAMPFREQ, SAMPFREQ*2*scl); 
 	data->tones.push_back(t); 
-	t = new Tone(300.f, uniformPan(), 0.25, offset+u*SAMPFREQ, SAMPFREQ*scl); 
+	t = new Tone(300.f, uniformPan(), mel*0.25, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t);
+	for(int i=0; i< 12; i++){
+		t = new Tone(150.f, 0.0, scl*(0.35+0.1*sin(i/2)), offset+((float)i*ui+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.8); 
+		data->tones.push_back(t);
+	}
 }
 
 int main (int argc, char *argv[])
