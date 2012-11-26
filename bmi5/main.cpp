@@ -46,6 +46,7 @@
 #include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
+#include "jacksnd.h"
 
 using namespace std;
 using namespace boost;
@@ -497,6 +498,27 @@ void* mmap_thread(void*){
 				write(pipe_out, (void*)&code, 4);
 				write(pipe_out, resp.c_str(), resp.size()); 
 			}
+			if(*beg == string("tone")){
+				// format: tone frequency pan amplitude duration
+				float freq = 261.626f; //C4
+				float pan = 0.0; 
+				float scale = 1.f; 
+				long duration = SAMPFREQ; 
+				if(beg != tokens.end())
+					freq = atof((*beg++).c_str());
+				if(beg != tokens.end())
+					pan = atof((*beg++).c_str());
+				if(beg != tokens.end())
+					scale = atof((*beg++).c_str());
+				if(beg != tokens.end())
+					duration = atof((*beg++).c_str()) * SAMPFREQ;
+				Tone* tn = new Tone(freq, pan, scale, -1, duration); 
+				jackAddTone(tn); //will be freed when done.
+				string resp = {"noise made!\n"}; 
+				code = resp.size(); 
+				write(pipe_out, (void*)&code, 4);
+				write(pipe_out, resp.c_str(), resp.size()); 
+			}
 			for (const auto& t : tokens) {
 				cout << t << "." << endl;
 			}
@@ -723,7 +745,6 @@ int main(int argn, char** argc){
 	//g_signal_connect(button, "clicked", G_CALLBACK(luaStopCB), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
-	
 	gtk_paned_add1(GTK_PANED(paned), v1);
 	da1 = gtk_drawing_area_new ();
 	gtk_paned_add2(GTK_PANED(paned), da1);
@@ -818,8 +839,12 @@ int main(int argn, char** argc){
 	
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
 	
+	//jack audio. 
+	jackInit(); 
+	
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
+	
 	gtk_main ();
 	
 	pthread_join(pthread,NULL);  // wait for the read thread to complete

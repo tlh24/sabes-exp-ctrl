@@ -1,8 +1,4 @@
-/** @file simple_client.c
- *
- * @brief This simple client demonstrates the basic features of JACK
- * as they would be used by many applications.
- */
+// this is adapted from jack's simple_client.c
 
 #include <stdio.h>
 #include <errno.h>
@@ -15,6 +11,7 @@
 #endif
 #include <jack/jack.h>
 #include <list>
+#include "jacksnd.h"
 
 jack_port_t *output_port1, *output_port2;
 jack_client_t *client;
@@ -23,113 +20,39 @@ jack_client_t *client;
 #define M_PI  (3.14159265)
 #endif
 
-#define TABLE_SIZE   (200)
-#define SAMPFREQ		48000.0
-
 using namespace std; 
 
-class Tone{
-public:
-	float		m_s1; 
-	float		m_s2; 
-	double	m_phase; 
-	double	m_pincr; 
-	double	m_poff; 
-	long		m_start; //in samples
-	long		m_duration; // in samples; 
-	long		m_attack; 
-	long		m_release; 
-	float		m_distortion; 
-	bool		m_dead; 
-	
-	Tone(float freq, float pan, float scale, long start, long duration){
-		m_s1 = 1.f - pan; 
-		m_s2 = pan + 1;
-		if(m_s1 > 1.f) m_s1 = 1.f; 
-		if(m_s2 > 1.f) m_s2 = 1.f; 
-		m_s1 *= scale; 
-		m_s2 *= scale; 
-		m_phase = 0.0; 
-		m_pincr = (double)freq / SAMPFREQ; 
-		m_dead = false; 
-		m_start = start; 
-		m_duration = duration; 
-		m_attack = 1000; 
-		m_release = 1000; 
-		m_distortion = 0.f; 
-		m_poff = 0.0;
-	}
-	~Tone(){}
-	
-	void sample(long s, float* d1, float* d2, float* sine){
-		if(m_dead || s > m_start + m_duration + m_release){
-			m_dead = true; 
-		} else {
-			if(m_start == -1) m_start = s; 
-			if(m_start <= s){
-				float env = 1.f;
-				if(s-m_start < m_attack)
-					env = (float)(s-m_start) / (float)m_attack; 
-				else if(s-m_start >= m_duration)
-					env = 1.f - (float)(s-m_start-m_duration) / (float)m_release; 
-				env < 0.f ? 0.f : env; 
-				env > 1.f ? 1.f : env; 
-				double phase = m_phase * TABLE_SIZE; 
-				int bot = (int)floor(phase); 
-				if(bot > TABLE_SIZE-1) bot = TABLE_SIZE-1; 
-				int top = bot+1; 
-				double lerp = phase - floor(phase); 
-				float a = (1-lerp)*sine[bot] + lerp*sine[top]; 
-				if(m_distortion > 0.f)
-					a = atan(a * (1 + m_distortion)) / atan(1+m_distortion); 
-				*d1 += a * m_s1 * env; 
-				*d2 += a * m_s2 * env; 
-				m_phase += m_pincr; 
-				if(m_phase > 1.0) m_phase -= 1.0; 
-			}
-		}
-	}
-};
+long g_jackSample; 
 
 typedef struct
 {
-	long		sample; //total number of samples. 
 	float		sine[TABLE_SIZE+1];
 	list<Tone*> tones; 
 } paTestData;
 
-static void signal_handler(int sig)
+static void signal_handler(int )
 {
 	jack_client_close(client);
 	fprintf(stderr, "signal received, exiting ...\n");
 	exit(0);
 }
 
-/**
- * The process callback for this JACK application is called in a
- * special realtime thread once for each audio cycle.
- *
- * This client follows a simple rule: when the JACK transport is
- * running, copy the input port to the output.  When it stops, exit.
- */
-
 int process (jack_nframes_t nframes, void *arg)
 {
 	jack_default_audio_sample_t *out1, *out2;
 	paTestData *data = (paTestData*)arg;
-	int i;
 
 	out1 = (jack_default_audio_sample_t*)jack_port_get_buffer (output_port1, nframes);
 	out2 = (jack_default_audio_sample_t*)jack_port_get_buffer (output_port2, nframes);
 
-	for( i=0; i<nframes; i++){
+	for(unsigned int i=0; i<nframes; i++){
 		out1[i] = 0.f; 
 		out2[i] = 0.f; 
 	}
 	list<Tone*>::iterator it;
 	for(it=data->tones.begin(); it != data->tones.end(); it++){
-		for(int i=0; i<nframes && !((*it)->m_dead); i++){
-			(*it)->sample(data->sample + i, &(out1[i]), &(out2[i]), data->sine); 
+		for(unsigned int i=0; i<nframes && !((*it)->m_dead); i++){
+			(*it)->sample(g_jackSample + i, &(out1[i]), &(out2[i]), data->sine); 
 		}
 	}
 	//remove the 'dead' tones. 
@@ -143,7 +66,7 @@ int process (jack_nframes_t nframes, void *arg)
 			it++; 
 		}
 	}
-	data->sample += nframes; 
+	g_jackSample += nframes; 
 	return 0;      
 }
 
@@ -151,11 +74,11 @@ int process (jack_nframes_t nframes, void *arg)
  * JACK calls this shutdown_callback if the server ever shuts down or
  * decides to disconnect the client.
  */
-void
-jack_shutdown (void *arg)
-{
+void jack_shutdown (void *){
 	exit (1);
 }
+
+/* song stuff. well, not really a song -- more of a set of noises. */ 
 float uniform(){ return ((float)rand() / (float)RAND_MAX);}
 float uniformPan(){ return uniform()*2.f -1.f; }
 void addTones(paTestData * data, long offset){
@@ -190,7 +113,7 @@ void addTones(paTestData * data, long offset){
 		data->tones.push_back(t);
 	}
 	float freqs2[] = {112.5f, 93.75f, 75.f, 100.f}; 
-	if(bar&31 > 15){
+	if((bar&31) > 15){
 		for(int i=0; i< 12; i++){
 			t = new Tone(freqs2[bar&3], 0.0, scl*(0.15+0.1*sin(i/2)), offset+((float)i*ui+ui)*SAMPFREQ, SAMPFREQ*ui*0.6); 
 			t->m_distortion = distortion; 
@@ -226,40 +149,22 @@ void addTones(paTestData * data, long offset){
 	data->tones.push_back(t);
 }
 
-int main (int argc, char *argv[])
+static paTestData g_data;
+
+int jackInit()
 {
 	const char **ports;
 	const char *client_name;
-	const char *server_name = NULL;
-	jack_options_t options = JackNullOption;
 	jack_status_t status;
-	paTestData data;
 	int i;
 
-	if (argc >= 2) {		/* client name specified? */
-		client_name = argv[1];
-		if (argc >= 3) {	/* server name specified? */
-			server_name = argv[2];
-            int my_option = JackNullOption | JackServerName;
-			options = (jack_options_t)my_option;
-		}
-	} else {			/* use basename of argv[0] */
-		client_name = strrchr(argv[0], '/');
-		if (client_name == 0) {
-			client_name = argv[0];
-		} else {
-			client_name++;
-		}
-	}
-
 	for( i=0; i<TABLE_SIZE+1; i++ ){
-		data.sine[i] = 0.2 * (float) sin( ((double)i/(double)TABLE_SIZE) * M_PI * 2. );
+		g_data.sine[i] = 0.2 * (float) sin( ((double)i/(double)TABLE_SIZE) * M_PI * 2. );
 	}
-	data.sample = 0; 
-	addTones(&data, 0); 
+	g_jackSample = 0; 
 	/* open a client connection to the JACK server */
 
-	client = jack_client_open (client_name, options, &status, server_name);
+	client = jack_client_open ("bmi5", JackNullOption, &status, NULL);
 	if (client == NULL) {
 		fprintf (stderr, "jack_client_open() failed, "
 			 "status = 0x%2.0x\n", status);
@@ -279,7 +184,7 @@ int main (int argc, char *argv[])
 	   there is work to be done.
 	*/
 
-	jack_set_process_callback (client, process, &data);
+	jack_set_process_callback (client, process, &g_data);
 
 	/* tell the JACK server to call `jack_shutdown()' if
 	   it ever shuts down, either entirely, or if it
@@ -307,7 +212,7 @@ int main (int argc, char *argv[])
 	 * process() callback will start running now. */
 
 	if (jack_activate (client)) {
-		fprintf (stderr, "cannot activate client");
+		fprintf (stderr, "jack_activate cannot activate client");
 		exit (1);
 	}
 
@@ -318,56 +223,54 @@ int main (int argc, char *argv[])
 	 * "input" to the backend, and capture ports are "output" from
 	 * it.
 	 */
- 	
 	ports = jack_get_ports (client, NULL, NULL,
 				JackPortIsPhysical|JackPortIsInput);
 	if (ports == NULL) {
-		fprintf(stderr, "no physical playback ports\n");
+		fprintf(stderr, "JACK: no physical playback ports\n");
 		exit (1);
 	}
-
 	if (jack_connect (client, jack_port_name (output_port1), ports[0])) {
-		fprintf (stderr, "cannot connect output ports\n");
+		fprintf (stderr, "JACK: cannot connect output ports\n");
 	}
-
 	if (jack_connect (client, jack_port_name (output_port2), ports[1])) {
-		fprintf (stderr, "cannot connect output ports\n");
+		fprintf (stderr, "JACK: cannot connect output ports\n");
 	}
-	
 	if (jack_connect (client, jack_port_name (output_port1), ports[4])) { //for my machine... 
-		fprintf (stderr, "cannot connect output ports\n");
+		fprintf (stderr, "JACK: cannot connect output ports\n");
 	}
-
 	if (jack_connect (client, jack_port_name (output_port2), ports[5])) {
-		fprintf (stderr, "cannot connect output ports\n");
+		fprintf (stderr, "JACK: cannot connect output ports\n");
 	}
-
 	free (ports);
-    
-    /* install a signal handler to properly quits jack client */
-#ifdef WIN32
-	signal(SIGINT, signal_handler);
-    signal(SIGABRT, signal_handler);
-	signal(SIGTERM, signal_handler);
-#else
+	//make sure it's working ..
+	addTones(&g_data, 0); 
+	return 0; 
+}
+void jackDemo(){
+	/* install a signal handler to properly quits jack client */
 	signal(SIGQUIT, signal_handler);
 	signal(SIGTERM, signal_handler);
 	signal(SIGHUP, signal_handler);
 	signal(SIGINT, signal_handler);
-#endif
 
 	/* keep running until the Ctrl+C */
+	addTones(&g_data, 0); 
 	long offset = 0; 
 	while (1) {
-	#ifdef WIN32 
-		Sleep(1000);
-	#else
 		sleep (3);
 		offset += SAMPFREQ*3;
-		addTones(&data, offset); 
-	#endif
+		addTones(&g_data, offset); 
 	}
-
 	jack_client_close (client);
 	exit (0);
 }
+void jackAddTone(Tone* t){
+	g_data.tones.push_back(t);
+}
+/*
+int main(){
+	jackInit(); 
+	jackDemo(); 
+	return 0; 
+}
+*/
