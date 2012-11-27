@@ -4,3 +4,6 @@ CP_Display.tlb
 
 # build log files
 *.plg
+
+
+Debug/*
