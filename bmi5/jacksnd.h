@@ -6,6 +6,15 @@
 
 extern long g_jackSample; 
 
+enum TONE_TYPE {
+	TONE_SINE, 
+	TONE_SAWUP,
+	TONE_SAWDOWN,
+	TONE_TRIANGLE,
+	TONE_SQUARE,
+	TONE_NUM
+};
+
 class Tone{
 public:
 	float		m_s1; 
@@ -19,6 +28,7 @@ public:
 	long		m_release; 
 	float		m_distortion; 
 	bool		m_dead; 
+	int		m_type; 
 	
 	Tone(float freq, float pan, float scale, long start, long duration){
 		pan = pan > 1.f ? 1.f : pan; 
@@ -38,6 +48,7 @@ public:
 		m_release = 1000; 
 		m_distortion = 0.f; 
 		m_poff = 0.0;
+		m_type = TONE_SINE; 
 	}
 	~Tone(){}
 	
@@ -54,16 +65,43 @@ public:
 					env = 1.f - (float)(s-m_start-m_duration) / (float)m_release; 
 				env = env < 0.f ? 0.f : env; 
 				env = env > 1.f ? 1.f : env; 
-				double phase = m_phase * TABLE_SIZE; 
-				int bot = (int)floor(phase); 
-				if(bot > TABLE_SIZE-1) bot = TABLE_SIZE-1; 
-				int top = bot+1; 
-				double lerp = phase - floor(phase); 
-				float a = (1-lerp)*sine[bot] + lerp*sine[top]; 
-				if(m_distortion > 0.f)
-					a = atan(a * (1 + m_distortion)) / atan(1+m_distortion); 
-				*d1 += a * m_s1 * env; 
-				*d2 += a * m_s2 * env; 
+				if(m_type == TONE_SINE){
+					double phase = m_phase * TABLE_SIZE; 
+					int bot = (int)floor(phase); 
+					if(bot > TABLE_SIZE-1) bot = TABLE_SIZE-1; 
+					int top = bot+1; 
+					double lerp = phase - floor(phase); 
+					float a = (1-lerp)*sine[bot] + lerp*sine[top]; 
+					if(m_distortion > 0.f)
+						a = atan(a * (1 + m_distortion)) / atan(1+m_distortion); 
+					*d1 += a * m_s1 * env; 
+					*d2 += a * m_s2 * env; 
+				}
+				else if(m_type == TONE_SAWUP){
+					// phase goes from 0 to 1 -- subtract 0.5 and *2.
+					float phase = m_phase - 0.5f; 
+					phase *= 2.f; 
+					*d1 += phase * m_s1 * env; 
+					*d2 += phase * m_s2 * env;
+				}
+				else if(m_type == TONE_SAWDOWN){
+					float phase = 0.5f - m_phase; 
+					phase *= 2.f; 
+					*d1 += phase * m_s1 * env; 
+					*d2 += phase * m_s2 * env;
+				}
+				else if(m_type == TONE_TRIANGLE){
+					float phase = 2.f * m_phase; 
+					if(phase > 1.f) phase = 2.f - phase; 
+					*d1 += phase * m_s1 * env; 
+					*d2 += phase * m_s2 * env;
+				}
+				else if(m_type == TONE_SQUARE){
+					float phase = -1.f; 
+					if(m_phase > 0.5f + m_distortion) phase = 1.f; //can change pulsewidth.
+					*d1 += phase * m_s1 * env; 
+					*d2 += phase * m_s2 * env;
+				}
 				m_phase += m_pincr; 
 				if(m_phase > 1.0) m_phase -= 1.0; 
 			}

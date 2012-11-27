@@ -637,8 +637,8 @@ void* polhemusThread(void* ){
 					// print data
 					//printf("x= %.4f, y= %.4f, z= %.4f, az= %.4f, el= %.4f, roll= %.4f\n",
 					//	pData[0],pData[1],pData[2],pData[3],pData[4],pData[5]);
-					printf("x= %.4f, y= %.4f, z= %.4f,\n",
-								pData[0],pData[1],pData[2]);
+					//printf("x= %.4f, y= %.4f, z= %.4f,\n",
+					//			pData[0],pData[1],pData[2]);
 					frames += 1; 
 					//printf("frame rate: %f\n", frames / (gettime() - starttime)); 
 					/*if(g_sensors[0][2] > 0.0){
