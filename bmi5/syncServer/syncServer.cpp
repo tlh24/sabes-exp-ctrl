@@ -213,6 +213,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	_controlfp_s(&prevFpuState, _PC_64, MCW_PC); 
 	printf("sizeof(double) %d\n,", sizeof(double)); 
 
+	bool run_rcx = false; 
 	const char* circuitPath = "C:\\Profiles\\tlh24\\JEO_Code\\TDT_Projects\\joeyos_baseline_project\\RCOCircuits\\Timing_Rec_Bin_RZ2_1.rcx"; 
 	//const char* circuitPath = "C:\\TDT\\ActiveX\\ActXExamples\\RP_files\\Band_Limited_Noise.rcx";
 
@@ -237,14 +238,16 @@ int _tmain(int argc, _TCHAR* argv[])
 	if (RP->ConnectRZ2("GB",1)) {  
 		printf("Connected to RZ2\n");
 	}
-	if (!RP->ClearCOF()) {  
-		printf("ClearCOF failed\n");
-	}
-	if (RP->LoadCOF(circuitPath)) {
-		printf("%s Loaded\n", circuitPath);
-	}
-	if (RP->Run()) {  
-		printf("Circuit running\n");
+	if(run_rcx){
+		if (!RP->ClearCOF()) {  
+			printf("ClearCOF failed\n");
+		}
+		if (RP->LoadCOF(circuitPath)) {
+			printf("%s Loaded\n", circuitPath);
+		}
+		if (RP->Run()) {  
+			printf("Circuit running\n");
+		}
 	}
 	StartCounter(); 
 	bool monotonic = true;
@@ -292,7 +295,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	getchar();
 	g_die = true; 
 
-	RP->Halt();
+	if(run_rcx) RP->Halt();
 
 	//restore FPU state. 
 	_controlfp_s(NULL, prevFpuState, MCW_PC); 
