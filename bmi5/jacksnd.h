@@ -21,6 +21,8 @@ public:
 	bool		m_dead; 
 	
 	Tone(float freq, float pan, float scale, long start, long duration){
+		pan = pan > 1.f ? 1.f : pan; 
+		pan = pan < -1.f ? -1.f : pan; 
 		m_s1 = 1.f - pan; 
 		m_s2 = pan + 1;
 		if(m_s1 > 1.f) m_s1 = 1.f; 
@@ -40,10 +42,10 @@ public:
 	~Tone(){}
 	
 	void sample(long s, float* d1, float* d2, float* sine){
+		if(m_start == -1) m_start = s; 
 		if(m_dead || s > m_start + m_duration + m_release){
 			m_dead = true; 
 		} else {
-			if(m_start == -1) m_start = s; 
 			if(m_start <= s){
 				float env = 1.f;
 				if(s-m_start < m_attack)
@@ -69,7 +71,9 @@ public:
 	}
 };
 
+void jackClose(int sig); 
 int jackInit(); 
 void jackDemo(); 
 void jackAddTone(Tone* t); 
+void jackAddToneP(float freq, float pan, float scale, float duration); 
 #endif

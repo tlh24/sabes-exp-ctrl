@@ -43,10 +43,10 @@
 #include "perftimer.h"
 
 //local.
+#include "jacksnd.h"
 #include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
-#include "jacksnd.h"
 
 using namespace std;
 using namespace boost;
@@ -499,29 +499,22 @@ void* mmap_thread(void*){
 				write(pipe_out, resp.c_str(), resp.size()); 
 			}
 			if(*beg == string("tone")){
-				// format: tone frequency pan amplitude duration
-				float freq = 261.626f; //C4
-				float pan = 0.0; 
-				float scale = 1.f; 
-				long duration = SAMPFREQ; 
+				// add a tone-interpreter (can add multiple for polyphony). 
+				beg++; 
+				ToneSerialize* tsz = new ToneSerialize(); 
 				if(beg != tokens.end())
-					freq = atof((*beg++).c_str());
-				if(beg != tokens.end())
-					pan = atof((*beg++).c_str());
-				if(beg != tokens.end())
-					scale = atof((*beg++).c_str());
-				if(beg != tokens.end())
-					duration = atof((*beg++).c_str()) * SAMPFREQ;
-				Tone* tn = new Tone(freq, pan, scale, -1, duration); 
-				jackAddTone(tn); //will be freed when done.
-				string resp = {"noise made!\n"}; 
+					tsz->m_name = (*beg); //name of the tone.
+				g_objs.push_back(tsz); 
+				string resp = {"made a tone generator named "}; 
+				resp += tsz->m_name; 
+				resp += {"\n"}; 
 				code = resp.size(); 
 				write(pipe_out, (void*)&code, 4);
 				write(pipe_out, resp.c_str(), resp.size()); 
 			}
-			for (const auto& t : tokens) {
+			/*for (const auto& t : tokens) {
 				cout << t << "." << endl;
-			}
+			}*/
 			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
 			bufn = 0; 
 		}
@@ -848,7 +841,7 @@ int main(int argn, char** argc){
 	gtk_main ();
 	
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
-	
+	jackClose(0); 
 	//save data!!
 	writeMatlab(g_objs, "backup.mat"); 
 

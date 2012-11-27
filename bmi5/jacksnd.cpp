@@ -30,11 +30,9 @@ typedef struct
 	list<Tone*> tones; 
 } paTestData;
 
-static void signal_handler(int )
-{
+void jackClose(int sig){
 	jack_client_close(client);
-	fprintf(stderr, "signal received, exiting ...\n");
-	exit(0);
+	fprintf(stderr, "signal %d received, exiting ...\n", sig);
 }
 
 int process (jack_nframes_t nframes, void *arg)
@@ -242,17 +240,16 @@ int jackInit()
 		fprintf (stderr, "JACK: cannot connect output ports\n");
 	}
 	free (ports);
+	/* install a signal handler to properly quits jack client */
+	signal(SIGQUIT, jackClose);
+	signal(SIGTERM, jackClose);
+	signal(SIGHUP, jackClose);
+	signal(SIGINT, jackClose);
 	//make sure it's working ..
 	addTones(&g_data, 0); 
 	return 0; 
 }
 void jackDemo(){
-	/* install a signal handler to properly quits jack client */
-	signal(SIGQUIT, signal_handler);
-	signal(SIGTERM, signal_handler);
-	signal(SIGHUP, signal_handler);
-	signal(SIGINT, signal_handler);
-
 	/* keep running until the Ctrl+C */
 	addTones(&g_data, 0); 
 	long offset = 0; 
@@ -265,6 +262,10 @@ void jackDemo(){
 	exit (0);
 }
 void jackAddTone(Tone* t){
+	g_data.tones.push_back(t);
+}
+void jackAddToneP(float freq, float pan, float scale, float duration){
+	Tone* t = new Tone(freq, pan, scale, -1, duration * SAMPFREQ); 
 	g_data.tones.push_back(t);
 }
 /*
