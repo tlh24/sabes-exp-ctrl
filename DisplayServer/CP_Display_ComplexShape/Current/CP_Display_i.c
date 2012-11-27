@@ -5,9 +5,9 @@
 
 
 /* File created by MIDL compiler version 5.01.0164 */
-/* at Tue Oct 18 18:08:39 2011
+/* at Mon Nov 26 18:53:17 2012
  */
-/* Compiler settings for D:\Sabes\Dropbox\2011-LabCode-NEW\DisplayServer\CP_Display_ComplexShape\Current\CP_Display.idl:
+/* Compiler settings for C:\Documents and Settings\joeyo\sabes-exp-ctrl\DisplayServer\CP_Display_ComplexShape\Current\CP_Display.idl:
     Oicf (OptLev=i2), W1, Zp8, env=Win32, ms_ext, c_ext
     error checks: allocation ref bounds_check enum stub_data 
 */
