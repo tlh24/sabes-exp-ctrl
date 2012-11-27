@@ -123,27 +123,27 @@ int polhemus::Rs232Connect(const char* port,int baud/*=115200*/){
 		br=B115200;
 		break;
 	default:
-		fprintf(stderr,"Baud value not available in this application, defaulting to 115200\n");
+		printf("Baud value not available in this application, defaulting to 115200\n");
 		br=B115200;
 	}
 
 	m_rs232Port=open(port,O_RDWR|O_NOCTTY|O_NDELAY);
 	if (m_rs232Port==-1){
-		fprintf(stderr,"Error connecting to tracker.\nDo you have necessary permissions to access %s?\n",port);
+		printf("Error opening serial port.\nDo you have necessary permissions to access %s?\n",port);
 		return -1;
 	}
 
 	// set up terminal for raw data
 	tcgetattr(m_rs232Port,&m_initialAtt);            // save this to restore later
-	newAtt=m_initialAtt;
+	newAtt = m_initialAtt;
 	cfmakeraw(&newAtt);
 	cfsetspeed(&newAtt,br);           // set baud
 	if (tcsetattr(m_rs232Port,TCSANOW,&newAtt)){
-		printf("Error setting terminal attributes\n");
+		printf("Polhemus: Error setting terminal attributes\n");
+		perror(":"); 
 		close(m_rs232Port);
 		return -2;
 	}
-
 	m_cnxType=RS232_CNX;
 	return 0;
 }

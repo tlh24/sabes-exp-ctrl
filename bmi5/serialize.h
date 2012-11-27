@@ -141,7 +141,7 @@ public:
 			m_sensors[i] = data[i]; 
 		v_sensors.push_back(m_sensors); 
 	}
-	void getLoc(double now, array<float,3> out){
+	void getLoc(double now, float* out){
 		//gets the current location, with forward estimation. 
 		//the update operations to the relevant variables (m_sensors, m_vel)
 		//are non-atomic, but a mutex here seems like a bit much. 
@@ -184,7 +184,7 @@ public:
 	virtual int numStores(){return 3;}
 	virtual void* mmapRead(void* addr){
 		double* d = (double*)addr; 
-		array<float,3> out; 
+		float out[3]; 
 		double time = gettime(); 
 		getLoc(time, out); 
 		for(int i=0; i<3; i++){
@@ -237,7 +237,7 @@ public:
 			case 5: return MAT_C_SINGLE; 
 		} return 0; 
 	}
-	virtual void getStoreDims(int indx, size_t* dims){
+	virtual void getStoreDims(int , size_t* dims){
 		dims[0] = dims[1] = 1; 
 	}
 	virtual void* getStore(int indx, int i){

@@ -84,8 +84,8 @@ void addTones(paTestData * data, long offset){
 	float scl = offset / (SAMPFREQ*15); 
 	if(scl > 1) scl = 1; 
 	float scl2 = scl * 0.15; 
-	scl += 0.1;
-	float mel = 0.18f;
+	scl += 0.2; if(scl > 1) scl = 1; 
+	float mel = 0.28f;
 	Tone* t; 
 	t = new Tone(500.f, uniformPan(), mel*0.25, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t); u += ui; 
@@ -246,7 +246,7 @@ int jackInit()
 	signal(SIGHUP, jackClose);
 	signal(SIGINT, jackClose);
 	//make sure it's working ..
-	addTones(&g_data, 0); 
+	addTones(&g_data, 20000); 
 	return 0; 
 }
 void jackDemo(){
