@@ -158,13 +158,14 @@ jack_shutdown (void *arg)
 }
 float uniform(){ return ((float)rand() / (float)RAND_MAX);}
 float uniformPan(){ return uniform()*2.f -1.f; }
+
 void addTones(paTestData * data, long offset){
 	float u = 0.f; float ui = 0.25; 
-	float scl = offset / (SAMPFREQ*15); 
+	float scl = offset / (SAMPFREQ*3*4); 
 	if(scl > 1) scl = 1; 
 	float scl2 = scl * 0.15; 
-	scl += 0.1;
-	float mel = 0.18f;
+	float mel = 0.165f;
+	long bar = offset / (SAMPFREQ*3); 
 	Tone* t; 
 	t = new Tone(500.f, uniformPan(), mel*0.25, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t); u += ui; 
@@ -176,23 +177,25 @@ void addTones(paTestData * data, long offset){
 	data->tones.push_back(t); u += ui; 
 	t = new Tone(400.f, uniformPan(), mel*0.22, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
 	data->tones.push_back(t); u += ui; 
-	t = new Tone(800.f, uniformPan(), mel*scl2*0.5, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
+	if(bar&1 == 0)
+		t = new Tone(700.f, uniformPan(), mel*scl2*0.5, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
+	else
+		t = new Tone(800.f, uniformPan(), mel*scl2*0.5, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
 	data->tones.push_back(t); 
 	t = new Tone(300.f, uniformPan(), mel*0.29, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t);
-	long bar = offset / (SAMPFREQ*3); 
 	float distortion = (bar&15) - 4; 
 	if(bar < 4) bar = 0;  
 	float freqs[] = {150.f, 125.f, 100.f, 133.f}; 
 	for(int i=0; i< 12; i++){
-		t = new Tone(freqs[bar&3], 0.0, scl*(0.25+0.1*sin(i/2)), offset+((float)i*ui+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.8); 
+		t = new Tone(freqs[bar&3], 0.0, scl*(0.22+0.08*sin(i/2)), offset+((float)i*ui+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.8); 
 		t->m_distortion = distortion; 
 		data->tones.push_back(t);
 	}
 	float freqs2[] = {112.5f, 93.75f, 75.f, 100.f}; 
 	if(bar&31 > 15){
 		for(int i=0; i< 12; i++){
-			t = new Tone(freqs2[bar&3], 0.0, scl*(0.15+0.1*sin(i/2)), offset+((float)i*ui+ui)*SAMPFREQ, SAMPFREQ*ui*0.6); 
+			t = new Tone(freqs2[bar&3], 0.0, scl*(0.12+0.06*sin(i/2)), offset+((float)i*ui+ui)*SAMPFREQ, SAMPFREQ*ui*0.6); 
 			t->m_distortion = distortion; 
 			data->tones.push_back(t);
 		}
@@ -219,11 +222,23 @@ void addTones(paTestData * data, long offset){
 	data->tones.push_back(t);
 	float fb = 50.f; 
 	if(bar & 1) fb = 66.f; 
-	t = new Tone(fb, uniformPan(), 0.3, offset+SAMPFREQ, SAMPFREQ*2); 
+	t = new Tone(fb, uniformPan(), 0.2, offset+SAMPFREQ, SAMPFREQ*2); 
 	t->m_attack = SAMPFREQ; 
 	t->m_release = SAMPFREQ;
 	t->m_distortion = 2 + bar/16; 
 	data->tones.push_back(t);
+}
+
+void addTones2(paTestData * data, long bar){
+	float u = 0.f; float ui = 0.25; 
+	float scl = 1.f; 
+	float freq = 
+	t = new Tone(300.f, 0.0, mel*0.2, offset+u*SAMPFREQ, SAMPFREQ*scl); 
+	data->tones.push_back(t); u += ui; 
+	t = new Tone(400.f, 0.0, mel*0.2, offset+u*SAMPFREQ, SAMPFREQ*scl); 
+	data->tones.push_back(t); u += ui;
+	t = new Tone(500.f, 0.0, mel*0.2, offset+u*SAMPFREQ, SAMPFREQ*scl); 
+	data->tones.push_back(t); u += ui;
 }
 
 int main (int argc, char *argv[])
