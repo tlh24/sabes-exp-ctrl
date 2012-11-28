@@ -141,7 +141,7 @@ public:
 			m_sensors[i] = data[i]; 
 		v_sensors.push_back(m_sensors); 
 	}
-	void getLoc(double now, array<float,3> out){
+	void getLoc(double now, float* out){
 		//gets the current location, with forward estimation. 
 		//the update operations to the relevant variables (m_sensors, m_vel)
 		//are non-atomic, but a mutex here seems like a bit much. 
@@ -184,7 +184,7 @@ public:
 	virtual int numStores(){return 3;}
 	virtual void* mmapRead(void* addr){
 		double* d = (double*)addr; 
-		array<float,3> out; 
+		float out[3]; 
 		double time = gettime(); 
 		getLoc(time, out); 
 		for(int i=0; i<3; i++){
@@ -195,6 +195,85 @@ public:
  		return (void*)d; 
 	}
 }; 
+
+class ToneSerialize : public Serialize {
+	vector<double> v_time; 
+	vector<double> v_ticks; 
+	vector<float> v_freq; 
+	vector<float> v_pan; 
+	vector<float> v_scale; 
+	vector<float> v_duration; 
+public:
+	ToneSerialize(){
+		m_name = "tone_"; 
+	}
+	~ToneSerialize(){
+		v_time.clear(); 
+		v_ticks.clear();
+		v_freq.clear(); 
+		v_pan.clear();
+		v_scale.clear(); 
+		v_duration.clear(); 
+	}
+	virtual void store(){} //done in mmapread().
+	virtual int nstored(){return v_time.size();}
+	virtual string storeName(int indx){
+		switch(indx){
+			case 0: return m_name + string("time");
+			case 1: return m_name + string("ticks"); 
+			case 2: return m_name + string("freq"); 
+			case 3: return m_name + string("pan"); 
+			case 4: return m_name + string("scale"); 
+			case 5: return m_name + string("duration"); 
+		} return string("none"); 
+	}
+	virtual int getStoreClass(int indx){
+		switch(indx){
+			case 0: return MAT_C_DOUBLE;
+			case 1: return MAT_C_DOUBLE;
+			case 2: return MAT_C_SINGLE;
+			case 3: return MAT_C_SINGLE; 
+			case 4: return MAT_C_SINGLE; 
+			case 5: return MAT_C_SINGLE; 
+		} return 0; 
+	}
+	virtual void getStoreDims(int , size_t* dims){
+		dims[0] = dims[1] = 1; 
+	}
+	virtual void* getStore(int indx, int i){
+		switch(indx){
+			case 0: return (void*)&(v_time[i]);
+			case 1: return (void*)&(v_ticks[i]); 
+			case 2: return (void*)&(v_freq[i]); 
+			case 3: return (void*)&(v_pan[i]); 
+			case 4: return (void*)&(v_scale[i]); 
+			case 5: return (void*)&(v_duration[i]); 
+		} return NULL; 
+	}
+	virtual int numStores(){return 6;}
+	virtual void* mmapRead(void* addr){
+		//this is a one-way communication channel from matlab. 
+		double* d = (double*)addr; 
+		d += 2; //skip ticks and time -- these are only saved in the file.
+		if(d[0] > 0.0){
+			float freq = d[0]; 
+			float pan = d[1]; 
+			float scale = d[2]; 
+			float duration = d[3]; 
+			jackAddToneP(freq, pan, scale, duration); 
+			double time = gettime();
+			v_time.push_back(time); 
+			v_ticks.push_back(g_tsc->getTicks()); 
+			v_freq.push_back(freq); 
+			v_pan.push_back(pan); 
+			v_scale.push_back(scale); 
+			v_duration.push_back(duration); 
+			d[0] = 0.0; 
+		}
+		d += 4; 
+		return (void*)d; 
+	}
+};
 
 void writeMatlab(vector<Serialize*> tosave, char* filename);
 size_t matlabFileSize(vector<Serialize*> tosave); 

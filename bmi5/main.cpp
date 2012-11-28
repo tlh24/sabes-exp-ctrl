@@ -43,6 +43,7 @@
 #include "perftimer.h"
 
 //local.
+#include "jacksnd.h"
 #include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
@@ -62,8 +63,9 @@ GtkWindow* g_mainWindow; //used for dialogs, etc.
 gtkglx*  g_daglx[2]; //human, monkey.
 GtkWidget* g_da[2]; //draw areas. 
 GtkWidget* g_timeLabel; 
-GtkWidget* g_luaTimeLabel; 
+GtkWidget* g_matlabTimeLabel; 
 GtkWidget* g_openglTimeLabel; 
+GtkWidget* g_polhemusLabel; 
 TimeSyncClient * g_tsc; 
 unsigned char			g_writeBuffer[1024*1024]; 
 PerfTimer	g_matlabTimer; 
@@ -74,6 +76,7 @@ TimeSerialize* g_timeSerialize;
 PolhemusSerialize* g_polhemus; 
 vector<Serialize*> g_objs; //container for each of these.
 
+//keep this around for controlling the microstimulator.
 void UDP_RZ2(){
 	int sock; 
  	sock = openSocket((char*)"169.230.191.195", LISTEN_PORT); 
@@ -129,6 +132,7 @@ int hostname_to_ip(char * hostname , char* ip){
 	}
 	return 1;
 }
+//this is outdated -- synchronization is shared with gtkclient.
 void* syncThread(void*){
 	int sock; 
 	//need to do host resolution here ..
@@ -365,13 +369,18 @@ static gboolean refresh (gpointer ){
 				g_matlabTimer.meanTime()*1000.0,
 				g_matlabTimer.lastTime()*1000.0, 
 				(float)n/(1024.f*1024.f));
-	gtk_label_set_text(GTK_LABEL(g_luaTimeLabel), str); 
+	gtk_label_set_text(GTK_LABEL(g_matlabTimeLabel), str); 
 	
  	snprintf(str, 256, "frame rate: %4.1f Hz\nOpenGL run %.1f ms (mean)\n%.1f ms (last)", 
 				g_frameRate, 
 				g_openGLTimer.meanTime()*1000.0, 
 				g_openGLTimer.lastTime()*1000.0); 
 	gtk_label_set_text(GTK_LABEL(g_openglTimeLabel), str); 
+	
+	float loc[3];  
+	g_polhemus->getLoc(gettime(), loc); 
+	snprintf(str, 256, "x %4.2f cm\ny %4.2f cm\nz %4.2f cm", loc[0], loc[1], loc[2]); 
+	gtk_label_set_text(GTK_LABEL(g_polhemusLabel), str); 
 	return TRUE;
 }
 string getMmapStructure(){
@@ -497,9 +506,23 @@ void* mmap_thread(void*){
 				write(pipe_out, (void*)&code, 4);
 				write(pipe_out, resp.c_str(), resp.size()); 
 			}
-			for (const auto& t : tokens) {
-				cout << t << "." << endl;
+			if(*beg == string("tone")){
+				// add a tone-interpreter (can add multiple for polyphony). 
+				beg++; 
+				ToneSerialize* tsz = new ToneSerialize(); 
+				if(beg != tokens.end())
+					tsz->m_name = (*beg); //name of the tone.
+				g_objs.push_back(tsz); 
+				string resp = {"made a tone generator named "}; 
+				resp += tsz->m_name; 
+				resp += {"\n"}; 
+				code = resp.size(); 
+				write(pipe_out, (void*)&code, 4);
+				write(pipe_out, resp.c_str(), resp.size()); 
 			}
+			/*for (const auto& t : tokens) {
+				cout << t << "." << endl;
+			}*/
 			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
 			bufn = 0; 
 		}
@@ -512,9 +535,9 @@ void* mmap_thread(void*){
 /* Liberty / Polhemus. 
  as reading from USB / serial will take some time, it makes sense to 
  put this in a separate thread, with mutex so that the instant the data is 
- available, we pass it through the task logic & display on screen
+ available we pass it through the task logic & display on screen
  (or control microstimulation). 
- There seems no lower latency way ... 
+ There seems no other way to get lower latency ... 
  While writing floats is likely atomic, writing three floats is not -- 
  hence the need for interlock. 
  */
@@ -527,6 +550,7 @@ void* polhemusThread(void* ){
 	
 	unsigned char buf[BUF_SIZE];
 	int count, start, len, i;
+	string deviceName = {"/dev/ttyS0"}; 
 	
 	//init the communication obj.
 	polhemus* pol = new polhemus(); 
@@ -536,13 +560,15 @@ void* polhemusThread(void* ){
 	}
 	int fail; 
 	//fail = pol->UsbConnect(TRKR_LIB); //see polhemus.h
-	fail = pol->Rs232Connect("/dev/ttyS2", 115200); 
+	fail = pol->Rs232Connect(deviceName.c_str(), 115200); 
 	if(fail){
-		printf("could not establish a rs232 connection to the Polhemus / liberty\n");
+		cout << deviceName << " could not establish a rs232 connection to the Polhemus"; 
+		cout << endl; 
+		cout << "try sudo chmod 770 " << deviceName << endl; 
 		g_polhemusConnected = false; 
 		return NULL; 
 	}else{
-		printf("polhemus connected via rs232!\n"); 
+		cout << "polhemus connected via rs232 on" << deviceName << endl; 
  		g_polhemusConnected = true;
 	}
 	//flush the buffer, sync things up.
@@ -554,6 +580,7 @@ void* polhemusThread(void* ){
 		len=pol->Read(buf,BUF_SIZE);  // keep trying till we get a response
 		count++; 
 	} while (len > 0);
+	cout << "connection established to Polhemus .." << endl; 
 	// first establish comm and clear out any residual trash data
 	double frames = 0; 
 	//now put it in binary (faster than ascii!) mode:
@@ -605,7 +632,6 @@ void* polhemusThread(void* ){
 					buf[i] = 0; 
 					//this data is used, move the pointer forward one. 
 					g_cbRN += 20;
-					// check for proper format LY for Liberty;  PA for Patriot
 					float* pData=(float*)(buf+8);			// header is first 8 bytes
 					g_polhemus->store(pData); 
 					// print data
@@ -697,19 +723,19 @@ int main(int argn, char** argc){
 	g_timeLabel = gtk_label_new("time: "); 
 	gtk_container_add (GTK_CONTAINER (v1), g_timeLabel );
 	
-	frame = gtk_frame_new("Matlab stats");
-	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-	gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
-	g_luaTimeLabel = gtk_label_new("mean: max: %:"); 
-	//gtk_misc_set_alignment (GTK_MISC (g_luaTimeLabel), 0, 0);
-	gtk_container_add (GTK_CONTAINER (frame), g_luaTimeLabel );
-	
-	frame = gtk_frame_new("OpenGL stats");
-	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-	gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
-	g_openglTimeLabel = gtk_label_new("mean: max: %:"); 
-	//gtk_misc_set_alignment (GTK_MISC (g_openglTimeLabel), 0, 0);
-	gtk_container_add (GTK_CONTAINER (frame), g_openglTimeLabel );
+	auto makeLabel = [&](const char* frameLbl, const char* dflt){
+		frame = gtk_frame_new(frameLbl);
+		gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+		gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
+		GtkWidget* tlbl = gtk_label_new(dflt); 
+		gtk_misc_set_alignment (GTK_MISC (tlbl), 0, 0);
+		gtk_label_set_justify( GTK_LABEL(tlbl), GTK_JUSTIFY_LEFT); 
+		gtk_container_add (GTK_CONTAINER (frame), tlbl );
+		return tlbl; 
+	}; 
+	g_matlabTimeLabel = makeLabel("Matlab stats", "mean:-- max:--"); 
+	g_openglTimeLabel = makeLabel("OpenGL stats", "mean:-- max:--");
+	g_polhemusLabel = makeLabel("Polhemus stats", "x -; y -; z -;"); 
 	
 	GtkWidget* button = gtk_button_new_with_label ("Save data");
 	g_signal_connect(button, "clicked", G_CALLBACK(saveMatlabData), 0); 
@@ -722,7 +748,6 @@ int main(int argn, char** argc){
 	button = gtk_button_new_with_label ("stop");
 	//g_signal_connect(button, "clicked", G_CALLBACK(luaStopCB), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
-	
 	
 	gtk_paned_add1(GTK_PANED(paned), v1);
 	da1 = gtk_drawing_area_new ();
@@ -792,7 +817,7 @@ int main(int argn, char** argc){
 	
 	//add a fullscreen checkbox to the gui.
 	makeCheckbox("Fullscreen", false, G_CALLBACK(fullscreenCB)); 
-	makeCheckbox("sync to Vblank", g_glvsync, G_CALLBACK(vsyncCB));  
+	makeCheckbox("sync to Vblank\n(resize window to enact)", g_glvsync, G_CALLBACK(vsyncCB));  
 	
 	//can init the shapes ... here i guess (no opengl though!)
 	g_timeSerialize = new TimeSerialize(); //synchronize with gtkclient_tdt.
@@ -818,12 +843,16 @@ int main(int argn, char** argc){
 	
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
 	
+	//jack audio. 
+	jackInit(); 
+	
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
+	
 	gtk_main ();
 	
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
-	
+	jackClose(0); 
 	//save data!!
 	writeMatlab(g_objs, "backup.mat"); 
 

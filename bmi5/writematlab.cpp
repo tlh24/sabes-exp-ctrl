@@ -11,6 +11,7 @@
 #include "mmaphelp.h"
 #include "gettime.h"
 #include "timesync.h"
+#include "jacksnd.h"
 #include "serialize.h"
 
 int matlabClassToType(int cls){
