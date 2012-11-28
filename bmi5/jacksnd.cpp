@@ -20,6 +20,8 @@ jack_client_t *client;
 #define M_PI  (3.14159265)
 #endif
 
+//#define TESTSONG
+
 using namespace std; 
 
 long g_jackSample; 
@@ -33,6 +35,9 @@ typedef struct
 void jackClose(int sig){
 	jack_client_close(client);
 	fprintf(stderr, "signal %d received, exiting ...\n", sig);
+#ifdef TESTSONG
+	exit(0); 
+#endif
 }
 
 int process (jack_nframes_t nframes, void *arg)
@@ -130,11 +135,11 @@ void addTones(paTestData * data, long offset){
 		t->m_release = 2500; 
 		data->tones.push_back(t);
 	}
-	t = new Tone(8000, 0.0, scl*(0.03), offset+((float)2*ui*2+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.08); 
+	t = new Tone(8000, 0.0, scl*(0.05), offset+((float)2*ui*2+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.08); 
 	t->m_attack = 200; 
 	t->m_release = 2500; 
 	data->tones.push_back(t);
-		t = new Tone(8000, 0.0, scl*(0.03), offset+((float)5*ui*2+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.08); 
+		t = new Tone(8000, 0.0, scl*(0.05), offset+((float)5*ui*2+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.08); 
 	t->m_attack = 200; 
 	t->m_release = 2500; 
 	data->tones.push_back(t);
@@ -268,10 +273,10 @@ void jackAddToneP(float freq, float pan, float scale, float duration){
 	Tone* t = new Tone(freq, pan, scale, -1, duration * SAMPFREQ); 
 	g_data.tones.push_back(t);
 }
-/*
+#ifdef TESTSONG
 int main(){
 	jackInit(); 
 	jackDemo(); 
 	return 0; 
 }
-*/
+#endif
