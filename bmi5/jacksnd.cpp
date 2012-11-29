@@ -20,6 +20,8 @@ jack_client_t *client;
 #define M_PI  (3.14159265)
 #endif
 
+//#define TESTSONG
+
 using namespace std; 
 
 long g_jackSample; 
@@ -33,6 +35,9 @@ typedef struct
 void jackClose(int sig){
 	jack_client_close(client);
 	fprintf(stderr, "signal %d received, exiting ...\n", sig);
+#ifdef TESTSONG
+	exit(0); 
+#endif
 }
 
 int process (jack_nframes_t nframes, void *arg)
@@ -79,13 +84,14 @@ void jack_shutdown (void *){
 /* song stuff. well, not really a song -- more of a set of noises. */ 
 float uniform(){ return ((float)rand() / (float)RAND_MAX);}
 float uniformPan(){ return uniform()*2.f -1.f; }
+
 void addTones(paTestData * data, long offset){
 	float u = 0.f; float ui = 0.25; 
-	float scl = offset / (SAMPFREQ*15); 
+	float scl = offset / (SAMPFREQ*3*4); 
 	if(scl > 1) scl = 1; 
 	float scl2 = scl * 0.15; 
-	scl += 0.2; if(scl > 1) scl = 1; 
-	float mel = 0.28f;
+	float mel = 0.165f; if(scl > 1.f) scl = 1.f; 
+	long bar = offset / (SAMPFREQ*3); 
 	Tone* t; 
 	t = new Tone(500.f, uniformPan(), mel*0.25, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t); u += ui; 
@@ -97,23 +103,25 @@ void addTones(paTestData * data, long offset){
 	data->tones.push_back(t); u += ui; 
 	t = new Tone(400.f, uniformPan(), mel*0.22, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
 	data->tones.push_back(t); u += ui; 
-	t = new Tone(800.f, uniformPan(), mel*scl2*0.5, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
+	if(bar&1 == 0)
+		t = new Tone(700.f, uniformPan(), mel*scl2*0.5, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
+	else
+		t = new Tone(800.f, uniformPan(), mel*scl2*0.5, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
 	data->tones.push_back(t); 
 	t = new Tone(300.f, uniformPan(), mel*0.29, offset+u*SAMPFREQ, SAMPFREQ*scl); 
 	data->tones.push_back(t);
-	long bar = offset / (SAMPFREQ*3); 
 	float distortion = (bar&15) - 4; 
 	if(bar < 4) bar = 0;  
 	float freqs[] = {150.f, 125.f, 100.f, 133.f}; 
 	for(int i=0; i< 12; i++){
-		t = new Tone(freqs[bar&3], 0.0, scl*(0.25+0.1*sin(i/2)), offset+((float)i*ui+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.8); 
+		t = new Tone(freqs[bar&3], 0.0, scl*(0.22+0.08*sin(i/2)), offset+((float)i*ui+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.8); 
 		t->m_distortion = distortion; 
 		data->tones.push_back(t);
 	}
 	float freqs2[] = {112.5f, 93.75f, 75.f, 100.f}; 
 	if((bar&31) > 15){
 		for(int i=0; i< 12; i++){
-			t = new Tone(freqs2[bar&3], 0.0, scl*(0.15+0.1*sin(i/2)), offset+((float)i*ui+ui)*SAMPFREQ, SAMPFREQ*ui*0.6); 
+			t = new Tone(freqs2[bar&3], 0.0, scl*(0.12+0.06*sin(i/2)), offset+((float)i*ui+ui)*SAMPFREQ, SAMPFREQ*ui*0.6); 
 			t->m_distortion = distortion; 
 			data->tones.push_back(t);
 		}
@@ -130,17 +138,17 @@ void addTones(paTestData * data, long offset){
 		t->m_release = 2500; 
 		data->tones.push_back(t);
 	}
-	t = new Tone(8000, 0.0, scl*(0.03), offset+((float)2*ui*2+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.08); 
+	t = new Tone(8000, 0.0, scl*(0.05), offset+((float)2*ui*2+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.08); 
 	t->m_attack = 200; 
 	t->m_release = 2500; 
 	data->tones.push_back(t);
-		t = new Tone(8000, 0.0, scl*(0.03), offset+((float)5*ui*2+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.08); 
+		t = new Tone(8000, 0.0, scl*(0.05), offset+((float)5*ui*2+ui/2)*SAMPFREQ, SAMPFREQ*ui*0.08); 
 	t->m_attack = 200; 
 	t->m_release = 2500; 
 	data->tones.push_back(t);
 	float fb = 50.f; 
 	if(bar & 1) fb = 66.f; 
-	t = new Tone(fb, uniformPan(), 0.3, offset+SAMPFREQ, SAMPFREQ*2); 
+	t = new Tone(fb, uniformPan(), 0.2, offset+SAMPFREQ, SAMPFREQ*2); 
 	t->m_attack = SAMPFREQ; 
 	t->m_release = SAMPFREQ;
 	t->m_distortion = 2 + bar/16; 
@@ -268,10 +276,10 @@ void jackAddToneP(float freq, float pan, float scale, float duration){
 	Tone* t = new Tone(freq, pan, scale, -1, duration * SAMPFREQ); 
 	g_data.tones.push_back(t);
 }
-/*
+#ifdef TESTSONG
 int main(){
 	jackInit(); 
 	jackDemo(); 
 	return 0; 
 }
-*/
+#endif

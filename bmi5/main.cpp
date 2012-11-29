@@ -723,25 +723,19 @@ int main(int argn, char** argc){
 	g_timeLabel = gtk_label_new("time: "); 
 	gtk_container_add (GTK_CONTAINER (v1), g_timeLabel );
 	
-	frame = gtk_frame_new("Matlab stats");
-	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-	gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
-	g_matlabTimeLabel = gtk_label_new("mean: max: %:"); 
-	gtk_container_add (GTK_CONTAINER (frame), g_matlabTimeLabel );
-	
-	frame = gtk_frame_new("OpenGL stats");
-	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-	gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
-	g_openglTimeLabel = gtk_label_new("mean: max: %:"); 
-	//gtk_misc_set_alignment (GTK_MISC (g_openglTimeLabel), 0, 0);
-	gtk_container_add (GTK_CONTAINER (frame), g_openglTimeLabel );
-	
-	frame = gtk_frame_new("Polhemus stats");
-	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-	gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
-	g_polhemusLabel = gtk_label_new("x -; y -; z -;"); 
-	//gtk_misc_set_alignment (GTK_MISC (g_openglTimeLabel), 0, 0);
-	gtk_container_add (GTK_CONTAINER (frame), g_polhemusLabel );
+	auto makeLabel = [&](const char* frameLbl, const char* dflt){
+		frame = gtk_frame_new(frameLbl);
+		gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+		gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
+		GtkWidget* tlbl = gtk_label_new(dflt); 
+		gtk_misc_set_alignment (GTK_MISC (tlbl), 0, 0);
+		gtk_label_set_justify( GTK_LABEL(tlbl), GTK_JUSTIFY_LEFT); 
+		gtk_container_add (GTK_CONTAINER (frame), tlbl );
+		return tlbl; 
+	}; 
+	g_matlabTimeLabel = makeLabel("Matlab stats", "mean:-- max:--"); 
+	g_openglTimeLabel = makeLabel("OpenGL stats", "mean:-- max:--");
+	g_polhemusLabel = makeLabel("Polhemus stats", "x -; y -; z -;"); 
 	
 	GtkWidget* button = gtk_button_new_with_label ("Save data");
 	g_signal_connect(button, "clicked", G_CALLBACK(saveMatlabData), 0); 
@@ -823,7 +817,7 @@ int main(int argn, char** argc){
 	
 	//add a fullscreen checkbox to the gui.
 	makeCheckbox("Fullscreen", false, G_CALLBACK(fullscreenCB)); 
-	makeCheckbox("sync to Vblank", g_glvsync, G_CALLBACK(vsyncCB));  
+	makeCheckbox("sync to Vblank\n(resize window to enact)", g_glvsync, G_CALLBACK(vsyncCB));  
 	
 	//can init the shapes ... here i guess (no opengl though!)
 	g_timeSerialize = new TimeSerialize(); //synchronize with gtkclient_tdt.
