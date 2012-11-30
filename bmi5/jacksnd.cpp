@@ -103,7 +103,7 @@ void addTones(paTestData * data, long offset){
 	data->tones.push_back(t); u += ui; 
 	t = new Tone(400.f, uniformPan(), mel*0.22, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
 	data->tones.push_back(t); u += ui; 
-	if(bar&1 == 0)
+	if((bar&1) == 0)
 		t = new Tone(700.f, uniformPan(), mel*scl2*0.5, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 
 	else
 		t = new Tone(800.f, uniformPan(), mel*scl2*0.5, offset+u*SAMPFREQ, SAMPFREQ*1.3*scl); 

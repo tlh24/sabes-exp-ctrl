@@ -14,9 +14,11 @@ class Shape : public Serialize {
 		unsigned int m_vao[2]; 
 		unsigned int m_vbo[2]; 
 		unsigned int m_drawmode; 
+		char				m_draw; 
 		array<float,4>	m_color;
 		array<float,2> m_scale; 
-		array<float,2> m_trans; 
+		array<float,2> m_trans;
+		vector<char> v_draw; 
 		vector<array<unsigned char,4>> v_color; 
 		vector<array<float,2>> v_scale; 
 		vector<array<float,2>> v_trans; 
@@ -28,6 +30,10 @@ class Shape : public Serialize {
 		m_trans[0] = m_trans[1] = 0.f; 
 		m_name = {"shape_"}; 
 		m_needConfig[0] = m_needConfig[1] = false; 
+		m_draw = 0; 
+#ifdef DEBUG
+		m_draw = 1; 
+#endif
 	}
 	void deleteBuffers(){
 		for(int i=0; i<2; i++){
@@ -82,17 +88,22 @@ class Shape : public Serialize {
 	}
 	virtual void draw(int display){
 		configure(display); //if we need it.
-		glPushMatrix();
-		glLoadIdentity();
-		glTranslatef(m_trans[0], m_trans[1], 0.f); 
-		glScalef(m_scale[0], m_scale[1], 1.f); 
-		glColor4f(m_color[0], m_color[1], m_color[2], m_color[3]);
-		glBindVertexArray(m_vao[display]);
-		glDrawArrays(m_drawmode, 0, m_n);  
-		glBindVertexArray(0);
-		glPopMatrix(); 
+		if(m_draw){
+			glPushMatrix();
+			glLoadIdentity();
+			glTranslatef(m_trans[0], m_trans[1], 0.f); 
+			glScalef(m_scale[0], m_scale[1], 1.f); 
+			glColor4f(m_color[0], m_color[1], m_color[2], m_color[3]);
+			glBindVertexArray(m_vao[display]);
+			glDrawArrays(m_drawmode, 0, m_n);  
+			glBindVertexArray(0);
+			glPopMatrix(); 
+		}
 	}
 	virtual void move(float, long double){}
+	void enable(bool d){
+		if(d) m_draw = 1; else m_draw = 0; 
+	}
 	void translate(float x, float y){
 		m_trans[0] = x; m_trans[1] = y; 
 	}
@@ -123,6 +134,7 @@ class Shape : public Serialize {
 		return (unsigned char)in; 
 	}
 	virtual void store(){
+		v_draw.push_back(m_draw); 
 		array<unsigned char,4> color; 
 		for(int i=0; i<4; i++)
 			color[i] = floatToU8(m_color[i]); 
@@ -133,37 +145,42 @@ class Shape : public Serialize {
 	virtual int nstored(){ return v_color.size(); }
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("color");
-			case 1: return m_name + string("scale");
-			case 2: return m_name + string("trans");
+			case 0: return m_name + string("draw"); 
+			case 1: return m_name + string("color");
+			case 2: return m_name + string("scale");
+			case 3: return m_name + string("trans");
 		} return string("none"); 
 	}
 	virtual int getStoreClass(int indx){
 		switch(indx){ 
-			case 0: return MAT_C_UINT8;
-			case 1: return MAT_C_SINGLE;
+			case 0: return MAT_C_INT8; 
+			case 1: return MAT_C_UINT8;
 			case 2: return MAT_C_SINGLE;
+			case 3: return MAT_C_SINGLE;
 		} return 0; 
 	}
 	virtual void getStoreDims(int indx, size_t* dims){
 		switch(indx){
-			case 0: dims[0] = 4; dims[1] = 1; break; 
-			case 1: dims[0] = 2; dims[1] = 1; break;
-			case 2: dims[0] = 2; dims[1] = 1; break; 
+			case 0: dims[0] = 1; dims[1] = 1; break; 
+			case 1: dims[0] = 4; dims[1] = 1; break; 
+			case 2: dims[0] = 2; dims[1] = 1; break;
+			case 3: dims[0] = 2; dims[1] = 1; break; 
 			default: dims[0] = 0; dims[1] = 0; break;
 		}
 	}
 	virtual void* getStore(int indx, int i){
 		switch(indx){
-			case 0: return (void*)&((v_color[i]))[0]; 
-			case 1: return (void*)&((v_scale[i]))[0]; 
-			case 2: return (void*)&((v_trans[i]))[0]; 
+			case 0: return (void*)&((v_draw[i])); 
+			case 1: return (void*)&((v_color[i]))[0]; 
+			case 2: return (void*)&((v_scale[i]))[0]; 
+			case 3: return (void*)&((v_trans[i]))[0]; 
 		} return NULL; 
 	}
-	virtual int numStores() {return 3;}
+	virtual int numStores() {return 4;}
 	virtual void* mmapRead(void* addr){
 		double* d = (double*)addr; 
 		int i; 
+		m_draw = *d++ > 0.0 ? 1 : 0; 
 		for(i=0; i<4; i++)
 			m_color[i] = *d++;
 		for(i=0; i<2; i++)
@@ -382,21 +399,23 @@ public: //do something like the flow field common in the lab.
 	virtual void draw(int display){
 		configure(display); 
 		//this is a little more complicated, as we need to do a memcpy and user shaders.
-		glPointSize(m_starSize); 
-		glUseProgram(m_program[display]); 
-		glBindVertexArray(m_vao[display]);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo[display]); // Bind our Vertex Buffer Object
-		glBufferData(GL_ARRAY_BUFFER, m_n*sizeof(starStruct), m_v, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
-		
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(starStruct), 0);
-		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(starStruct), (void*)8);
-		
-		glDrawArrays(m_drawmode, 0, m_n);  
-		glBindBuffer(GL_ARRAY_BUFFER, 0); 
-		glBindVertexArray(0);
-		glUseProgram(0); 
+		if(m_draw){
+			glPointSize(m_starSize); 
+			glUseProgram(m_program[display]); 
+			glBindVertexArray(m_vao[display]);
+			glBindBuffer(GL_ARRAY_BUFFER, m_vbo[display]); // Bind our Vertex Buffer Object
+			glBufferData(GL_ARRAY_BUFFER, m_n*sizeof(starStruct), m_v, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
+			
+			glEnableVertexAttribArray(0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(starStruct), 0);
+			glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(starStruct), (void*)8);
+			
+			glDrawArrays(m_drawmode, 0, m_n);  
+			glBindBuffer(GL_ARRAY_BUFFER, 0); 
+			glBindVertexArray(0);
+			glUseProgram(0); 
+		}
 	}
 	void setVel(double x, double y){ m_vel[0] = x; m_vel[1] = y; }
 	void setCoherence(double c){ m_coherence = c; }

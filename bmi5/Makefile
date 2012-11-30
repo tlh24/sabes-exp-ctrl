@@ -2,7 +2,7 @@ CC = g++
 OBJS = main.o tdt_udp.o glInfo.o glFont.o polhemus.o writematlab.o \
 	jacksnd.o ../../myopen/common_host/gettime.o
 CFLAGS=-I/usr/local/include -I../../myopen/common_host
-CFLAGS+=  -g
+CFLAGS+=  -g -DDEBUG
 CFLAGS+= -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare -Wformat=2 \
 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
 -Wextra -pedantic -std=c++11 -rdynamic

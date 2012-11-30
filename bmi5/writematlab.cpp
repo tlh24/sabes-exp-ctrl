@@ -18,7 +18,8 @@ int matlabClassToType(int cls){
 	switch(cls) {
 		case MAT_C_SINGLE: return MAT_T_SINGLE; 
 		case MAT_C_DOUBLE: return MAT_T_DOUBLE; 
-		case MAT_C_UINT8: return MAT_T_UINT8; 
+		case MAT_C_UINT8: return MAT_T_UINT8;
+		case MAT_C_INT8: return MAT_T_INT8; 
 		case MAT_C_INT32: return MAT_T_INT32; 
 	}
 	return 0; 
@@ -27,7 +28,8 @@ int matlabClassToBytes(int cls){
 	switch(cls) {
 		case MAT_C_SINGLE: return 4; 
 		case MAT_C_DOUBLE: return 8; 
-		case MAT_C_UINT8: return 1; 
+		case MAT_C_UINT8: return 1;
+		case MAT_C_INT8: return 1; 
 		case MAT_C_INT32: return 4; 
 	}
 	return 0; 
