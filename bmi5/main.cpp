@@ -30,6 +30,8 @@
 
 // C++11? 
 #include <iostream>
+#include <fstream>
+#include <streambuf>
 #include <vector>
 #include <string>
 #include <sstream>
@@ -844,7 +846,7 @@ int main(int argn, char** argc){
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
 	
 	//jack audio. 
-	jackInit(); 
+	//jackInit(); -- this needs to be a loadable module.
 	
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
@@ -852,7 +854,7 @@ int main(int argn, char** argc){
 	gtk_main ();
 	
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
-	jackClose(0); 
+	//jackClose(0); 
 	//save data!!
 	writeMatlab(g_objs, "backup.mat"); 
 

@@ -1,11 +1,7 @@
 // class for drawing shapes via opengl.
 #ifndef __SHAPE_H__
 #define __SHAPE_H__
-/*
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glext.h> 
-*/
+
 #define PI 3.141592653589793
 class Shape : public Serialize {
 	public:
@@ -194,24 +190,6 @@ struct starStruct {
 	float	position[2]; 
 	unsigned int color; 
 }; 
-static const char *vertex_source = {
-"#version 330\n"
-"layout (location = 0) in vec4 position;\n"
-"layout (location = 1) in vec4 color;\n"
-"smooth out vec4 theColor;\n"
-"void main(){\n"
-"    gl_Position = position;\n"
-"    theColor = color;\n"
-"}\n"
-};
-static const char *fragment_source = {
-"#version 330\n"
-"smooth in vec4 theColor;\n"
-"out vec4 outputColor;\n"
-"void main(){\n"
-"    outputColor = theColor;\n"
-"}\n"
-}; 
 class StarField : public Shape {
 public: //do something like the flow field common in the lab.
 	array<float,2> m_vel; //in screen units/second. 
@@ -226,6 +204,8 @@ public: //do something like the flow field common in the lab.
 	long double m_startTime; 
 	bool	m_awesome = false; 
 	bool	m_fade = false; 
+	float	m_affine[4][4]; 
+	float	m_quadratic[4][4]; 
 	vector<array<float,2>> v_vel; 
 	vector<float> v_coherence; 
 	// we can assume that the other parts don't change during the experiment.
@@ -240,7 +220,14 @@ public: //do something like the flow field common in the lab.
 		m_lastTime = 0.0; 
 		m_starSize = 3.0; 
 		m_startTime = gettime(); 
-		m_name = string{"stars_"}; 
+		m_name = string{"stars_"};
+		//load identity matrix. (for now). 
+		for(int i=0; i<16; i++){
+			m_affine[0][i] = m_quadratic[0][i] = 0.f; 
+		}
+		for(int i=0; i<4; i++){
+			m_affine[i][i] = 1.f; //emitted w must be 1! 
+		}
 	}
 	~StarField(){
 		if(m_v) free(m_v); m_v = NULL;
@@ -274,10 +261,11 @@ public: //do something like the flow field common in the lab.
 			printf("error: makeVAO: m_n < 0\n"); 	
 		}
 	}
-	void makeShader(int index, GLenum type, const char* source){
+	void makeShader(int index, GLenum type, std::string source){
 		GLuint shader = glCreateShader(type);
-		int length = strlen(source);
-		glShaderSource(shader, 1, (const char **)&source, &length);
+		int length = source.size();
+		const char* str = source.c_str();
+		glShaderSource(shader, 1, (const char **)&str, &length);
 		glCompileShader(shader);
 		GLint result; /* make sure the compilation was successful */
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
@@ -295,10 +283,20 @@ public: //do something like the flow field common in the lab.
 		glDeleteShader(shader); //will not be destroyed until the referencing program is destroyed.
 		return; 
 	}
+	std::string fileToString(const char* fname){
+		std::ifstream t(fname); //yay stackoverflow!!
+		std::string str;
+		t.seekg(0, std::ios::end);   
+		str.reserve(t.tellg());
+		t.seekg(0, std::ios::beg);
+		str.assign((std::istreambuf_iterator<char>(t)),
+						std::istreambuf_iterator<char>());
+		return str; 
+	}
 	void makeShaders(int index){
 		m_program[index] = glCreateProgram();
-		makeShader(index, GL_VERTEX_SHADER , vertex_source); 
-		makeShader(index, GL_FRAGMENT_SHADER , fragment_source); 
+		makeShader(index, GL_VERTEX_SHADER, fileToString("vertex.glsl")); 
+		makeShader(index, GL_FRAGMENT_SHADER, fileToString("fragment.glsl")); 
 		glLinkProgram(m_program[index]);
 		GLint result; 
 		glGetProgramiv(m_program[index], GL_LINK_STATUS, &result);
@@ -402,6 +400,10 @@ public: //do something like the flow field common in the lab.
 		if(m_draw){
 			glPointSize(m_starSize); 
 			glUseProgram(m_program[display]); 
+			int affloc = glGetUniformLocation(m_program[display], "affine_matrix"); 
+			glUniformMatrix4fv(affloc, 1, GL_FALSE, &m_affine[0][0]);
+			int quadloc = glGetUniformLocation(m_program[display], "quadratic_matrix"); 
+			glUniformMatrix4fv(quadloc, 1, GL_FALSE, &m_quadratic[0][0]); 
 			glBindVertexArray(m_vao[display]);
 			glBindBuffer(GL_ARRAY_BUFFER, m_vbo[display]); // Bind our Vertex Buffer Object
 			glBufferData(GL_ARRAY_BUFFER, m_n*sizeof(starStruct), m_v, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
