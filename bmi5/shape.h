@@ -10,7 +10,10 @@ class Shape : public Serialize {
 		unsigned int m_vao[2]; 
 		unsigned int m_vbo[2]; 
 		unsigned int m_drawmode; 
-		char				m_draw; 
+		char			m_draw; 
+		GLuint 		m_program[2]; 
+		float			m_affine[4][4]; //affine world-to-screen
+		float			m_quadratic[4][4]; //quadratic world-to-screen
 		array<float,4>	m_color;
 		array<float,2> m_scale; 
 		array<float,2> m_trans;
@@ -26,6 +29,14 @@ class Shape : public Serialize {
 		m_trans[0] = m_trans[1] = 0.f; 
 		m_name = {"shape_"}; 
 		m_needConfig[0] = m_needConfig[1] = false; 
+		m_program[0] = m_program[1] = 0; 
+		//load identity matrix. (for now). 
+		for(int i=0; i<16; i++){
+			m_affine[0][i] = m_quadratic[0][i] = 0.f; 
+		}
+		for(int i=0; i<4; i++){
+			m_affine[i][i] = 1.f; //emitted w must be 1! 
+		}
 		m_draw = 0; 
 #ifdef DEBUG
 		m_draw = 1; 
@@ -38,12 +49,14 @@ class Shape : public Serialize {
 		}
 	}
 	~Shape(){
+		if(m_program[0]) glDeleteProgram(m_program[0]);
+		if(m_program[1]) glDeleteProgram(m_program[1]);
 		deleteBuffers(); 
 		v_color.clear(); 
 		v_scale.clear(); 
 		v_trans.clear();
 	}
-	void makeVAO(float* vertices, bool del, int display){
+	virtual void makeVAO(float* vertices, bool del, int display){
 		if(m_n > 0){
 			glGenVertexArrays(1, &(m_vao[display])); // Create our Vertex Array Object
 			glBindVertexArray(m_vao[display]); // Bind our Vertex Array Object so we can use it
@@ -61,11 +74,65 @@ class Shape : public Serialize {
 			printf("error: makeVAO: m_n < 0\n"); 	
 		}
 	}
+	void makeShader(int index, GLenum type, std::string source){
+		GLuint shader = glCreateShader(type);
+		int length = source.size();
+		const char* str = source.c_str();
+		glShaderSource(shader, 1, (const char **)&str, &length);
+		glCompileShader(shader);
+		GLint result; /* make sure the compilation was successful */
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+		if(result == GL_FALSE) {
+			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+			char* log = (char*)malloc(length);
+			glGetShaderInfoLog(shader, length, &result, log);
+			/* print an error message and the info log */
+			fprintf(stderr, "Unable to compile shader %s\n", log);
+			free(log);
+			glDeleteShader(shader);
+			return;
+		}
+		glAttachShader(m_program[index], shader); 
+		glDeleteShader(shader); //will not be destroyed until the referencing program is destroyed.
+		return; 
+	}
+	std::string fileToString(const char* fname){
+		std::ifstream t(fname); //yay stackoverflow!!
+		std::string str;
+		t.seekg(0, std::ios::end);   
+		str.reserve(t.tellg());
+		t.seekg(0, std::ios::beg);
+		str.assign((std::istreambuf_iterator<char>(t)),
+						std::istreambuf_iterator<char>());
+		return str; 
+	}
+	void makeShadersNamed(int index, const char* vertexName, const char* fragmentName){
+		m_program[index] = glCreateProgram();
+		makeShader(index, GL_VERTEX_SHADER, fileToString(vertexName)); 
+		makeShader(index, GL_FRAGMENT_SHADER, fileToString(fragmentName)); 
+		glLinkProgram(m_program[index]);
+		GLint result; 
+		glGetProgramiv(m_program[index], GL_LINK_STATUS, &result);
+		if(result == GL_FALSE) {
+			GLint length;
+			glGetProgramiv(m_program[index], GL_INFO_LOG_LENGTH, &length);
+			char* log = (char*)malloc(length);
+			glGetProgramInfoLog(m_program[index], length, &result, log);
+			fprintf(stderr, "Program linking failed %d: %s\n", length, log);
+			free(log);
+			/* delete the program */
+			glDeleteProgram(m_program[index]);
+			m_program[index] = 0;
+		}
+	}
+	virtual void makeShaders(int index){
+		makeShadersNamed(index, "vertex_flatcolor.glsl", "fragment.glsl"); 
+	}
 	void makeCircle(int n){
 		m_n = n+1; 
 		m_needConfig[0] = m_needConfig[1] = true; 
 	}
-	void configure(int display){
+	virtual void configure(int display){
 		if(m_needConfig[display]){
 			printf("Shape: configuring display [%d]\n", display); 
 			//makes a circle, diameter 1, at the origin.
@@ -78,29 +145,60 @@ class Shape : public Serialize {
 				v[i*2+3] = 0.5f*cosf(t); 
 			}
 			makeVAO(v, true, display); 
+			makeShaders(display); 
 			m_drawmode = GL_TRIANGLE_FAN; 
 			m_needConfig[display] = false; 
 		}
 	}
+	void setupDrawMatrices(int display){
+		//first pre-multiply the local->world with the world->screen matrix. 
+		float m[4][4]; //world matrix.
+		for(int i=0; i<16; i++) m[0][i] = 0.f; 
+		m[0][3] = m_trans[0]; 
+		m[1][3] = m_trans[1]; 
+		m[0][0] = m_scale[0]; 
+		m[1][1] = m_scale[1]; 
+		m[2][2] = m[3][3] = 1.f; 
+		float n[4][4]; 
+		// n = affine * world (in that order!)
+		for(int r=0; r<4; r++){
+			for(int c=0; c<4; c++){
+				float f = 0.f; 
+				for(int i=0; i<4; i++)
+					f += m_affine[r][i] * m[i][c]; 
+				n[c][r] = f; //opengl assumes fortran order (like matlab), hence transpose.
+			}
+		}
+		//transpose quadratic matrix too.
+		float o[4][4]; 
+		for(int r=0; r<4; r++){
+			for(int c=0; c<4; c++){
+				o[c][r] = m_quadratic[r][c]; 
+			}
+		}
+		glUseProgram(m_program[display]); 
+		int affloc = glGetUniformLocation(m_program[display], "affine_matrix"); 
+		if(affloc >= 0)glUniformMatrix4fv(affloc, 1, GL_FALSE, &n[0][0]);
+		int quadloc = glGetUniformLocation(m_program[display], "quadratic_matrix"); 
+		if(quadloc >= 0)glUniformMatrix4fv(quadloc, 1, GL_FALSE, &o[0][0]);
+	}
 	virtual void draw(int display){
 		configure(display); //if we need it.
 		if(m_draw){
-			glPushMatrix();
-			glLoadIdentity();
-			glTranslatef(m_trans[0], m_trans[1], 0.f); 
-			glScalef(m_scale[0], m_scale[1], 1.f); 
-			glColor4f(m_color[0], m_color[1], m_color[2], m_color[3]);
+			setupDrawMatrices(display); 
+			int colorloc = glGetUniformLocation(m_program[display], "uniform_color"); 
+			if(colorloc >= 0)glUniform4f(colorloc, m_color[0], m_color[1], m_color[2], m_color[3]);
+			
 			glBindVertexArray(m_vao[display]);
 			glDrawArrays(m_drawmode, 0, m_n);  
 			glBindVertexArray(0);
-			glPopMatrix(); 
 		}
 	}
-	virtual void move(float, long double){}
+	virtual void move(float, long double){} //no velocity here.
 	void enable(bool d){
 		if(d) m_draw = 1; else m_draw = 0; 
 	}
-	void translate(float x, float y){
+	void translate(float x, float y){ //in real-world coordinates. 
 		m_trans[0] = x; m_trans[1] = y; 
 	}
 	void scale(float s){
@@ -199,13 +297,10 @@ public: //do something like the flow field common in the lab.
 	float	m_coherence; 
 	float	m_starSize; 
 	GLuint	m_colorbuffer; 
-	GLuint 	m_program[2]; 
 	long double m_lastTime; //oh god it's been years...
 	long double m_startTime; 
 	bool	m_awesome = false; 
 	bool	m_fade = false; 
-	float	m_affine[4][4]; 
-	float	m_quadratic[4][4]; 
 	vector<array<float,2>> v_vel; 
 	vector<float> v_coherence; 
 	// we can assume that the other parts don't change during the experiment.
@@ -221,25 +316,17 @@ public: //do something like the flow field common in the lab.
 		m_starSize = 3.0; 
 		m_startTime = gettime(); 
 		m_name = string{"stars_"};
-		//load identity matrix. (for now). 
-		for(int i=0; i<16; i++){
-			m_affine[0][i] = m_quadratic[0][i] = 0.f; 
-		}
-		for(int i=0; i<4; i++){
-			m_affine[i][i] = 1.f; //emitted w must be 1! 
-		}
 	}
 	~StarField(){
 		if(m_v) free(m_v); m_v = NULL;
 		if(m_pvel) free(m_pvel); m_pvel = NULL;
 		if(m_age) free(m_age); m_age = NULL; 
-		if(m_program[0]) glDeleteProgram(m_program[0]);
-		if(m_program[1]) glDeleteProgram(m_program[1]);
 		deleteBuffers(); 
 		v_vel.clear(); 
 		v_coherence.clear(); 
 	}
-	void makeVAO(starStruct* vertices, bool del, int display){
+	virtual void makeVAO(starStruct* vertices, bool del, int display){
+		//this method differs from Shape::makeVAO in that each vertex has a color.
 		if(m_n > 0){
 			glGenVertexArrays(1, &(m_vao[display])); // Create our Vertex Array Object
 			glBindVertexArray(m_vao[display]); // Bind our Vertex Array Object so we can use it
@@ -259,57 +346,6 @@ public: //do something like the flow field common in the lab.
 			if(del) free(vertices);
 		}else{
 			printf("error: makeVAO: m_n < 0\n"); 	
-		}
-	}
-	void makeShader(int index, GLenum type, std::string source){
-		GLuint shader = glCreateShader(type);
-		int length = source.size();
-		const char* str = source.c_str();
-		glShaderSource(shader, 1, (const char **)&str, &length);
-		glCompileShader(shader);
-		GLint result; /* make sure the compilation was successful */
-		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
-		if(result == GL_FALSE) {
-			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-			char* log = (char*)malloc(length);
-			glGetShaderInfoLog(shader, length, &result, log);
-			/* print an error message and the info log */
-			fprintf(stderr, "Unable to compile shader %s\n", log);
-			free(log);
-			glDeleteShader(shader);
-			return;
-		}
-		glAttachShader(m_program[index], shader); 
-		glDeleteShader(shader); //will not be destroyed until the referencing program is destroyed.
-		return; 
-	}
-	std::string fileToString(const char* fname){
-		std::ifstream t(fname); //yay stackoverflow!!
-		std::string str;
-		t.seekg(0, std::ios::end);   
-		str.reserve(t.tellg());
-		t.seekg(0, std::ios::beg);
-		str.assign((std::istreambuf_iterator<char>(t)),
-						std::istreambuf_iterator<char>());
-		return str; 
-	}
-	void makeShaders(int index){
-		m_program[index] = glCreateProgram();
-		makeShader(index, GL_VERTEX_SHADER, fileToString("vertex.glsl")); 
-		makeShader(index, GL_FRAGMENT_SHADER, fileToString("fragment.glsl")); 
-		glLinkProgram(m_program[index]);
-		GLint result; 
-		glGetProgramiv(m_program[index], GL_LINK_STATUS, &result);
-		if(result == GL_FALSE) {
-			GLint length;
-			glGetProgramiv(m_program[index], GL_INFO_LOG_LENGTH, &length);
-			char* log = (char*)malloc(length);
-			glGetProgramInfoLog(m_program[index], length, &result, log);
-			fprintf(stderr, "Program linking failed %d: %s\n", length, log);
-			free(log);
-			/* delete the program */
-			glDeleteProgram(m_program[index]);
-			m_program[index] = 0;
 		}
 	}
 	float uniform(){ return ((float)rand() / (float)RAND_MAX);}
@@ -337,7 +373,10 @@ public: //do something like the flow field common in the lab.
 		m_needConfig[0] = m_needConfig[1] = true; 
 		m_drawmode = GL_POINTS; 
 	}
-	void configure(int display){
+	virtual void makeShaders(int index){
+		makeShadersNamed(index, "vertex.glsl", "fragment.glsl"); 
+	}
+	virtual void configure(int display){
 		if(m_needConfig[display]){
 			makeVAO(m_v, false, display); //keep around the b.s.
 			makeShaders(display); 
@@ -345,6 +384,7 @@ public: //do something like the flow field common in the lab.
 		}
 	}
 	virtual void move(float ar, long double time){
+		//will need to update this to permit
 		float dt = (float)(time - m_lastTime); 
 		float a[2]; a[0] = ar*1.1f; a[1] = 1.1f; 
 		int k = (int)(m_n * (1.0-m_coherence));
@@ -399,11 +439,8 @@ public: //do something like the flow field common in the lab.
 		//this is a little more complicated, as we need to do a memcpy and user shaders.
 		if(m_draw){
 			glPointSize(m_starSize); 
-			glUseProgram(m_program[display]); 
-			int affloc = glGetUniformLocation(m_program[display], "affine_matrix"); 
-			glUniformMatrix4fv(affloc, 1, GL_FALSE, &m_affine[0][0]);
-			int quadloc = glGetUniformLocation(m_program[display], "quadratic_matrix"); 
-			glUniformMatrix4fv(quadloc, 1, GL_FALSE, &m_quadratic[0][0]); 
+			setupDrawMatrices(display); 
+			
 			glBindVertexArray(m_vao[display]);
 			glBindBuffer(GL_ARRAY_BUFFER, m_vbo[display]); // Bind our Vertex Buffer Object
 			glBufferData(GL_ARRAY_BUFFER, m_n*sizeof(starStruct), m_v, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
