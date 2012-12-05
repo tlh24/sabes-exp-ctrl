@@ -7,4 +7,4 @@ stream: PO8eTest.cpp
 	g++ -o $@ -g $(LDFLAGS) $<
 
 clean:
-	rm -rd stream *.o
+	rm -rf stream *.o

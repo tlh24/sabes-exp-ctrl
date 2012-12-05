@@ -8,3 +8,6 @@ stream: PO8eTest.cpp
 
 clean:
 	rm -rf stream *.o
+	
+install:
+	sudo ./mkdevs
