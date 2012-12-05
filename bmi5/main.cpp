@@ -30,6 +30,8 @@
 
 // C++11? 
 #include <iostream>
+#include <fstream>
+#include <streambuf>
 #include <vector>
 #include <string>
 #include <sstream>
@@ -54,6 +56,7 @@ using namespace boost;
 double 	g_frameRate = 0.0; 
 long double		g_lastFrame = 0.0; 
 int		g_frame = 0;
+int 		g_nCommand = 0; //number of matlab commands recieved.
 bool 		g_glInitialized[2] = {false};
 bool		g_glvsync = false; 
 float		g_mousePos[2]; 
@@ -72,7 +75,8 @@ PerfTimer	g_matlabTimer;
 PerfTimer	g_openGLTimer; 
 
 // matlab-interactive objects. 
-TimeSerialize* g_timeSerialize; 
+TimeSerialize* 	g_timeSerialize; 
+FrameSerialize* 	g_frameSerialize; 
 PolhemusSerialize* g_polhemus; 
 vector<Serialize*> g_objs; //container for each of these.
 
@@ -341,8 +345,12 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 		g_objs[i]->draw(h); 
 	/// end
 
-	g_daglx[h]->swap(); //always double buffered.
+	g_daglx[h]->swap(); //always double buffered
 	g_openGLTimer.exit(); 
+	if(da == g_da[1]){
+		g_frameSerialize->store(g_frame); 
+		g_frame++; 
+	}
 	return TRUE;
 }
 
@@ -454,8 +462,9 @@ void* mmap_thread(void*){
 			for(unsigned int i=0; i<g_objs.size(); i++)
 				b = g_objs[i]->mmapRead(b); 
 			for(unsigned int i=0; i<g_objs.size(); i++)
-				g_objs[i]->store(); 
-			
+				g_objs[i]->store(); //store when changes were commanded.
+			// variables which are the other direction -- e.g. polhemus --
+			// should be stored when *they* are recieved. 
 			usleep(100); //let the kernel sync memory.
 			g_matlabTimer.enter(); 
 			code = 0; // = OK.
@@ -499,14 +508,7 @@ void* mmap_thread(void*){
 					write(pipe_out, resp.c_str(), resp.size()); 
 				}
 			}
-			if(*beg == string("mmap")){
-				// return the mmapinfo.
-				string resp = getMmapStructure();
-				code = resp.size(); 
-				write(pipe_out, (void*)&code, 4);
-				write(pipe_out, resp.c_str(), resp.size()); 
-			}
-			if(*beg == string("tone")){
+			else if(*beg == string("tone")){
 				// add a tone-interpreter (can add multiple for polyphony). 
 				beg++; 
 				ToneSerialize* tsz = new ToneSerialize(); 
@@ -520,13 +522,43 @@ void* mmap_thread(void*){
 				write(pipe_out, (void*)&code, 4);
 				write(pipe_out, resp.c_str(), resp.size()); 
 			}
+			else if(*beg == string("mmap")){
+				// return the mmapinfo.
+				string resp = getMmapStructure();
+				code = resp.size(); 
+				write(pipe_out, (void*)&code, 4);
+				write(pipe_out, resp.c_str(), resp.size()); 
+			}
+			else if(*beg == string("clear all")){
+				printf("clearing all data in memory"); 
+				for(unsigned int i=0; i<g_objs.size(); i++)
+					g_objs[i]->clear();
+				string resp = {"cleared all stored data\n"}; 
+				code = resp.size(); 
+				write(pipe_out, (void*)&code, 4);
+				write(pipe_out, resp.c_str(), resp.size()); 
+			}
+			else{
+				string resp = {"Current command vocabulary:\n"};
+				resp += {"\tmake circle <name>\n"}; 
+				resp += {"\tmake stars <name>\n"}; 
+				resp += {"\ttone <name>\n"};
+				resp += {"\t\tmake a tone generator\n"}; 
+				resp += {"\tmmap\n"}; 
+				resp += {"\t\treturn mmap structure information, for eval() in matlab\n"}; 
+				resp += {"\tclear all\n"}; 
+				resp += {"\t\tclear data stored in memory (e.g. when starting an experiment)\n"}; 
+				code = resp.size(); 
+				write(pipe_out, (void*)&code, 4);
+				write(pipe_out, resp.c_str(), resp.size()); 
+			}
 			/*for (const auto& t : tokens) {
 				cout << t << "." << endl;
 			}*/
 			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
 			bufn = 0; 
 		}
-		g_frame++; 
+		g_nCommand++; 
 	}
 	close (pipe_in);
 	close (pipe_out); 
@@ -656,7 +688,7 @@ void* polhemusThread(void* ){
 	return NULL;
 }
 
-static void saveMatlabData(gpointer parent_window) {
+static void saveMatlabData(gpointer, gpointer parent_window){
 	GtkWidget *dialog;
 	dialog = gtk_file_chooser_dialog_new ("Save Data File",
 						(GtkWindow*)parent_window,
@@ -674,6 +706,23 @@ static void saveMatlabData(gpointer parent_window) {
 		g_free (filename);
 	}
 	gtk_widget_destroy (dialog);
+}
+static void clearDataCB(gpointer, gpointer parent_window){
+	//pop up a yes/no (message) dialog. 
+	GtkWidget* dialog = gtk_message_dialog_new (GTK_WINDOW(parent_window),
+			GTK_DIALOG_DESTROY_WITH_PARENT,
+			GTK_MESSAGE_QUESTION,
+			GTK_BUTTONS_YES_NO,
+			"Do you want to clear all recorded data?");
+
+/* Destroy the dialog when the user responds to it (e.g. clicks a button) */
+	gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+	if(result == GTK_RESPONSE_YES){
+		printf("clearing all data in memory"); 
+		for(unsigned int i=0; i<g_objs.size(); i++)
+			g_objs[i]->clear();
+	}
+	gtk_widget_destroy(dialog);
 }
 
 void longDoubleTest(){
@@ -737,16 +786,16 @@ int main(int argn, char** argc){
 	g_openglTimeLabel = makeLabel("OpenGL stats", "mean:-- max:--");
 	g_polhemusLabel = makeLabel("Polhemus stats", "x -; y -; z -;"); 
 	
-	GtkWidget* button = gtk_button_new_with_label ("Save data");
-	g_signal_connect(button, "clicked", G_CALLBACK(saveMatlabData), 0); 
+	GtkWidget* button = gtk_button_new_with_label ("Write data to disk");
+	g_signal_connect(button, "clicked", G_CALLBACK(saveMatlabData), window); 
+	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
+	
+	button = gtk_button_new_with_label ("Clear data");
+	g_signal_connect(button, "clicked", G_CALLBACK(clearDataCB), window); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
 	button = gtk_button_new_with_label ("print mmap structure");
 	g_signal_connect(button, "clicked", G_CALLBACK(printMmapStructure), 0); 
-	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
-	
-	button = gtk_button_new_with_label ("stop");
-	//g_signal_connect(button, "clicked", G_CALLBACK(luaStopCB), 0); 
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0); 
 	
 	gtk_paned_add1(GTK_PANED(paned), v1);
@@ -821,8 +870,10 @@ int main(int argn, char** argc){
 	
 	//can init the shapes ... here i guess (no opengl though!)
 	g_timeSerialize = new TimeSerialize(); //synchronize with gtkclient_tdt.
+	g_frameSerialize = new FrameSerialize(); 
 	g_polhemus = new PolhemusSerialize(); 
-	g_objs.push_back(g_timeSerialize); 
+	g_objs.push_back(g_timeSerialize);
+	g_objs.push_back(g_frameSerialize); 
 	g_objs.push_back(g_polhemus); 
 
 	g_signal_connect_swapped (window, "destroy",
@@ -844,7 +895,7 @@ int main(int argn, char** argc){
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
 	
 	//jack audio. 
-	jackInit(); 
+	//jackInit(); -- this needs to be a loadable module.
 	
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
@@ -852,7 +903,7 @@ int main(int argn, char** argc){
 	gtk_main ();
 	
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
-	jackClose(0); 
+	//jackClose(0); 
 	//save data!!
 	writeMatlab(g_objs, "backup.mat"); 
 
