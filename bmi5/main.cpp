@@ -476,6 +476,11 @@ void* mmap_thread(void*){
 			string txt = string(buf); 
 			char_separator<char> sep("\", "); 
 			tokenizer<char_separator<char> > tokens(txt, sep);
+			auto sendResponse = [&](string resp){
+				code = resp.size(); 
+				write(pipe_out, (void*)&code, 4); //this so we know how much to seek in matlab.
+				write(pipe_out, resp.c_str(), resp.size()); 
+			}; 
 			auto beg = tokens.begin(); 
 			if((*beg) == string("make")){
 				beg++; 
@@ -489,9 +494,7 @@ void* mmap_thread(void*){
 					string resp = {"made a circle named "}; 
 					resp += shp->m_name; 
 					resp += {"\n"}; 
-					code = resp.size(); 
-					write(pipe_out, (void*)&code, 4); //this so we know how much to seek in matlab.
-					write(pipe_out, resp.c_str(), resp.size()); 
+					sendResponse(resp); 
 				}
 				if((*beg) == string("stars")){
 					beg++; 
@@ -503,9 +506,7 @@ void* mmap_thread(void*){
 					string resp = {"made a starfield named "}; 
 					resp += sf->m_name; 
 					resp += {"\n"}; 
-					code = resp.size(); 
-					write(pipe_out, (void*)&code, 4);
-					write(pipe_out, resp.c_str(), resp.size()); 
+					sendResponse(resp); 
 				}
 			}
 			else if(*beg == string("tone")){
@@ -518,9 +519,66 @@ void* mmap_thread(void*){
 				string resp = {"made a tone generator named "}; 
 				resp += tsz->m_name; 
 				resp += {"\n"}; 
-				code = resp.size(); 
-				write(pipe_out, (void*)&code, 4);
-				write(pipe_out, resp.c_str(), resp.size()); 
+				sendResponse(resp); 
+			}
+			else if(*beg == string("store")){
+				// store <type> <size> <name>
+				beg++; 
+				string error = {"could not interpret command --\n"}; 
+				error += {"format is: store <type> <size> <name>"}; 
+				string typedesc = {"type needs to be one of:\n"}; 
+				typedesc += {"char, uchar, int, float, double\n"}; 
+				if(beg != tokens.end()){
+					string type = *beg++; 
+					if(beg != tokens.end()){
+						string ssize = *beg++; 
+						int size = atoi(ssize.c_str()); 
+						if(beg != tokens.end() && size > 0 && size < 1024){
+							string name = *beg++; 
+							//good, we have all the parameters
+							if(type == string("char")){
+								VectorSerialize<char>* obj = 
+									new VectorSerialize<char>(size, MAT_C_INT8); 
+								obj->m_name = name; 
+								g_objs.push_back(obj); 
+							} else if(type == string("uchar")){
+								VectorSerialize<unsigned char>* obj = 
+									new VectorSerialize<unsigned char>(size, MAT_C_UINT8); 
+								obj->m_name = name; 
+								g_objs.push_back(obj); 
+								break; 
+							} else if(type == string("int")){
+								VectorSerialize<int>* obj = 
+									new VectorSerialize<int>(size, MAT_C_INT32); 
+								obj->m_name = name; 
+								g_objs.push_back(obj); 
+								break; 
+							} else if(type == string("float")){ 
+								VectorSerialize<float>* obj = 
+									new VectorSerialize<float>(size, MAT_C_SINGLE); 
+								obj->m_name = name; 
+								g_objs.push_back(obj); 
+								break; 
+							} else if(type == string("double")){ 
+								VectorSerialize<double>* obj = 
+									new VectorSerialize<double>(size, MAT_C_DOUBLE); 
+								obj->m_name = name; 
+								g_objs.push_back(obj); 
+								break; 
+							} else{
+								string resp = {"could not generate a store --\n"}; 
+								resp += typedesc;
+								sendResponse(resp); 
+							}
+						} else {
+							sendResponse(error + typedesc); 
+						}
+					} else {
+						sendResponse(error + typedesc); 
+					}
+				} else {
+					sendResponse(error + typedesc); 
+				}
 			}
 			else if(*beg == string("mmap")){
 				// return the mmapinfo.

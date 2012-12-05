@@ -137,7 +137,7 @@ public:
 };
 
 // this one's a bit different, 
-// since the polhemus thread runs asynchronously from the display thread.
+// since the polhemus thread runs *asynchronously* from the display thread.
 // ideally we want to keep an estimate of velocity, and forward-project position
 // to prevent temporal noise from coupling into spatial noise. 
 class PolhemusSerialize : public Serialize {
@@ -317,6 +317,46 @@ public:
 		return (void*)d; 
 	}
 };
+
+//this class is for recording arbitrary numbers, in the form of a vector, 
+//from matlab.  Can be used for e.g. trial#, trial type, your mommas number ... 
+template <class T> 
+class VectorSerialize : public Serialize {
+public:
+	int	m_size; 
+	int	m_type; 
+	vector<T> m_stor; 
+	vector<vector<T> > v_stor; 
+	
+	VectorSerialize(int size, int matiotype){
+		m_size = size; 
+		m_type = matiotype; 
+	}
+	~VectorSerialize(){ clear(); }
+	virtual void store(){
+		v_stor.push_back(m_stor); 
+	}
+	virtual void clear(){
+		v_stor.clear(); 
+	}
+	virtual int nstored(){ return v_stor.size(); }
+	virtual string storeName(int ){ return m_name; }
+	virtual int getStoreClass(int ){ return m_type; }
+	virtual void getStoreDims(int, size_t* dims){
+		dims[0] = m_size; dims[1] = 1; return;
+	}
+	virtual void* getStore(int , int i){
+		return (void*)&(v_stor[i]); 
+	}
+	virtual int numStores(){ return 1; }
+	virtual void* mmapRead(void* addr){
+		double* d = (double*)addr; 
+		for(int i=0; i<m_size; i++){
+			m_stor[i] = (T)(*d++); // will work??
+		}
+		return (void*)d; 
+	}
+}; 
 
 void writeMatlab(vector<Serialize*> tosave, char* filename);
 size_t matlabFileSize(vector<Serialize*> tosave); 
