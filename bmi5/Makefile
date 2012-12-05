@@ -1,6 +1,6 @@
 CC = g++
 OBJS = main.o tdt_udp.o glInfo.o glFont.o polhemus.o writematlab.o \
-	jacksnd.o ../../myopen/common_host/gettime.o
+	../../myopen/common_host/jacksnd.o ../../myopen/common_host/gettime.o
 CFLAGS=-I/usr/local/include -I../../myopen/common_host
 CFLAGS+=  -g -DDEBUG
 CFLAGS+= -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare -Wformat=2 \
@@ -14,7 +14,7 @@ FIFOS = bmi5_in bmi5_out
 
 all: bmi5
 
-main.o : main.cpp shape.h gtkglx.h
+main.o : main.cpp shape.h gtkglx.h serialize.h
 
 %.o : %.cpp 
 	$(CC) -c -o $@ $(CFLAGS) $(GTKFLAGS) $<

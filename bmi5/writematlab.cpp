@@ -100,8 +100,7 @@ void writeMatlab(vector<Serialize*> tosave, char* filename){
 				dims[1] = tosave[j]->nstored(); 
 				int typ = matlabClassToType(cls); 
 				string s = tosave[j]->storeName(indx);
-				string t = string{"d_"} + s; //prevent namespace pollution? 
-				field = Mat_VarCreate(t.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims, f, 0); 
+				field = Mat_VarCreate(s.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims, f, 0); 
 				Mat_VarWrite(matfp,field,MAT_COMPRESSION_NONE);
 				Mat_VarFree(field);
 			}

@@ -13,6 +13,7 @@ public:
 	Serialize(){}
 	virtual ~Serialize(){ }
 	virtual void 	store(){ fprintf(stderr, "store must be implemented in derived classes.\n"); }
+	virtual void	clear(){ fprintf(stderr, "clear must be implemented in derived classes.\n"); }
 	virtual int 	nstored(){return 0;} //number of timeslices. 
 	virtual string storeName(int ){ return string("none"); }
 	virtual int 	getStoreClass(int ){ return 0; }
@@ -43,6 +44,7 @@ extern TimeSyncClient* g_tsc;
 extern int g_frame; 
 extern long double gettime(); 
 
+//this class records the time when matlab sends commands.
 class TimeSerialize : public Serialize {
 public:
 	vector<double> v_time; 
@@ -50,16 +52,18 @@ public:
 	vector<int> v_frame; 
 	
 	TimeSerialize(){}
-	~TimeSerialize(){ 
-		v_time.clear(); 
-		v_ticks.clear(); 
-	}
+	~TimeSerialize(){ clear(); }
 	virtual void store(){
 		double time = gettime(); 
 		double ticks = g_tsc->getTicks(); 
 		v_time.push_back(time); 
 		v_ticks.push_back(ticks); 
 		v_frame.push_back(g_frame); 
+	}
+	virtual void clear(){
+		v_time.clear(); 
+		v_ticks.clear(); 
+		v_frame.clear(); 
 	}
 	virtual int nstored(){return v_time.size(); }
 	virtual string storeName(int indx){
@@ -80,6 +84,7 @@ public:
 		dims[0] = 1; dims[1] = 1; 
 	}
 	virtual void* getStore(int indx, int i){
+		std::cout << "getStore called, " << m_name << " size " << nstored() << std::endl; 
 		switch(indx){
 			case 0: return (void*)&(v_time[i]);
 			case 1: return (void*)&(v_ticks[i]); 
@@ -95,6 +100,38 @@ public:
 		*d++ = time; 
 		*d++ = ticks; 
 		*d++ = (double)g_frame; 
+		return (void*)d; 
+	}
+};
+
+// this class records the time when a frame was displayed 
+// (minus any buffering in the projector/display)
+class FrameSerialize : public TimeSerialize {
+public:
+	double m_time; 
+	double m_ticks; 
+	int m_frame; 
+	
+	FrameSerialize() : TimeSerialize() {
+		m_name = {"frame_"}; 
+	}
+	~FrameSerialize(){ clear(); }
+	// you must call store() within the opengl display thread.
+	virtual void store(){} //dummy.
+	virtual void store(int frame){
+		m_time = gettime(); 
+		m_ticks = g_tsc->getTicks(); 
+		m_frame = frame; 
+		v_time.push_back(m_time); 
+		v_ticks.push_back(m_ticks); 
+		v_frame.push_back(m_frame); 
+	}
+	virtual void* mmapRead(void* addr){
+		//this is a write, and returns the time & ticks of the last recorded frame.
+		double * d = (double*)addr; 
+		*d++ = m_time; 
+		*d++ = m_ticks; 
+		*d++ = m_frame; 
 		return (void*)d; 
 	}
 };
@@ -120,17 +157,14 @@ public:
 		m_time = 0; 
 		m_ticks = 0; 
 	}
-	~PolhemusSerialize(){
-		v_sensors.clear(); 
-		v_time.clear(); 
-		v_ticks.clear(); 
-	}
+	~PolhemusSerialize(){ clear(); }
 	void store(float* data){
 		double time = gettime(); 
 		//update the velocity.
+		double vv[3]; 
 		for(int i=0; i<3; i++){
 			double v = (data[i] - m_sensors[i]) / (time - m_time); 
-			m_vel[i] = 0.8*m_vel[i] + 0.2*v; // in mm/sec, slightly smoothed.
+			vv[i] = 0.8*m_vel[i] + 0.2*v; // in mm/sec, slightly smoothed.
 			// smoothing should be ok given source b/w & sampling rate. 
 		}
 		m_time = time; 
@@ -139,7 +173,14 @@ public:
 		v_ticks.push_back(m_ticks); 
 		for(int i=0; i<3; i++)
 			m_sensors[i] = data[i]; 
+		for(int i=0; i<3; i++)
+			m_vel[i]  = vv[i];
 		v_sensors.push_back(m_sensors); 
+	}
+	virtual void clear(){
+		v_sensors.clear(); 
+		v_time.clear(); 
+		v_ticks.clear(); 
 	}
 	void getLoc(double now, float* out){
 		//gets the current location, with forward estimation. 
@@ -208,6 +249,9 @@ public:
 		m_name = "tone_"; 
 	}
 	~ToneSerialize(){
+	}
+	virtual void store(){} //done in mmapread().
+	virtual void clear(){
 		v_time.clear(); 
 		v_ticks.clear();
 		v_freq.clear(); 
@@ -215,7 +259,6 @@ public:
 		v_scale.clear(); 
 		v_duration.clear(); 
 	}
-	virtual void store(){} //done in mmapread().
 	virtual int nstored(){return v_time.size();}
 	virtual string storeName(int indx){
 		switch(indx){
