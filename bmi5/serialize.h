@@ -327,12 +327,20 @@ public:
 	int	m_type; 
 	vector<T> m_stor; 
 	vector<vector<T> > v_stor; 
+	T*		m_bs; 
 	
 	VectorSerialize(int size, int matiotype){
 		m_size = size; 
 		m_type = matiotype; 
+		for(int i=0; i<size; i++){
+			m_stor.push_back((T)0); 
+		}
+		m_bs = NULL;
 	}
-	~VectorSerialize(){ clear(); }
+	~VectorSerialize(){ 
+		clear(); 
+		free(m_bs); 
+	}
 	virtual void store(){
 		v_stor.push_back(m_stor); 
 	}
@@ -345,8 +353,16 @@ public:
 	virtual void getStoreDims(int, size_t* dims){
 		dims[0] = m_size; dims[1] = 1; return;
 	}
-	virtual void* getStore(int , int i){
-		return (void*)&(v_stor[i]); 
+	virtual void* getStore(int , int k){
+		//coalesce the memory -- <vector<vector>> is non-continuous in memory. 
+		if(m_bs) free(m_bs); 
+		m_bs = (T*)malloc(sizeof(T)*nstored()*m_size); 
+		for(int i=0; i<nstored(); i++){
+			for(int j=0; j<m_size; j++){
+				m_bs[j + i*m_size] = v_stor[i][j]; 
+			}
+		}
+		return (void*)&(m_bs[k*m_size]); 
 	}
 	virtual int numStores(){ return 1; }
 	virtual void* mmapRead(void* addr){

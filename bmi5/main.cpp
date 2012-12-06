@@ -446,12 +446,12 @@ void* mmap_thread(void*){
 	}
 	mmh.prinfo(); 
 
-	char buf[128]; int bufn = 0; 
+	char buf[256]; int bufn = 0; 
 	flush_pipe(pipe_out); 
 	int code = 0; 
 	while(!g_die){
 		//printf("%d waiting for matlab...\n", frame); 
-		int r = read(pipe_in, &(buf[bufn]), 128);
+		int r = read(pipe_in, &(buf[bufn]), 256);
 		if(r > 0) bufn += r; 
 		buf[bufn] = 0; 
 		//printf("%d read %d %s\n", frame, r, buf); 
@@ -541,30 +541,31 @@ void* mmap_thread(void*){
 									new VectorSerialize<char>(size, MAT_C_INT8); 
 								obj->m_name = name; 
 								g_objs.push_back(obj); 
+								sendResponse({"made store type char\n"}); 
 							} else if(type == string("uchar")){
 								VectorSerialize<unsigned char>* obj = 
 									new VectorSerialize<unsigned char>(size, MAT_C_UINT8); 
 								obj->m_name = name; 
 								g_objs.push_back(obj); 
-								break; 
+								sendResponse({"made store type uchar\n"}); 
 							} else if(type == string("int")){
 								VectorSerialize<int>* obj = 
 									new VectorSerialize<int>(size, MAT_C_INT32); 
 								obj->m_name = name; 
 								g_objs.push_back(obj); 
-								break; 
+								sendResponse({"made store type int\n"}); 
 							} else if(type == string("float")){ 
 								VectorSerialize<float>* obj = 
 									new VectorSerialize<float>(size, MAT_C_SINGLE); 
 								obj->m_name = name; 
 								g_objs.push_back(obj); 
-								break; 
+								sendResponse({"made store type float\n"}); 
 							} else if(type == string("double")){ 
 								VectorSerialize<double>* obj = 
 									new VectorSerialize<double>(size, MAT_C_DOUBLE); 
 								obj->m_name = name; 
 								g_objs.push_back(obj); 
-								break; 
+								sendResponse({"made store type double\n"}); 
 							} else{
 								string resp = {"could not generate a store --\n"}; 
 								resp += typedesc;
@@ -583,18 +584,24 @@ void* mmap_thread(void*){
 			else if(*beg == string("mmap")){
 				// return the mmapinfo.
 				string resp = getMmapStructure();
-				code = resp.size(); 
-				write(pipe_out, (void*)&code, 4);
-				write(pipe_out, resp.c_str(), resp.size()); 
+				sendResponse(resp); 
 			}
-			else if(*beg == string("clear all")){
+			else if(*beg == string("clear_all")){
 				printf("clearing all data in memory"); 
 				for(unsigned int i=0; i<g_objs.size(); i++)
 					g_objs[i]->clear();
 				string resp = {"cleared all stored data\n"}; 
-				code = resp.size(); 
-				write(pipe_out, (void*)&code, 4);
-				write(pipe_out, resp.c_str(), resp.size()); 
+				sendResponse(resp); 
+			}
+			else if(*beg == string("save")){
+				beg++; 
+				if(beg != tokens.end()){
+					string fname = *beg; 
+					writeMatlab(g_objs, (char*)fname.c_str()); 
+					string resp = {"saved file "}; 
+					resp += fname; resp += {"\n"}; 
+					sendResponse(resp); 
+				}
 			}
 			else{
 				string resp = {"Current command vocabulary:\n"};
@@ -604,8 +611,9 @@ void* mmap_thread(void*){
 				resp += {"\t\tmake a tone generator\n"}; 
 				resp += {"\tmmap\n"}; 
 				resp += {"\t\treturn mmap structure information, for eval() in matlab\n"}; 
-				resp += {"\tclear all\n"}; 
+				resp += {"\tclear_all\n"}; 
 				resp += {"\t\tclear data stored in memory (e.g. when starting an experiment)\n"}; 
+				resp += {"\tsave <file name>\n"}; 
 				code = resp.size(); 
 				write(pipe_out, (void*)&code, 4);
 				write(pipe_out, resp.c_str(), resp.size()); 
