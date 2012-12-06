@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "tdt_udp.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <math.h>
@@ -45,6 +44,7 @@
 #include "perftimer.h"
 
 //local.
+#include "tdt_udp.h"
 #include "jacksnd.h"
 #include "serialize.h"
 #include "shape.h"
@@ -78,9 +78,9 @@ PerfTimer	g_openGLTimer;
 TimeSerialize* 	g_timeSerialize; 
 FrameSerialize* 	g_frameSerialize; 
 PolhemusSerialize* g_polhemus; 
-vector<Serialize*> g_objs; //container for each of these.
+vector<Serialize*> g_objs; //container for each of these, and more.
 
-//keep this around for controlling the microstimulator.
+//keep this around for controlling the microstimulator, juicer, etc.
 void UDP_RZ2(){
 	int sock; 
  	sock = openSocket((char*)"169.230.191.195", LISTEN_PORT); 
@@ -571,15 +571,32 @@ void* mmap_thread(void*){
 								resp += typedesc;
 								sendResponse(resp); 
 							}
+						} else sendResponse(error + typedesc); 
+					} else sendResponse(error + typedesc); 
+				} else sendResponse(error + typedesc); 
+			}
+			else if(*beg == string("tdtudp")){
+				// tdtudp <size> <ipaddress>
+				beg++; 
+				if(beg != tokens.end()){
+					string ssize = *beg++; 
+					int size = atoi(ssize.c_str()); 
+					if(beg != tokens.end() && size > 0 && size < 128){
+						string ipaddr = *beg++; 
+						int sock = openSocket((char*)ipaddr.c_str(), LISTEN_PORT); 
+						if(sock == 0){
+							sendResponse(string("could not open socket to ") + ipaddr); 
 						} else {
-							sendResponse(error + typedesc); 
+							if(!checkRZ(sock)){
+								sendResponse(string("there does not seem to be an RZ2 at")+ipaddr); 
+							} else {
+								TdtUdpSerialize* obj = new TdtUdpSerialize(sock, size); 
+								g_objs.push_back(obj); 
+								sendResponse(string("successfully made a UDP connection object to")+ipaddr); 
+							}
 						}
-					} else {
-						sendResponse(error + typedesc); 
-					}
-				} else {
-					sendResponse(error + typedesc); 
-				}
+					} else sendResponse({"could not interpret command --\nformat is tdtudp <size> <ipaddress>\n"}); 
+				} else sendResponse({"could not interpret command --\nformat is tdtudp <size> <ipaddress>\n"}); 
 			}
 			else if(*beg == string("mmap")){
 				// return the mmapinfo.

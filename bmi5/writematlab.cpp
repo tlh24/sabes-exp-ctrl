@@ -12,6 +12,7 @@
 #include "gettime.h"
 #include "timesync.h"
 #include "jacksnd.h"
+#include "tdt_udp.h"
 #include "serialize.h"
 
 int matlabClassToType(int cls){

@@ -374,6 +374,105 @@ public:
 	}
 }; 
 
+//class for sending float data to TDT -- 
+//exact protocol depends on the RCX file running on the RZ2.
+//class saves timing information for when the packet was sent. 
+class TdtUdpSerialize : public Serialize {
+public: 
+	int					m_sock; 
+	int 					m_size; 
+	double				m_time; 
+	double				m_ticks; 
+	vector<double>		m_last; 
+	vector<float>		m_stor; 
+	vector<double> 	v_time; 
+	vector<double>		v_ticks; 
+	vector<vector<float> > v_stor; 
+	float*				m_bs; 
+	
+	TdtUdpSerialize(int sock, int size){
+		//the sock should be created elsewhere -- so we can get error strings out.
+		m_sock = sock;
+		m_size = size; 
+		for(int i=0; i<size; i++){
+			m_stor.push_back(0.f); 
+			m_last.push_back(0.0); 
+		}
+		m_bs = 0; 
+	}
+	~TdtUdpSerialize(){
+		disconnectRZ(m_sock); 
+		clear(); 
+		if(m_bs) free(m_bs); 
+	}
+	virtual void store(){ } //do it in mmapRead()
+	virtual void clear(){
+		v_time.clear(); 
+		v_ticks.clear(); 
+		v_stor.clear(); 
+	}
+	virtual int nstored(){ return v_stor.size(); }
+	virtual string storeName(int indx){
+		switch(indx){
+			case 0: return m_name + string("time"); 
+			case 1: return m_name + string("ticks"); 
+			case 2: return m_name + string("udp"); 
+		} return string{"none"};
+	}
+	virtual int getStoreClass(int indx){
+		switch(indx){
+			case 0: return MAT_C_DOUBLE; 
+			case 1: return MAT_C_DOUBLE; 
+			case 2: return MAT_C_SINGLE; 
+		} return 0; 
+	}
+	virtual void getStoreDims(int indx, size_t* dims){
+		switch(indx){
+			case 0: dims[0] = 1; dims[1] = 1; return; 
+			case 1: dims[0] = 1; dims[1] = 1; return; 
+			case 2: dims[0] = m_size; dims[1] = 1; return; 
+		}
+	}
+	virtual void* getStore(int indx, int k){
+		if(indx == 0)
+			return (void*)&(v_time[k]); 
+		else if(indx == 1)
+			return (void*)&(v_ticks[k]); 
+		else if(indx == 2){
+			//coalesce the memory -- <vector<vector>> is non-continuous in memory. 
+			if(m_bs) free(m_bs); 
+			m_bs = (float*)malloc(sizeof(float)*nstored()*m_size); 
+			for(int i=0; i<nstored(); i++){
+				for(int j=0; j<m_size; j++){
+					m_bs[j + i*m_size] = v_stor[i][j]; 
+				}
+			}
+			return (void*)&(m_bs[k*m_size]); 
+		} else return NULL; 
+	}
+	virtual int numStores(){return 3;}
+	virtual void* mmapRead(void* addr){
+		double* d = (double*)addr; 
+		d += 2; //skip ticks and time -- these are only saved in the file.
+		bool sames = true; 
+		for(int i=0; i<m_size; i++)
+			sames &= m_last[i] == d[i]; 
+		if(!sames){
+			for(int i=0; i<m_size; i++){
+				m_last[i] = d[i]; 
+				m_stor[i] = (float)d[i]; 
+			}
+			sendDataRZ(m_sock, &(m_stor[0]), m_size); //thread-synchronous is ok?
+			double time = gettime(); //save the time of TX.
+			v_ticks.push_back(g_tsc->getTicks()); 
+			v_time.push_back(time); 
+			v_stor.push_back(m_stor); 
+		}
+		d += m_size; 
+		return (void*)d;
+	}
+}; 
+
 void writeMatlab(vector<Serialize*> tosave, char* filename);
 size_t matlabFileSize(vector<Serialize*> tosave); 
 size_t mmapFileSize(vector<Serialize*> tosave); 
