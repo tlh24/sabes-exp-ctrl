@@ -2,6 +2,9 @@
 #ifndef __SHAPE_H__
 #define __SHAPE_H__
 
+extern Matrix44Serialize*	g_affine44; //used for translating world->screen coordinates.
+extern Matrix44Serialize*	g_quadratic44;
+
 #define PI 3.141592653589793
 class Shape : public Serialize {
 	public:
@@ -12,8 +15,6 @@ class Shape : public Serialize {
 		unsigned int m_drawmode; 
 		char			m_draw; 
 		GLuint 		m_program[2]; 
-		float			m_affine[4][4]; //affine world-to-screen
-		float			m_quadratic[4][4]; //quadratic world-to-screen
 		array<float,4>	m_color;
 		array<float,2> m_scale; 
 		array<float,2> m_trans;
@@ -30,13 +31,6 @@ class Shape : public Serialize {
 		m_name = {"shape_"}; 
 		m_needConfig[0] = m_needConfig[1] = false; 
 		m_program[0] = m_program[1] = 0; 
-		//load identity matrix. (for now). 
-		for(int i=0; i<16; i++){
-			m_affine[0][i] = m_quadratic[0][i] = 0.f; 
-		}
-		for(int i=0; i<4; i++){
-			m_affine[i][i] = 1.f; //emitted w must be 1! 
-		}
 		m_draw = 0; 
 #ifdef DEBUG
 		m_draw = 1; 
@@ -160,27 +154,23 @@ class Shape : public Serialize {
 		m[1][1] = m_scale[1]; 
 		m[2][2] = m[3][3] = 1.f; 
 		float n[4][4]; 
+		float* aff = g_affine44->data(); 
 		// n = affine * world (in that order!)
 		for(int r=0; r<4; r++){
 			for(int c=0; c<4; c++){
 				float f = 0.f; 
 				for(int i=0; i<4; i++)
-					f += m_affine[r][i] * m[i][c]; 
+					//g_affine in matlab order.
+					f += aff[r+4*i] * m[i][c]; 
 				n[c][r] = f; //opengl assumes fortran order (like matlab), hence transpose.
 			}
 		}
-		//transpose quadratic matrix too.
-		float o[4][4]; 
-		for(int r=0; r<4; r++){
-			for(int c=0; c<4; c++){
-				o[c][r] = m_quadratic[r][c]; 
-			}
-		}
+		//quadratic matrix from matlab -- already transposed.
 		glUseProgram(m_program[display]); 
 		int affloc = glGetUniformLocation(m_program[display], "affine_matrix"); 
 		if(affloc >= 0)glUniformMatrix4fv(affloc, 1, GL_FALSE, &n[0][0]);
 		int quadloc = glGetUniformLocation(m_program[display], "quadratic_matrix"); 
-		if(quadloc >= 0)glUniformMatrix4fv(quadloc, 1, GL_FALSE, &o[0][0]);
+		if(quadloc >= 0)glUniformMatrix4fv(quadloc, 1, GL_FALSE, g_quadratic44->data());
 	}
 	virtual void draw(int display){
 		configure(display); //if we need it.

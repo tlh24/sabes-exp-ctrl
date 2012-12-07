@@ -20,7 +20,7 @@ public:
 	virtual void	getStoreDims(int , size_t* dims){dims[0] = 0; dims[1] = 0;}
 	virtual void*	getStore(int , int){ return NULL; }
 	virtual int 	numStores(){ return 0; }
-	virtual void* 	mmapRead(void* ){ return NULL;}
+	virtual double* 	mmapRead(double* ){ return NULL;}
 		//drawing routines -- opengl.
 	virtual void	draw(int) {}
 	virtual void	move(float, long double){}
@@ -92,15 +92,14 @@ public:
 		} return NULL; 
 	}
 	virtual int numStores(){ return 3; }
-	virtual void* mmapRead(void* addr){
+	virtual double* mmapRead(double* d){
 		//this is actually a write! 
-		double * d = (double*)addr; 
 		double time = gettime(); 
 		double ticks = g_tsc->getTicks(); 
 		*d++ = time; 
 		*d++ = ticks; 
 		*d++ = (double)g_frame; 
-		return (void*)d; 
+		return d; 
 	}
 };
 
@@ -126,13 +125,12 @@ public:
 		v_ticks.push_back(m_ticks); 
 		v_frame.push_back(m_frame); 
 	}
-	virtual void* mmapRead(void* addr){
+	virtual double* mmapRead(double* d){
 		//this is a write, and returns the time & ticks of the last recorded frame.
-		double * d = (double*)addr; 
 		*d++ = m_time; 
 		*d++ = m_ticks; 
 		*d++ = m_frame; 
-		return (void*)d; 
+		return d; 
 	}
 };
 
@@ -223,8 +221,7 @@ public:
 		} return NULL; 
 	}
 	virtual int numStores(){return 3;}
-	virtual void* mmapRead(void* addr){
-		double* d = (double*)addr; 
+	virtual double* mmapRead(double* d){
 		float out[3]; 
 		double time = gettime(); 
 		getLoc(time, out); 
@@ -233,7 +230,7 @@ public:
 		}
 		*d++ = time; //redundant, but keeps things consistent.
 		*d++ = g_tsc->getTicks(); 
- 		return (void*)d; 
+ 		return d; 
 	}
 }; 
 
@@ -294,9 +291,8 @@ public:
 		} return NULL; 
 	}
 	virtual int numStores(){return 6;}
-	virtual void* mmapRead(void* addr){
+	virtual double* mmapRead(double* d){
 		//this is a one-way communication channel from matlab. 
-		double* d = (double*)addr; 
 		d += 2; //skip ticks and time -- these are only saved in the file.
 		if(d[0] > 0.0){
 			float freq = d[0]; 
@@ -314,7 +310,7 @@ public:
 			d[0] = 0.0; 
 		}
 		d += 4; 
-		return (void*)d; 
+		return d; 
 	}
 };
 
@@ -365,12 +361,11 @@ public:
 		return (void*)&(m_bs[k*m_size]); 
 	}
 	virtual int numStores(){ return 1; }
-	virtual void* mmapRead(void* addr){
-		double* d = (double*)addr; 
+	virtual double* mmapRead(double* d){
 		for(int i=0; i<m_size; i++){
 			m_stor[i] = (T)(*d++); // will work??
 		}
-		return (void*)d; 
+		return d; 
 	}
 }; 
 
@@ -451,8 +446,7 @@ public:
 		} else return NULL; 
 	}
 	virtual int numStores(){return 3;}
-	virtual void* mmapRead(void* addr){
-		double* d = (double*)addr; 
+	virtual double* mmapRead(double* d){
 		d += 2; //skip ticks and time -- these are only saved in the file.
 		bool sames = true; 
 		for(int i=0; i<m_size; i++)
@@ -469,8 +463,60 @@ public:
 			v_stor.push_back(m_stor); 
 		}
 		d += m_size; 
-		return (void*)d;
+		return d;
 	}
+}; 
+
+//convenience class for saving 4x4 calibration matrix (affine, quadratic). 
+class Matrix44Serialize : public Serialize {
+public: 
+	array<double,16>				m_cmp;
+	array<float,16>				m_x; 
+	vector<array<float,16> >	v_x; 
+	
+	Matrix44Serialize(string name){
+		m_name = name; 
+		for(int i=0; i<16; i++){
+			m_x[i] = 0; // Matlab ordering (column major -- same in openGL).
+			m_cmp[i] = 0; }
+		for(int i=0; i<4; i++){
+			m_x[i+i*4] = 1.f; 
+			m_cmp[i+i*4] = 1.f; }
+	}
+	~Matrix44Serialize(){
+		clear(); 
+	}
+	virtual void clear(){
+		v_x.clear(); 
+	}
+	virtual void store(){ /* in mmap. */}
+	virtual int nstored(){return v_x.size(); }
+	virtual string storeName(int ){ return m_name + string("_m44"); }
+	virtual int getStoreClass(int ){ return MAT_C_SINGLE; }
+	virtual void getStoreDims(int, size_t* dims){
+		dims[0] = 4; dims[1] = 4; return; 
+	}
+	virtual void* getStore(int , int i){
+		return (void*)&(v_x[i]); 
+	}
+	virtual int numStores(){return 1;}
+	virtual double* mmapRead(double* d){
+		//don't store the time here -- you should not be changing it during the exp!
+		bool sames = true; 
+		for(int i=0; i<16; i++)
+			sames &= d[i] == m_cmp[i]; 
+		if(!sames){
+			for(int i=0; i<16; i++) {
+				m_x[i] = (float)d[i]; 
+				m_cmp[i] = d[i]; 
+			}
+			v_x.push_back(m_x); 
+		}
+		d += 16; 
+		return d; 
+	}
+	const float &operator[](int i){ return m_x[i]; } //wish i could do [][] .. eh.
+	float* data(){ return m_x.data(); }; 
 }; 
 
 void writeMatlab(vector<Serialize*> tosave, char* filename);

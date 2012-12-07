@@ -98,6 +98,7 @@ void writeMatlab(vector<Serialize*> tosave, char* filename){
 				int cls = tosave[j]->getStoreClass(indx); 
 				size_t dims[2]; 
 				tosave[j]->getStoreDims(indx, dims); 
+				dims[0] *= dims[1]; //for matrices.
 				dims[1] = tosave[j]->nstored(); 
 				int typ = matlabClassToType(cls); 
 				string s = tosave[j]->storeName(indx);

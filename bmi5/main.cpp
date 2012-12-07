@@ -77,6 +77,8 @@ PerfTimer	g_openGLTimer;
 // matlab-interactive objects. 
 TimeSerialize* 	g_timeSerialize; 
 FrameSerialize* 	g_frameSerialize; 
+Matrix44Serialize*	g_affine44; //used for translating world->screen coordinates.
+Matrix44Serialize*	g_quadratic44;
 PolhemusSerialize* g_polhemus; 
 vector<Serialize*> g_objs; //container for each of these, and more.
 
@@ -458,7 +460,7 @@ void* mmap_thread(void*){
 		if(r >= 3 && buf[0] == 'g' && buf[1] == 'o'){
 			//react to changes requested. 
 			g_matlabTimer.exit(); 
-			void* b = mmh.m_addr; 
+			double* b = (double*)mmh.m_addr; 
 			for(unsigned int i=0; i<g_objs.size(); i++)
 				b = g_objs[i]->mmapRead(b); 
 			for(unsigned int i=0; i<g_objs.size(); i++)
@@ -954,9 +956,19 @@ int main(int argn, char** argc){
 	//can init the shapes ... here i guess (no opengl though!)
 	g_timeSerialize = new TimeSerialize(); //synchronize with gtkclient_tdt.
 	g_frameSerialize = new FrameSerialize(); 
+	g_affine44 = new Matrix44Serialize(string("affine")); 
+	g_quadratic44 = new Matrix44Serialize(string("quadratic")); 
+	//4x4 matrices are initalized with the identity matrix = not ok for quadratic.
+	for(int i=0; i<4; i++){
+		g_quadratic44->m_x[i+i*4] = 0; 
+		g_quadratic44->m_cmp[i+i*4] = 0; //to catch the edges.
+	}
 	g_polhemus = new PolhemusSerialize(); 
+	
 	g_objs.push_back(g_timeSerialize);
 	g_objs.push_back(g_frameSerialize); 
+	g_objs.push_back(g_affine44); 
+	g_objs.push_back(g_quadratic44); 
 	g_objs.push_back(g_polhemus); 
 
 	g_signal_connect_swapped (window, "destroy",
