@@ -261,8 +261,7 @@ class Shape : public Serialize {
 		} return NULL; 
 	}
 	virtual int numStores() {return 4;}
-	virtual void* mmapRead(void* addr){
-		double* d = (double*)addr; 
+	virtual double* mmapRead(double* d){
 		int i; 
 		m_draw = *d++ > 0.0 ? 1 : 0; 
 		for(i=0; i<4; i++)
@@ -271,7 +270,7 @@ class Shape : public Serialize {
 			m_scale[i] = *d++; 
 		for(i=0; i<2; i++)
 			m_trans[i] = *d++; 
-		return (void*)d; 
+		return d; 
 	}
 };
 struct starStruct {
@@ -505,13 +504,12 @@ public: //do something like the flow field common in the lab.
 		}
 	}
 	virtual int numStores() { return Shape::numStores() + 2; }
-	virtual void* mmapRead(void* addr){
-		void* b = Shape::mmapRead(addr); 
-		double* d = (double*)b; 
+	virtual double* mmapRead(double* d){
+		d = Shape::mmapRead(d); 
 		for(int i=0; i<2; i++)
 			m_vel[i] = *d++; 
 		m_coherence = *d++; 
-		return (void*)d; 
+		return d; 
 	}
 };
 #endif

@@ -1,34 +1,17 @@
 % test the connection with bmi5 as well. 
+global bmi5_in bmi5_out m2; 
 cd('/home/tlh24/sabes-exp-ctrl/bmi5');
 
 bmi5_out = fopen('/home/tlh24/sabes-exp-ctrl/bmi5/bmi5_out', 'r'); 
 bmi5_in = fopen('/home/tlh24/sabes-exp-ctrl/bmi5/bmi5_in', 'w'); 
 
 % initial settings -- setup a cursor and a starfield.
-fwrite(bmi5_in, 'store float 3 trial')
-code = fread(bmi5_out, 1, 'int');
-msg = char(fread(bmi5_out, code, 'char')')
-
-fwrite(bmi5_in, 'make circle cursor_');
-code = fread(bmi5_out, 1, 'int');
-msg = char(fread(bmi5_out, code, 'char')')
-
-fwrite(bmi5_in, 'make stars stars_');
-code = fread(bmi5_out, 1, 'int');
-msg = char(fread(bmi5_out, code, 'char')')
-
-fwrite(bmi5_in, 'make circle target_');
-code = fread(bmi5_out, 1, 'int');
-msg = char(fread(bmi5_out, code, 'char')')
-
-fwrite(bmi5_in, 'tone'); % tone object, not actual tone.
-code = fread(bmi5_out, 1, 'int');
-msg = char(fread(bmi5_out, code, 'char')')
-
-fwrite(bmi5_in, 'mmap structure');
-code = fread(bmi5_out, 1, 'int');
-msg = char(fread(bmi5_out, code, 'char')')
-eval(msg); 
+bmi5_cmd('store float 3 trial'); 
+bmi5_cmd('make circle cursor_'); 
+bmi5_cmd('make stars stars_'); 
+bmi5_cmd('make circle target_'); 
+bmi5_cmd('tone');  % tone object, not actual tone.
+eval(bmi5_cmd('mmap structure')); 
 
 m2.Data(1).tone_freq = 440; 
 m2.Data(1).tone_pan = 0;
@@ -46,10 +29,13 @@ m2.Data(1).cursor_draw = 1;
 m2.Data(1).target_draw = 1;  
 m2.Data(1).stars_draw = 1; 
 
+m2.Data(1).affine_m44 = eye(4); 
+m2.Data(1).quadratic_m44 = zeros(4); 
+
 m2.Data(1).stars_coherence = 0.5; 
 m2.Data(1).stars_scale = [1; 1]; %necessary! -- defaults to 0.
-fwrite(bmi5_in, 'go.'); 
-code = fread(bmi5_out, 1, 'int');
+
+bmi5_cmd('go.'); 
 
 n = 200
 tic

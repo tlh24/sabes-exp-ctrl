@@ -12,16 +12,19 @@ public:
 	string	m_name; 
 	Serialize(){}
 	virtual ~Serialize(){ }
-	virtual void 	store(){ fprintf(stderr, "store must be implemented in derived classes.\n"); }
-	virtual void	clear(){ fprintf(stderr, "clear must be implemented in derived classes.\n"); }
+	void perr(const char* method){
+		fprintf(stderr, "\"%s\":%s must be implemented in derived classes.\n", 
+			m_name.c_str(), method); }
+	virtual void 	store(){ perr("store"); }
+	virtual void	clear(){ perr("clear"); }
 	virtual int 	nstored(){return 0;} //number of timeslices. 
-	virtual string storeName(int ){ return string("none"); }
-	virtual int 	getStoreClass(int ){ return 0; }
-	virtual void	getStoreDims(int , size_t* dims){dims[0] = 0; dims[1] = 0;}
-	virtual void*	getStore(int , int){ return NULL; }
-	virtual int 	numStores(){ return 0; }
-	virtual double* 	mmapRead(double* ){ return NULL;}
-		//drawing routines -- opengl.
+	virtual string storeName(int ){ perr("storeName"); return string("none"); }
+	virtual int 	getStoreClass(int ){ perr("getStoreClass"); return 0; }
+	virtual void	getStoreDims(int , size_t* dims){perr("getStoreDims"); dims[0] = 0; dims[1] = 0;}
+	virtual void*	getStore(int , int){ perr("getStore"); return NULL; }
+	virtual int 	numStores(){ perr("numStores"); return 0; }
+	virtual double* 	mmapRead(double* ){ perr("mmapRead"); return NULL;}
+		//drawing routines -- opengl -- not all need implement.
 	virtual void	draw(int) {}
 	virtual void	move(float, long double){}
 		// reads/writes parameters from a mmaped file (address).
@@ -504,7 +507,7 @@ public:
 		//don't store the time here -- you should not be changing it during the exp!
 		bool sames = true; 
 		for(int i=0; i<16; i++)
-			sames &= d[i] == m_cmp[i]; 
+			sames &= (d[i] == m_cmp[i]); 
 		if(!sames){
 			for(int i=0; i<16; i++) {
 				m_x[i] = (float)d[i]; 
@@ -515,7 +518,6 @@ public:
 		d += 16; 
 		return d; 
 	}
-	const float &operator[](int i){ return m_x[i]; } //wish i could do [][] .. eh.
 	float* data(){ return m_x.data(); }; 
 }; 
 
