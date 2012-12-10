@@ -94,12 +94,13 @@ void writeMatlab(vector<Serialize*> tosave, char* filename){
 		// write out individual feilds, one at a time, to save memory.
 		for(unsigned int j=0; j<tosave.size(); j++){
 			for(int indx=0; indx < tosave[j]->numStores(); indx++){
-				void* f = tosave[j]->getStore(indx, 0); //vectors are stored in a strictly linear array.
 				int cls = tosave[j]->getStoreClass(indx); 
+				//get dims *before* pointer in case things are still growing!
 				size_t dims[2]; 
 				tosave[j]->getStoreDims(indx, dims); 
 				dims[0] *= dims[1]; //for matrices.
 				dims[1] = tosave[j]->nstored(); 
+				void* f = tosave[j]->getStore(indx, 0); //vectors are stored in a strictly linear array.
 				int typ = matlabClassToType(cls); 
 				string s = tosave[j]->storeName(indx);
 				field = Mat_VarCreate(s.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims, f, 0); 

@@ -355,8 +355,9 @@ public:
 	virtual void* getStore(int , int k){
 		//coalesce the memory -- <vector<vector>> is non-continuous in memory. 
 		if(m_bs) free(m_bs); 
-		m_bs = (T*)malloc(sizeof(T)*nstored()*m_size); 
-		for(int i=0; i<nstored(); i++){
+		int n = nstored(); //atomic -- if we're not careful, may change during read!
+		m_bs = (T*)malloc(sizeof(T)*n*m_size); 
+		for(int i=0; i<n; i++){
 			for(int j=0; j<m_size; j++){
 				m_bs[j + i*m_size] = v_stor[i][j]; 
 			}
