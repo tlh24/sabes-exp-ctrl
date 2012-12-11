@@ -37,6 +37,8 @@ m2.Data(1).stars_scale = [1; 1]; %necessary! -- defaults to 0.
 
 bmi5_cmd('go.'); 
 
+bmi5_cmd('start_recording'); 
+
 n = 200
 tic
 for i=1:n

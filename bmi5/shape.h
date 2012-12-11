@@ -217,6 +217,11 @@ class Shape : public Serialize {
 		in = in < 0.f ? 0.f : in; 
 		return (unsigned char)in; 
 	}
+	virtual void clear(){
+		v_color.clear();
+		v_scale.clear(); 
+		v_trans.clear(); 
+	}
 	virtual void store(){
 		v_draw.push_back(m_draw); 
 		array<unsigned char,4> color; 
@@ -454,6 +459,11 @@ public: //do something like the flow field common in the lab.
 	}
 	void setFade(bool s){ m_fade = s; }
 	// serialization
+	virtual void clear(){
+		Shape::clear(); 
+		v_vel.clear(); 
+		v_coherence.clear(); 
+	}
 	virtual void store(){
 		Shape::store(); 
 		v_vel.push_back(m_vel); 

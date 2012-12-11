@@ -177,8 +177,14 @@ public:
 		for(int i=0; i<3; i++)
 			m_sensors[i] = data[i]; 
 		for(int i=0; i<3; i++)
-			m_vel[i]  = vv[i];
+			m_vel[i] = vv[i];
 		v_sensors.push_back(m_sensors); 
+	}
+	void update(float* data){ //used for status, etc -- does not store anything in the vectors.
+		for(int i=0; i<3; i++)
+			m_sensors[i] = data[i]; 
+		for(int i=0; i<3; i++)
+			m_vel[i] = 0;
 	}
 	virtual void clear(){
 		v_sensors.clear(); 
@@ -189,7 +195,7 @@ public:
 		//gets the current location, with forward estimation. 
 		//the update operations to the relevant variables (m_sensors, m_vel)
 		//are non-atomic, but a mutex here seems like a bit much. 
-		double dt = now - m_time; 
+		double dt = 0.0; //now - m_time; 
 		for(int i=0; i<3; i++)
 			out[i] = m_sensors[i] + m_vel[i] * dt; 
 	}

@@ -39,6 +39,7 @@ hold on
 pred = world * q; 
 plot(pred(:,1), pred(:,2), 'ro'); 
 
+load('q.mat')
 qp = q'; 
 q2 = eye(4); 
 q2(1:2, 1:2) = qp(1:2, 1:2); 

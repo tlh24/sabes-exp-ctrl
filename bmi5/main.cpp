@@ -426,6 +426,7 @@ void* mmap_thread(void*){
 				write(pipe_out, (void*)&code, 4); //this so we know how much to seek in matlab.
 				write(pipe_out, resp.c_str(), resp.size()); 
 			}; 
+			string resp = {""}; 
 			auto beg = tokens.begin(); 
 			if((*beg) == string("make")){
 				beg++; 
@@ -436,10 +437,9 @@ void* mmap_thread(void*){
 					if(beg != tokens.end())
 						shp->m_name = (*beg); //name of the circle.
 					g_objs.push_back(shp); 
-					string resp = {"made a circle named "}; 
+					resp = string("made a circle named "); 
 					resp += shp->m_name; 
 					resp += {"\n"}; 
-					sendResponse(resp); 
 				}
 				if((*beg) == string("stars")){
 					beg++; 
@@ -448,10 +448,9 @@ void* mmap_thread(void*){
 					if(beg != tokens.end())
 						sf->m_name = (*beg); //name of the circle.
 					g_objs.push_back(sf); 
-					string resp = {"made a starfield named "}; 
+					resp = {"made a starfield named "}; 
 					resp += sf->m_name; 
 					resp += {"\n"}; 
-					sendResponse(resp); 
 				}
 			}
 			else if(*beg == string("tone")){
@@ -461,10 +460,9 @@ void* mmap_thread(void*){
 				if(beg != tokens.end())
 					tsz->m_name = (*beg); //name of the tone.
 				g_objs.push_back(tsz); 
-				string resp = {"made a tone generator named "}; 
+				resp = {"made a tone generator named "}; 
 				resp += tsz->m_name; 
 				resp += {"\n"}; 
-				sendResponse(resp); 
 			}
 			else if(*beg == string("store")){
 				// store <type> <size> <name>
@@ -486,39 +484,38 @@ void* mmap_thread(void*){
 									new VectorSerialize<char>(size, MAT_C_INT8); 
 								obj->m_name = name; 
 								g_objs.push_back(obj); 
-								sendResponse({"made store type char\n"}); 
+								resp = string("made store type char\n"); 
 							} else if(type == string("uchar")){
 								VectorSerialize<unsigned char>* obj = 
 									new VectorSerialize<unsigned char>(size, MAT_C_UINT8); 
 								obj->m_name = name; 
 								g_objs.push_back(obj); 
-								sendResponse({"made store type uchar\n"}); 
+								resp = ("made store type uchar\n"); 
 							} else if(type == string("int")){
 								VectorSerialize<int>* obj = 
 									new VectorSerialize<int>(size, MAT_C_INT32); 
 								obj->m_name = name; 
 								g_objs.push_back(obj); 
-								sendResponse({"made store type int\n"}); 
+								resp = ("made store type int\n"); 
 							} else if(type == string("float")){ 
 								VectorSerialize<float>* obj = 
 									new VectorSerialize<float>(size, MAT_C_SINGLE); 
 								obj->m_name = name; 
 								g_objs.push_back(obj); 
-								sendResponse({"made store type float\n"}); 
+								resp = ("made store type float\n"); 
 							} else if(type == string("double")){ 
 								VectorSerialize<double>* obj = 
 									new VectorSerialize<double>(size, MAT_C_DOUBLE); 
 								obj->m_name = name; 
 								g_objs.push_back(obj); 
-								sendResponse({"made store type double\n"}); 
+								resp = ("made store type double\n"); 
 							} else{
-								string resp = {"could not generate a store --\n"}; 
+								resp = {"could not generate a store --\n"}; 
 								resp += typedesc;
-								sendResponse(resp); 
 							}
-						} else sendResponse(error + typedesc); 
-					} else sendResponse(error + typedesc); 
-				} else sendResponse(error + typedesc); 
+						} else resp = error + typedesc; 
+					} else resp = error + typedesc; 
+				} else resp = error + typedesc; 
 			}
 			else if(*beg == string("tdtudp")){
 				// tdtudp <size> <ipaddress>
@@ -530,30 +527,28 @@ void* mmap_thread(void*){
 						string ipaddr = *beg++; 
 						int sock = openSocket((char*)ipaddr.c_str(), LISTEN_PORT); 
 						if(sock == 0){
-							sendResponse(string("could not open socket to ") + ipaddr); 
+							resp = string("could not open socket to ") + ipaddr; 
 						} else {
 							if(!checkRZ(sock)){
-								sendResponse(string("there does not seem to be an RZ2 at")+ipaddr); 
+								resp = string("there does not seem to be an RZ2 at")+ipaddr; 
 							} else {
 								TdtUdpSerialize* obj = new TdtUdpSerialize(sock, size); 
 								g_objs.push_back(obj); 
-								sendResponse(string("successfully made a UDP connection object to")+ipaddr); 
+								resp = string("successfully made a UDP connection object to")+ipaddr; 
 							}
 						}
-					} else sendResponse({"could not interpret command --\nformat is tdtudp <size> <ipaddress>\n"}); 
-				} else sendResponse({"could not interpret command --\nformat is tdtudp <size> <ipaddress>\n"}); 
+					} else resp = string("could not interpret command --\nformat is tdtudp <size> <ipaddress>\n"); 
+				} else resp = string("could not interpret command --\nformat is tdtudp <size> <ipaddress>\n"); 
 			}
 			else if(*beg == string("mmap")){
 				// return the mmapinfo.
-				string resp = getMmapStructure();
-				sendResponse(resp); 
+				resp = getMmapStructure();
 			}
 			else if(*beg == string("clear_all")){
 				printf("clearing all data in memory"); 
 				for(unsigned int i=0; i<g_objs.size(); i++)
 					g_objs[i]->clear();
-				string resp = {"cleared all stored data\n"}; 
-				sendResponse(resp); 
+				resp = {"cleared all stored data\n"}; 
 			}
 			else if(*beg == string("save")){
 				beg++; 
@@ -562,17 +557,22 @@ void* mmap_thread(void*){
 					  pthread_mutex_lock(&mutex_fwrite); 
 					writeMatlab(g_objs, (char*)fname.c_str(), false); 
 					  pthread_mutex_unlock(&mutex_fwrite); 
-					string resp = {"saved file "}; 
+					resp = string("saved file "); 
 					resp += fname; resp += {"\n"}; 
-					sendResponse(resp); 
 				}
 			}
 			else if(*beg == string("start_recording")){
 				beg++; 
 				g_record = true; 
+				resp = string("started recording."); 
+			}
+			else if(*beg == string("stop_recording")){
+				beg++; 
+				g_record = false; 
+				resp = string("stopped recording."); 
 			}
 			else{
-				string resp = {"Current command vocabulary:\n"};
+				resp = {"Current command vocabulary:\n"};
 				resp += {"\tmake circle <name>\n"}; 
 				resp += {"\tmake stars <name>\n"}; 
 				resp += {"\ttone <name>\n"};
@@ -581,12 +581,11 @@ void* mmap_thread(void*){
 				resp += {"\t\treturn mmap structure information, for eval() in matlab\n"}; 
 				resp += {"\tclear_all\n"}; 
 				resp += {"\t\tclear data stored in memory (e.g. when starting an experiment)\n"}; 
-				resp += {"\tstart_recording\n"}; 
+				resp += {"\tstart_recording\n"};
+				resp += {"\tstop_recording\n"}; 
 				resp += {"\tsave <file name>\n"}; 
-				code = resp.size(); 
-				write(pipe_out, (void*)&code, 4);
-				write(pipe_out, resp.c_str(), resp.size()); 
 			}
+			sendResponse(resp); 
 			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
 			bufn = 0; 
 		}
@@ -733,6 +732,8 @@ void* polhemusThread(void* ){
 					float* pData=(float*)(buf+8);			// header is first 8 bytes
 					if(g_record) 
 						g_polhemus->store(pData); 
+					else
+						g_polhemus->update(pData); // for status, etc.
 					frames += 1; 
 				}
 			}
