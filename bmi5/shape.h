@@ -22,7 +22,7 @@ class Shape : public Serialize {
 		vector<array<unsigned char,4>> v_color; 
 		vector<array<float,2>> v_scale; 
 		vector<array<float,2>> v_trans; 
-	Shape(void){
+	Shape(void) : Serialize(){
 		m_vao[0] = m_vao[1] = 0; 
 		m_vbo[0] = m_vbo[1] = 0; 
 		m_color[0] = m_color[1] = m_color[2] = m_color[3] = 1.f; 
@@ -255,9 +255,9 @@ class Shape : public Serialize {
 	virtual void* getStore(int indx, int i){
 		switch(indx){
 			case 0: return (void*)&((v_draw[i])); 
-			case 1: return (void*)&((v_color[i]))[0]; 
-			case 2: return (void*)&((v_scale[i]))[0]; 
-			case 3: return (void*)&((v_trans[i]))[0]; 
+			case 1: return (void*)&((v_color[i])[0]); 
+			case 2: return (void*)&((v_scale[i])[0]); 
+			case 3: return (void*)&((v_trans[i])[0]); 
 		} return NULL; 
 	}
 	virtual int numStores() {return 4;}
@@ -498,7 +498,7 @@ public: //do something like the flow field common in the lab.
 		}else{
 			indx -= Shape::numStores(); 
 			switch(indx){
-				case 0: return (void*)&((v_vel[i]))[0]; 
+				case 0: return (void*)&((v_vel[i])[0]); 
 				case 1: return (void*)&((v_coherence[i]));
 			} return NULL; 
 		}

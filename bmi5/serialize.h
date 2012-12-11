@@ -10,8 +10,11 @@ using namespace std;
 class Serialize{
 public:
 	string	m_name; 
+	int		m_lastBackup; //index+1 of last record saved to backup.
 	Serialize(){}
-	virtual ~Serialize(){ }
+	virtual ~Serialize(){
+		m_lastBackup = 0; 
+	}
 	void perr(const char* method){
 		fprintf(stderr, "\"%s\":%s must be implemented in derived classes.\n", 
 			m_name.c_str(), method); }
@@ -54,7 +57,7 @@ public:
 	vector<double> v_ticks; 
 	vector<int> v_frame; 
 	
-	TimeSerialize(){}
+	TimeSerialize() : Serialize() {}
 	~TimeSerialize(){ clear(); }
 	virtual void store(){
 		double time = gettime(); 
@@ -87,7 +90,6 @@ public:
 		dims[0] = 1; dims[1] = 1; 
 	}
 	virtual void* getStore(int indx, int i){
-		std::cout << "getStore called, " << m_name << " size " << nstored() << std::endl; 
 		switch(indx){
 			case 0: return (void*)&(v_time[i]);
 			case 1: return (void*)&(v_ticks[i]); 
@@ -151,7 +153,7 @@ public:
 	vector<double>	v_time; 
 	vector<double> v_ticks; 
 	
-	PolhemusSerialize(){
+	PolhemusSerialize() : Serialize() {
 		m_name = "polhemus_"; 
 		m_sensors[0] = m_sensors[1] = m_sensors[2] = 0.0; 
 		m_vel[0] = m_vel[1] = m_vel[2] = 0.0; 
@@ -245,7 +247,7 @@ class ToneSerialize : public Serialize {
 	vector<float> v_scale; 
 	vector<float> v_duration; 
 public:
-	ToneSerialize(){
+	ToneSerialize() : Serialize() {
 		m_name = "tone_"; 
 	}
 	~ToneSerialize(){
@@ -328,7 +330,7 @@ public:
 	vector<vector<T> > v_stor; 
 	T*		m_bs; 
 	
-	VectorSerialize(int size, int matiotype){
+	VectorSerialize(int size, int matiotype) : Serialize(){
 		m_size = size; 
 		m_type = matiotype; 
 		for(int i=0; i<size; i++){
@@ -356,13 +358,13 @@ public:
 		//coalesce the memory -- <vector<vector>> is non-continuous in memory. 
 		if(m_bs) free(m_bs); 
 		int n = nstored(); //atomic -- if we're not careful, may change during read!
-		m_bs = (T*)malloc(sizeof(T)*n*m_size); 
-		for(int i=0; i<n; i++){
+		m_bs = (T*)malloc(sizeof(T)*(n-k)*m_size); 
+		for(int i=0; i<n-k; i++){
 			for(int j=0; j<m_size; j++){
-				m_bs[j + i*m_size] = v_stor[i][j]; 
+				m_bs[j + i*m_size] = v_stor[i+k][j]; 
 			}
 		}
-		return (void*)&(m_bs[k*m_size]); 
+		return (void*)(m_bs); 
 	}
 	virtual int numStores(){ return 1; }
 	virtual double* mmapRead(double* d){
@@ -389,7 +391,7 @@ public:
 	vector<vector<float> > v_stor; 
 	float*				m_bs; 
 	
-	TdtUdpSerialize(int sock, int size){
+	TdtUdpSerialize(int sock, int size) : Serialize(){
 		//the sock should be created elsewhere -- so we can get error strings out.
 		m_sock = sock;
 		m_size = size; 
@@ -440,13 +442,14 @@ public:
 		else if(indx == 2){
 			//coalesce the memory -- <vector<vector>> is non-continuous in memory. 
 			if(m_bs) free(m_bs); 
-			m_bs = (float*)malloc(sizeof(float)*nstored()*m_size); 
-			for(int i=0; i<nstored(); i++){
+			int n = nstored(); 
+			m_bs = (float*)malloc(sizeof(float)*(n-k)*m_size); 
+			for(int i=0; i<n-k; i++){
 				for(int j=0; j<m_size; j++){
-					m_bs[j + i*m_size] = v_stor[i][j]; 
+					m_bs[j + i*m_size] = v_stor[i+k][j]; 
 				}
 			}
-			return (void*)&(m_bs[k*m_size]); 
+			return (void*)(m_bs); 
 		} else return NULL; 
 	}
 	virtual int numStores(){return 3;}
@@ -478,7 +481,7 @@ public:
 	array<float,16>				m_x; 
 	vector<array<float,16> >	v_x; 
 	
-	Matrix44Serialize(string name){
+	Matrix44Serialize(string name) : Serialize(){
 		m_name = name; 
 		for(int i=0; i<16; i++){
 			m_x[i] = 0; // Matlab ordering (column major -- same in openGL).
@@ -500,8 +503,8 @@ public:
 	virtual void getStoreDims(int, size_t* dims){
 		dims[0] = 4; dims[1] = 4; return; 
 	}
-	virtual void* getStore(int , int i){
-		return (void*)&(v_x[i]); 
+	virtual void* getStore(int , int k){
+		return (void*)&(v_x[k]); 
 	}
 	virtual int numStores(){return 1;}
 	virtual double* mmapRead(double* d){
@@ -522,7 +525,8 @@ public:
 	float* data(){ return m_x.data(); }; 
 }; 
 
-void writeMatlab(vector<Serialize*> tosave, char* filename);
+void writeMatlab(vector<Serialize*> tosave, char* filename, bool backup);
 size_t matlabFileSize(vector<Serialize*> tosave); 
 size_t mmapFileSize(vector<Serialize*> tosave); 
+bool matlabHasNewData(vector<Serialize*> tosave); 
 #endif

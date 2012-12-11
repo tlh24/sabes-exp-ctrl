@@ -10,7 +10,7 @@ world = zeros(16, 3);
 screen(:,3) = 1; 
 world(:,3) = 1; 
 pm = zeros(3); 
-% in tim's desk setup:
+% in tim's desk setup: (will differ in other setups).
 pm(1,3) = 1; % z -> x
 pm(2,2) = 1; % y -> y
 pm(3,1) = 0; % x -> 0

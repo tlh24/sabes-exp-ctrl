@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <math.h>
 #include <time.h>
 #include <arpa/inet.h>
@@ -9,7 +12,6 @@
 #include <stack>
 #include <string>
 #include <boost/tokenizer.hpp>
-#include <sys/mman.h>
 #include <fcntl.h>
 #include "matio.h"
 
@@ -61,6 +63,7 @@ bool 		g_glInitialized[2] = {false};
 bool		g_glvsync = false; 
 float		g_mousePos[2]; 
 bool		g_die = false; 
+bool		g_record = false; 
 bool		g_polhemusConnected = false; 
 GtkWindow* g_mainWindow; //used for dialogs, etc. 
 gtkglx*  g_daglx[2]; //human, monkey.
@@ -80,9 +83,12 @@ FrameSerialize* 	g_frameSerialize;
 Matrix44Serialize*	g_affine44; //used for translating world->screen coordinates.
 Matrix44Serialize*	g_quadratic44;
 PolhemusSerialize* g_polhemus; 
-vector<Serialize*> g_objs; //container for each of these, and more.
+vector<Serialize*> g_objs; //container for each of these, and more!
+
+pthread_mutex_t	mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
 
 //keep this around for controlling the microstimulator, juicer, etc.
+// n.b. superceded by TdtUdpSerialize.
 void UDP_RZ2(){
 	int sock; 
  	sock = openSocket((char*)"169.230.191.195", LISTEN_PORT); 
@@ -138,72 +144,7 @@ int hostname_to_ip(char * hostname , char* ip){
 	}
 	return 1;
 }
-//this is outdated -- synchronization is shared with gtkclient.
-void* syncThread(void*){
-	int sock; 
-	//need to do host resolution here ..
-	char ipaddr[256]; 
-	if(hostname_to_ip("GEDDA.local", ipaddr)){
-		printf("could not resolve GEDDA.local\n"); 
- 		return 0; 
-	}
- 	sock = openSocket(ipaddr, 27707); 
-	// set a timeout of 1 sec..
-	struct timeval tv;
-	tv.tv_sec = 1;
-	tv.tv_usec = 0;
-	if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv,  sizeof tv)){
-		perror("setsockopt");
-		return NULL;
-	}
-	unsigned char buf[1024]; 
-	long double skew = 0.0; 
-	long double delay = 0.0; 
-	long double gain = 0.001; 
-	long double lastupdate, fabsupdate; 
-	lastupdate = 0.0; fabsupdate = 0.0; 
-	while(!g_die){
-		//send the time, as a double.
-		double time = (double)gettime(); 
-		int n = send(sock, &time, 8, 0); 
-		if(n != 8) printf("sent length %d\n", n); 
-		//currently the socket is blocking -- will wait for data.
-		n = recv(sock, buf, 1024, 0);
-		long double recvtime = gettime(); 
-		if(n != 32){
-			if(n > 0){
-				buf[n]= 0; 
-				printf("unexpected reply: %s\n", buf); 
-			}
-		}else{
-			double* recv = (double*)buf; 
-			long double skew_delay = recvtime - recv[0]; 
-			//windows will report a skew_delay as well -- add them
-			long double ld = (recv[1] + skew_delay)/2.0; 
-			long double ls = (recv[1] - skew_delay)/2.0; 
-			long double update = ls - skew; 
-			skew = skew + gain*update; 
-			delay = 0.999*delay + 0.001*ld; //this is purely diagnostic.
-			printf("skew:%Lf delay %Lf gain %Lf metric %Lf update %Lf\n", skew, delay, gain, 
-					 lastupdate/fabsupdate, update); 
-			double g_offset = recv[2]; 
-			double g_slope = recv[3]; 
-			//use this to estimate the TDT clock. 
-			long double ticks = ((recvtime + skew)*1000.0*g_slope + g_offset); 
-			printf("estimated TDT ticks: %Lf offset %f slope %f\n", ticks, g_offset, g_slope); 
-			//update the gain.
-			if(fabsupdate > 0.0){
-				if(fabs(lastupdate)/fabsupdate > 0.2) gain += 2.1861058423e-5; 
-				else gain -= 1.2745310745e-5; 
-			}
-			if(gain > 0.5674529345) gain = 0.5674529345; if(gain < 1e-6) gain = 1e-6; 
-			lastupdate = 0.95 * lastupdate + 0.05 * update; 
-			fabsupdate = 0.95 * fabsupdate + 0.05 * fabs(update); 
-			usleep(1000); 
-		}
-	}
-	return NULL; 
-}
+
 
 void errorDialog(char* msg){
 	GtkWidget *dialog, *label, *content_area;
@@ -350,7 +291,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	g_daglx[h]->swap(); //always double buffered
 	g_openGLTimer.exit(); 
 	if(da == g_da[1]){
-		g_frameSerialize->store(g_frame); 
+		if(g_record) g_frameSerialize->store(g_frame); 
 		g_frame++; 
 	}
 	return TRUE;
@@ -463,8 +404,10 @@ void* mmap_thread(void*){
 			double* b = (double*)mmh.m_addr; 
 			for(unsigned int i=0; i<g_objs.size(); i++)
 				b = g_objs[i]->mmapRead(b); 
-			for(unsigned int i=0; i<g_objs.size(); i++)
-				g_objs[i]->store(); //store when changes were commanded.
+			if(g_record){
+				for(unsigned int i=0; i<g_objs.size(); i++)
+					g_objs[i]->store(); //store when changes were commanded.
+			}
 			// variables which are the other direction -- e.g. polhemus --
 			// should be stored when *they* are recieved. 
 			usleep(100); //let the kernel sync memory.
@@ -616,11 +559,17 @@ void* mmap_thread(void*){
 				beg++; 
 				if(beg != tokens.end()){
 					string fname = *beg; 
-					writeMatlab(g_objs, (char*)fname.c_str()); 
+					  pthread_mutex_lock(&mutex_fwrite); 
+					writeMatlab(g_objs, (char*)fname.c_str(), false); 
+					  pthread_mutex_unlock(&mutex_fwrite); 
 					string resp = {"saved file "}; 
 					resp += fname; resp += {"\n"}; 
 					sendResponse(resp); 
 				}
+			}
+			else if(*beg == string("start_recording")){
+				beg++; 
+				g_record = true; 
 			}
 			else{
 				string resp = {"Current command vocabulary:\n"};
@@ -632,14 +581,12 @@ void* mmap_thread(void*){
 				resp += {"\t\treturn mmap structure information, for eval() in matlab\n"}; 
 				resp += {"\tclear_all\n"}; 
 				resp += {"\t\tclear data stored in memory (e.g. when starting an experiment)\n"}; 
+				resp += {"\tstart_recording\n"}; 
 				resp += {"\tsave <file name>\n"}; 
 				code = resp.size(); 
 				write(pipe_out, (void*)&code, 4);
 				write(pipe_out, resp.c_str(), resp.size()); 
 			}
-			/*for (const auto& t : tokens) {
-				cout << t << "." << endl;
-			}*/
 			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
 			bufn = 0; 
 		}
@@ -648,6 +595,40 @@ void* mmap_thread(void*){
 	close (pipe_in);
 	close (pipe_out); 
 	return NULL; 
+}
+void* backup_thread(void*){
+	//find a directory, see if it exist; if not make it.
+	time_t t = time(NULL); 
+	struct tm tm = *localtime(&t); 
+	bool found = true; 
+	char dirname[256]; 
+	int i = 1; 
+	while(found){
+		snprintf(dirname, 256, "%d-%d-%d_%04d", tm.tm_year+1900, 
+					tm.tm_mon+1, tm.tm_mday, i); //maybe should have a prefix here?
+		struct stat st; 
+		int err = stat(dirname, &st);
+		if(!S_ISDIR(st.st_mode) || err < 0){ 
+			found = false; 
+			if(mkdir(dirname, 0777))
+				printf("could not mkdir %s\n", dirname); 
+		}else i++; 
+	}
+	int k=1; 
+	while(!g_die){
+		for(int j=0; j<10 && !g_die; j++)
+			sleep(1); //so it closes somewhat quickly.
+		if(!g_die && matlabHasNewData(g_objs)){
+			char fname[256]; 
+			snprintf(fname, 256, "%s/backup_%04d.mat", dirname, k); 
+			pthread_mutex_lock(&mutex_fwrite); 
+			writeMatlab(g_objs, fname, true); 
+			pthread_mutex_unlock(&mutex_fwrite); 
+			printf("... saved %s\n", fname); 
+			k++; 
+		}
+	}
+	return 0; 
 }
 /* Liberty / Polhemus. 
  as reading from USB / serial will take some time, it makes sense to 
@@ -750,19 +731,9 @@ void* polhemusThread(void* ){
 					//this data is used, move the pointer forward one. 
 					g_cbRN += 20;
 					float* pData=(float*)(buf+8);			// header is first 8 bytes
-					g_polhemus->store(pData); 
-					// print data
-					//printf("x= %.4f, y= %.4f, z= %.4f, az= %.4f, el= %.4f, roll= %.4f\n",
-					//	pData[0],pData[1],pData[2],pData[3],pData[4],pData[5]);
-					//printf("x= %.4f, y= %.4f, z= %.4f,\n",
-					//			pData[0],pData[1],pData[2]);
+					if(g_record) 
+						g_polhemus->store(pData); 
 					frames += 1; 
-					//printf("frame rate: %f\n", frames / (gettime() - starttime)); 
-					/*if(g_sensors[0][2] > 0.0){
-						g_sensors[0][0] *= -1.f;
-						g_sensors[0][1] *= -1.f;
-						//g_sensors[0][2] *= -1.f; 
-					}*/
 				}
 			}
 		}
@@ -787,7 +758,9 @@ static void saveMatlabData(gpointer, gpointer parent_window){
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT){
 		char *filename;
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-		writeMatlab(g_objs, filename); 
+		 pthread_mutex_lock(&mutex_fwrite); 
+		writeMatlab(g_objs, filename, false); 
+		 pthread_mutex_unlock(&mutex_fwrite); 
 		g_free (filename);
 	}
 	gtk_widget_destroy (dialog);
@@ -982,15 +955,18 @@ int main(int argn, char** argc){
 	g_da[1] = da2; 
 	g_timeout_add (4, refresh, da1); //250 Hz, approximate. 
 	
-	pthread_t pthread; 
+	//mutexes --
+	pthread_mutex_init(&mutex_fwrite, NULL);
+	
+	pthread_t pthread, mthread, bthread; 
 	pthread_create(&pthread, NULL, polhemusThread, NULL); 
-	pthread_t syncthread; 
-	pthread_create(&syncthread, NULL, mmap_thread, NULL); 
+	pthread_create(&mthread, NULL, mmap_thread, NULL); 
+	pthread_create(&bthread, NULL, backup_thread, NULL); 
 	
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
 	
 	//jack audio. 
-	//jackInit(); -- this needs to be a loadable module.
+	//jackInit(); -- this needs to be a loadable module, debugging with it sucks
 	
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
@@ -998,15 +974,19 @@ int main(int argn, char** argc){
 	gtk_main ();
 	
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
+	//pthread_join(mthread,NULL); 
+	pthread_join(bthread,NULL); 
 	//jackClose(0); 
 	//save data!!
-	writeMatlab(g_objs, "backup.mat"); 
-
+	writeMatlab(g_objs, "backup.mat", false); //the whole enchilada.
+	pthread_mutex_destroy(&mutex_fwrite); 
+	
 	delete g_daglx[0];
 	delete g_daglx[1]; 
 	delete g_tsc; 
 	for(unsigned int i=0; i<g_objs.size(); i++){
 		delete (g_objs[i]); 
 	}
+	
 	return 0; 
 }
