@@ -38,7 +38,7 @@ int matlabClassToBytes(int cls){
 	
 void writeMatlab(vector<Serialize*> tosave, char* filename, bool backup){
 	// warning: this function requires (potentially) a *lot* of memory!!!
-	mat_t* matfp = Mat_CreateVer(filename,NULL,MAT_FT_DEFAULT);
+	mat_t* matfp = Mat_Create(filename,NULL);
 	if ( NULL == matfp ) {
 		fprintf(stderr,"Error creating MAT file \"test.mat\"\n");
 		return;
@@ -64,9 +64,11 @@ void writeMatlab(vector<Serialize*> tosave, char* filename, bool backup){
 				void* f = tosave[j]->getStore(indx, k); //vectors are stored in a strictly linear array.
 				int typ = matlabClassToType(cls); 
 				string s = tosave[j]->storeName(indx);
-				//field = Mat_VarCreate(s.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims, f, 0); 
-				//Mat_VarWrite(matfp,field,MAT_COMPRESSION_NONE);
-				//Mat_VarFree(field);
+				int dims2[2]; 
+				dims2[0] = dims[0]; dims2[1] = dims[1]; 
+				field = Mat_VarCreate(s.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims2, f, 0); 
+				Mat_VarWrite(matfp,field,0);
+				Mat_VarFree(field);
 			}
 		}
 		if(backup) tosave[j]->m_lastBackup = n; 

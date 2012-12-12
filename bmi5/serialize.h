@@ -139,16 +139,71 @@ public:
 	}
 };
 
+class PolhemusPredict {
+public:
+	float			m_s[8][3]; //last 8 sensor measurements. 
+	long double m_t[32]; //time of the last 32 measurements (rate should be static!)
+	int			m_ptr; //circluar, obvi.
+	
+	PolhemusPredict(){
+		for(int i=0; i<24; i++)
+			m_s[0][i] = 0.f; 
+		for(int i=0; i<32; i++)
+			m_t[i] = 0.0; 
+		m_ptr = 0; 
+	}
+	~PolhemusPredict(){}
+	void add(long double time, float* s){
+		m_t[m_ptr & 31] = time; 
+		for(int i=0; i<3; i++)
+			m_s[m_ptr & 7][i] = s[i]; 
+		m_ptr++; 
+	}
+	void predict(long double time, float* s){
+		//critical assumptions: stream is actually sampled at a constant rate, 
+		//even if it does not come in at a constant rate. 
+		int n = m_ptr; 
+		long double mean = m_t[(n-1)&31] - m_t[(n+2)&31]; //don't read m_ptr -- other thread may write.
+		mean /= 29; //mean period.
+		//calculate the time of the most recent sample (n-1) in terms of last 29 samples.
+		long double avg = 0; 
+		for(int i=0; i<30; i++)
+			avg += m_t[(n-1-i)&31] + mean*i; 
+		avg /= 30; 
+		// calculate the velocity (units / sample, assuming constant sampling rate)
+		float vel[3]; 
+		for(int j=0; j<3; j++){
+			vel[j] = 0; 
+			for(int i=0; i<5; i++){
+				vel[j] += m_s[(n-1-i)&7][j] - m_s[(n-2-i)&7][j]; 
+			}
+			vel[j] /= 5; 
+		}
+		if(mean > 0.001){
+			float dt = (float)((time - avg)/mean);  
+			for(int j=0; j<3; j++){
+				float here = 0.f; 
+				for(int i=0; i<5; i++)
+					here += m_s[(n-1-i)&7][j] + vel[j]*i; //more overeager noise suppression.
+				here /= 5; 
+				s[j] = here + vel[j]*dt; 
+			}
+		}else{
+			for(int i=0; i<3; i++) s[i] = 0.f;
+		}
+	}
+};
+
 // this one's a bit different, 
 // since the polhemus thread runs *asynchronously* from the display thread.
 // ideally we want to keep an estimate of velocity, and forward-project position
 // to prevent temporal noise from coupling into spatial noise. 
 class PolhemusSerialize : public Serialize {
 public: 
+	PolhemusPredict*	m_pp; 
 	array<float,3>	m_sensors; //these here for copying to mmap.
 	double			m_time;
 	double			m_ticks; 
-	array<double,3> m_vel; 
 	vector<array<float,3>> v_sensors; 
 	vector<double>	v_time; 
 	vector<double> v_ticks; 
@@ -156,35 +211,26 @@ public:
 	PolhemusSerialize() : Serialize() {
 		m_name = "polhemus_"; 
 		m_sensors[0] = m_sensors[1] = m_sensors[2] = 0.0; 
-		m_vel[0] = m_vel[1] = m_vel[2] = 0.0; 
 		m_time = 0; 
 		m_ticks = 0; 
+		m_pp = new PolhemusPredict(); 
 	}
-	~PolhemusSerialize(){ clear(); }
+	~PolhemusSerialize(){ clear(); delete m_pp;}
 	void store(float* data){
 		double time = gettime(); 
-		//update the velocity.
-		double vv[3]; 
-		for(int i=0; i<3; i++){
-			double v = (data[i] - m_sensors[i]) / (time - m_time); 
-			vv[i] = 0.8*m_vel[i] + 0.2*v; // in mm/sec, slightly smoothed.
-			// smoothing should be ok given source b/w & sampling rate. 
-		}
+		m_pp->add(time, data); 
 		m_time = time; 
 		m_ticks = g_tsc->getTicks(); 
 		v_time.push_back(m_time); 
 		v_ticks.push_back(m_ticks); 
 		for(int i=0; i<3; i++)
 			m_sensors[i] = data[i]; 
-		for(int i=0; i<3; i++)
-			m_vel[i] = vv[i];
 		v_sensors.push_back(m_sensors); 
 	}
 	void update(float* data){ //used for status, etc -- does not store anything in the vectors.
 		for(int i=0; i<3; i++)
 			m_sensors[i] = data[i]; 
-		for(int i=0; i<3; i++)
-			m_vel[i] = 0;
+		m_pp->add(gettime(), data); 
 	}
 	virtual void clear(){
 		v_sensors.clear(); 
@@ -192,12 +238,7 @@ public:
 		v_ticks.clear(); 
 	}
 	void getLoc(double now, float* out){
-		//gets the current location, with forward estimation. 
-		//the update operations to the relevant variables (m_sensors, m_vel)
-		//are non-atomic, but a mutex here seems like a bit much. 
-		double dt = 0.0; //now - m_time; 
-		for(int i=0; i<3; i++)
-			out[i] = m_sensors[i] + m_vel[i] * dt; 
+		m_pp->predict(now, out); 
 	}
 	virtual void store(){
 		//printf("error: you must call store(float*)\n"); 
