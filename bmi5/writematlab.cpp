@@ -50,20 +50,23 @@ void writeMatlab(vector<Serialize*> tosave, char* filename, bool backup){
 	for(unsigned int j=0; j<tosave.size(); j++){
 		int n = tosave[j]->nstored(); 
 		int k = backup ? tosave[j]->m_lastBackup : 0; 
+		if(k < 0){
+			printf("m_lastBackup < 0, %s\n", tosave[j]->m_name.c_str()); 
+		}
 		for(int indx=0; indx < tosave[j]->numStores(); indx++){
 			int cls = tosave[j]->getStoreClass(indx); 
 			//get dims *before* pointer for when things are still growing!
 			size_t dims[2]; 
 			tosave[j]->getStoreDims(indx, dims); 
-			if(n > k){
+			if(n > k && k > 0){
 				dims[0] *= dims[1]; //for matrices.
 				dims[1] = n-k; 
 				void* f = tosave[j]->getStore(indx, k); //vectors are stored in a strictly linear array.
 				int typ = matlabClassToType(cls); 
 				string s = tosave[j]->storeName(indx);
-				field = Mat_VarCreate(s.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims, f, 0); 
-				Mat_VarWrite(matfp,field,MAT_COMPRESSION_NONE);
-				Mat_VarFree(field);
+				//field = Mat_VarCreate(s.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims, f, 0); 
+				//Mat_VarWrite(matfp,field,MAT_COMPRESSION_NONE);
+				//Mat_VarFree(field);
 			}
 		}
 		if(backup) tosave[j]->m_lastBackup = n; 

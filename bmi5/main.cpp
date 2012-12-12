@@ -75,7 +75,8 @@ GtkWidget* g_polhemusLabel;
 TimeSyncClient * g_tsc; 
 unsigned char			g_writeBuffer[1024*1024]; 
 PerfTimer	g_matlabTimer; 
-PerfTimer	g_openGLTimer; 
+PerfTimer	g_openGLTimer;
+VsyncTimer	g_vsyncTimer; 
 
 // matlab-interactive objects. 
 TimeSerialize* 	g_timeSerialize; 
@@ -86,6 +87,7 @@ PolhemusSerialize* g_polhemus;
 vector<Serialize*> g_objs; //container for each of these, and more!
 
 pthread_mutex_t	mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
+long double			g_nextVsyncTime = -1; 
 
 //keep this around for controlling the microstimulator, juicer, etc.
 // n.b. superceded by TdtUdpSerialize.
@@ -199,8 +201,8 @@ static gint motion_notify_event( GtkWidget *w,
 }
 typedef GLvoid  
 (*glXSwapIntervalSGIFunc) (GLint);  
-static gboolean
-configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
+static gboolean 
+  configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 {
 	int h = (int)((long long)p & 0xf);
 	if(h<0 || h>1) g_assert_not_reached ();
@@ -214,7 +216,7 @@ configure1 (GtkWidget *da, GdkEventConfigure *, gpointer p)
 		glXSwapIntervalSGI = (glXSwapIntervalSGIFunc)  
 			glXGetProcAddressARB((const GLubyte*)"glXSwapIntervalSGI");  
 		if (glXSwapIntervalSGI)  
-				glXSwapIntervalSGI (g_glvsync ? 1 : 0); 
+				glXSwapIntervalSGI(g_glvsync ? 1 : 0); 
 	}
 	
 	//save the viewport size.
@@ -279,6 +281,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	
 	/// draw objects
 	//update before the swap (smoother motion?)
+	// matlab should have already updated the relevant variables..
 	if(da == g_da[1]){ 
 		t = gettime(); 
 		for(unsigned int i=0; i<g_objs.size(); i++)
@@ -293,6 +296,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	if(da == g_da[1]){
 		if(g_record) g_frameSerialize->store(g_frame); 
 		g_frame++; 
+		g_nextVsyncTime = g_vsyncTimer.add(gettime()); 
 	}
 	return TRUE;
 }
@@ -411,8 +415,12 @@ void* mmap_thread(void*){
 			// variables which are the other direction -- e.g. polhemus --
 			// should be stored when *they* are recieved. 
 			usleep(100); //let the kernel sync memory.
+			long double tt = gettime(); 
+			long double w = g_nextVsyncTime - tt; 
+			if(w > 0)
+				usleep(w * 1e6); //wait for these matlab commands to be rendered before returning.
 			g_matlabTimer.enter(); 
-			code = 0; // = OK.
+			code = 0; // = OK -- matlab waits for this response.
 			write(pipe_out, (void*)&code, 4); 
 			bufn = 0; 
 			//printf("sent pipe_out 'go'\n"); 
@@ -695,11 +703,10 @@ void* polhemusThread(void* ){
 			//pol->Write((void*)("p"), 1); //request position data.
 			start = count = 0;
 			memset(buf, 0, 40); 
-			usleep(200);
 			do {
 				len = pol->Read(buf+start, BUF_SIZE-start); 
 				if(len>0) start+=len;
-				usleep(100);
+				usleep(300);
 			} while((len>0));
 			if(start > 0){
 				//printf("%d bytes Read\n",start);
@@ -735,6 +742,7 @@ void* polhemusThread(void* ){
 					else
 						g_polhemus->update(pData); // for status, etc.
 					frames += 1; 
+					usleep(1800); 
 				}
 			}
 		}
@@ -972,6 +980,7 @@ int main(int argn, char** argc){
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
 	
+	g_record = true; 
 	gtk_main ();
 	
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
@@ -980,7 +989,7 @@ int main(int argn, char** argc){
 	//jackClose(0); 
 	//save data!!
 	writeMatlab(g_objs, "backup.mat", false); //the whole enchilada.
-	pthread_mutex_destroy(&mutex_fwrite); 
+	pthread_mutex_destroy(&mutex_fwrite);
 	
 	delete g_daglx[0];
 	delete g_daglx[1]; 
