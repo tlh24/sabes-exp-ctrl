@@ -183,6 +183,7 @@ void updateCursPos(float x, float y){
 		g_mousePos[i] *= 2.f;
 	}
 	g_mousePos[1] *= -1; //zero at the top for gtk; bottom for opengl.
+	//printf("cursor position: %f %f\n", g_mousePos[0], g_mousePos[1]); 
 }
 static gint motion_notify_event( GtkWidget *w,
                                  GdkEventMotion *){
@@ -196,7 +197,6 @@ static gint motion_notify_event( GtkWidget *w,
 	gdk_window_get_device_position (gtk_widget_get_window (w), pointer, &ix, &iy, NULL);
 	x = ix; y = iy;
 	updateCursPos(x,y); 
-	printf("cursor position: %f %f\n", x, y); 
 	return TRUE;
 }
 typedef GLvoid  
@@ -334,7 +334,9 @@ static gboolean refresh (gpointer ){
 	
 	float loc[3];  
 	g_polhemus->getLoc(gettime(), loc); 
-	snprintf(str, 256, "x %4.2f cm\ny %4.2f cm\nz %4.2f cm", loc[0], loc[1], loc[2]); 
+	string con = g_polhemusConnected ? string("connected"):string("disconnected:using cursor"); 
+	snprintf(str, 256, "%s\nx %4.2f cm\ny %4.2f cm\nz %4.2f cm", 
+				con.c_str(), loc[0], loc[1], loc[2]); 
 	gtk_label_set_text(GTK_LABEL(g_polhemusLabel), str); 
 	return TRUE;
 }
@@ -651,7 +653,7 @@ char g_circBuff[1024];
 unsigned int g_cbPtr = 0; 
 unsigned int g_cbRN = 0; //pointer to the last carrige return.
 
-void* polhemusThread(void* ){
+void* polhemus_thread(void* ){
 	
 	unsigned char buf[BUF_SIZE];
 	int count, start, len, i;
@@ -667,39 +669,55 @@ void* polhemusThread(void* ){
 	//fail = pol->UsbConnect(TRKR_LIB); //see polhemus.h
 	fail = pol->Rs232Connect(deviceName.c_str(), 115200); 
 	if(fail){
-		cout << deviceName << " could not establish a rs232 connection to the Polhemus"; 
+		cout << deviceName << " could not open a rs232 connection to the Polhemus"; 
 		cout << endl; 
 		cout << "try sudo chmod 770 " << deviceName << endl; 
 		g_polhemusConnected = false; 
-		return NULL; 
 	}else{
-		cout << "polhemus connected via rs232 on" << deviceName << endl; 
+		cout << "polhemus connecting via rs232 on " << deviceName << endl; 
  		g_polhemusConnected = true;
 	}
 	//flush the buffer, sync things up.
 	count = 0; 
+	int rxbytes = 0; 
 	do {
 		if(count <20)
 			pol->Write("p"); //request position data (and stop continuous..)
 		usleep(5000); 
-		len=pol->Read(buf,BUF_SIZE);  // keep trying till we get a response
+		len = pol->Read(buf,BUF_SIZE);  // keep trying till we get a response
+		if(len > 0)rxbytes += len; 
 		count++; 
 	} while (len > 0);
-	cout << "connection established to Polhemus .." << endl; 
-	// first establish comm and clear out any residual trash data
-	double frames = 0; 
-	//now put it in binary (faster than ascii!) mode:
-	pol->Write("f1\r"); 
-	usleep(5000);
-	len = pol->Read(buf, BUF_SIZE); //throw away.
-	usleep(5000);
-	// we only care about x, y, z -- faster (lower latency) transmission.
-	pol->Write("O*,2\r"); //this command turns off sending Euler angles. 
-	pol->Write("c\r"); //request continuous data.
-	// and read the data in a loop.
-	g_cbPtr = g_cbRN = 0; 
-	while(!g_die){
-		if(1){ //binary communication. slow?
+	
+	if(rxbytes <= 0){
+		g_polhemusConnected = false; 
+		cout << "could not connect to polhemus, switcing to mouse control." << endl; 
+		while(!g_die){
+			float synth[3]; 
+			synth[0] = g_mousePos[0]; 
+			synth[1] = g_mousePos[1]; 
+			synth[2] = 0; 
+			if(g_record) 
+				g_polhemus->store(synth); 
+			else
+				g_polhemus->update(synth); 
+			usleep(1e6/240); 
+		}
+	} else {
+		cout << "connection established to Polhemus .." << endl; 
+		// first establish comm and clear out any residual trash data
+		double frames = 0; 
+		//now put it in binary (faster than ascii!) mode:
+		pol->Write("f1\r"); 
+		usleep(5000);
+		len = pol->Read(buf, BUF_SIZE); //throw away.
+		usleep(5000);
+		// we only care about x, y, z -- faster (lower latency) transmission.
+		pol->Write("O*,2\r"); //this command turns off sending Euler angles. 
+		pol->Write("c\r"); //request continuous data.
+		// and read the data in a loop.
+		g_cbPtr = g_cbRN = 0; 
+		while(!g_die){
 			//pol->Write((void*)("p"), 1); //request position data.
 			start = count = 0;
 			memset(buf, 0, 40); 
@@ -709,7 +727,6 @@ void* polhemusThread(void* ){
 				usleep(300);
 			} while((len>0));
 			if(start > 0){
-				//printf("%d bytes Read\n",start);
 				//frame starts with 'LY_P', and is 8 bytes. This is followed by 3 4-byte floats.
 				//total frame is hence 20 bytes. 
 				for(i=0; i<start; i++){
@@ -746,9 +763,9 @@ void* polhemusThread(void* ){
 				}
 			}
 		}
+		pol->Write((void*)("p"), 1); //stop continuous mode.
+		usleep(500); 
 	}
-	pol->Write((void*)("p"), 1); //stop continuous mode.
-	usleep(500); 
 	pol->Close(); 
 	return NULL;
 }
@@ -968,7 +985,7 @@ int main(int argn, char** argc){
 	pthread_mutex_init(&mutex_fwrite, NULL);
 	
 	pthread_t pthread, mthread, bthread; 
-	pthread_create(&pthread, NULL, polhemusThread, NULL); 
+	pthread_create(&pthread, NULL, polhemus_thread, NULL); 
 	pthread_create(&mthread, NULL, mmap_thread, NULL); 
 	pthread_create(&bthread, NULL, backup_thread, NULL); 
 	

@@ -1,4 +1,4 @@
-function [screen,world] = bmi5_calibrate()
+function [] = bmi5_calibrate(mouse)
 global m2; 
 % reset the affine transform.
 m2.Data(1).affine_m44 = eye(4); 
@@ -11,9 +11,13 @@ screen(:,3) = 1;
 world(:,3) = 1; 
 pm = zeros(3); 
 % in tim's desk setup: (will differ in other setups).
-pm(1,3) = 1; % z -> x
-pm(2,2) = 1; % y -> y
-pm(3,1) = 0; % x -> 0
+if(mouse)
+	pm = eye(3);% mouse control.
+else
+	pm(1,3) = 1; % z -> x
+	pm(2,2) = 1; % y -> y
+	pm(3,1) = 0; % x -> 0
+end
 i=1;
 for yi = 1:4
 	for xi = 1:4
@@ -38,17 +42,8 @@ plot(screen(:,1), screen(:,2), 'bo');
 hold on
 pred = world * q; 
 plot(pred(:,1), pred(:,2), 'ro'); 
-
-load('q.mat')
-qp = q'; 
-q2 = eye(4); 
-q2(1:2, 1:2) = qp(1:2, 1:2); 
-q2(1:2, 4) = qp(1:2, 3); 
-m2.Data(1).affine_m44 = q2; 
-bmi5_sync(); 
-
-while(1)
-	p = pm * m2.Data(1).polhemus_sensors;
-	m2.Data(1).target_trans = p(1:2); 
-	bmi5_sync(); 
+if(mouse)
+	save('calibration_mouse.mat','q','pm'); 
+else
+	save('calibration.mat','q','pm'); 
 end
