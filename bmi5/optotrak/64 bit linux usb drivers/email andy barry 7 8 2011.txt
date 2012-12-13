@@ -1,0 +1,23 @@
+Hi Melanie,
+
+Sure, no worries.  The README file explains how to install the driver
+and also how to build it from source.  Someone knowledgeable with
+Linux shouldn't have too much trouble.
+
+
+My full kernel string is:
+
+abarry@AAAZZZ:~$ uname -a
+Linux AAAZZZ 2.6.32-32-generic #62-Ubuntu SMP Wed Apr 20 21:52:38 UTC
+2011 x86_64 GNU/Linux
+
+so the short answer is I'm running it on 2.6.32-32.  I've included
+64-bit and 32-bit binaries, so both should work.
+
+
+Let me know if you have any trouble with it.
+
+
+Best,
+
+Andy

@@ -196,7 +196,7 @@ static gint motion_notify_event( GtkWidget *w,
 	gdk_window_get_device_position (gtk_widget_get_window (w), pointer, &ix, &iy, NULL);
 	x = ix; y = iy;
 	updateCursPos(x,y); 
-	//printf("cursor position: %f %f\n", x, y); 
+	printf("cursor position: %f %f\n", x, y); 
 	return TRUE;
 }
 typedef GLvoid  
