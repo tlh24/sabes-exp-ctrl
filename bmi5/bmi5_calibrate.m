@@ -1,7 +1,7 @@
 function [] = bmi5_calibrate(mouse)
-global m2; 
+global b5; 
 % reset the affine transform.
-m2.Data(1).affine_m44 = eye(4); 
+b5.affine_m44 = eye(4); 
 bmi5_sync(); 
 % first ask for a set of points. 
 w = linspace(-0.8, 0.8, 4); 
@@ -23,13 +23,13 @@ for yi = 1:4
 	for xi = 1:4
 		x = w(xi); 
 		y = w(yi); 
-		m2.Data(1).target_trans = [x ; y]; 
+		b5.target_trans = [x ; y]; 
 		screen(i,1) = x; 
 		screen(i,2) = y; 
 		bmi5_sync(); 
 		pause(1); 
 		bmi5_sync(); % update sensors.
-		p = (pm * m2.Data(1).polhemus_sensors)'; 
+		p = (pm * b5.polhemus_sensors_o)'; 
 		world(i,1:2) = p(1:2);
 		i=i+1;
 	end

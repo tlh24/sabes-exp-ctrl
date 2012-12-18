@@ -39,7 +39,16 @@ public:
 			getStoreDims(indx, dims); 
 			string stor = storeName(indx); 
 			oss << "\t'double' [" << dims[0] << " " << dims[1] << "] '" << stor << "';...\n"; 
-			//printf("\t'double' [%ld %ld] '%s';...\n", dims[0], dims[1], stor.c_str()); 
+		}
+		return oss.str(); 
+	}
+	virtual string getStructInfo(){
+		std::stringstream oss;
+		size_t dims[2]; 
+		for(int indx = 0; indx < numStores(); indx++){
+			getStoreDims(indx, dims); 
+			string stor = storeName(indx); 
+			oss << "b5." << stor << " = zeros(" << dims[0] << "," << dims[1] << ");\n"; 
 		}
 		return oss.str(); 
 	}
@@ -74,9 +83,9 @@ public:
 	virtual int nstored(){return v_time.size(); }
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("time"); 
-			case 1: return m_name + string("ticks"); 
-			case 2: return m_name + string("frame"); 
+			case 0: return m_name + string("time_o"); 
+			case 1: return m_name + string("ticks_o"); 
+			case 2: return m_name + string("frame_o"); 
 		} return string("none"); 
 	}
 	virtual int getStoreClass(int indx){
@@ -98,7 +107,7 @@ public:
 	}
 	virtual int numStores(){ return 3; }
 	virtual double* mmapRead(double* d){
-		//this is actually a write! 
+		//this is actually a write (all variables output) 
 		double time = gettime(); 
 		double ticks = g_tsc->getTicks(); 
 		*d++ = time; 
@@ -246,9 +255,9 @@ public:
 	virtual int nstored(){return v_sensors.size();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("sensors"); 
-			case 1: return m_name + string("time"); 
-			case 2: return m_name + string("ticks"); 
+			case 0: return m_name + string("sensors_o"); 
+			case 1: return m_name + string("time_o"); 
+			case 2: return m_name + string("ticks_o"); 
 		} return string{"none"};
 	}
 	virtual int getStoreClass(int indx){
@@ -311,8 +320,8 @@ public:
 	virtual int nstored(){return v_time.size();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("time");
-			case 1: return m_name + string("ticks"); 
+			case 0: return m_name + string("time"); //these are not output--
+			case 1: return m_name + string("ticks"); //only saved in file (below).
 			case 2: return m_name + string("freq"); 
 			case 3: return m_name + string("pan"); 
 			case 4: return m_name + string("scale"); 
@@ -396,7 +405,7 @@ public:
 		v_stor.clear(); 
 	}
 	virtual int nstored(){ return v_stor.size(); }
-	virtual string storeName(int ){ return m_name; }
+	virtual string storeName(int ){ return m_name; } //no _o -- variables are input.
 	virtual int getStoreClass(int ){ return m_type; }
 	virtual void getStoreDims(int, size_t* dims){
 		dims[0] = m_size; dims[1] = 1; return;
@@ -462,8 +471,8 @@ public:
 	virtual int nstored(){ return v_stor.size(); }
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("time"); 
-			case 1: return m_name + string("ticks"); 
+			case 0: return m_name + string("time"); //only saved
+			case 1: return m_name + string("ticks"); //in file.
 			case 2: return m_name + string("udp"); 
 		} return string{"none"};
 	}
