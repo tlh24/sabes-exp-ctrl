@@ -342,12 +342,11 @@ static gboolean refresh (gpointer ){
 }
 string getMmapStructure(){
 	std::stringstream oss; 
-	oss << "m2 = memmapfile('/tmp/bmi5_control', 'Format', {...\n"; 
+	oss << "% mmap structure (pass to bmi5_mmap())\n"; 
+	oss << "mex bmi5_mmap.cpp % to make sure you have the latest version.
 	for(unsigned int i=0; i<g_objs.size(); i++){
-		oss << g_objs[i]->getMmapInfo(); 
+		oss << g_objs[i]->getStructInfo(); 
 	}
-	oss << "\t});\n"; 
-	oss << "m2.Writable = true;"; 
 	return oss.str();
 }
 static void printMmapStructure(GtkWidget*, gpointer ){
