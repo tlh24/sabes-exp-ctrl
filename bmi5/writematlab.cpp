@@ -58,7 +58,7 @@ void writeMatlab(vector<Serialize*> tosave, char* filename, bool backup){
 			//get dims *before* pointer for when things are still growing!
 			size_t dims[2]; 
 			tosave[j]->getStoreDims(indx, dims); 
-			if(n > k && k > 0){
+			if(n > k && k >= 0){
 				dims[0] *= dims[1]; //for matrices.
 				dims[1] = n-k; 
 				void* f = tosave[j]->getStore(indx, k); //vectors are stored in a strictly linear array.

@@ -39,23 +39,18 @@ bmi5_cmd('go.');
 
 bmi5_cmd('start_recording'); 
 
-n = 200
+n = 20000
 tic
 for i=1:n
-	m2.Data(1).cursor_trans = sin(toc()/4)*[sin(toc()); cos(toc())]; 
+    theta = m2.Data(1).time; 
+	m2.Data(1).cursor_trans = sin(theta/4)*[sin(theta); cos(theta)]; 
 	m2.Data(1).target_trans = -1* m2.Data(1).cursor_trans; 
-	m2.Data(1).stars_vel = 0.1*[sin(toc()); cos(toc())]; 
-	m2.Data(1).trial = [i; floor(i/10); floor(i/100)]; 
+	m2.Data(1).stars_vel = 0.1*[sin(theta); cos(theta)]; 
+	% m2.Data(1).trial = [i; floor(i/10); floor(i/100)]; 
 	% tell bmi5 to set these parameters -- it's read is blocking.
-	fwrite(bmi5_in, 'go.'); 
-	% if bmi5 has to do anything, it will block on this read. 
-	% could e.g. wait for vsync.
-	code = fread(bmi5_out, 1, 'int');
-	if(code ~= 0)
-		disp('unexpected response from bmi5_out pipe'); 
-	end
-	disp(['frame ' num2str(m2.Data(1).frame)]); 
-	disp(['ticks ' num2str(m2.Data(1).ticks)]); 
+    bmi5_sync(); 
+	%disp(['frame ' num2str(m2.Data(1).frame)]); 
+	%disp(['ticks ' num2str(m2.Data(1).ticks)]); 
 end
 d = toc()
 frame_rate = n/d

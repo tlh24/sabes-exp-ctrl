@@ -657,7 +657,7 @@ void* polhemus_thread(void* ){
 	
 	unsigned char buf[BUF_SIZE];
 	int count, start, len, i;
-	string deviceName = {"/dev/ttyS0"}; 
+	string deviceName = {"/dev/ttyS1"}; 
 	
 	//init the communication obj.
 	polhemus* pol = new polhemus(); 
@@ -671,7 +671,8 @@ void* polhemus_thread(void* ){
 	if(fail){
 		cout << deviceName << " could not open a rs232 connection to the Polhemus"; 
 		cout << endl; 
-		cout << "try sudo chmod 770 " << deviceName << endl; 
+		cout << "> try sudo usermod -a -G dialout <username>" << endl;
+		cout << "> then logout and log back in." << endl; 
 		g_polhemusConnected = false; 
 	}else{
 		cout << "polhemus connecting via rs232 on " << deviceName << endl; 
@@ -691,7 +692,7 @@ void* polhemus_thread(void* ){
 	
 	if(rxbytes <= 0){
 		g_polhemusConnected = false; 
-		cout << "could not connect to polhemus, switcing to mouse control." << endl; 
+		cout << "could not connect to polhemus, switching to mouse control." << endl; 
 		while(!g_die){
 			float synth[3]; 
 			synth[0] = g_mousePos[0]; 
