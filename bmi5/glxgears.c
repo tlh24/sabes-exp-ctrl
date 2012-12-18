@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -49,18 +50,22 @@
 #include <time.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <vector>
 
 
 #ifndef M_PI
 #define M_PI 3.14159265
 #endif
 
+using namespace std; 
 
 static GLfloat view_rotx = 20.0, view_roty = 30.0, view_rotz = 0.0;
 static GLint gear1, gear2, gear3;
 static GLfloat angle = 0.0;
 
 long double g_startTime = 0.0;
+vector<double> g_times; 
+vector<double> g_times_pre; 
 
 long double gettime(){ /*in seconds!*/
 	timespec pt ;
@@ -411,17 +416,19 @@ event_loop(Display *dpy, Window win)
 
       /* next frame */
 		if(rt)
-			angle = gettime() * 30.0; 
+			angle = gettime() * 50.0; 
       else
-			angle += 0.01;
+			angle += 0.25;
 
       draw();
+		long double t2 = gettime();
       glXSwapBuffers(dpy, win);
+		long double t = gettime();
+		g_times_pre.push_back((double)t2); 
+		g_times.push_back((double)t);
 
       /* calc framerate */
       {
-         long double t = gettime();
-
          if (t0 < 0)
             t0 = t;
 
@@ -442,13 +449,13 @@ event_loop(Display *dpy, Window win)
    }
 }
 
+Display *dpy;
+Window win;
+GLXContext ctx;
 
 int
 main(int argc, char *argv[])
 {
-   Display *dpy;
-   Window win;
-   GLXContext ctx;
    char *dpyName = NULL;
    GLboolean printInfo = GL_FALSE;
    int i;
@@ -490,6 +497,15 @@ main(int argc, char *argv[])
    glXDestroyContext(dpy, ctx);
    XDestroyWindow(dpy, win);
    XCloseDisplay(dpy);
+	
+	//print out the frame times. 
+	FILE* fid = fopen("glxgears_timing.txt", "w"); 
+	if(fid){
+		for(unsigned int i=0; i<g_times.size(); i++){
+			fprintf(fid, "%f\t%f\n", g_times[i], g_times_pre[i]); 
+		}
+		fclose(fid); 
+	}
 
    return 0;
 }

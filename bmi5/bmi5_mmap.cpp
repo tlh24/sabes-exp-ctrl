@@ -7,20 +7,19 @@ void mexFunction( int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ] )
 	//we can do better.
 	//call this mex function to pass commands; returns new values; 
 	//does not do synchronization (at present). 
-	size_t length = 256*8; //mmapFileSize(g_objs); 
-	mmapHelp mmh(length, "/tmp/bmi5_control"); 
-	double* b = (double*)mmh.m_addr; 
+	size_t length = 256*8;
+	mmapHelp mmh(length, "/tmp/bmi5_control", false); // probably too much time here..
+	double* b = (double*)mmh.m_addr; // but matlab does not easily support persistent data structures. 
 	
-	int nelements = mxGetNumberOfElements(prhs[0]); 
 	int nfields = mxGetNumberOfFields(prhs[0]); 
-	//mexPrintf("nelements %d nfields %d \n", nelements, nfields); 
 	
 	for(int f=0; f<nfields; f++){
 		const char* fieldname = mxGetFieldNameByNumber(prhs[0], f); 
-		int sl = strlen(fieldname); 
 		bool out = false; 
-		if(fieldname[sl-1] == 'o' && fieldname[sl-2] == '_')
-			out = true; //output of bmi5.
+		for(int j=0; j<256 && fieldname[j]; j++){
+			if(fieldname[j] == '_' && fieldname[j+1] == 'o')
+				out = true; 
+		}
 		mxArray* field = mxGetFieldByNumber(prhs[0], 0, f); 
 		if(field){
 			int m = mxGetM(field); 
@@ -29,12 +28,9 @@ void mexFunction( int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ] )
 			double* data = (double*)mxGetData(field); 
 			if(data){
 				if(!out){
-					//mexPrintf("contents: "); 
 					for(int j=0; j<m*n; j++){
 						*b++ = data[j]; 
-						//mexPrintf("%f ", data[j]); 
 					}
-					//mexPrintf("\n"); 
 				}else{
 					for(int j=0; j<m*n; j++)
 						data[j] = *b++;
@@ -42,7 +38,30 @@ void mexFunction( int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ] )
 			}
 		}
 	}
-	if(nlhs != 0){
-		mexPrintf("nlhs = %d\n", nlhs); 
+	//sync here, to save time.
+	int pipe_in = open("bmi5_in", O_RDWR); 
+	if(pipe_in <= 0){
+		char buf[256];
+		getcwd(buf, 256); 
+		buf[255] = 0; 
+		mexPrintf("could not open ./bmi5_in (make with mkfifo); %s\n", buf); 
+	}else{
+		write(pipe_in, (void*)"go.", 3); 
+		close(pipe_in); 
+	}
+	int pipe_out = open("bmi5_out", O_RDWR); 
+	int ret = 0; 
+	if(pipe_out <= 0){
+		mexPrintf("could not open ./bmi5_out (make with mkfifo)\n"); 
+	}else{
+		read(pipe_out, (void*)&ret, sizeof(int)); 
+		close(pipe_out); 
+	}
+	if(nlhs != 1){
+		mexPrintf("nlhs = %d, should be 1.\n", nlhs); 
+	}else{
+		plhs[0] = mxCreateDoubleMatrix(1,1,mxREAL);
+    	double* outMatrix = mxGetPr(plhs[0]);
+		outMatrix[0] = (double)ret; 
 	}
 }

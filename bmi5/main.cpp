@@ -343,7 +343,7 @@ static gboolean refresh (gpointer ){
 string getMmapStructure(){
 	std::stringstream oss; 
 	oss << "% mmap structure (pass to bmi5_mmap())\n"; 
-	oss << "mex bmi5_mmap.cpp % to make sure you have the latest version.
+	oss << "mex -O bmi5_mmap.cpp % to make sure you have the latest version.\n"; 
 	for(unsigned int i=0; i<g_objs.size(); i++){
 		oss << g_objs[i]->getStructInfo(); 
 	}
@@ -415,11 +415,7 @@ void* mmap_thread(void*){
 			}
 			// variables which are the other direction -- e.g. polhemus --
 			// should be stored when *they* are recieved. 
-			usleep(100); //let the kernel sync memory.
-			long double tt = gettime(); 
-			long double w = g_nextVsyncTime - tt; 
-			if(w > 0)
-				usleep(w * 1e6); //wait for these matlab commands to be rendered before returning.
+			usleep(100); //let the kernel sync memory (required..)
 			g_matlabTimer.enter(); 
 			code = 0; // = OK -- matlab waits for this response.
 			write(pipe_out, (void*)&code, 4); 
@@ -889,8 +885,8 @@ int main(int argn, char** argc){
 	//setup the opengl context for da1.
 	//before we do this, tun on FSAA. 
 	putenv( "__GL_FSAA_MODE=10" ); //http://www.opengl.org/discussion_boards/showthread.php/172000-Programmatically-controlling-level-of-AA
-	putenv("__GL_SYNC_TO_VBLANK=0"); //don't sync to vertical blanking.  individually per window.
-	putenv("__GL_SYNC_DISPLAY_DEVICE=DFP-3"); //sync to this display device. 
+	putenv("__GL_SYNC_TO_VBLANK=1"); //don't sync to vertical blanking.  individually per window.
+	putenv("__GL_SYNC_DISPLAY_DEVICE=CRT-1"); //sync to this display device. (use nvidia-settings)
 	gtk_widget_set_double_buffered (da1, FALSE);
 	g_daglx[0] = new gtkglx(da1); 
  

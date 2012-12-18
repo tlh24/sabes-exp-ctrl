@@ -25,8 +25,11 @@ main.o : main.cpp shape.h gtkglx.h serialize.h
 bmi5: $(OBJS) $(FIFOS)
 	$(CC) -o $@ $(GTKLD) $(LDFLAGS) -lmatio $(OBJS)
 	
+glxgears: glxgears.c
+	$(CC) -O3 -o $@ -lrt -lGL $<
+	
 clean:
-	rm -rf *.o bmi5
+	rm -rf *.o bmi5 glxgears
 	
 bmi5_in: 
 	mkfifo $@
