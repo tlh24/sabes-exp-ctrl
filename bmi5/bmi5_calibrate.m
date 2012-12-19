@@ -1,4 +1,5 @@
 function [] = bmi5_calibrate(mouse)
+pause(10); 
 global b5; 
 % reset the affine transform.
 b5.affine_m44 = eye(4); 
@@ -14,8 +15,8 @@ pm = zeros(3);
 if(mouse)
 	pm = eye(3);% mouse control.
 else
-	pm(1,3) = 1; % z -> x
-	pm(2,2) = 1; % y -> y
+	pm(1,2) = -1; % y -> x
+	pm(2,3) = -1; % z -> y
 	pm(3,1) = 0; % x -> 0
 end
 i=1;
@@ -26,9 +27,11 @@ for yi = 1:4
 		b5.target_trans = [x ; y]; 
 		screen(i,1) = x; 
 		screen(i,2) = y; 
-		bmi5_sync(); 
-		pause(1); 
-		bmi5_sync(); % update sensors.
+		bmi5_mmap(b5); 
+		pause(2); 
+        for h=1:30
+            bmi5_mmap(b5); % update sensors.
+        end
 		p = (pm * b5.polhemus_sensors_o)'; 
 		world(i,1:2) = p(1:2);
 		i=i+1;
