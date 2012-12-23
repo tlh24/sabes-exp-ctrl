@@ -8,3 +8,7 @@ stream: PO8eTest.cpp
 
 clean:
 	rm -rf stream *.o
+	
+install:
+	sudo cp libPO8eStreaming.so /usr/local/lib/
+	sudo ldconfig -v | grep PO8

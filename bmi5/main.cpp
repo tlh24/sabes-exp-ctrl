@@ -520,9 +520,9 @@ void* mmap_thread(void*){
 				write(pipe_out, (void*)&code, 4);
 				write(pipe_out, resp.c_str(), resp.size()); 
 			}
-			/*for (const auto& t : tokens) {
+			for (const auto& t : tokens) {
 				cout << t << "." << endl;
-			}*/
+			}
 			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
 			bufn = 0; 
 		}
