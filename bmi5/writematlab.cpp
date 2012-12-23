@@ -12,13 +12,15 @@
 #include "gettime.h"
 #include "timesync.h"
 #include "jacksnd.h"
+#include "tdt_udp.h"
 #include "serialize.h"
 
 int matlabClassToType(int cls){
 	switch(cls) {
 		case MAT_C_SINGLE: return MAT_T_SINGLE; 
 		case MAT_C_DOUBLE: return MAT_T_DOUBLE; 
-		case MAT_C_UINT8: return MAT_T_UINT8; 
+		case MAT_C_UINT8: return MAT_T_UINT8;
+		case MAT_C_INT8: return MAT_T_INT8; 
 		case MAT_C_INT32: return MAT_T_INT32; 
 	}
 	return 0; 
@@ -27,89 +29,51 @@ int matlabClassToBytes(int cls){
 	switch(cls) {
 		case MAT_C_SINGLE: return 4; 
 		case MAT_C_DOUBLE: return 8; 
-		case MAT_C_UINT8: return 1; 
+		case MAT_C_UINT8: return 1;
+		case MAT_C_INT8: return 1; 
 		case MAT_C_INT32: return 4; 
 	}
 	return 0; 
 }
 	
-void writeMatlab(vector<Serialize*> tosave, char* filename){
-	// warning: this function requires a *lot* of memory!!!
-	const char* fieldnames[256]; 
-	int nfn = 0; 
-	for(unsigned int j=0; j<tosave.size(); j++){
-		for(int indx=0; indx < tosave[j]->numStores(); indx++){
-			string stor = tosave[j]->storeName(indx); 
-			char* s = (char*)malloc(stor.size()+1); 
-			strcpy(s, stor.c_str()); 
-			s[stor.size()] = 0; 
-			fieldnames[nfn] = s; // have to be careful to free() this!
-			nfn++; 
-		}
-	}
-	mat_t* matfp = Mat_CreateVer(filename,NULL,MAT_FT_DEFAULT);
+void writeMatlab(vector<Serialize*> tosave, char* filename, bool backup){
+	// warning: this function requires (potentially) a *lot* of memory!!!
+	mat_t* matfp = Mat_Create(filename,NULL);
 	if ( NULL == matfp ) {
 		fprintf(stderr,"Error creating MAT file \"test.mat\"\n");
 		return;
 	}
-	size_t struct_dims[2] = {1,1}; 
-	int nstored = tosave[0]->nstored(); 
-	struct_dims[0] = nstored; 
-	// TDT calls their things tanks, which is a reservoir of water, so we can call ours tarn.
-	// tarns are much cooler than tanks.
 	matvar_t *field; 
-	//two ways of formatting the file. 
-	if(0){
-		//1. in a structure. 
-		// write out in chronological order ...
-		matvar_t* matvar = Mat_VarCreateStruct("tarn", 2,struct_dims,fieldnames,nfn);
-		if ( NULL == matvar ) {
-			fprintf(stderr,"Error creating variable for ’tarn’\n");
-			Mat_Close(matfp);
-			return;
+	//method 2 of writing files: individual variables. 
+	// (method 1 depreciated)
+	// write out individual feilds, one at a time, to save memory.
+	for(unsigned int j=0; j<tosave.size(); j++){
+		int n = tosave[j]->nstored(); 
+		int k = backup ? tosave[j]->m_lastBackup : 0; 
+		if(k < 0){
+			printf("m_lastBackup < 0, %s\n", tosave[j]->m_name.c_str()); 
 		}
-		size_t dims[2] = {1,1}; 
-		for(int i=0; i<nstored; i++){
-			for(unsigned int j=0; j<tosave.size(); j++){
-				for(int indx=0; indx < tosave[j]->numStores(); indx++){
-					void* f = tosave[j]->getStore(indx, i); 
-					int cls = tosave[j]->getStoreClass(indx); 
-					tosave[j]->getStoreDims(indx, dims); 
-					int typ = matlabClassToType(cls); 
-					field = Mat_VarCreate(NULL, (matio_classes)cls, (matio_types)typ, 2, dims, f, 0); 
-					string s = tosave[j]->storeName(indx);
-					Mat_VarSetStructFieldByName(matvar, s.c_str(), i, field);
-				}
-			}
-		}
-		//write it all out. 
-		Mat_VarWrite(matfp,matvar,MAT_COMPRESSION_NONE);
-		Mat_VarFree(matvar);
-		Mat_Close(matfp);
-	} else {
-		//2. individual variables. 
-		// write out individual feilds, one at a time, to save memory.
-		for(unsigned int j=0; j<tosave.size(); j++){
-			for(int indx=0; indx < tosave[j]->numStores(); indx++){
-				void* f = tosave[j]->getStore(indx, 0); //vectors are stored in a strictly linear array.
-				int cls = tosave[j]->getStoreClass(indx); 
-				size_t dims[2]; 
-				tosave[j]->getStoreDims(indx, dims); 
-				dims[1] = tosave[j]->nstored(); 
+		for(int indx=0; indx < tosave[j]->numStores(); indx++){
+			int cls = tosave[j]->getStoreClass(indx); 
+			//get dims *before* pointer for when things are still growing!
+			size_t dims[2]; 
+			tosave[j]->getStoreDims(indx, dims); 
+			if(n > k && k >= 0){
+				dims[0] *= dims[1]; //for matrices.
+				dims[1] = n-k; 
+				void* f = tosave[j]->getStore(indx, k); //vectors are stored in a strictly linear array.
 				int typ = matlabClassToType(cls); 
 				string s = tosave[j]->storeName(indx);
-				string t = string{"d_"} + s; //prevent namespace pollution? 
-				field = Mat_VarCreate(t.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims, f, 0); 
-				Mat_VarWrite(matfp,field,MAT_COMPRESSION_NONE);
+				int dims2[2]; 
+				dims2[0] = dims[0]; dims2[1] = dims[1]; 
+				field = Mat_VarCreate(s.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims2, f, 0); 
+				Mat_VarWrite(matfp,field,0);
 				Mat_VarFree(field);
 			}
 		}
-		Mat_Close(matfp);
+		if(backup) tosave[j]->m_lastBackup = n; 
 	}
-	while(nfn > 0){
-		nfn--; 
-		free((void*)fieldnames[nfn]); 
-	}
+	Mat_Close(matfp);
 }
 size_t matlabFileSize(vector<Serialize*> tosave){
 	size_t n = 0; 
@@ -134,4 +98,12 @@ size_t mmapFileSize(vector<Serialize*> tosave){
 		}
 	}
 	return n; 
+}
+bool matlabHasNewData(vector<Serialize*> tosave){
+	for(unsigned int j=0; j<tosave.size(); j++){
+		int n = tosave[j]->nstored(); 
+		int k = tosave[j]->m_lastBackup; 
+		if( n > k ) return true; 
+	}
+	return false; 
 }

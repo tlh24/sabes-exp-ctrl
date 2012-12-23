@@ -37,6 +37,14 @@ int openSocket(char *strIPAddr, int port){
 	}
 	int optval = 1; // turn on address reuse. 
 	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)); 
+	//set timeout on these so if there is no RZ2, they rx does not block forever. 
+	struct timeval timeout;      
+	timeout.tv_sec = 1;
+	timeout.tv_usec = 0;
+	if(setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
+		fprintf(stderr,"setsockopt failed\n");
+	if(setsockopt (sock, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
+		fprintf(stderr,"setsockopt failed\n");
 
 	// Flip uses connect rather than bind here -- so outgoing packets have a default endpoint.
 	if (connect(sock, (struct sockaddr*)&sin, sizeof(sockaddr_in)) != 0)
@@ -51,11 +59,10 @@ int openSocket(char *strIPAddr, int port){
 	return sock;
 }
 
-bool checkRZ(int sock)
-{
+bool checkRZ(int sock){
 	char req[HEADER_BYTES] = COMMAND_HEADER(GET_VERSION), resp[1024];
 	if (send(sock, req, HEADER_BYTES, 0) != HEADER_BYTES){
-		fprintf(stderr, "Failed to send GET_VERSION packet:\n"); 
+		fprintf(stderr, "RZ: Failed to send GET_VERSION packet:\n"); 
 		perror(":");
 	}
 
@@ -66,58 +73,51 @@ bool checkRZ(int sock)
 
 	char packet[HEADER_BYTES] = COMMAND_HEADER(SET_REMOTE_IP);
 	if (send(sock, packet, HEADER_BYTES, 0) != HEADER_BYTES){
-		fprintf(stderr, "Failed to send \"start sending\" packet:\n"); 
+		fprintf(stderr, "RZ: Failed to send \"start sending\" packet:\n"); 
 		perror(":");
 	}
 	//TODO: does it reply? discard packet if it does.
-
 	return true;
 }
 
-
-
-bool sendData(int sock, double *data, int count)
-{
+bool sendDataRZ(int sock, float *data, int count){
 	char *packet;
-    bool retval = false;
+	bool retval = false;
 	int i;
-
 	// Allocate packet
 	packet = new char[4+4*count];
-	
+
 	// Get header and load into packet
 	char header[4] = DATA_HEADER((char)count);
-	for(i=0; i<4; i++) packet[i]=header[i];
+	for(i=0; i<4; i++) 
+		packet[i]=header[i];
 
 	// Load data (as floats)
-    for(i=0; i<count; i++)
-		((float*)(packet + HEADER_BYTES))[i] = (float)(data[i]);
+	float *f = (float*)(packet + HEADER_BYTES); 
+	for(i=0; i<count; i++)
+		f[i] = (float)(data[i]);
 
-    // match the byte ordering of the RZ communication
-    uint32_t *udata = (uint32_t*)(packet + HEADER_BYTES);
-    for(i=0; i<count; i++)
-        udata[i] = htonl(udata[i]);
-
-    // send the data over the UDP connection
-    if (send(sock, packet, 4 + count * 4, 0) == 4 + count * 4)
-        retval = true;
-
+	// match the byte ordering of the RZ communication
+	uint32_t *udata = (uint32_t*)f;
+	for(i=0; i<count; i++)
+		udata[i] = htonl(udata[i]);
+	// send the data over the UDP connection
+	if (send(sock, packet, 4 + count * 4, 0) == 4 + count * 4)
+		retval = true;
 	// Close
-		  free(packet); 
-    return retval;
+	free(packet); 
+	return retval;
 }
 
 void disconnectRZ(int sock)
 {
-    if (sock != INVALID_SOCKET)
-    {
-        char packet[HEADER_BYTES] = COMMAND_HEADER(FORGET_REMOTE_IP);
-        if (send(sock, packet, HEADER_BYTES, 0) != HEADER_BYTES){
-            fprintf(stderr, "Failed to send \"stop sending\" packet.\n");
-		  		perror(":");
-	 		}
-
-        close(sock);
-        sock = INVALID_SOCKET;
-    }
+	if (sock != INVALID_SOCKET){
+		char packet[HEADER_BYTES] = COMMAND_HEADER(FORGET_REMOTE_IP);
+		if (send(sock, packet, HEADER_BYTES, 0) != HEADER_BYTES){
+			fprintf(stderr, "Failed to send \"stop sending\" packet.\n");
+			perror(":");
+		}
+		close(sock);
+		sock = INVALID_SOCKET;
+	}
 }
