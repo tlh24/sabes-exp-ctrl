@@ -66,7 +66,11 @@ CFLAGS	+= \
 	-Wno-unused-parameter \
 	-Wno-unused-value \
 	-DPLATFORM_LINUX \
-	-I ../ndlib/include -I ./
+	-I ../ndlib/include -I ./ 
+# 	-Wl,--rpath=/opt/eglibc/lib \
+# 	-Wl,--rpath-link=/opt/eglibc/lib \
+# 	-Wl,--dynamic-linker=/opt/eglibc/lib/ld-linux-x86-64.so.2
+#	-I/opt/eglibc/include 
 
 LDFLAGS = -lm -loapi -ldl
 

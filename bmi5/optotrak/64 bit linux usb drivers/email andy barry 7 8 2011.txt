@@ -21,3 +21,29 @@ Let me know if you have any trouble with it.
 Best,
 
 Andy
+
+---- tlh's notes: 
+(1) Need ftdi's drivers, http://www.ftdichip.com/Drivers/D2XX.htm
+(now included in the repository). 
+they are supplied as binaries, pretty simple to install. 
+
+(2) Install NDI's oapi. 
+cd optotrak/NDIoapi/ndlib/lib
+sudo cp liboapi.so /usr/local/lib
+sudo ldconfig
+
+(3) sudo apt-get install libusb-dev (not libusb-1.0-0-dev)
+
+(4) build usblink.so -- will be copied to /usr/local/lib. 
+
+(5) copy NDoapi to /opt/
+
+(6) export ND_DIR="/opt/NDIoapi/ndigital"
+	and add it to your ~/.bashrc
+	
+(7) libftdi2xx requires glib version 2.14 -- but debian has version 2.13-37. 
+	Therefore we need to install eglibc version 2.14 (testing this..)
+	i've installed it to /opt/eglibc/
+	You'll need to make /opt/eglibc/etc/ld.so.conf with the line
+	/opt/eglibc/lib
+	then make install.

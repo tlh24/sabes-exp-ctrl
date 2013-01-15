@@ -1,12 +1,12 @@
 #!/bin/bash
 
 echo "Compiling..."
-gcc -fPIC -g -c -Wall usblink.c -I /opt/NDIoapi/ndlib/include/ -I /usr/include/libusb-1.0 -DPLATFORM_LINUX
+gcc -fPIC -g -c -Wall usblink.c -I../../../NDIoapi/ndlib/include/ -I /usr/include/libusb-1.0 -DPLATFORM_LINUX
 
 echo "Building shared library..."
-gcc -shared -Wl,-soname,usblink.so.1 -o usblink.so.1 usblink.o -loapi -lftd2xx -lusb
+gcc -shared -Wl,-soname,usblink.so.1 -o usblink.so.1 usblink.o -loapi libftd2xx.a -lusb
 
-#echo "Copying file..."
-#cp usblink.so.1 /opt/NDIoapi/ndigital/usblink.so
+echo "Copying file..."
+sudo cp usblink.so.1 /opt/NDIoapi/ndigital/usblink.so
 
 echo "done."

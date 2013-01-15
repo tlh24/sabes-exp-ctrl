@@ -184,7 +184,7 @@ void Pause( float fSec )
 
 static FT_HANDLE OpenUSBDevice( int nType, int nId )
 {
-
+	printf("usblink.c: OpenUSBDevice(%d, %d)\n", nType, nId); 
 	FT_HANDLE	hndl = 0;	
 	unsigned 	i;
 	DWORD		dwDevs;

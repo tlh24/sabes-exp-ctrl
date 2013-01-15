@@ -50,7 +50,10 @@ Application Files Included
 *****************************************************************/
 #include "certus_aux.h"
 #include "ot_aux.h"
-
+/*
+http://stackoverflow.com/questions/4032373/linking-against-an-old-version-of-libc-to-provide-greater-application-coverage/5977518#5977518
+*/
+__asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
 
 void main( int argc, unsigned char *argv[] )
 {
