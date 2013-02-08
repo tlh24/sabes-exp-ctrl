@@ -39,13 +39,8 @@ bmi5_out:
 	
 deps:
 	sudo apt-get install gdb libgtk-3-dev libgtkglext1-dev freeglut3-dev \
-<<<<<<< HEAD
-	libusb-1.0-0-dev libglew-dev libjack-jackd2-dev \
-	libblas-dev liblapack-dev libfftw3-dev libhdf5-dev
-=======
 	libmatio-dev libusb-1.0-0-dev libglew-dev libjack-jackd2-dev \
 	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl
->>>>>>> 1f38b94bfc8f6eff598aa8fdf97085092ce3221a
 	mkfifo bmi5_out
 	mkfifo bmi5_in
 	
