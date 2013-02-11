@@ -382,11 +382,32 @@ void* mmap_thread(void*){
 	size_t length = 256*8; //mmapFileSize(g_objs); 
 	mmapHelp mmh(length, "/tmp/bmi5_control"); 
 	
+	struct stat sb;
+
+	int fret = mkfifo("bmi5_out", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP); // rw, user & group
+	if (fret == 0) {
+		printf("mkfifo ./bmi5_out\n");
+	}
+	else {
+		if (errno == EEXIST) {
+			stat("bmi5_out",&sb);
+			if ((sb.st_mode & S_IFMT) != S_IFIFO) {
+				printf("./bmi5_out exists but is not a fifo\n");
+				g_die = true; // xxx how to die immediately?
+			}
+		}
+		else {
+			perror("error creating ./bmi5_out:");
+			g_die = true; // xxx how to die immediately?
+		}
+	}
+
 	int pipe_out = open("bmi5_out", O_RDWR); 
 	if(pipe_out <= 0){
 		perror("could not open ./bmi5_out (make with mkfifo)\n"); 
 		return NULL; 
 	}
+
 	int pipe_in = open("bmi5_in", O_RDWR); 
 	if(pipe_in <= 0){
 		perror("could not open ./bmi5_in (make with mkfifo)\n"); 
