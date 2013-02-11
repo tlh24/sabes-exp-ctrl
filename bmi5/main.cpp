@@ -91,6 +91,7 @@ long double			g_nextVsyncTime = -1;
 
 //keep this around for controlling the microstimulator, juicer, etc.
 // n.b. superceded by TdtUdpSerialize.
+/*
 void UDP_RZ2(){
 	int sock; 
  	sock = openSocket((char*)"169.230.191.195", LISTEN_PORT); 
@@ -129,6 +130,7 @@ void UDP_RZ2(){
 		}
 	}
 }
+*/
 int hostname_to_ip(char * hostname , char* ip){
 	struct hostent *he;
 	struct in_addr **addr_list;
@@ -905,9 +907,9 @@ int main(int argn, char** argc){
 	
 	//setup the opengl context for da1.
 	//before we do this, tun on FSAA. 
-	putenv( "__GL_FSAA_MODE=10" ); //http://www.opengl.org/discussion_boards/showthread.php/172000-Programmatically-controlling-level-of-AA
-	putenv("__GL_SYNC_TO_VBLANK=0"); //don't sync to vertical blanking.  individually per window.
-	putenv("__GL_SYNC_DISPLAY_DEVICE=CRT-1"); //sync to this display device. (use nvidia-settings)
+	putenv((char *)"__GL_FSAA_MODE=10" ); //http://www.opengl.org/discussion_boards/showthread.php/172000-Programmatically-controlling-level-of-AA
+	putenv((char *)"__GL_SYNC_TO_VBLANK=0"); //don't sync to vertical blanking.  individually per window.
+	putenv((char *)"__GL_SYNC_DISPLAY_DEVICE=CRT-1"); //sync to this display device. (use nvidia-settings)
 	gtk_widget_set_double_buffered (da1, FALSE);
 	g_daglx[0] = new gtkglx(da1); 
  
@@ -1022,7 +1024,7 @@ int main(int argn, char** argc){
 	pthread_join(bthread,NULL); 
 	//jackClose(0); 
 	//save data!!
-	writeMatlab(g_objs, "backup.mat", false); //the whole enchilada.
+	writeMatlab(g_objs, (char *)"backup.mat", false); //the whole enchilada.
 	pthread_mutex_destroy(&mutex_fwrite);
 	
 	delete g_daglx[0];
