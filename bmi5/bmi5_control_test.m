@@ -1,9 +1,9 @@
 % test the connection with bmi5 as well. 
 global bmi5_in bmi5_out b5; 
-cd('/home/tlh24/sabes-exp-ctrl/bmi5');
+cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5');
 
-bmi5_out = fopen('/home/tlh24/sabes-exp-ctrl/bmi5/bmi5_out', 'r'); 
-bmi5_in = fopen('/home/tlh24/sabes-exp-ctrl/bmi5/bmi5_in', 'w'); 
+bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
+bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
 % initial settings -- setup a cursor and a starfield.
 bmi5_cmd('store float 3 trial'); 
@@ -33,7 +33,8 @@ b5.affine_m44 = eye(4);
 b5.quadratic_m44 = zeros(4); 
 
 b5.stars_coherence = 0.5; 
-b5.stars_scale = [1; 1]; %necessary! -- defaults to 0.
+b5.stars_scale = [1 ; 1]; %necessary! -- defaults to 0.
+b5.stars_vel = [0.5 ; 0.5];
 
 code = bmi5_mmap(b5); 
 
