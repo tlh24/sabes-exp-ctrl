@@ -1,3 +1,7 @@
+# The following can be set at the commandline
+# ie: make USE_DEBUG=true
+USE_DEBUG = false
+
 CPP = g++
 CC  = gcc
 
@@ -8,7 +12,13 @@ CFLAGS := -I/usr/local/include -I../../myopen/common_host
 CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
 -Wextra -Werror -pedantic -std=c++11 -rdynamic
-CFLAGS += -O3 -DDEBUG
+
+ifeq ($(strip $(USE_DEBUG)),true)
+  CFLAGS += -g -DDEBUG
+else
+  CLFAGS += -O3
+endif
+
 
 LDFLAGS = -rdynamic -lrt -lGL -lGLU -lGLEW -lusb-1.0 -lhdf5 -ljack
 GLIBS = gtk+-3.0
