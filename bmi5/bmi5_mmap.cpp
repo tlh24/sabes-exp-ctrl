@@ -2,13 +2,17 @@
 #include <string.h>
 #include "../../myopen/common_host/mmaphelp.h"
 
+#define BMI5_CTRL_MMAP	"/tmp/bmi5_control.mmap"
+#define BMI5_IN_FIFO	"/tmp/bmi5_in.fifo"
+#define BMI5_OUT_FIFO	"/tmp/bmi5_out.fifo"
+
 void mexFunction( int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ] ) {
 	//matlab built-in mmap funtionality too slow (scales with # of variables). 
 	//we can do better.
 	//call this mex function to pass commands; returns new values; 
 	//does not do synchronization (at present). 
 	size_t length = 256*8;
-	mmapHelp mmh(length, "/tmp/bmi5_control", false); // probably too much time here..
+	mmapHelp mmh(length, BMI5_CTRL_MMAP, false); // probably too much time here..
 	double* b = (double*)mmh.m_addr; // but matlab does not easily support persistent data structures. 
 	
 	if(nrhs == 1){
@@ -42,20 +46,20 @@ void mexFunction( int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ] )
 		mexPrintf("bmi5_mmap: please supply the b5 structure as an argument.\n"); 
 	}
 	//sync here, to save time.
-	int pipe_in = open("bmi5_in", O_RDWR); 
+	int pipe_in = open(BMI5_IN_FIFO, O_RDWR); 
 	if(pipe_in <= 0){
 		char buf[256];
 		getcwd(buf, 256); 
 		buf[255] = 0; 
-		mexPrintf("bmi5_mmap: could not open ./bmi5_in (make with mkfifo); %s\n", buf); 
+		mexPrintf("bmi5_mmap: could not open fifo: %s; %s\n", BMI5_IN_FIFO, buf); 
 	}else{
 		write(pipe_in, (void*)"go.", 3); 
 		close(pipe_in); 
 	}
-	int pipe_out = open("bmi5_out", O_RDWR); 
+	int pipe_out = open(BMI5_OUT_FIFO, O_RDWR); 
 	int ret = 0; 
 	if(pipe_out <= 0){
-		mexPrintf("bmi5_mmap: could not open ./bmi5_out (make with mkfifo)\n"); 
+		mexPrintf("bmi5_mmap: could not open fifo: %s\n",BMI5_OUT_FIFO); 
 	}else{
 		read(pipe_out, (void*)&ret, sizeof(int)); 
 		close(pipe_out); 

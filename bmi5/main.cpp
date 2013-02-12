@@ -51,13 +51,18 @@
 #include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
+#include "fifohelp.h"
 
 using namespace std;
 using namespace boost;
 
-double 	g_frameRate = 0.0; 
-long double		g_lastFrame = 0.0; 
-int		g_frame = 0;
+#define BMI5_CTRL_MMAP	"/tmp/bmi5_control.mmap"
+#define BMI5_IN_FIFO	"/tmp/bmi5_in.fifo"
+#define BMI5_OUT_FIFO	"/tmp/bmi5_out.fifo"
+
+double 		g_frameRate = 0.0; 
+long double	g_lastFrame = 0.0; 
+int			g_frame = 0;
 int 		g_nCommand = 0; //number of matlab commands recieved.
 bool 		g_glInitialized[2] = {false};
 bool		g_glvsync = false; 
@@ -65,28 +70,28 @@ float		g_mousePos[2];
 bool		g_die = false; 
 bool		g_record = false; 
 bool		g_polhemusConnected = false; 
-GtkWindow* g_mainWindow; //used for dialogs, etc. 
-gtkglx*  g_daglx[2]; //human, monkey.
-GtkWidget* g_da[2]; //draw areas. 
-GtkWidget* g_timeLabel; 
-GtkWidget* g_matlabTimeLabel; 
-GtkWidget* g_openglTimeLabel; 
-GtkWidget* g_polhemusLabel; 
+GtkWindow* 	g_mainWindow; //used for dialogs, etc. 
+gtkglx*  	g_daglx[2]; //human, monkey.
+GtkWidget* 	g_da[2]; //draw areas. 
+GtkWidget* 	g_timeLabel; 
+GtkWidget* 	g_matlabTimeLabel; 
+GtkWidget* 	g_openglTimeLabel; 
+GtkWidget* 	g_polhemusLabel; 
 TimeSyncClient * g_tsc; 
-unsigned char			g_writeBuffer[1024*1024]; 
+unsigned char g_writeBuffer[1024*1024]; 
 PerfTimer	g_matlabTimer; 
 PerfTimer	g_openGLTimer;
 VsyncTimer	g_vsyncTimer; 
 
 // matlab-interactive objects. 
-TimeSerialize* 	g_timeSerialize; 
+TimeSerialize* 		g_timeSerialize; 
 FrameSerialize* 	g_frameSerialize; 
 Matrix44Serialize*	g_affine44; //used for translating world->screen coordinates.
 Matrix44Serialize*	g_quadratic44;
-PolhemusSerialize* g_polhemus; 
-vector<Serialize*> g_objs; //container for each of these, and more!
+PolhemusSerialize* 	g_polhemus; 
+vector<Serialize*> 	g_objs; //container for each of these, and more!
 
-pthread_mutex_t	mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
+pthread_mutex_t		mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
 long double			g_nextVsyncTime = -1; 
 
 //keep this around for controlling the microstimulator, juicer, etc.
@@ -130,7 +135,6 @@ void UDP_RZ2(){
 		}
 	}
 }
-*/
 int hostname_to_ip(char * hostname , char* ip){
 	struct hostent *he;
 	struct in_addr **addr_list;
@@ -148,6 +152,7 @@ int hostname_to_ip(char * hostname , char* ip){
 	}
 	return 1;
 }
+*/
 
 
 void errorDialog(char* msg){
@@ -187,8 +192,7 @@ void updateCursPos(float x, float y){
 	g_mousePos[1] *= -1; //zero at the top for gtk; bottom for opengl.
 	//printf("cursor position: %f %f\n", g_mousePos[0], g_mousePos[1]); 
 }
-static gint motion_notify_event( GtkWidget *w,
-                                 GdkEventMotion *){
+static gint motion_notify_event( GtkWidget *w, GdkEventMotion *){
 	float x, y;
 	int ix, iy;
 	GdkDeviceManager *device_manager;
@@ -382,47 +386,21 @@ void flush_pipe(int fid){
 /* matlab interaction -- through shared memory. */
 void* mmap_thread(void*){
 	size_t length = 256*8; //mmapFileSize(g_objs); 
-	mmapHelp mmh(length, "/tmp/bmi5_control"); 
+	mmapHelp mmh(length, BMI5_CTRL_MMAP);
+	mmh.prinfo();
+
+	fifoHelp pipe_in(BMI5_IN_FIFO);
+	pipe_in.prinfo();
+
+	fifoHelp pipe_out(BMI5_OUT_FIFO);
+	pipe_out.prinfo();
 	
-	struct stat sb;
-
-	int fret = mkfifo("bmi5_out", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP); // rw, user & group
-	if (fret == 0) {
-		printf("mkfifo ./bmi5_out\n");
-	}
-	else {
-		if (errno == EEXIST) {
-			stat("bmi5_out",&sb);
-			if ((sb.st_mode & S_IFMT) != S_IFIFO) {
-				printf("./bmi5_out exists but is not a fifo\n");
-				g_die = true; // xxx how to die immediately?
-			}
-		}
-		else {
-			perror("error creating ./bmi5_out:");
-			g_die = true; // xxx how to die immediately?
-		}
-	}
-
-	int pipe_out = open("bmi5_out", O_RDWR); 
-	if(pipe_out <= 0){
-		perror("could not open ./bmi5_out (make with mkfifo)\n"); 
-		return NULL; 
-	}
-
-	int pipe_in = open("bmi5_in", O_RDWR); 
-	if(pipe_in <= 0){
-		perror("could not open ./bmi5_in (make with mkfifo)\n"); 
-		return NULL; 
-	}
-	mmh.prinfo(); 
-
 	char buf[256]; int bufn = 0; 
-	flush_pipe(pipe_out); 
+	flush_pipe(pipe_out.m_fd); 
 	int code = 0; 
 	while(!g_die){
 		//printf("%d waiting for matlab...\n", frame); 
-		int r = read(pipe_in, &(buf[bufn]), 256);
+		int r = read(pipe_in.m_fd, &(buf[bufn]), 256);
 		if(r > 0) bufn += r; 
 		buf[bufn] = 0; 
 		//printf("%d read %d %s\n", frame, r, buf); 
@@ -441,9 +419,8 @@ void* mmap_thread(void*){
 			usleep(100); //let the kernel sync memory (required..)
 			g_matlabTimer.enter(); 
 			code = 0; // = OK -- matlab waits for this response.
-			write(pipe_out, (void*)&code, 4); 
+			write(pipe_out.m_fd, (void*)&code, 4); 
 			bufn = 0; 
-			//printf("sent pipe_out 'go'\n"); 
 		} else {
 			//setup command? 
 			string txt = string(buf); 
@@ -451,8 +428,8 @@ void* mmap_thread(void*){
 			tokenizer<char_separator<char> > tokens(txt, sep);
 			auto sendResponse = [&](string resp){
 				code = resp.size(); 
-				write(pipe_out, (void*)&code, 4); //this so we know how much to seek in matlab.
-				write(pipe_out, resp.c_str(), resp.size()); 
+				write(pipe_out.m_fd, (void*)&code, 4); //this so we know how much to seek in matlab.
+				write(pipe_out.m_fd, resp.c_str(), resp.size()); 
 			}; 
 			string resp = {""}; 
 			auto beg = tokens.begin(); 
@@ -619,8 +596,6 @@ void* mmap_thread(void*){
 		}
 		g_nCommand++; 
 	}
-	close (pipe_in);
-	close (pipe_out); 
 	return NULL; 
 }
 void* backup_thread(void*){
