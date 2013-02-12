@@ -662,13 +662,12 @@ void* polhemus_thread(void* ){
 	//fail = pol->UsbConnect(TRKR_LIB); //see polhemus.h
 	fail = pol->Rs232Connect(deviceName.c_str(), 115200); 
 	if(fail){
-		cout << deviceName << " could not open a rs232 connection to the Polhemus"; 
-		cout << endl; 
-		cout << "> try sudo usermod -a -G dialout <username>" << endl;
-		cout << "> then logout and log back in." << endl; 
+		printf("could not open via rs232 to Polhemus on %s\n", deviceName.c_str()); 
+		printf("> try sudo usermod -a -G dialout <username>");
+		printf("> then logout and log back in.");
 		g_polhemusConnected = false; 
 	}else{
-		cout << "polhemus connecting via rs232 on " << deviceName << endl; 
+		printf("connecting to polhemus via rs232 on %s\n", deviceName.c_str());
  		g_polhemusConnected = true;
 	}
 	//flush the buffer, sync things up.
@@ -677,7 +676,7 @@ void* polhemus_thread(void* ){
 	do {
 		if(count <20)
 			pol->Write("p"); //request position data (and stop continuous..)
-		usleep(5000); 
+		usleep(10000); 
 		len = pol->Read(buf,BUF_SIZE);  // keep trying till we get a response
 		if(len > 0)rxbytes += len; 
 		count++; 
