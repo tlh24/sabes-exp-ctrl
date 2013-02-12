@@ -19,12 +19,10 @@ else
   CLFAGS += -O3
 endif
 
-
 LDFLAGS = -rdynamic -lrt -lGL -lGLU -lGLEW -lusb-1.0 -lhdf5 -ljack
 GLIBS = gtk+-3.0
 GTKFLAGS = `pkg-config --cflags $(GLIBS) `
 GTKLD = `pkg-config --libs $(GLIBS) `
-FIFOS = bmi5_in bmi5_out
 
 all: bmi5
 
@@ -36,7 +34,7 @@ main.o : main.cpp shape.h gtkglx.h serialize.h
 %.o: ../../myopen/common_host/%.cpp\
 	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
 
-bmi5: $(OBJS) $(FIFOS)
+bmi5: $(OBJS)
 	$(CPP) -o $@ $(GTKLD) $(LDFLAGS) -lmatio $(OBJS)
 	
 glxgears: glxgears.c
@@ -45,16 +43,8 @@ glxgears: glxgears.c
 clean:
 	rm -rf *.o bmi5 glxgears
 	
-bmi5_in: 
-	mkfifo $@
-	
-bmi5_out:
-	mkfifo $@
-	
 deps:
 	sudo apt-get install gdb libgtk-3-dev libgtkglext1-dev freeglut3-dev \
 	libmatio-dev libusb-1.0-0-dev libglew-dev libjack-jackd2-dev \
 	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl
-	mkfifo bmi5_out
-	mkfifo bmi5_in
 	
