@@ -36,14 +36,15 @@
 #include <gtksourceview/gtksourcestyleschememanager.h>
 #include <gtksourceview/gtksourceprintcompositor.h>
 #include <gtksourceview/gtksourceview-typebuiltins.h>
+//#include "srcView.h"
 #ifdef TEST_XML_MEM
 #include <libxml/xmlreader.h>
 #endif
 
 /* Global list of open windows */
 
-static GList *windows = NULL;
 static GtkSourceStyleScheme *style_scheme = NULL;
+extern void luaRunString(char* str); 
 
 /* Private data structures */
 
@@ -55,8 +56,9 @@ static GtkSourceStyleScheme *style_scheme = NULL;
 
 /* Private prototypes -------------------------------------------------------- */
 
-static void       open_file_cb                   (GtkAction       *action,
-						  gpointer         user_data);
+static void       open_file_cb(GtkAction  *action, gpointer user_data);
+static void       save_file_cb(GtkAction *action, gpointer user_data);
+static void       execute_buffer_cb(GtkAction *action, gpointer user_data);
 static void       print_file_cb                  (GtkAction       *action,
 						  gpointer         user_data);
 static void       find_cb			 (GtkAction       *action,
@@ -100,7 +102,7 @@ static void       backward_string_cb             (GtkAction       *action,
 						  gpointer         user_data);
 
 
-static GtkWidget *create_view_window             (GtkSourceBuffer *buffer,
+static GtkWidget *create_view_window             (GtkWidget* top, GtkSourceBuffer *buffer,
 						  GtkSourceView   *from);
 
 
@@ -109,6 +111,10 @@ static GtkWidget *create_view_window             (GtkSourceBuffer *buffer,
 static GtkActionEntry buffer_action_entries[] = {
 	{ "Open", GTK_STOCK_OPEN, "_Open", "<control>O",
 	  "Open a file", G_CALLBACK (open_file_cb) },
+	{ "Save", GTK_STOCK_SAVE, "_Save", "<control>S",
+	  "Save this file", G_CALLBACK (save_file_cb) },
+	{ "Execute", GTK_STOCK_SAVE, "_Execute", "F5",
+	  "Run this file", G_CALLBACK (execute_buffer_cb) },
 	{ "Quit", GTK_STOCK_QUIT, "_Quit", "<control>Q",
 	  "Exit the application", G_CALLBACK (gtk_main_quit) }
 };
@@ -167,11 +173,11 @@ static GtkToggleActionEntry toggle_entries[] = {
 };
 
 static GtkRadioActionEntry tabs_radio_entries[] = {
+	{ "TabWidth3", NULL, "3", NULL, "Set tabulation width to 3 spaces", 3 },
 	{ "TabWidth4", NULL, "4", NULL, "Set tabulation width to 4 spaces", 4 },
 	{ "TabWidth6", NULL, "6", NULL, "Set tabulation width to 6 spaces", 6 },
 	{ "TabWidth8", NULL, "8", NULL, "Set tabulation width to 8 spaces", 8 },
-	{ "TabWidth10", NULL, "10", NULL, "Set tabulation width to 10 spaces", 10 },
-	{ "TabWidth12", NULL, "12", NULL, "Set tabulation width to 12 spaces", 12 }
+	{ "TabWidth10", NULL, "10", NULL, "Set tabulation width to 10 spaces", 10 }
 };
 
 static GtkRadioActionEntry indent_radio_entries[] = {
@@ -218,11 +224,11 @@ static const gchar *view_ui_description =
 "      <menuitem action=\"InsertSpaces\"/>"
 "      <separator/>"
 "      <menu action=\"TabWidth\">"
+"        <menuitem action=\"TabWidth3\"/>"
 "        <menuitem action=\"TabWidth4\"/>"
 "        <menuitem action=\"TabWidth6\"/>"
 "        <menuitem action=\"TabWidth8\"/>"
 "        <menuitem action=\"TabWidth10\"/>"
-"        <menuitem action=\"TabWidth12\"/>"
 "      </menu>"
 "      <menu action=\"IndentWidth\">"
 "        <menuitem action=\"IndentWidthUnset\"/>"
@@ -251,6 +257,8 @@ static const gchar *buffer_ui_description =
 "  <menubar name=\"MainMenu\">"
 "    <menu action=\"FileMenu\">"
 "      <menuitem action=\"Open\"/>"
+"      <menuitem action=\"Save\"/>"
+"      <menuitem action=\"Execute\"/>"
 "      <menuitem action=\"Print\"/>"
 "      <menuitem action=\"Find\"/>"
 "      <menuitem action=\"Replace\"/>"
@@ -425,7 +433,7 @@ get_language (GtkTextBuffer *buffer, const gchar *filename)
 	return language;
 }
 
-static gboolean
+gboolean
 open_file (GtkSourceBuffer *buffer, const gchar *filename)
 {
 	GtkSourceLanguage *language = NULL;
@@ -493,6 +501,30 @@ out:
 	return success;
 }
 
+gboolean
+save_file (GtkSourceBuffer *buffer)
+{
+	gboolean success = FALSE; 
+	GtkTextIter start, end;
+	char *text;
+	gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(buffer), 
+										&start, &end);
+	text = gtk_text_buffer_get_text(GTK_TEXT_BUFFER(buffer), 
+											 &start, &end, TRUE);
+	// get the filename stored in the gobject properties.
+	char* filename = (char*)g_object_get_data (G_OBJECT (buffer), "filename"); 
+	
+	FILE* fid = fopen(filename, "w"); 
+	if(fid){
+		fwrite(text, 1, strlen(text), fid); 
+		success = TRUE; 
+		fclose(fid); 
+	}else{
+		printf("could not save file %s\n", filename); 
+	}
+	g_free (text);
+	return success;
+}
 
 /* View action callbacks -------------------------------------------------------- */
 
@@ -633,10 +665,11 @@ smart_home_end_toggled_cb (GtkAction *action,
 			(GTK_RADIO_ACTION (action)));
 }
 
+
 static void
-new_view_cb (GtkAction *, gpointer user_data)
+new_view_cb (GtkAction *, gpointer )
 {
-	GtkSourceBuffer *buffer;
+	/*GtkSourceBuffer *buffer;
 	GtkSourceView *view;
 	GtkWidget *window;
 
@@ -647,7 +680,7 @@ new_view_cb (GtkAction *, gpointer user_data)
 
 	window = create_view_window (buffer, view);
 	gtk_window_set_default_size (GTK_WINDOW (window), 400, 400);
-	gtk_widget_show (window);
+	gtk_widget_show (window);*/
 }
 
 static void
@@ -893,6 +926,26 @@ open_file_cb (GtkAction *, gpointer user_data)
 	}
 
 	gtk_widget_destroy (chooser);
+}
+
+static void
+save_file_cb (GtkAction *, gpointer user_data){
+	save_file(GTK_SOURCE_BUFFER(user_data)); 
+}
+
+static void
+execute_buffer_cb (GtkAction *, gpointer user_data){
+
+	GtkSourceBuffer *buffer = GTK_SOURCE_BUFFER(user_data); 
+	gboolean success = FALSE; 
+	GtkTextIter start, end;
+	char *text;
+	gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(buffer), 
+										&start, &end);
+	text = gtk_text_buffer_get_text(GTK_TEXT_BUFFER(buffer), 
+											 &start, &end, TRUE);
+	luaRunString(text); 
+	g_free (text);
 }
 
 #define NON_BLOCKING_PAGINATION
@@ -1172,41 +1225,6 @@ move_cursor_cb (GtkTextBuffer *buffer,
 	update_cursor_position (buffer, user_data);
 }
 
-static gboolean
-window_deleted_cb (GtkWidget *widget, GdkEvent *, gpointer user_data)
-{
-	g_return_val_if_fail (GTK_SOURCE_IS_VIEW (user_data), TRUE);
-
-	if (g_list_nth_data (windows, 0) == widget)
-	{
-		/* Main (first in the list) window was closed, so exit
-		 * the application */
-		gtk_main_quit ();
-	}
-	else
-	{
-		GtkSourceView *view = GTK_SOURCE_VIEW (user_data);
-		GtkSourceBuffer *buffer = GTK_SOURCE_BUFFER (
-			gtk_text_view_get_buffer (GTK_TEXT_VIEW (view)));
-
-		windows = g_list_remove (windows, widget);
-
-		/* deinstall buffer motion signal handlers */
-		g_signal_handlers_disconnect_matched (buffer,
-						      G_SIGNAL_MATCH_DATA,
-						      0, /* signal_id */
-						      0, /* detail */
-						      NULL, /* closure */
-						      NULL, /* func */
-						      user_data);
-
-		/* we return FALSE since we want the window destroyed */
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
 static void
 line_mark_activated (GtkSourceGutter *,
                      GtkTextIter     *iter,
@@ -1339,9 +1357,9 @@ add_source_mark_pixbufs (GtkSourceView *view)
 }
 
 static GtkWidget *
-create_view_window (GtkSourceBuffer *buffer, GtkSourceView *from)
+create_view_window (GtkWidget* top, GtkSourceBuffer *buffer, GtkSourceView *from)
 {
-	GtkWidget *window, *sw, *view, *vbox, *pos_label, *menu;
+	GtkWidget *sw, *view, *vbox, *pos_label, *menu;
 	PangoFontDescription *font_desc = NULL;
 	GtkAccelGroup *accel_group;
 	GtkActionGroup *action_group;
@@ -1352,10 +1370,11 @@ create_view_window (GtkSourceBuffer *buffer, GtkSourceView *from)
 	g_return_val_if_fail (from == NULL || GTK_SOURCE_IS_VIEW (from), NULL);
 
 	/* window */
-	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	/*if(!window)
+		window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_container_set_border_width (GTK_CONTAINER (window), 0);
 	gtk_window_set_title (GTK_WINDOW (window), "GtkSourceView Demo");
-	windows = g_list_append (windows, window);
+	windows = g_list_append (windows, window);*/
 
 	/* view */
 	view = gtk_source_view_new_with_buffer (buffer);
@@ -1366,7 +1385,6 @@ create_view_window (GtkSourceBuffer *buffer, GtkSourceView *from)
 	g_signal_connect (buffer, "mark-set", G_CALLBACK (move_cursor_cb), view);
 	g_signal_connect (buffer, "changed", G_CALLBACK (update_cursor_position), view);
 	g_signal_connect (view, "line-mark-activated", G_CALLBACK (line_mark_activated), view);
-	g_signal_connect (window, "delete-event", (GCallback) window_deleted_cb, view);
 	g_signal_connect (buffer, "bracket-matched", G_CALLBACK (bracket_matched), 0);
 
 	/* action group and UI manager */
@@ -1390,11 +1408,11 @@ create_view_window (GtkSourceBuffer *buffer, GtkSourceView *from)
 	g_object_unref (action_group);
 
 	/* save a reference to the ui manager in the window for later use */
-	g_object_set_data_full (G_OBJECT (window), "ui_manager",
+	g_object_set_data_full (G_OBJECT (top), "ui_manager",
 				ui_manager, (GDestroyNotify) g_object_unref);
 
 	accel_group = gtk_ui_manager_get_accel_group (ui_manager);
-	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
+	gtk_window_add_accel_group (GTK_WINDOW (top), accel_group);
 
 	error = NULL;
 	if (!gtk_ui_manager_add_ui_from_string (ui_manager, view_ui_description, -1, &error))
@@ -1414,7 +1432,6 @@ create_view_window (GtkSourceBuffer *buffer, GtkSourceView *from)
 	menu = gtk_ui_manager_get_widget (ui_manager, "/MainMenu");
 
 	/* layout widgets */
-	gtk_container_add (GTK_CONTAINER (window), vbox);
 	gtk_box_pack_start (GTK_BOX (vbox), menu, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), sw, TRUE, TRUE, 0);
 	gtk_container_add (GTK_CONTAINER (sw), view);
@@ -1477,16 +1494,16 @@ create_view_window (GtkSourceBuffer *buffer, GtkSourceView *from)
 			gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action), TRUE);
 		g_free (tmp);
 	}
-
+	gtk_source_view_set_tab_width(GTK_SOURCE_VIEW (view), 3); // set default tab width.
 	add_source_mark_pixbufs (GTK_SOURCE_VIEW (view));
 
 	gtk_widget_show_all (vbox);
 
-	return window;
+	return vbox;
 }
 
-static GtkWidget *
-create_main_window (GtkSourceBuffer *buffer)
+GtkWidget *
+create_main_window (GtkWidget* top, GtkSourceBuffer *buffer)
 {
 	GtkWidget *window;
 	GtkAction *action;
@@ -1495,8 +1512,8 @@ create_main_window (GtkSourceBuffer *buffer)
 	GList *groups;
 	GError *error;
 
-	window = create_view_window (buffer, NULL);
-	ui_manager = (GtkUIManager*)g_object_get_data (G_OBJECT (window), "ui_manager");
+	window = create_view_window (top, buffer, NULL); //actually returns a vbox widget.
+	ui_manager = (GtkUIManager*)g_object_get_data (G_OBJECT (top), "ui_manager");
 
 	/* buffer action group */
 	action_group = gtk_action_group_new ("BufferActions");
@@ -1541,7 +1558,7 @@ create_main_window (GtkSourceBuffer *buffer)
 	action = gtk_action_group_get_action (action_group, "InsertSpaces");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action), FALSE);
 
-	action = gtk_action_group_get_action (action_group, "TabWidth8");
+	action = gtk_action_group_get_action (action_group, "TabWidth3");
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action), TRUE);
 
 	action = gtk_action_group_get_action (action_group, "IndentWidthUnset");
@@ -1630,10 +1647,10 @@ init_mem_stuff (void)
 
 
 /* Program entry point ------------------------------------------------------------ */
-
+/*
 int main_sv(int argc, char **argv)
 {
-	GtkWidget *window;
+	GtkWidget *top;
 	GtkSourceLanguageManager *lm;
 	GtkSourceStyleSchemeManager *sm;
 	GtkSourceBuffer *buffer;
@@ -1666,7 +1683,7 @@ int main_sv(int argc, char **argv)
 
 // 	gdk_window_set_debug_updates (TRUE);
 
-	/* we do not use defaults so we don't need to install the library */
+	// we do not use defaults so we don't need to install the library
 	dirs = use_default_paths ? NULL : builtin_lang_dirs;
 	lm = gtk_source_language_manager_get_default ();
 	gtk_source_language_manager_set_search_path (lm, dirs);
@@ -1712,7 +1729,7 @@ int main_sv(int argc, char **argv)
 	else
 		style_scheme = NULL;
 
-	/* create buffer */
+	// create buffer
 	buffer = gtk_source_buffer_new (NULL);
 
 	gtk_source_buffer_set_highlight_syntax (buffer, !no_syntax);
@@ -1722,15 +1739,15 @@ int main_sv(int argc, char **argv)
 	else
 		open_file (buffer, "script.lua");
 
-	/* create first window */
-	window = create_main_window (buffer);
-	gtk_window_set_default_size (GTK_WINDOW (window), 500, 500);
-	gtk_widget_show (window);
+	// create first window 
+	top = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	create_main_window (top, buffer);
+	gtk_window_set_default_size (GTK_WINDOW (top), 500, 500);
+	gtk_widget_show (top);
 
-	/* ... and action! */
 	//gtk_main ();
 
-	/* cleanup */
+	//cleanup 
 	g_list_foreach (windows, (GFunc) gtk_widget_destroy, NULL);
 	g_list_free (windows);
 	g_object_unref (buffer);
@@ -1738,4 +1755,4 @@ int main_sv(int argc, char **argv)
 	g_free (style_scheme_id);
 
 	return 0;
-}
+} */

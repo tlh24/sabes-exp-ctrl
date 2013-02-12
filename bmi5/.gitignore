@@ -1,0 +1,6 @@
+*.o
+*~
+*.mexa64
+*.mat
+bmi5
+stream

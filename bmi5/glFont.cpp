@@ -7,7 +7,7 @@
 #include <GL/gl.h>	
 #include <GL/glu.h>	
 #include <GL/glx.h>    
-#include "glext.h"
+#include <GL/glext.h> 
 #include "glInfo.h"
 #include "glFont.h"
 

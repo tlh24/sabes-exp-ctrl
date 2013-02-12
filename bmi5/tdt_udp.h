@@ -40,9 +40,9 @@ typedef unsigned int uint32_t;
 #define DATA_HEADER(count)      MAKE_HEADER(DATA_PACKET, count)
 #define COMMAND_HEADER(cmd)     MAKE_HEADER(cmd, 0)
 
-int openSocket(char *strIPAddr);
+int  openSocket(char *strIPAddr, int port);
 bool checkRZ(int sock);
-bool sendData(int sock, double *data, int count);
+bool sendDataRZ(int sock, float *data, int count);
 void disconnectRZ(int sock);
 
 #endif
