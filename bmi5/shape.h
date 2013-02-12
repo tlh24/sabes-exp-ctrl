@@ -314,7 +314,7 @@ public: //do something like the flow field common in the lab.
 		m_v = NULL; 
 		m_pvel = NULL; 
 		m_age = 0; 
-		m_coherence = 0.5f; 
+		m_coherence = 1.0f; 
 		m_lastTime = 0.0; 
 		m_starSize = 3.0; 
 		m_startTime = gettime(); 
@@ -390,7 +390,7 @@ public: //do something like the flow field common in the lab.
 		//will need to update this to permit
 		float dt = (float)(time - m_lastTime); 
 		float a[2]; a[0] = ar*1.1f; a[1] = 1.1f; 
-		int k = (int)(m_n * (1.0-m_coherence));
+		int k = (int)floor(m_n * m_coherence);
 		float speed = sqrtf(m_vel[0]*m_vel[0] + m_vel[1]*m_vel[1]); 
 		for(int i=0; i<k; i++){
 			for(int j=0; j<2; j++){
