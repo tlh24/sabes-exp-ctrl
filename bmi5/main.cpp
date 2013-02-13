@@ -985,8 +985,10 @@ int main(int argn, char** argc){
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
 	
 	//jack audio. 
-	//jackInit(); -- this needs to be a loadable module, debugging with it sucks
-	
+	#ifndef DEBUG
+		jackInit(JACKPROCESS_TONES); // this needs to be a loadable module, debugging with it sucks
+	#endif
+
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
 	
