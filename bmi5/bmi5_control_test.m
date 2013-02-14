@@ -1,5 +1,8 @@
 % test the connection with bmi5 as well. 
-global bmi5_in bmi5_out b5; 
+global bmi5_in bmi5_out b5;
+
+b5 = [];
+
 cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5');
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
@@ -10,13 +13,13 @@ bmi5_cmd('store float 3 trial');
 bmi5_cmd('make circle cursor_'); 
 bmi5_cmd('make stars stars_'); 
 bmi5_cmd('make circle target_'); 
-bmi5_cmd('tone');  % tone object, not actual tone.
+bmi5_cmd('make tone tone_');  % tone object, not actual tone.
 eval(bmi5_cmd('mmap structure')); 
 
 b5.tone_freq = 440; 
 b5.tone_pan = 0;
 b5.tone_scale = 1;
-b5.tone_duration = 5;
+b5.tone_duration = 1;
 
 b5.cursor_scale = [0.1; 0.1]; 
 b5.cursor_color = [1; 0.6; 1; 1]; 

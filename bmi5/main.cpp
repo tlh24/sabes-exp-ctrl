@@ -442,7 +442,7 @@ void* mmap_thread(void*){
 					if(beg != tokens.end())
 						shp->m_name = (*beg); //name of the circle.
 					g_objs.push_back(shp); 
-					resp = string("made a circle named "); 
+					resp = {"made a circle named "}; 
 					resp += shp->m_name; 
 					resp += {"\n"}; 
 				}
@@ -457,17 +457,17 @@ void* mmap_thread(void*){
 					resp += sf->m_name; 
 					resp += {"\n"}; 
 				}
-			}
-			else if(*beg == string("tone")){
-				// add a tone-interpreter (can add multiple for polyphony). 
-				beg++; 
-				ToneSerialize* tsz = new ToneSerialize(); 
-				if(beg != tokens.end())
-					tsz->m_name = (*beg); //name of the tone.
-				g_objs.push_back(tsz); 
-				resp = {"made a tone generator named "}; 
-				resp += tsz->m_name; 
-				resp += {"\n"}; 
+				if((*beg) == string("tone")){
+					// add a tone-interpreter (can add multiple for polyphony). 
+					beg++; 
+					ToneSerialize* tsz = new ToneSerialize(); 
+					if(beg != tokens.end())
+						tsz->m_name = (*beg); //name of the tone.
+					g_objs.push_back(tsz); 
+					resp = {"made a tone generator named "}; 
+					resp += tsz->m_name; 
+					resp += {"\n"}; 
+					}
 			}
 			else if(*beg == string("store")){
 				// store <type> <size> <name>
@@ -580,7 +580,7 @@ void* mmap_thread(void*){
 				resp = {"Current command vocabulary:\n"};
 				resp += {"\tmake circle <name>\n"}; 
 				resp += {"\tmake stars <name>\n"}; 
-				resp += {"\ttone <name>\n"};
+				resp += {"\tmake tone <name>\n"};
 				resp += {"\t\tmake a tone generator\n"}; 
 				resp += {"\tmmap\n"}; 
 				resp += {"\t\treturn mmap structure information, for eval() in matlab\n"}; 
