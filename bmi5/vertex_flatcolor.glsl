@@ -7,9 +7,7 @@ layout (location = 0) in vec2 position;
 smooth out vec4 theColor;
 
 void main(){
-	vec4 a = vec4(position, 0.0, 0.0); 
-	a.z = 0.0; 
-	a.w = 1.0; 
+	vec4 a = vec4(position, 0.0, 1.0); 
 	vec4 b; 
 	b.x = a.x*a.x; 
 	b.y = a.y*a.y; 
