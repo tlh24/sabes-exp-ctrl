@@ -246,7 +246,7 @@ class Shape : public Serialize {
 			case 0: return m_name + string("draw"); 
 			case 1: return m_name + string("color");
 			case 2: return m_name + string("scale");
-			case 3: return m_name + string("trans");
+			case 3: return m_name + string("pos");
 		} return string("none"); 
 	}
 	virtual int getStoreClass(int indx){

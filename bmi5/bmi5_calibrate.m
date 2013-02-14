@@ -52,7 +52,7 @@ for yi = 1:snt
         s = strcat('target',num2str(i),'_');
         b5.(strcat(s,'scale')) = [0.1 ; 0.1];
         b5.(strcat(s,'color')) = [0; 1; 0; 1];
-        b5.(strcat(s,'trans')) = [x ; y];
+        b5.(strcat(s,'pos')) = [x ; y];
         b5.(strcat(s,'draw'))  = 1;
         i=i+1;
     end
@@ -60,7 +60,7 @@ end
 
 b5.cursor_scale = [0.1; 0.1]; 
 b5.cursor_color = [1; 1; 1; 1]; 
-b5.cursor_trans = [0; 0];
+b5.cursor_pos   = [0; 0];
 b5.cursor_draw  = 0;
 
 b5.affine_m44 = eye(4); 
@@ -128,7 +128,7 @@ bmi5_mmap(b5);
 
 while(1)
 	p = pm * b5.polhemus_sensors_o;
-	b5.cursor_trans = p(1:2); 
+	b5.cursor_pos = p(1:2); 
 	bmi5_mmap(b5); 
 end
 

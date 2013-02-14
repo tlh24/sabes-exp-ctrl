@@ -23,10 +23,10 @@ b5.tone_duration = 1;
 
 b5.cursor_scale = [0.1; 0.1]; 
 b5.cursor_color = [1; 0.6; 1; 1]; 
-b5.cursor_trans = [0.5; 0.5];
+b5.cursor_pos = [0.5; 0.5];
 b5.target_scale = [0.1; 0.1]; 
 b5.target_color = [1; 1; 0.6; 1]; 
-b5.target_trans = [-0.5; -0.5];
+b5.target_pos = [-0.5; -0.5];
 
 b5.cursor_draw = 1; 
 b5.target_draw = 1;  
