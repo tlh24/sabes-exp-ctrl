@@ -14,7 +14,7 @@ CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wextra -Werror -pedantic -std=c++11 -rdynamic
 
 ifeq ($(strip $(USE_DEBUG)),true)
-  CFLAGS += -g -DDEBUG
+  CFLAGS += -O1 -g -DDEBUG
 else
   CLFAGS += -O3
 endif

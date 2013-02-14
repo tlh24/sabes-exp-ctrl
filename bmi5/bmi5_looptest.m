@@ -3,8 +3,8 @@ global b5;
 n = 20000;
 tic
 for i=1:n
-	b5.cursor_trans = sin(toc()/4)*[sin(toc()); cos(toc())]; 
-	b5.target_trans = -1* b5.cursor_trans; 
+	b5.cursor_pos = sin(toc()/4)*[sin(toc()); cos(toc())]; 
+	b5.target_pos = -1* b5.cursor_pos; 
 	b5.stars_vel = 0.1*[sin(toc()); cos(toc())]; 
 	b5.trial = [i; floor(i/10); floor(i/100)]; 
 	% tell bmi5 to set these parameters -- synchronization is internal. 

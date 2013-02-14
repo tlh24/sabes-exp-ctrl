@@ -322,7 +322,7 @@ public:
 		switch(indx){
 			case 0: return m_name + string("time"); //these are not output--
 			case 1: return m_name + string("ticks"); //only saved in file (below).
-			case 2: return m_name + string("freq"); 
+			case 2: return m_name + string("freq_io"); //bidirectional.
 			case 3: return m_name + string("pan"); 
 			case 4: return m_name + string("scale"); 
 			case 5: return m_name + string("duration"); 
@@ -368,7 +368,7 @@ public:
 			v_pan.push_back(pan); 
 			v_scale.push_back(scale); 
 			v_duration.push_back(duration); 
-			d[0] = 0.0; 
+			d[0] = 0.0; //reset frequency.
 		}
 		d += 4; 
 		return d; 

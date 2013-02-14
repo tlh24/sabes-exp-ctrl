@@ -12,6 +12,6 @@ bmi5_mmap(b5);
 
 while(1)
     world = pm * b5.polhemus_sensors_o; 
-    b5.cursor_trans = world(1:2); 
+    b5.cursor_pos = world(1:2); 
     bmi5_mmap(b5);
 end

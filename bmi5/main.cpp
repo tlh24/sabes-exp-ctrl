@@ -442,7 +442,7 @@ void* mmap_thread(void*){
 					if(beg != tokens.end())
 						shp->m_name = (*beg); //name of the circle.
 					g_objs.push_back(shp); 
-					resp = string("made a circle named "); 
+					resp = {"made a circle named "}; 
 					resp += shp->m_name; 
 					resp += {"\n"}; 
 				}
@@ -457,17 +457,17 @@ void* mmap_thread(void*){
 					resp += sf->m_name; 
 					resp += {"\n"}; 
 				}
-			}
-			else if(*beg == string("tone")){
-				// add a tone-interpreter (can add multiple for polyphony). 
-				beg++; 
-				ToneSerialize* tsz = new ToneSerialize(); 
-				if(beg != tokens.end())
-					tsz->m_name = (*beg); //name of the tone.
-				g_objs.push_back(tsz); 
-				resp = {"made a tone generator named "}; 
-				resp += tsz->m_name; 
-				resp += {"\n"}; 
+				if((*beg) == string("tone")){
+					// add a tone-interpreter (can add multiple for polyphony). 
+					beg++; 
+					ToneSerialize* tsz = new ToneSerialize(); 
+					if(beg != tokens.end())
+						tsz->m_name = (*beg); //name of the tone.
+					g_objs.push_back(tsz); 
+					resp = {"made a tone generator named "}; 
+					resp += tsz->m_name; 
+					resp += {"\n"}; 
+					}
 			}
 			else if(*beg == string("store")){
 				// store <type> <size> <name>
@@ -580,7 +580,7 @@ void* mmap_thread(void*){
 				resp = {"Current command vocabulary:\n"};
 				resp += {"\tmake circle <name>\n"}; 
 				resp += {"\tmake stars <name>\n"}; 
-				resp += {"\ttone <name>\n"};
+				resp += {"\tmake tone <name>\n"};
 				resp += {"\t\tmake a tone generator\n"}; 
 				resp += {"\tmmap\n"}; 
 				resp += {"\t\treturn mmap structure information, for eval() in matlab\n"}; 
@@ -662,13 +662,12 @@ void* polhemus_thread(void* ){
 	//fail = pol->UsbConnect(TRKR_LIB); //see polhemus.h
 	fail = pol->Rs232Connect(deviceName.c_str(), 115200); 
 	if(fail){
-		cout << deviceName << " could not open a rs232 connection to the Polhemus"; 
-		cout << endl; 
-		cout << "> try sudo usermod -a -G dialout <username>" << endl;
-		cout << "> then logout and log back in." << endl; 
+		printf("could not open via rs232 to Polhemus on %s\n", deviceName.c_str()); 
+		printf("> try sudo usermod -a -G dialout <username>");
+		printf("> then logout and log back in.");
 		g_polhemusConnected = false; 
 	}else{
-		cout << "polhemus connecting via rs232 on " << deviceName << endl; 
+		printf("connecting to polhemus via rs232 on %s\n", deviceName.c_str());
  		g_polhemusConnected = true;
 	}
 	//flush the buffer, sync things up.
@@ -677,7 +676,7 @@ void* polhemus_thread(void* ){
 	do {
 		if(count <20)
 			pol->Write("p"); //request position data (and stop continuous..)
-		usleep(5000); 
+		usleep(10000); 
 		len = pol->Read(buf,BUF_SIZE);  // keep trying till we get a response
 		if(len > 0)rxbytes += len; 
 		count++; 
@@ -986,8 +985,10 @@ int main(int argn, char** argc){
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
 	
 	//jack audio. 
-	//jackInit(); -- this needs to be a loadable module, debugging with it sucks
-	
+	#ifndef DEBUG
+		jackInit(JACKPROCESS_TONES); // this needs to be a loadable module, debugging with it sucks
+	#endif
+
 	g_mainWindow = (GtkWindow*)window; 
 	gtk_widget_show_all (window);
 	
