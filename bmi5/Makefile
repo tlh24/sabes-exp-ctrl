@@ -35,7 +35,10 @@ main.o : main.cpp shape.h gtkglx.h serialize.h
 	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
 
 bmi5: $(OBJS)
-	$(CPP) -o $@ $(GTKLD) $(LDFLAGS) -lmatio $(OBJS)
+	$(CPP) -o $@ $(GTKLD) $(LDFLAGS) -lmatio -lpcap $(OBJS)
+	
+opto: bmi5 # enables packet-capture privelages on bmi5. 
+	sudo setcap cap_net_raw,cap_net_admin=eip bmi5
 	
 glxgears: glxgears.c
 	$(CC) -O3 -o $@ -lrt -lGL $<
@@ -46,5 +49,6 @@ clean:
 deps:
 	sudo apt-get install gdb libgtk-3-dev libgtkglext1-dev freeglut3-dev \
 	libmatio-dev libusb-1.0-0-dev libglew-dev libjack-jackd2-dev \
-	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl
+	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl \
+	libpcap-dev
 	

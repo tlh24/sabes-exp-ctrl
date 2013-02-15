@@ -171,6 +171,7 @@ public:
 	void predict(long double time, float* s){
 		//critical assumptions: stream is actually sampled at a constant rate, 
 		//even if it does not come in at a constant rate. 
+		// does not assume that argument time is on that interval. 
 		int n = m_ptr; 
 		long double mean = m_t[(n-1)&31] - m_t[(n+2)&31]; //don't read m_ptr -- other thread may write.
 		mean /= 29; //mean period.
@@ -241,13 +242,13 @@ public:
 			m_sensors[i] = data[i]; 
 		m_pp->add(gettime(), data); 
 	}
+	void getLoc(double now, float* out){
+		m_pp->predict(now, out); 
+	}
 	virtual void clear(){
 		v_sensors.clear(); 
 		v_time.clear(); 
 		v_ticks.clear(); 
-	}
-	void getLoc(double now, float* out){
-		m_pp->predict(now, out); 
 	}
 	virtual void store(){
 		//printf("error: you must call store(float*)\n"); 
@@ -579,6 +580,99 @@ public:
 		return d; 
 	}
 	float* data(){ return m_x.data(); }; 
+}; 
+
+class OptoSerialize : public VectorSerialize<float> {
+	int m_nsensors; //number of sensors. 
+	double	m_time; 
+	double	m_ticks; 
+	vector<double>	v_time; 
+	vector<double> v_ticks; 
+	vector<PolhemusPredict*> m_pp; 
+	
+	OptoSerialize(int nsensors) : VectorSerialize(nsensors * 3, MAT_C_SINGLE){
+		m_nsensors = nsensors; 
+		m_time = 0; 
+		m_ticks = 0; 
+		for(int i=0; i<m_nsensors; i++){
+			m_pp.push_back(new PolhemusPredict()); 
+		}
+	}
+	~OptoSerialize(){
+		clear(); 
+		for(int i=0; i<m_nsensors; i++){
+			delete m_pp[i]; 
+		}
+		m_pp.clear(); 
+	}
+	void store(float* data){
+		//assumes there is m_nsensors * 3 floats in *data. 
+		m_time = gettime(); 
+		m_ticks = g_tsc->getTicks(); 
+		for(int i=0; i<m_nsensors; i++){
+			m_pp[i]->add(m_time, &(data[i*3])); 
+		}
+		for(int i=0; i<m_nsensors*3; i++){
+			m_stor[i] = data[i]; 
+		}
+		VectorSerialize::store(); 
+		v_time.push_back(m_time); 
+		v_ticks.push_back(m_ticks); 
+	}
+	void getLoc(double now, float* out){
+		for(int i=0; i<m_nsensors; i++){
+			m_pp[i]->predict(now, &(out[i*3])); 
+		}
+	}
+	virtual void clear(){
+		VectorSerialize::clear();
+		v_time.clear(); 
+		v_ticks.clear();  
+	}
+	virtual void store(){
+		//printf("error: you must call store(float*)\n"); 
+	}
+	virtual int nstored(){ return VectorSerialize::nstored();}
+	virtual string storeName(int indx){
+		switch(indx){
+			case 0: return m_name + string("sensors_o"); 
+			case 1: return m_name + string("time_o"); 
+			case 2: return m_name + string("ticks_o"); 
+		} return string("none"); 
+	}
+	virtual int getStoreClass(int indx){
+		switch(indx){
+			case 0: return MAT_C_SINGLE; 
+			case 1: return MAT_C_DOUBLE; 
+			case 2: return MAT_C_DOUBLE; 
+		} return 0; 
+	}
+	virtual void getStoreDims(int indx, size_t* dims){
+		switch(indx){
+			case 0: VectorSerialize::getStoreDims(indx, dims); return; 
+			case 1: dims[0] = 1; dims[1] = 1; return; 
+			case 2: dims[0] = 1; dims[1] = 1; return; 
+		}
+	}
+	virtual void* getStore(int indx, int i){
+		switch(indx){
+			case 0: return VectorSerialize::getStore(indx, i); 
+			case 1: return (void*)&(v_time[i]); 
+			case 2: return (void*)&(v_ticks[i]);
+		} return NULL; 
+	}
+	virtual int numStores(){return 3;}
+	virtual double* mmapRead(double* d){
+		m_time = gettime(); 
+		m_ticks = g_tsc->getTicks(); 
+		getLoc(m_time, m_stor.data()); 
+		for(int i=0; i<3*m_nsensors; i++){
+			*d++ = m_stor[i]; //float->double.
+		}
+		*d++ = m_time; //redundant, but keeps things consistent.
+		*d++ = m_ticks; 
+ 		return d; 
+	}
 }; 
 
 void writeMatlab(vector<Serialize*> tosave, char* filename, bool backup);

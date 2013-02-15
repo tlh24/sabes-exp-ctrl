@@ -179,18 +179,19 @@ class Shape : public Serialize {
 			int colorloc = glGetUniformLocation(m_program[display], "uniform_color"); 
 			if(colorloc >= 0)glUniform4f(colorloc, m_color[0], m_color[1], m_color[2], m_color[3]);
 			
-		if(1){
-			glBegin(GL_TRIANGLE_FAN); 
-			float scl = 0.5; 
-			glVertex3f(1.f*scl, 1.f*scl, 0.f);
-			glVertex3f(1.f*scl, -1.f*scl, 0.f); 
-			glVertex3f(-1.f*scl, -1.f*scl, 0.f); 
-			glVertex3f(-1.f*scl, 1.f*scl, 0.f); 
-			glEnd(); 
-		}
-			glBindVertexArray(m_vao[display]);
-			glDrawArrays(m_drawmode, 0, m_n);  
-			glBindVertexArray(0);
+			if(m_program[0] == 0){ //boring square mode! DEBUG. 
+				glBegin(GL_TRIANGLE_FAN); 
+				float scl = 0.5; 
+				glVertex3f(1.f*scl, 1.f*scl, 0.f);
+				glVertex3f(1.f*scl, -1.f*scl, 0.f); 
+				glVertex3f(-1.f*scl, -1.f*scl, 0.f); 
+				glVertex3f(-1.f*scl, 1.f*scl, 0.f); 
+				glEnd(); 
+			} else {
+				glBindVertexArray(m_vao[display]);
+				glDrawArrays(m_drawmode, 0, m_n);  
+				glBindVertexArray(0);
+			}
 		}
 	}
 	virtual void move(float, long double){} //no velocity here.
