@@ -28,7 +28,7 @@ class Shape : public Serialize {
 		m_color[0] = m_color[1] = m_color[2] = m_color[3] = 1.f; 
 		m_scale[0] = m_scale[1] = 1.f; 
 		m_trans[0] = m_trans[1] = 0.f; 
-		m_name = {"shape_"}; 
+		m_name = {"shape"}; 
 		m_needConfig[0] = m_needConfig[1] = false; 
 		m_program[0] = m_program[1] = 0; 
 		m_draw = 0; 
@@ -244,10 +244,10 @@ class Shape : public Serialize {
 	virtual int nstored(){ return v_color.size(); }
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("draw"); 
-			case 1: return m_name + string("color");
-			case 2: return m_name + string("scale");
-			case 3: return m_name + string("pos");
+			case 0: return m_name + string("_draw"); 
+			case 1: return m_name + string("_color");
+			case 2: return m_name + string("_scale");
+			case 3: return m_name + string("_pos");
 		} return string("none"); 
 	}
 	virtual int getStoreClass(int indx){
@@ -319,7 +319,7 @@ public: //do something like the flow field common in the lab.
 		m_lastTime = 0.0; 
 		m_starSize = 3.0; 
 		m_startTime = gettime(); 
-		m_name = string{"stars_"};
+		m_name = string{"stars"};
 	}
 	~StarField(){
 		if(m_v) free(m_v); m_v = NULL;
@@ -485,8 +485,8 @@ public: //do something like the flow field common in the lab.
 		}else{
 			indx -= Shape::numStores(); 
 			switch(indx){
-				case 0: return m_name + string("vel"); 
-				case 1: return m_name + string("coherence"); 
+				case 0: return m_name + string("_vel"); 
+				case 1: return m_name + string("_coherence"); 
 			} return string("none"); 
 		}
 	}

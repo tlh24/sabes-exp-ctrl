@@ -11,10 +11,10 @@ b5 = [];
 num_targets = 9;
 
 for j=1:num_targets
- bmi5_cmd(strcat('make circle target',num2str(j),'_'));
+ bmi5_cmd(strcat('make circle target',num2str(j)));
 end
-bmi5_cmd('make tone tone_');
-bmi5_cmd('make circle cursor_');
+bmi5_cmd('make tone tone');
+bmi5_cmd('make circle cursor');
 
 eval(bmi5_cmd('mmap structure'));
 

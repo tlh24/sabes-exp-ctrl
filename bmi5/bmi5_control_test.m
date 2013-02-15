@@ -10,13 +10,13 @@ bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w');
 
 % initial settings -- setup a cursor and a starfield.
 bmi5_cmd('store float 3 trial'); 
-bmi5_cmd('make circle cursor_'); 
-bmi5_cmd('make stars stars_'); 
-bmi5_cmd('make circle target_'); 
-bmi5_cmd('make tone tone_');  % tone object, not actual tone.
+bmi5_cmd('make circle cursor'); 
+bmi5_cmd('make stars stars'); 
+bmi5_cmd('make circle target'); 
+bmi5_cmd('make tone tone');  % tone object, not actual tone.
 eval(bmi5_cmd('mmap structure')); 
 
-b5.tone_freq = 440; 
+b5.tone_freq_io = 440; 
 b5.tone_pan = 0;
 b5.tone_scale = 1;
 b5.tone_duration = 1;

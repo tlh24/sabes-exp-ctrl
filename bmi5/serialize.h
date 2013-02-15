@@ -219,7 +219,7 @@ public:
 	vector<double> v_ticks; 
 	
 	PolhemusSerialize() : Serialize() {
-		m_name = "polhemus_"; 
+		m_name = "polhemus"; 
 		m_sensors[0] = m_sensors[1] = m_sensors[2] = 0.0; 
 		m_time = 0; 
 		m_ticks = 0; 
@@ -256,9 +256,9 @@ public:
 	virtual int nstored(){return v_sensors.size();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("sensors_o"); 
-			case 1: return m_name + string("time_o"); 
-			case 2: return m_name + string("ticks_o"); 
+			case 0: return m_name + string("_sensors_o"); 
+			case 1: return m_name + string("_time_o"); 
+			case 2: return m_name + string("_ticks_o"); 
 		} return string{"none"};
 	}
 	virtual int getStoreClass(int indx){
@@ -305,7 +305,7 @@ class ToneSerialize : public Serialize {
 	vector<float> v_duration; 
 public:
 	ToneSerialize() : Serialize() {
-		m_name = "tone_"; 
+		m_name = "tone"; 
 	}
 	~ToneSerialize(){
 	}
@@ -321,12 +321,12 @@ public:
 	virtual int nstored(){return v_time.size();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("time"); //these are not output--
-			case 1: return m_name + string("ticks"); //only saved in file (below).
-			case 2: return m_name + string("freq_io"); //bidirectional.
-			case 3: return m_name + string("pan"); 
-			case 4: return m_name + string("scale"); 
-			case 5: return m_name + string("duration"); 
+			case 0: return m_name + string("_time"); //these are not output--
+			case 1: return m_name + string("_ticks"); //only saved in file (below).
+			case 2: return m_name + string("_freq_io"); //bidirectional.
+			case 3: return m_name + string("_pan"); 
+			case 4: return m_name + string("_scale"); 
+			case 5: return m_name + string("_duration"); 
 		} return string("none"); 
 	}
 	virtual int getStoreClass(int indx){
@@ -438,12 +438,12 @@ public:
 class TdtUdpSerialize : public Serialize {
 public: 
 	int					m_sock; 
-	int 					m_size; 
+	int 				m_size; 
 	double				m_time; 
 	double				m_ticks; 
 	vector<double>		m_last; 
 	vector<float>		m_stor; 
-	vector<double> 	v_time; 
+	vector<double> 		v_time; 
 	vector<double>		v_ticks; 
 	vector<vector<float> > v_stor; 
 	float*				m_bs; 
@@ -472,9 +472,9 @@ public:
 	virtual int nstored(){ return v_stor.size(); }
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("time"); //only saved
-			case 1: return m_name + string("ticks"); //in file.
-			case 2: return m_name + string("udp"); 
+			case 0: return m_name + string("_time"); //only saved
+			case 1: return m_name + string("_ticks"); //in file.
+			case 2: return m_name + string("_udp"); 
 		} return string{"none"};
 	}
 	virtual int getStoreClass(int indx){
@@ -635,9 +635,9 @@ class OptoSerialize : public VectorSerialize<float> {
 	virtual int nstored(){ return VectorSerialize::nstored();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("sensors_o"); 
-			case 1: return m_name + string("time_o"); 
-			case 2: return m_name + string("ticks_o"); 
+			case 0: return m_name + string("_sensors_o"); 
+			case 1: return m_name + string("_time_o"); 
+			case 2: return m_name + string("_ticks_o"); 
 		} return string("none"); 
 	}
 	virtual int getStoreClass(int indx){
