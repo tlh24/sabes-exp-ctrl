@@ -816,7 +816,8 @@ void* opto_thread(void* ){
 		return (void*)2;
 	}
 	/* Grab a packet */
-	int packets = 0; 
+	int packets = 0;
+	k = 0;
 	while(!g_die){
 		packet = pcap_next(handle, &header);
 		/* Print its length */
