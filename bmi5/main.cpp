@@ -450,14 +450,14 @@ void* mmap_thread(void*){
 					resp += shp->m_name; 
 					resp += {"\n"}; 
 				}
-				if((*beg) == string("stars")){
+				if((*beg) == string("dots")){
 					beg++; 
 					StarField* sf = new StarField(); 
 					sf->makeStars(3000, g_daglx[1]->getAR());
 					if(beg != tokens.end())
 						sf->m_name = (*beg); //name of the circle.
 					g_objs.push_back(sf); 
-					resp = {"made a starfield named "}; 
+					resp = {"made a dotfield named "}; 
 					resp += sf->m_name; 
 					resp += {"\n"}; 
 				}
@@ -583,7 +583,7 @@ void* mmap_thread(void*){
 			else{
 				resp = {"Current command vocabulary:\n"};
 				resp += {"\tmake circle <name>\n"}; 
-				resp += {"\tmake stars <name>\n"}; 
+				resp += {"\tmake dots <name>\n"}; 
 				resp += {"\tmake tone <name>\n"};
 				resp += {"\t\tmake a tone generator\n"}; 
 				resp += {"\tmmap\n"}; 
