@@ -1,20 +1,19 @@
 function [] = bmi5_calibrate(mouse)
 global bmi5_in bmi5_out b5;
 
-cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5');
+% cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5');
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
-b5 = [];
-
 num_targets = 9;
 
 for j=1:num_targets
- bmi5_cmd(strcat('make circle target',num2str(j),'_'));
+ bmi5_cmd(strcat('make circle target',num2str(j)));
 end
-bmi5_cmd('make tone tone_');
-bmi5_cmd('make circle cursor_');
+bmi5_cmd('make tone tone');
+bmi5_cmd('make circle cursor');
+bmi5_cmd('mouse finger');
 
 eval(bmi5_cmd('mmap structure'));
 
@@ -91,7 +90,7 @@ for yi = 1:snt
 		pause(2);
         b5.tone_freq = 0; % need to add a 'play' flag.
         bmi5_mmap(b5); % update sensors.
-		p = (pm * b5.polhemus_sensors_o)'; 
+		p = (pm * [b5.finger_o;0])'; 
 		world(i,1:3) = p(1:3);
 		i=i+1;
 	end
@@ -121,13 +120,13 @@ bmi5_mmap(b5);
 qp = q'; 
 q2 = eye(4); 
 q2(1:2, 1:2) = qp(1:2, 1:2); 
-q2(1:2, 4) = qp(1:2, 3); 
+q2(1:2, 4) = qp(1:2, 4); 
 b5.affine_m44 = q2; 
 b5.cursor_draw = 1;
 bmi5_mmap(b5); 
 
 while(1)
-	p = pm * b5.polhemus_sensors_o;
+	p = pm * [b5.finger_o;0];
 	b5.cursor_pos = p(1:2); 
 	bmi5_mmap(b5); 
 end

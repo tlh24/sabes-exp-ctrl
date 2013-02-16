@@ -1,6 +1,6 @@
 # The following can be set at the commandline
 # ie: make USE_DEBUG=true
-USE_DEBUG = false
+USE_DEBUG = true
 
 CPP = g++
 CC  = gcc
@@ -14,7 +14,7 @@ CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wextra -Werror -pedantic -std=c++11 -rdynamic
 
 ifeq ($(strip $(USE_DEBUG)),true)
-  CFLAGS += -O1 -g -DDEBUG
+  CFLAGS += -g -DDEBUG
 else
   CLFAGS += -O3
 endif

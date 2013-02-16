@@ -58,6 +58,7 @@ class TimeSyncClient;
 extern TimeSyncClient* g_tsc; 
 extern int g_frame; 
 extern long double gettime(); 
+extern float g_mousePos[2]; 
 
 //this class records the time when matlab sends commands.
 class TimeSerialize : public Serialize {
@@ -583,6 +584,7 @@ public:
 }; 
 
 class OptoSerialize : public VectorSerialize<float> {
+public:
 	int m_nsensors; //number of sensors. 
 	double	m_time; 
 	double	m_ticks; 
@@ -674,6 +676,24 @@ class OptoSerialize : public VectorSerialize<float> {
  		return d; 
 	}
 }; 
+
+class MouseSerialize : public VectorSerialize<float> {
+public:
+	//no timing in this one -- synchronous to global timer.
+	MouseSerialize() : VectorSerialize(2, MAT_C_SINGLE){}
+	~MouseSerialize(){}
+	virtual void store(){
+		m_stor[0] = g_mousePos[0]; 
+		m_stor[1] = g_mousePos[1]; 
+		VectorSerialize::store(); 
+	}
+	virtual string storeName(int ){ return m_name + string("_o"); } //output.
+	virtual double* mmapRead(double* d){
+		*d++ = g_mousePos[0];
+		*d++ = g_mousePos[1]; 
+		return d; 
+	}
+};
 
 void writeMatlab(vector<Serialize*> tosave, char* filename, bool backup);
 size_t matlabFileSize(vector<Serialize*> tosave); 

@@ -5,6 +5,7 @@
 extern Matrix44Serialize*	g_affine44; //used for translating world->screen coordinates.
 extern Matrix44Serialize*	g_quadratic44;
 
+
 #define PI 3.141592653589793
 class Shape : public Serialize {
 	public:
@@ -43,9 +44,9 @@ class Shape : public Serialize {
 		}
 	}
 	~Shape(){
-		if(m_program[0]) glDeleteProgram(m_program[0]);
-		if(m_program[1]) glDeleteProgram(m_program[1]);
-		deleteBuffers(); 
+		//if(m_program[0]) glDeleteProgram(m_program[0]); m_program[0] = 0; 
+		//if(m_program[1]) glDeleteProgram(m_program[1]); m_program[1] = 0; 
+		//deleteBuffers(); -- must be called within the OpenGL context in which they were created.
 		v_color.clear(); 
 		v_scale.clear(); 
 		v_trans.clear();
@@ -122,25 +123,19 @@ class Shape : public Serialize {
 	virtual void makeShaders(int index){
 		makeShadersNamed(index, "vertex_flatcolor.glsl", "fragment.glsl"); 
 	}
-	void makeCircle(int n){
-		m_n = n+1; 
-		m_needConfig[0] = m_needConfig[1] = true; 
+	virtual void fill(float* v){
+		for(int i=0; i<m_n; i++){
+			v[i*2+0] = i&1; 
+			v[i*2+1] = (i>>1)&1;
+		}
 	}
 	virtual void configure(int display){
 		if(m_needConfig[display]){
 			printf("Shape: configuring display [%d]\n", display); 
-			//makes a circle, diameter 1, at the origin.
 			float* v = (float*)malloc((m_n)*sizeof(float)*2); 
-			v[0] = 0.f; 
-			v[1] = 0.f; 
-			for(int i=0; i<m_n-1; i++){
-				float t = (float)i * PI * 2 / (m_n-2); 
-				v[i*2+2] = 0.5f*sinf(t); 
-				v[i*2+3] = 0.5f*cosf(t); 
-			}
+			fill(v); 
 			makeVAO(v, true, display); 
 			makeShaders(display); 
-			m_drawmode = GL_TRIANGLE_FAN; 
 			m_needConfig[display] = false; 
 		}
 	}
@@ -532,4 +527,90 @@ public: //do something like the flow field common in the lab.
 		return d; 
 	}
 };
+
+class Circle : public Shape {
+	float 	m_radius; 
+public:
+	Circle(float radius, int ns) : Shape(){
+		m_radius = radius; 
+		m_n = ns+1; 
+		m_needConfig[0] = m_needConfig[1] = true; 
+		m_drawmode = GL_TRIANGLE_FAN; 
+	}
+	~Circle(){}
+	virtual void fill(float* v){
+		v[0] = 0.f; 
+		v[1] = 0.f; 
+		for(int i=0; i<m_n-1; i++){
+			float t = (float)i * PI * 2 / (m_n-2); 
+			v[i*2+2] = m_radius*sinf(t); 
+			v[i*2+3] = m_radius*cosf(t); 
+		}
+	}
+}; 
+
+class Ring : public Shape {
+	float	m_ir; 
+	float	m_or; 
+	int	m_ns; 
+public:
+	Ring(float innerRadius, float outerRadius, int ns) : Shape(){
+		m_ir = innerRadius; 
+		m_or = outerRadius; 
+		m_n = (ns+1)*2; //number of 2-element vertices.
+		m_ns = ns; 
+		m_needConfig[0] = m_needConfig[1] = true; 
+		m_drawmode = GL_TRIANGLE_STRIP; 
+	}
+	~Ring(){}
+	virtual void fill(float* v){
+		for(int i=0; i<m_ns+1; i++){
+			float t = (float)i * PI * 2 / (m_ns); 
+			v[i*4+0] = m_ir*sinf(t); 
+			v[i*4+1] = m_ir*cosf(t); 
+			v[i*4+2] = m_or*sinf(t); 
+			v[i*4+3] = m_or*cosf(t); 
+		}
+	}
+}; 
+
+class Square : public Shape {
+public:
+	float m_w; 
+	float m_sign[10] = {-1,-1,-1,1,1,1,1,-1,-1,-1}; 
+	Square(float width){
+		m_w = width * 0.5f; 
+		m_n = 5; 
+		m_needConfig[0] = m_needConfig[1] = true; 
+		m_drawmode = GL_TRIANGLE_STRIP; 
+	}
+	~Square(){}
+	virtual void fill(float* v){
+		for(int i=0; i<5; i++){
+			v[i*2+0] = m_sign[i*2+0]*m_w;
+			v[i*2+1] = m_sign[i*2+1]*m_w; 
+		}
+	}
+}; 
+
+class OpenSquare : public Square {
+	float m_iw; 
+public:
+	OpenSquare(float innerWidth, float outerWidth) : Square(outerWidth) {
+		m_iw = innerWidth*0.5f; 
+		m_n = 10; 
+		m_needConfig[0] = m_needConfig[1] = true; 
+		m_drawmode = GL_TRIANGLE_STRIP; 
+	}
+	~OpenSquare(){}
+	virtual void fill(float*v){
+		for(int i=0; i<5; i++){
+			v[i*4+0] = m_sign[i*2+0]*m_iw;
+			v[i*4+1] = m_sign[i*2+1]*m_iw; 
+			v[i*4+2] = m_sign[i*2+0]*m_w;
+			v[i*4+3] = m_sign[i*2+1]*m_w; 
+		}
+	}
+}; 
+
 #endif

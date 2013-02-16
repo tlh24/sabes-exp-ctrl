@@ -93,10 +93,15 @@ Matrix44Serialize*	g_affine44; //used for translating world->screen coordinates.
 Matrix44Serialize*	g_quadratic44;
 PolhemusSerialize* 	g_polhemus; 
 OptoSerialize* 		g_opto; //the optotrak.
+MouseSerialize*		g_mouse; //mouse control.
 vector<Serialize*> 	g_objs; //container for each of these, and more!
 
 pthread_mutex_t		mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
+pthread_mutex_t		mutex_gobjs; 
 long double			g_nextVsyncTime = -1; 
+
+//forward decl.
+void gobjsInit(); 
 
 //keep this around for controlling the microstimulator, juicer, etc.
 // n.b. superceded by TdtUdpSerialize.
@@ -240,6 +245,7 @@ static gboolean
 	glOrtho (-1.f*ar,ar,-1,1,0,1);
 	glEnable(GL_BLEND);
 	glEnable(GL_LINE_SMOOTH);
+	glDisable(GL_CULL_FACE); 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_DEPTH_TEST);
 	//glDepthMask(GL_TRUE);
@@ -290,8 +296,8 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	glShadeModel(GL_FLAT);
 	
 	/// draw objects
-	//update before the swap (smoother motion?)
-	// matlab should have already updated the relevant variables..
+	//update before the swap for minimum display latency. 
+	pthread_mutex_lock(&mutex_gobjs); 
 	if(da == g_da[1]){ 
 		t = gettime(); 
 		for(unsigned int i=0; i<g_objs.size(); i++)
@@ -299,6 +305,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	}
 	for(unsigned int i=0; i<g_objs.size(); i++)
 		g_objs[i]->draw(h); 
+	pthread_mutex_unlock(&mutex_gobjs); 
 	/// end
 
 	g_daglx[h]->swap(); //always double buffered
@@ -343,7 +350,7 @@ static gboolean refresh (gpointer ){
 	gtk_label_set_text(GTK_LABEL(g_openglTimeLabel), str); 
 	
 	float loc[3];  
-	g_polhemus->getLoc(gettime(), loc); 
+	if(g_polhemus) g_polhemus->getLoc(gettime(), loc); 
 	string con = g_polhemusConnected ? string("connected"):string("disconnected:using cursor"); 
 	snprintf(str, 256, "%s\nx %4.2f cm\ny %4.2f cm\nz %4.2f cm", 
 				con.c_str(), loc[0], loc[1], loc[2]); 
@@ -354,6 +361,7 @@ string getMmapStructure(){
 	std::stringstream oss; 
 	oss << "% mmap structure (pass to bmi5_mmap())\n"; 
 	oss << "mex -O bmi5_mmap.cpp % to make sure you have the latest version.\n"; 
+	oss << "clear b5; \n"; 
 	for(unsigned int i=0; i<g_objs.size(); i++){
 		oss << g_objs[i]->getStructInfo(); 
 	}
@@ -412,12 +420,14 @@ void* mmap_thread(void*){
 			//react to changes requested. 
 			g_matlabTimer.exit(); 
 			double* b = (double*)mmh.m_addr; 
+			pthread_mutex_lock(&mutex_gobjs); 
 			for(unsigned int i=0; i<g_objs.size(); i++)
 				b = g_objs[i]->mmapRead(b); 
 			if(g_record){
 				for(unsigned int i=0; i<g_objs.size(); i++)
 					g_objs[i]->store(); //store when changes were commanded.
 			}
+			pthread_mutex_unlock(&mutex_gobjs); 
 			// variables which are the other direction -- e.g. polhemus --
 			// should be stored when *they* are recieved. 
 			usleep(100); //let the kernel sync memory (required..)
@@ -427,51 +437,92 @@ void* mmap_thread(void*){
 			bufn = 0; 
 		} else {
 			//setup command? 
+			pthread_mutex_lock(&mutex_gobjs); 
 			string txt = string(buf); 
 			char_separator<char> sep("\", "); 
 			tokenizer<char_separator<char> > tokens(txt, sep);
-			auto sendResponse = [&](string resp){
-				code = resp.size(); 
-				write(pipe_out.m_fd, (void*)&code, 4); //this so we know how much to seek in matlab.
-				write(pipe_out.m_fd, resp.c_str(), resp.size()); 
-			}; 
 			string resp = {""}; 
+			string typ = {""}; 
+			string name = {"null"}; 
+			auto sendResponse = [&](string q){
+				code = q.size(); 
+				write(pipe_out.m_fd, (void*)&code, 4); //this so we know how much to seek in matlab.
+				write(pipe_out.m_fd, q.c_str(), q.size()); 
+			}; 
+			auto makeConf = [&](Serialize* shp, string nam){
+				shp->m_name = nam + string("_"); 
+				g_objs.push_back(shp); 
+				resp = {"made a "}; 
+				resp += typ; 
+				resp += " named "; 
+				resp += shp->m_name; 
+				resp += {"\n"}; 
+			};
+			auto clamp01 = [&](float v){
+				return (v > 1 ? 1 : (v < 0 ? 0 : v)); 
+			};
 			auto beg = tokens.begin(); 
 			if((*beg) == string("make")){
 				beg++; 
-				if((*beg) == string("circle")){
+				typ = string("circle"); 
+				if((*beg) == typ){
 					beg++; 
-					Shape* shp = new Shape(); 
-					shp->makeCircle(64); 
+					Circle* shp = new Circle(0.5, 64); 
 					if(beg != tokens.end())
-						shp->m_name = (*beg); //name of the circle.
-					g_objs.push_back(shp); 
-					resp = {"made a circle named "}; 
-					resp += shp->m_name; 
-					resp += {"\n"}; 
-				}
-				if((*beg) == string("stars")){
+						name = (*beg); //name of the circle.
+					makeConf(shp, name); 
+				} else {
+				typ = string("ring"); 
+				if((*beg) == typ){
+					beg++; 
+					float thick = 0.2; name = typ; 
+					if(beg != tokens.end()) {
+						name = (*beg); beg++; }
+					if(beg != tokens.end()) {
+						thick = clamp01(atof(beg->c_str())); 
+						beg++; }
+					Ring* shp = new Ring(0.5*(1-thick), 0.5, 64); 
+					makeConf(shp, name); 
+				} else {
+				typ = string("square"); 
+				if((*beg) == typ){
+					beg++; 
+					Square* shp = new Square(1.0); 
+					if(beg != tokens.end())
+						name = (*beg); //name of the circle.
+ 					makeConf(shp, name); 
+				} else {
+				typ = string("open_square"); 
+				if((*beg) == typ){
+					beg++; 
+					float thick = 0.2; name = typ; 
+					if(beg != tokens.end()) {
+						name = (*beg); beg++; }
+					if(beg != tokens.end()) {
+						thick = clamp01(atof(beg->c_str())); 
+						beg++; }
+					OpenSquare* shp = new OpenSquare(1.f-thick, 1.f); 
+					makeConf(shp, name); 
+				} else {
+				typ = string("stars"); 
+				if((*beg) == typ){
 					beg++; 
 					StarField* sf = new StarField(); 
 					sf->makeStars(3000, g_daglx[1]->getAR());
 					if(beg != tokens.end())
-						sf->m_name = (*beg); //name of the circle.
-					g_objs.push_back(sf); 
-					resp = {"made a starfield named "}; 
-					resp += sf->m_name; 
-					resp += {"\n"}; 
-				}
-				if((*beg) == string("tone")){
+						name = (*beg); //name of the circle.
+					makeConf(sf, name); 
+				} else {
+				typ = string("tone"); 
+				if((*beg) == typ){
 					// add a tone-interpreter (can add multiple for polyphony). 
 					beg++; 
 					ToneSerialize* tsz = new ToneSerialize(); 
 					if(beg != tokens.end())
-						tsz->m_name = (*beg); //name of the tone.
-					g_objs.push_back(tsz); 
-					resp = {"made a tone generator named "}; 
-					resp += tsz->m_name; 
-					resp += {"\n"}; 
-					}
+						name = (*beg); //name of the tone.
+					makeConf(tsz, name); 
+				}
+				}}}}}
 			}
 			else if(*beg == string("store")){
 				// store <type> <size> <name>
@@ -486,7 +537,7 @@ void* mmap_thread(void*){
 						string ssize = *beg++; 
 						int size = atoi(ssize.c_str()); 
 						if(beg != tokens.end() && size > 0 && size < 1024){
-							string name = *beg++; 
+							name = (*beg++) + string("_"); 
 							//good, we have all the parameters
 							if(type == string("char")){
 								VectorSerialize<char>* obj = 
@@ -526,6 +577,59 @@ void* mmap_thread(void*){
 					} else resp = error + typedesc; 
 				} else resp = error + typedesc; 
 			}
+			else if(*beg == string("polhemus")){
+				// polhemus <name> -- more options later.
+				if(g_polhemusConnected){
+					beg++; 
+					name = string("polhemus"); 
+					if(beg != tokens.end()){
+						name = *beg; beg++; }
+					if(g_polhemus) delete g_polhemus; 
+					g_polhemus = new PolhemusSerialize(); 
+					g_objs.push_back(g_polhemus); 
+					g_polhemus->m_name = name; 
+					resp = string("intialized polhemus object called"); 
+					resp += name; resp += string("\n"); 
+				}else{
+					resp = string("could not initialize polhemus object "); 
+					resp += string(" -- not connected.\n"); 
+				}
+			}
+			else if(*beg == string("mouse")){
+				// mouse <name> -- simple mouse control.
+				beg++; 
+				name = string("mouse"); 
+				if(beg != tokens.end()){
+					name = *beg; beg++; }
+				if(g_mouse) delete g_mouse; 
+				g_mouse = new MouseSerialize(); 
+				g_objs.push_back(g_mouse); 
+				g_mouse->m_name = name; 
+				resp = string("intialized mouse object called "); 
+				resp += name; resp += string("\n"); 
+			}
+			else if(*beg == string("optotrak")){
+				// optotrak <name> <nsensors> -- definitely more options later!
+				if(g_optoConnected){
+					beg++; 
+					name = string("optotrak"); 
+					int nsensors = 1; 
+					if(beg != tokens.end()){
+						name = *beg; beg++; }
+					if(beg != tokens.end()){
+						nsensors = atoi(beg->c_str()); beg++; }
+					if(g_opto) delete g_opto; 
+					nsensors = nsensors < 1 ? 1 : (nsensors > 10 ? 10 : nsensors); 
+					g_opto = new OptoSerialize(nsensors); 
+					g_objs.push_back(g_opto); 
+					g_opto->m_name = name; 
+					resp = string("intialized optotrak object called"); 
+					resp += name; resp += string("\n"); 
+				}else{
+					resp = string("could not initialize optotrack object "); 
+					resp += string(" -- not connected.\n"); 
+				}
+			}
 			else if(*beg == string("tdtudp")){
 				// tdtudp <size> <ipaddress>
 				beg++; 
@@ -559,6 +663,15 @@ void* mmap_thread(void*){
 					g_objs[i]->clear();
 				resp = {"cleared all stored data\n"}; 
 			}
+			else if(*beg == string("delete_all")){
+				printf("deleting all objects"); 
+				for(unsigned int i=0; i<g_objs.size(); i++){
+					delete g_objs[i];
+				}
+				resp = {"all objects deleted.\n"}; 
+				g_objs.clear(); 
+				gobjsInit(); //timing, etc. 
+			}
 			else if(*beg == string("save")){
 				beg++; 
 				if(beg != tokens.end()){
@@ -582,18 +695,32 @@ void* mmap_thread(void*){
 			}
 			else{
 				resp = {"Current command vocabulary:\n"};
-				resp += {"\tmake circle <name>\n"}; 
+				resp += {"\tmake circle <name>\n"};
+				resp += {"\tmake ring <name> <frac. thickness>\n"}; 
+				resp += {"\tmake square <name>\n"};
+				resp += {"\tmake open_square <name> <frac thickness>\n"}; 
 				resp += {"\tmake stars <name>\n"}; 
 				resp += {"\tmake tone <name>\n"};
 				resp += {"\t\tmake a tone generator\n"}; 
+				resp += {"\tstore <type> <size> <name>\n"};
+				resp += {"\t\tmake a generic store for matlab data --\n"};
+				resp += {"\t\t<type> can be char, uchar, int, float, or double.\n"};
+				resp += {"\t\t<size> is the size of the vector 1-\n"}; 
+				resp += {"\t\tNOTE: in b5, all vectors are type DOUBLE, independent of disc storage type\n"}; 
+				resp += {"\tpolhemus <name> -- for getting polhemus sensor loc\n"}; 
+				resp += {"\tmouse <name> -- for getting mouse location\n"};
+				resp += {"\toptotrak <name> <nsensors> -- for getting optotrak location\n"}; 
 				resp += {"\tmmap\n"}; 
 				resp += {"\t\treturn mmap structure information, for eval() in matlab\n"}; 
 				resp += {"\tclear_all\n"}; 
 				resp += {"\t\tclear data stored in memory (e.g. when starting an experiment)\n"}; 
+				resp += {"\tdelete_all\n"}; 
+				resp += {"\t\tdelete all objects (shapes etc) & reinstate timing objects.\n"};
 				resp += {"\tstart_recording\n"};
 				resp += {"\tstop_recording\n"}; 
 				resp += {"\tsave <file name>\n"}; 
 			}
+			pthread_mutex_unlock(&mutex_gobjs); 
 			sendResponse(resp); 
 			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
 			bufn = 0; 
@@ -627,9 +754,9 @@ void* backup_thread(void*){
 		if(!g_die && matlabHasNewData(g_objs)){
 			char fname[256]; 
 			snprintf(fname, 256, "%s/backup_%04d.mat", dirname, k); 
-			pthread_mutex_lock(&mutex_fwrite); 
+			 pthread_mutex_lock(&mutex_fwrite); 
 			writeMatlab(g_objs, fname, true); 
-			pthread_mutex_unlock(&mutex_fwrite); 
+			 pthread_mutex_unlock(&mutex_fwrite); 
 			printf("... saved %s\n", fname); 
 			k++; 
 		}
@@ -688,18 +815,7 @@ void* polhemus_thread(void* ){
 	
 	if(rxbytes <= 0){
 		g_polhemusConnected = false; 
-		cout << "could not connect to polhemus, switching to mouse control." << endl; 
-		while(!g_die){
-			float synth[3]; 
-			synth[0] = g_mousePos[0]; 
-			synth[1] = g_mousePos[1]; 
-			synth[2] = 0; 
-			if(g_record) 
-				g_polhemus->store(synth); 
-			else
-				g_polhemus->update(synth); 
-			usleep(1e6/240); 
-		}
+		cout << "could not connect to polhemus." << endl; 
 	} else {
 		cout << "connection established to Polhemus .." << endl; 
 		// first establish comm and clear out any residual trash data
@@ -751,10 +867,12 @@ void* polhemus_thread(void* ){
 					//this data is used, move the pointer forward one. 
 					g_cbRN += 20;
 					float* pData=(float*)(buf+8);			// header is first 8 bytes
-					if(g_record) 
-						g_polhemus->store(pData); 
-					else
-						g_polhemus->update(pData); // for status, etc.
+					if(g_polhemus){
+						if(g_record) 
+							g_polhemus->store(pData); 
+						else
+							g_polhemus->update(pData); // for status, etc.
+					}
 					frames += 1; 
 					usleep(1800); 
 				}
@@ -817,6 +935,7 @@ void* opto_thread(void* ){
 	}
 	/* Grab a packet */
 	int packets = 0; 
+	k = 0; 
 	while(!g_die){
 		packet = pcap_next(handle, &header);
 		/* Print its length */
@@ -859,6 +978,7 @@ void* opto_thread(void* ){
 						printf("%f ", *f++); 
 					}
 					printf("\n"); 
+					//need to save this data into g_opto->store()
 				}
 			}else{
 				fprintf(stderr, "Optotrak: Invalid TCP header length: %u bytes\n", size_tcp);
@@ -924,14 +1044,22 @@ void longDoubleTest(){
 	printf("sum ld: %Lf, d: %f difference %Lf\n", ld, d, ld2); 
 }
 
-void lambdaTest() {
-	char s[]="Hello World!";
-	int Uppercase = 0; //modified by the lambda
-	for_each(s, s+sizeof(s), [&Uppercase] (char c) {
-		if (isupper(c))
-		Uppercase++;
-		});
-	cout<< Uppercase<<" uppercase letters in: "<< s << endl;
+void gobjsInit(){
+	g_timeSerialize = new TimeSerialize(); //synchronize with gtkclient_tdt.
+	g_frameSerialize = new FrameSerialize(); 
+	g_affine44 = new Matrix44Serialize(string("affine")); 
+	g_quadratic44 = new Matrix44Serialize(string("quadratic")); 
+	//4x4 matrices are initalized with the identity matrix = not ok for quadratic.
+	for(int i=0; i<4; i++){
+		g_quadratic44->m_x[i+i*4] = 0; 
+		g_quadratic44->m_cmp[i+i*4] = 0; //to catch the edges.
+	}
+	pthread_mutex_lock(&mutex_gobjs); 
+	g_objs.push_back(g_timeSerialize);
+	g_objs.push_back(g_frameSerialize); 
+	g_objs.push_back(g_affine44); 
+	g_objs.push_back(g_quadratic44); 
+	pthread_mutex_unlock(&mutex_gobjs); 
 }
 
 int main(int argn, char** argc){
@@ -1016,7 +1144,7 @@ int main(int argn, char** argc){
 	//make the aux / monkey window. 
 	
 	GtkWidget* top = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title (GTK_WINDOW (top), "m0nkey view");
+	gtk_window_set_title (GTK_WINDOW (top), "subject view");
 	gtk_window_set_default_size (GTK_WINDOW (top), 320, 240);
 	da2 = gtk_drawing_area_new ();
 	gtk_container_add (GTK_CONTAINER (top), da2);
@@ -1051,24 +1179,6 @@ int main(int argn, char** argc){
 	//add a fullscreen checkbox to the gui.
 	makeCheckbox("Fullscreen", false, G_CALLBACK(fullscreenCB)); 
 	makeCheckbox("sync to Vblank\n(resize window to enact)", g_glvsync, G_CALLBACK(vsyncCB));  
-	
-	//can init the shapes ... here i guess (no opengl though!)
-	g_timeSerialize = new TimeSerialize(); //synchronize with gtkclient_tdt.
-	g_frameSerialize = new FrameSerialize(); 
-	g_affine44 = new Matrix44Serialize(string("affine")); 
-	g_quadratic44 = new Matrix44Serialize(string("quadratic")); 
-	//4x4 matrices are initalized with the identity matrix = not ok for quadratic.
-	for(int i=0; i<4; i++){
-		g_quadratic44->m_x[i+i*4] = 0; 
-		g_quadratic44->m_cmp[i+i*4] = 0; //to catch the edges.
-	}
-	g_polhemus = new PolhemusSerialize(); 
-	
-	g_objs.push_back(g_timeSerialize);
-	g_objs.push_back(g_frameSerialize); 
-	g_objs.push_back(g_affine44); 
-	g_objs.push_back(g_quadratic44); 
-	g_objs.push_back(g_polhemus); 
 
 	g_signal_connect_swapped (window, "destroy",
 			G_CALLBACK (destroy), NULL);
@@ -1081,8 +1191,14 @@ int main(int argn, char** argc){
 	g_da[1] = da2; 
 	g_timeout_add (4, refresh, da1); //250 Hz, approximate. 
 	
+	g_polhemus = 0; 
+	g_opto = 0; 
+	g_mouse = 0; 
+	gobjsInit(); 
+	
 	//mutexes --
 	pthread_mutex_init(&mutex_fwrite, NULL);
+	pthread_mutex_init(&mutex_gobjs, NULL);
 	
 	pthread_t pthread, mthread, bthread, othread; 
 	pthread_create(&pthread, NULL, polhemus_thread, NULL);
@@ -1111,6 +1227,7 @@ int main(int argn, char** argc){
 	//save data!!
 	writeMatlab(g_objs, (char *)"backup.mat", false); //the whole enchilada.
 	pthread_mutex_destroy(&mutex_fwrite);
+	pthread_mutex_destroy(&mutex_gobjs);
 	
 	delete g_daglx[0];
 	delete g_daglx[1]; 
