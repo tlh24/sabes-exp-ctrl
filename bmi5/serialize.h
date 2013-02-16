@@ -322,13 +322,13 @@ public:
 	virtual int nstored(){return v_time.size();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("_time"); //these are not output--
-			case 1: return m_name + string("_ticks"); //only saved in file (below).
-			case 2: return m_name + string("_freq_io"); //bidirectional.
-			case 3: return m_name + string("_pan"); 
-			case 4: return m_name + string("_scale"); 
-			case 5: return m_name + string("_duration"); 
-		} return string("none"); 
+			case 0: return m_name + string("time"); //these are not output--
+			case 1: return m_name + string("ticks"); //only saved in file (below).
+			case 2: return m_name + string("freq_io"); //bidirectional.
+			case 3: return m_name + string("pan"); 
+			case 4: return m_name + string("scale"); 
+			case 5: return m_name + string("duration"); 
+		} return string("none");
 	}
 	virtual int getStoreClass(int indx){
 		switch(indx){

@@ -351,7 +351,7 @@ static gboolean refresh (gpointer ){
 	
 	float loc[3];  
 	if(g_polhemus) g_polhemus->getLoc(gettime(), loc); 
-	string con = g_polhemusConnected ? string("connected"):string("disconnected:using cursor"); 
+	string con = g_polhemusConnected ? string("connected"):string("disconnected"); 
 	snprintf(str, 256, "%s\nx %4.2f cm\ny %4.2f cm\nz %4.2f cm", 
 				con.c_str(), loc[0], loc[1], loc[2]); 
 	gtk_label_set_text(GTK_LABEL(g_polhemusLabel), str); 
@@ -360,7 +360,7 @@ static gboolean refresh (gpointer ){
 string getMmapStructure(){
 	std::stringstream oss; 
 	oss << "% mmap structure (pass to bmi5_mmap())\n"; 
-	oss << "mex -O bmi5_mmap.cpp % to make sure you have the latest version.\n"; 
+	oss << "mex -O ../bmi5_mmap.cpp % to make sure you have the latest version.\n"; 
 	oss << "clear b5; \n"; 
 	for(unsigned int i=0; i<g_objs.size(); i++){
 		oss << g_objs[i]->getStructInfo(); 
@@ -461,6 +461,13 @@ void* mmap_thread(void*){
 			auto clamp01 = [&](float v){
 				return (v > 1 ? 1 : (v < 0 ? 0 : v)); 
 			};
+			auto g_objsRm = [&](Serialize* sx){
+				int j = -1; 
+				for(unsigned int i=0; i<g_objs.size(); i++){
+					if(g_objs[i] == sx) j = i; 
+				}
+				if(j>=0) g_objs.erase(g_objs.begin()+j);
+			}; 
 			auto beg = tokens.begin(); 
 			if((*beg) == string("make")){
 				beg++; 
@@ -584,6 +591,7 @@ void* mmap_thread(void*){
 					name = string("polhemus"); 
 					if(beg != tokens.end()){
 						name = *beg; beg++; }
+					g_objsRm(g_polhemus); 
 					if(g_polhemus) delete g_polhemus; 
 					g_polhemus = new PolhemusSerialize(); 
 					g_objs.push_back(g_polhemus); 
@@ -601,6 +609,7 @@ void* mmap_thread(void*){
 				name = string("mouse"); 
 				if(beg != tokens.end()){
 					name = *beg; beg++; }
+				g_objsRm(g_mouse); 
 				if(g_mouse) delete g_mouse; 
 				g_mouse = new MouseSerialize(); 
 				g_objs.push_back(g_mouse); 
@@ -618,6 +627,7 @@ void* mmap_thread(void*){
 						name = *beg; beg++; }
 					if(beg != tokens.end()){
 						nsensors = atoi(beg->c_str()); beg++; }
+					g_objsRm(g_opto); 
 					if(g_opto) delete g_opto; 
 					nsensors = nsensors < 1 ? 1 : (nsensors > 10 ? 10 : nsensors); 
 					g_opto = new OptoSerialize(nsensors); 
@@ -1054,12 +1064,10 @@ void gobjsInit(){
 		g_quadratic44->m_x[i+i*4] = 0; 
 		g_quadratic44->m_cmp[i+i*4] = 0; //to catch the edges.
 	}
-	pthread_mutex_lock(&mutex_gobjs); 
 	g_objs.push_back(g_timeSerialize);
 	g_objs.push_back(g_frameSerialize); 
 	g_objs.push_back(g_affine44); 
 	g_objs.push_back(g_quadratic44); 
-	pthread_mutex_unlock(&mutex_gobjs); 
 }
 
 int main(int argn, char** argc){
@@ -1194,7 +1202,9 @@ int main(int argn, char** argc){
 	g_polhemus = 0; 
 	g_opto = 0; 
 	g_mouse = 0; 
+	pthread_mutex_lock(&mutex_gobjs); 
 	gobjsInit(); 
+	pthread_mutex_unlock(&mutex_gobjs); 
 	
 	//mutexes --
 	pthread_mutex_init(&mutex_fwrite, NULL);

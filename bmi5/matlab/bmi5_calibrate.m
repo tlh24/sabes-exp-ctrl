@@ -13,10 +13,11 @@ for j=1:num_targets
 end
 bmi5_cmd('make tone tone');
 bmi5_cmd('make circle cursor');
-<<<<<<< HEAD:bmi5/matlab/bmi5_calibrate.m
-bmi5_cmd('mouse finger');
-=======
->>>>>>> 4f73b166fb8437baea8101f86f86baf8f8de10f8:bmi5/bmi5_calibrate.m
+if(mouse)
+	bmi5_cmd('mouse finger');
+else
+	bmi5_cmd('polhemus finger'); 
+end
 
 eval(bmi5_cmd('mmap structure'));
 
@@ -27,7 +28,7 @@ world = zeros(num_targets, 4);
 screen(:,4) = 1; 
 world(:,4) = 1; 
 pm = zeros(3); 
-% in tim's desk setup: (will differ in other setups).
+
 if(mouse)
 	pm = eye(3);% mouse control.
 else

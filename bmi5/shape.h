@@ -239,10 +239,10 @@ class Shape : public Serialize {
 	virtual int nstored(){ return v_color.size(); }
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("_draw"); 
-			case 1: return m_name + string("_color");
-			case 2: return m_name + string("_scale");
-			case 3: return m_name + string("_pos");
+			case 0: return m_name + string("draw"); 
+			case 1: return m_name + string("color");
+			case 2: return m_name + string("scale");
+			case 3: return m_name + string("pos");
 		} return string("none"); 
 	}
 	virtual int getStoreClass(int indx){
@@ -480,8 +480,8 @@ public: //do something like the flow field common in the lab.
 		}else{
 			indx -= Shape::numStores(); 
 			switch(indx){
-				case 0: return m_name + string("_vel"); 
-				case 1: return m_name + string("_coherence"); 
+				case 0: return m_name + string("vel"); 
+				case 1: return m_name + string("coherence"); 
 			} return string("none"); 
 		}
 	}
