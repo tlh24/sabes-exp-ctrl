@@ -13,7 +13,10 @@ for j=1:num_targets
 end
 bmi5_cmd('make tone tone');
 bmi5_cmd('make circle cursor');
+<<<<<<< HEAD:bmi5/matlab/bmi5_calibrate.m
 bmi5_cmd('mouse finger');
+=======
+>>>>>>> 4f73b166fb8437baea8101f86f86baf8f8de10f8:bmi5/bmi5_calibrate.m
 
 eval(bmi5_cmd('mmap structure'));
 
