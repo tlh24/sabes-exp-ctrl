@@ -1,6 +1,6 @@
 # The following can be set at the commandline
 # ie: make USE_DEBUG=true
-USE_DEBUG = true
+USE_DEBUG = false
 
 CPP = g++
 CC  = gcc
@@ -13,7 +13,8 @@ CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
 -Wextra -Werror -pedantic -std=c++11 -rdynamic
 
-ifeq ($(strip $(USE_DEBUG)),true)
+
+ifeq ($(strip $(USE_DEBUG)),true) 
   CFLAGS += -g -DDEBUG
 else
   CLFAGS += -O3

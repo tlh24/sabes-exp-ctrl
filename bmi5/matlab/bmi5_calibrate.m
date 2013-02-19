@@ -1,12 +1,12 @@
 function [] = bmi5_calibrate(mouse)
 global bmi5_in bmi5_out b5;
 
-% cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5');
+cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
-num_targets = 9;
+num_targets = 16;
 
 for j=1:num_targets
  bmi5_cmd(strcat('make circle target',num2str(j)));
@@ -64,7 +64,7 @@ for yi = 1:snt
     end
 end
 
-b5.cursor_scale = [0.1; 0.1]; 
+b5.cursor_scale = [15; 15]; % in mm
 b5.cursor_color = [1; 1; 1; 1]; 
 b5.cursor_pos   = [0; 0];
 b5.cursor_draw  = 0;
@@ -97,13 +97,19 @@ for yi = 1:snt
 		pause(2);
         b5.tone_freq = 0; % need to add a 'play' flag.
         bmi5_mmap(b5); % update sensors.
-		p = (pm * [b5.finger_o;0])'; 
+        if(mouse)
+            p = (pm * [b5.finger_o;0])'; 
+        else
+            p = (pm * [b5.finger_sensors_o])'; 
+        end
 		world(i,1:3) = p(1:3);
 		i=i+1;
 	end
 end
 
-q = world\screen; % screen = world * q (transposed from opengl)
+world2 = world; 
+world2(:,3) = 0; 
+q = world2\screen; % screen = world * q (transposed from opengl)
 
 hold off
 plot(screen(:,1), screen(:,2), 'bo'); 
@@ -133,7 +139,7 @@ b5.cursor_draw = 1;
 bmi5_mmap(b5); 
 
 while(1)
-	p = pm * [b5.finger_o;0];
+	p = pm * [b5.finger_sensors_o];
 	b5.cursor_pos = p(1:2); 
 	bmi5_mmap(b5); 
 end

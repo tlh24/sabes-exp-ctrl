@@ -830,11 +830,16 @@ void* polhemus_thread(void* ){
 		cout << "connection established to Polhemus .." << endl; 
 		// first establish comm and clear out any residual trash data
 		double frames = 0; 
+		//put it in centimeter mode. 
+		pol->Write("U1\r"); 
+		usleep(1e4);
+		len = pol->Read(buf, BUF_SIZE); //throw away.
+		usleep(1e4);
 		//now put it in binary (faster than ascii!) mode:
 		pol->Write("f1\r"); 
-		usleep(5000);
+		usleep(1e4);
 		len = pol->Read(buf, BUF_SIZE); //throw away.
-		usleep(5000);
+		usleep(1e4);
 		// we only care about x, y, z -- faster (lower latency) transmission.
 		pol->Write("O*,2\r"); //this command turns off sending Euler angles. 
 		pol->Write("c\r"); //request continuous data.
