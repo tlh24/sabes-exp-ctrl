@@ -40,9 +40,12 @@ else
     %        -1   0   0   
     %         0  -1   0  ];
          
-    pm = [   0  -1   0
-             0   0  -1   
-            +1   0   0  ];
+    % In addition to permuting from the native polhemus
+    % axes to a more reasonable set of axes, this matrix
+    % handles the conversion to mm from cm (polhemus native units)
+    pm = [    0  -10    0
+              0    0  -10  
+            +10    0    0  ];
          
 end
 
