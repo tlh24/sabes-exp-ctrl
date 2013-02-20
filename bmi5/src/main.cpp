@@ -53,7 +53,7 @@
 #include "shape.h"
 #include "polhemus.h"
 #include "fifohelp.h"
-#include "optotrak_sniff/etherstruct.h"
+#include "../optotrak_sniff/etherstruct.h"
 
 using namespace std;
 using namespace boost;

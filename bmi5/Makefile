@@ -5,10 +5,11 @@ USE_DEBUG = false
 CPP = g++
 CC  = gcc
 
-OBJS = main.o tdt_udp.o glInfo.o glFont.o polhemus.o writematlab.o \
+OBJS = src/main.o src/tdt_udp.o src/glInfo.o src/glFont.o src/polhemus.o \
+	src/writematlab.o \
 	../../myopen/common_host/jacksnd.o ../../myopen/common_host/gettime.o
 
-CFLAGS := -I/usr/local/include -I../../myopen/common_host
+CFLAGS := -Iinclude -I/usr/local/include -I../../myopen/common_host
 CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
 -Wextra -Werror -pedantic -std=c++11 -rdynamic
@@ -27,9 +28,7 @@ GTKLD = `pkg-config --libs $(GLIBS) `
 
 all: bmi5
 
-main.o : main.cpp shape.h gtkglx.h serialize.h
-
-%.o : %.cpp 
+src/%.o : src/%.cpp 
 	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
 	
 %.o: ../../myopen/common_host/%.cpp\
@@ -41,11 +40,11 @@ bmi5: $(OBJS)
 opto: bmi5 # enables packet-capture privelages on bmi5. 
 	sudo setcap cap_net_raw,cap_net_admin=eip bmi5
 	
-glxgears: glxgears.c
-	$(CC) -O3 -o $@ -lrt -lGL $<
+glxgears: src/glxgears.c
+	$(CPP) -O3 -o $@ -lrt -lGL $<
 	
 clean:
-	rm -rf *.o bmi5 glxgears
+	rm -rf src/*.o bmi5 glxgears
 	
 deps:
 	sudo apt-get install gdb libgtk-3-dev libgtkglext1-dev freeglut3-dev \
