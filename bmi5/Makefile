@@ -47,8 +47,8 @@ clean:
 	rm -rf src/*.o bmi5 glxgears
 	
 deps:
-	sudo apt-get install gdb libgtk-3-dev libgtkglext1-dev freeglut3-dev \
-	libmatio-dev libusb-1.0-0-dev libglew-dev libjack-jackd2-dev \
+	sudo apt-get install gdb libboost-dev libgtk-3-dev libgtkglext1-dev \
+	freeglut3-dev libmatio-dev libusb-1.0-0-dev libglew-dev libjack-jackd2-dev \
 	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl \
 	libpcap-dev
 	
