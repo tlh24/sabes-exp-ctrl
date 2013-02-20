@@ -55,19 +55,13 @@ void BuildFont(void) {
 void KillFont(void){
     glDeleteLists(g_base, 96);                    // delete all 96 characters.
 }
-GLvoid printGLf(const char *fmt, ...){
-    va_list ap;     /* our argument pointer */
-    char text[256];
-    if (fmt == NULL)    /* if there is no string to draw do nothing */
-        return;
-    va_start(ap, fmt);  /* make ap point to first unnamed arg */
-    /* FIXME: we *should* do boundschecking or something to prevent buffer
-     * overflows/segmentations faults
-     */
-    vsprintf(text, fmt, ap);
-    va_end(ap);
-    glPushAttrib(GL_LIST_BIT);
-    glListBase(g_base - 32);
-    glCallLists(strlen(text), GL_UNSIGNED_BYTE, text);
-    glPopAttrib();
+void glPrint(const char *text){                    // custom gl print routine.
+    if (text == NULL) {                         // if there's no text, do nothing.
+		return;
+    }
+    glPushAttrib(GL_LIST_BIT);                  // alert that we're about to offset the display lists with glListBase
+    glListBase(g_base - 32);                      // sets the base character to 32.
+
+    glCallLists(strlen(text), GL_UNSIGNED_BYTE, text); // draws the display list text.
+    glPopAttrib();                              // undoes the glPushAttrib(GL_LIST_BIT);
 }

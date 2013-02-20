@@ -54,6 +54,7 @@
 #include "polhemus.h"
 #include "fifohelp.h"
 #include "../optotrak_sniff/etherstruct.h"
+#include "glFont.h"
 
 using namespace std;
 using namespace boost;
@@ -163,7 +164,6 @@ int hostname_to_ip(char * hostname , char* ip){
 }
 */
 
-
 void errorDialog(char* msg){
 	GtkWidget *dialog, *label, *content_area;
 	dialog = gtk_dialog_new_with_buttons ("Error",
@@ -232,6 +232,8 @@ static gboolean
 			glXGetProcAddressARB((const GLubyte*)"glXSwapIntervalSGI");  
 		if (glXSwapIntervalSGI)  
 				glXSwapIntervalSGI(g_glvsync ? 1 : 0); 
+		//font on this one too.
+		BuildFont(); 
 	}
 	
 	//save the viewport size.
@@ -515,7 +517,7 @@ void* mmap_thread(void*){
 				if((*beg) == typ){
 					beg++; 
 					StarField* sf = new StarField(); 
-					sf->makeStars(3000, g_daglx[1]->getAR());
+					sf->makeStars(3000, g_daglx[1]->getAR()); //3k should be parameter?
 					if(beg != tokens.end())
 						name = (*beg); //name of the circle.
 					makeConf(sf, name); 
@@ -528,8 +530,22 @@ void* mmap_thread(void*){
 					if(beg != tokens.end())
 						name = (*beg); //name of the tone.
 					makeConf(tsz, name); 
+				} else {
+				typ = string("text"); 
+				if((*beg) == typ){
+					beg++; 
+					int nchars = 256; name = typ;
+					if(beg != tokens.end()) { 
+						name = (*beg); beg++; 
+					}
+					if(beg != tokens.end()) {
+						nchars = atoi(beg->c_str()); beg++;
+					}
+					nchars &= (0x1ff ^ 7); 
+					DisplayText* x = new DisplayText(nchars); 
+					makeConf(x, name); 
 				}
-				}}}}}
+				}}}}}}
 			}
 			else if(*beg == string("store")){
 				// store <type> <size> <name>
@@ -709,7 +725,12 @@ void* mmap_thread(void*){
 				resp += {"\tmake ring <name> <frac. thickness>\n"}; 
 				resp += {"\tmake square <name>\n"};
 				resp += {"\tmake open_square <name> <frac thickness>\n"}; 
-				resp += {"\tmake stars <name>\n"}; 
+				resp += {"\tmake stars <name>\n"};
+				resp += {"\tmake text <name> <nchars>\n"}; 
+				resp += {"\t\tDisplays text on the screen.\n"};
+				resp += {"\t\tnchars must be a multipe of 8\n"};
+				resp += {"\t\t<name>_str in b5 structure MUST NOT CHANGE SIZE.\n"};
+				resp += {"\t\te.g. you cannot do b5.text_str = 'something';\n"}; 
 				resp += {"\tmake tone <name>\n"};
 				resp += {"\t\tmake a tone generator\n"}; 
 				resp += {"\tstore <type> <size> <name>\n"};
@@ -1238,12 +1259,15 @@ int main(int argn, char** argc){
 	pthread_join(othread,NULL);
 	//pthread_join(mthread,NULL); 
 	pthread_join(bthread,NULL); 
-	//jackClose(0); 
+	#ifndef DEBUG
+		jackClose(0); 
+	#endif
 	//save data!!
 	writeMatlab(g_objs, (char *)"backup.mat", false); //the whole enchilada.
 	pthread_mutex_destroy(&mutex_fwrite);
 	pthread_mutex_destroy(&mutex_gobjs);
 	
+	KillFont(); //right context?  unsure.
 	delete g_daglx[0];
 	delete g_daglx[1]; 
 	delete g_tsc; 

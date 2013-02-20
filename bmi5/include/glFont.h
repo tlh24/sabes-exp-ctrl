@@ -3,6 +3,6 @@
 
 void BuildFont(void);
 void KillFont(void);
-GLvoid printGLf(const char *fmt, ...);
+void glPrint(const char* text);
 
 #endif //__GLFONT_H__
