@@ -11,7 +11,10 @@
 #include <string.h>
 #include <stack>
 #include <string>
+#include <iomanip>
+#include <limits>
 #include <boost/tokenizer.hpp>
+#include <boost/lexical_cast.hpp>
 #include <fcntl.h>
 #include <pcap.h>
 #include "matio.h"
@@ -80,6 +83,8 @@ GtkWidget* 	g_timeLabel;
 GtkWidget* 	g_matlabTimeLabel; 
 GtkWidget* 	g_openglTimeLabel; 
 GtkWidget* 	g_polhemusLabel; 
+GtkWidget* 	g_optoLabel; 
+string		g_optoLabelStr; 
 TimeSyncClient * g_tsc; 
 unsigned char g_writeBuffer[1024*1024]; 
 PerfTimer	g_matlabTimer; 
@@ -349,12 +354,20 @@ static gboolean refresh (gpointer ){
 				g_openGLTimer.lastTime()*1000.0); 
 	gtk_label_set_text(GTK_LABEL(g_openglTimeLabel), str); 
 	
-	float loc[3];  
+	float loc[32];  
 	if(g_polhemus) g_polhemus->getLoc(gettime(), loc); 
-	string con = g_polhemusConnected ? string("connected"):string("disconnected"); 
-	snprintf(str, 256, "%s\nx %4.2f cm\ny %4.2f cm\nz %4.2f cm", 
-				con.c_str(), loc[0], loc[1], loc[2]); 
+	if(g_polhemusConnected){
+		snprintf(str, 256, "connected\nx %4.2f cm\ny %4.2f cm\nz %4.2f cm", 
+				loc[0], loc[1], loc[2]); 
+	}else{
+		snprintf(str, 256, "disconnected"); 
+	}
 	gtk_label_set_text(GTK_LABEL(g_polhemusLabel), str); 
+	
+	if(g_opto) g_opto->getLoc(gettime(), loc); 
+	string con = g_optoConnected ? string("connected\n"):string("disconnected\n"); 
+	con += g_optoLabelStr;
+	gtk_label_set_text(GTK_LABEL(g_optoLabel), con.c_str()); 
 	return TRUE;
 }
 string getMmapStructure(){
@@ -937,6 +950,7 @@ void* opto_thread(void* ){
 	handle = pcap_open_live(dev, 1024, 1, 10, errbuf); //second to last argument: timeout. 
 	if (handle == NULL) {
 		fprintf(stderr, "Optotrak: Couldn't open device %s: %s\n", "eth1", errbuf);
+		fprintf(stderr, "\t\ttry 'make opto' to set permissions.\n"); 
 		return (void*)2;
 	}
 	/* Compile and apply the filter */
@@ -950,6 +964,7 @@ void* opto_thread(void* ){
 	}
 	/* Grab a packet */
 	int packets = 0; 
+	float g[32]; 
 	k = 0; 
 	while(!g_die){
 		packet = pcap_next(handle, &header);
@@ -985,15 +1000,37 @@ void* opto_thread(void* ){
 					k = 0;  
 				}
 				if(k == 1){
-					printf("timestamp: %d\n", u[1]); 
+					//printf("timestamp: %d\n", u[1]); 
 				}
 				if(k == 2){
-					printf("float val: "); 
-					for(j=0; j<(len/4);j++){
-						printf("%f ", *f++); 
+					ostringstream oss;
+					oss << std::setprecision(2);
+					oss << std::fixed;
+					int nsensors = len/24; 
+					float* ff = f; 
+					auto clampfloat = [&](float w){
+						return fabs(w) > 1e6 ? 0 : w;; 
+					};
+					for(j=0; j<nsensors; j++){
+						oss << "marker_" << (j+1) << " "; 
+						oss << " x:" << clampfloat(*ff++);
+						oss << " y:" << clampfloat(*ff++); 
+						oss << " z:" << clampfloat(*ff++) << "\n"; 
+						ff += 3; 
 					}
-					printf("\n"); 
-					//need to save this data into g_opto->store()
+					g_optoLabelStr = oss.str(); 
+					if(g_opto){
+						//assume (for Certus) there is no orientation data. 
+						int m = 0; 
+						for(j=0; j<(len/4);j++){
+							if((j % 6) < 3){
+								g[m] = *f; 
+								m++; 
+							}
+							f++; 
+						}
+						g_opto->store(g); 
+					}
 				}
 			}else{
 				fprintf(stderr, "Optotrak: Invalid TCP header length: %u bytes\n", size_tcp);
@@ -1109,7 +1146,8 @@ int main(int argn, char** argc){
 	}; 
 	g_matlabTimeLabel = makeLabel("Matlab stats", "mean:-- max:--"); 
 	g_openglTimeLabel = makeLabel("OpenGL stats", "mean:-- max:--");
-	g_polhemusLabel = makeLabel("Polhemus stats", "x -; y -; z -;"); 
+	g_polhemusLabel = makeLabel("Polhemus stats", "x -; y -; z -;");
+	g_optoLabel = makeLabel("Optotrak stats", "x -; y -; z -;"); 
 	
 	GtkWidget* button = gtk_button_new_with_label ("Write data to disk");
 	g_signal_connect(button, "clicked", G_CALLBACK(saveMatlabData), window); 
