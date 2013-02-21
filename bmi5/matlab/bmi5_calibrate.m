@@ -102,7 +102,7 @@ end
 
 world2 = world; 
 world2(:,3) = 0; 
-q = world2\screen; % screen = world * q (transposed from opengl)
+q = world2\screen; % screen = world * q (q will be transposed from opengl)
 
 hold off
 plot(screen(:,1), screen(:,2), 'bo'); 
