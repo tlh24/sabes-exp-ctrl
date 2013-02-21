@@ -172,7 +172,7 @@ class Shape : public Serialize {
 		if(m_draw){
 			setupDrawMatrices(display); 
 			int colorloc = glGetUniformLocation(m_program[display], "uniform_color"); 
-			if(colorloc >= 0)glUniform4f(colorloc, m_color[0], m_color[1], m_color[2], m_color[3]);
+			if(colorloc >= 0) glUniform4f(colorloc, m_color[0], m_color[1], m_color[2], m_color[3]);
 			
 			if(m_program[0] == 0){ //boring square mode! DEBUG. 
 				glBegin(GL_TRIANGLE_FAN); 
@@ -613,4 +613,120 @@ public:
 	}
 }; 
 
+class DisplayText : public VectorSerialize<char> {
+public: 
+	string	m_text; 
+	double			m_time; 
+	array<double,2>	m_pos; //double so the comparisons work properly.
+	array<double,4>	m_color; 
+	vector<double>	v_time; 
+	vector<array<float,2>> v_pos;
+	vector<array<unsigned char,4>> v_color; 
+	
+	DisplayText(int size) : VectorSerialize(size, MAT_C_INT8){
+		m_text = string("test!"); 
+		m_pos[0] = 10; m_pos[1] = 10; 
+		for(int i=0; i<4; i++)
+			m_color[i] = 1.f; 
+	}
+	~DisplayText(){
+		clear(); 
+	}
+	virtual void store(){} //in mmap()
+	virtual void clear(){
+		VectorSerialize::clear(); 
+		v_time.clear(); 
+		v_pos.clear(); 
+		v_color.clear(); 
+	}
+	virtual string storeName(int indx){
+		switch(indx){
+			case 0: return m_name + string("str"); 
+			case 1: return m_name + string("time_o"); 
+			case 2: return m_name + string("pos");
+			case 3: return m_name + string("color"); 
+		} return string("none"); 
+	}
+	virtual int getStoreClass(int indx){
+		switch(indx){
+			case 0: return VectorSerialize::getStoreClass(indx); 
+			case 1: return MAT_C_DOUBLE; 
+			case 2: return MAT_C_SINGLE;
+			case 3: return MAT_C_UINT8; 
+		} return 0; 
+	}
+	virtual void getStoreDims(int indx, size_t* dims){
+		switch(indx){
+			case 0: VectorSerialize::getStoreDims(indx, dims); return; 
+			case 1: dims[0] = 1; dims[1] = 1; return; 
+			case 2: dims[0] = 2; dims[1] = 1; return;
+			case 3: dims[0] = 4; dims[1] = 1; return; 
+		}
+	}
+	virtual void* getStore(int indx, int i){
+		switch(indx){
+			case 0: return VectorSerialize::getStore(indx, i); 
+			case 1: return (void*)&(v_time[i]); 
+			case 2: return (void*)&((v_pos[i])[0]);
+			case 3: return (void*)&((v_color[i])[0]); 
+		} return NULL; 
+	}
+	virtual int numStores(){return 4;}
+	virtual double* mmapRead(double *d){
+		m_text.reserve(m_size); //just in case..
+		char* s = (char*)m_text.data(); 
+		int i; 
+		for(i=0; i<m_size; i++)
+			s[i] = (char)(*d++); 
+		//see if the strings are the same. 
+		bool same = true; 
+		for(i=0; i<m_size; i++){
+			if(s[i] != m_stor[i]) same = false; 
+		}
+		for(i=0; i<2; i++){
+			if(d[i+1] != m_pos[i]) same = false; 
+		}
+		for(i=0; i<4; i++){
+			if(d[i+3] != m_color[i]) same = false; 
+		}
+		if(!same){
+			for(i=0; i<m_size; i++)
+				m_stor[i] = s[i]; 
+			for(i=0; i<2; i++)
+				m_pos[i] = d[i+1];
+			for(i=0; i<4; i++)
+				m_color[i] = d[i+3]; 
+			v_stor.push_back(m_stor); 
+			m_time = gettime(); 
+			v_time.push_back(m_time); 
+			array<float,2> pos; 
+			pos[0] = m_pos[0]; pos[1] = m_pos[1]; 
+			v_pos.push_back(pos); 
+			array<unsigned char,4> color; 
+			for(i=0; i<4; i++)
+				color[i] = (char)(m_color[i] * 255.f); 
+			v_color.push_back(color);
+		}
+		d[0] = m_time; //ala polhemus
+		d += 7; //time, pos, color.
+		return d; 
+	}
+	virtual void draw(int display){
+		//need to convert world coords to screen. 
+		float in[4], out[4]; 
+		for(int i=0; i<4; i++){
+			in[i] = out[i] = 0.f; 
+		}
+		in[0] = m_pos[0]; in[1] = m_pos[1]; 
+		float* aff = g_affine44->data(); //in matlab/openGL row major order.
+		for(int r=0; r<4; r++){
+			for(int c=0; c<4; c++){
+				out[r] += aff[r+4*c] * in[c]; 
+			}
+		}
+		glColor4f(m_color[0], m_color[1], m_color[2], m_color[3]);
+		glRasterPos2f(out[0], out[1]); 
+		glPrint(m_text.c_str(), display); 
+	}
+};
 #endif
