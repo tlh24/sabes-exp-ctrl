@@ -1112,7 +1112,11 @@ int main(int argn, char** argc){
 	gtk_init (&argn, &argc);
 
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	#ifndef DEBUG
 	gtk_window_set_title (GTK_WINDOW (window), "sabes experimental control");
+	#else
+	gtk_window_set_title (GTK_WINDOW (window), "sabes experimental control *** DEBUG ***");	
+	#endif
 	gtk_window_set_default_size (GTK_WINDOW (window), 850, 650);
 
 	paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
@@ -1184,7 +1188,11 @@ int main(int argn, char** argc){
 	//make the aux / monkey window. 
 	
 	GtkWidget* top = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	#ifndef DEBUG
 	gtk_window_set_title (GTK_WINDOW (top), "subject view");
+	#else
+	gtk_window_set_title (GTK_WINDOW (top), "subject view *** DEBUG ***");	
+	#endif
 	gtk_window_set_default_size (GTK_WINDOW (top), 320, 240);
 	da2 = gtk_drawing_area_new ();
 	gtk_container_add (GTK_CONTAINER (top), da2);
