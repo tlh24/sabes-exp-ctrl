@@ -1,6 +1,6 @@
 # The following can be set at the commandline
-# ie: make USE_DEBUG=true
-DBG = true
+# ie: make DBG=true
+DBG = false
 
 CPP = g++
 CC  = gcc
