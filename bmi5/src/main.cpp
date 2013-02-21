@@ -186,7 +186,8 @@ void errorDialog(char* msg){
 void destroy(GtkWidget *, gpointer){
 	//more cleanup later.
 	g_die = true;
-	KillFont(); 
+	KillFont(0); 
+	KillFont(1);
 	gtk_main_quit();
 }
 void updateCursPos(float x, float y){
@@ -233,8 +234,9 @@ static gboolean
 		if (glXSwapIntervalSGI)  
 				glXSwapIntervalSGI(g_glvsync ? 1 : 0); 
 		//font on this one too.
-		BuildFont(); 
 	}
+	KillFont(h); 
+	BuildFont(h); 
 	
 	//save the viewport size.
 	GtkAllocation allocation;
@@ -272,7 +274,6 @@ static gboolean
 		}
 		g_glInitialized[h] = true;
 	}
-	BuildFont(); //so we're in the right context. 
 	//have to create the shapes here -- context again.
 	return TRUE;
 }
@@ -1267,13 +1268,12 @@ int main(int argn, char** argc){
 	pthread_mutex_destroy(&mutex_fwrite);
 	pthread_mutex_destroy(&mutex_gobjs);
 	
-	KillFont(); //right context?  unsure.
-	delete g_daglx[0];
-	delete g_daglx[1]; 
-	delete g_tsc; 
 	for(unsigned int i=0; i<g_objs.size(); i++){
 		delete (g_objs[i]); 
 	}
+	delete g_daglx[0];
+	delete g_daglx[1]; 
+	delete g_tsc; 
 	
 	return 0; 
 }

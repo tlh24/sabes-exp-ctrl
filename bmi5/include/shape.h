@@ -711,10 +711,22 @@ public:
 		d += 7; //time, pos, color.
 		return d; 
 	}
-	virtual void draw(int ){
+	virtual void draw(int display){
+		//need to convert world coords to screen. 
+		float in[4], out[4]; 
+		for(int i=0; i<4; i++){
+			in[i] = out[i] = 0.f; 
+		}
+		in[0] = m_pos[0]; in[1] = m_pos[1]; 
+		float* aff = g_affine44->data(); //in matlab/openGL row major order.
+		for(int r=0; r<4; r++){
+			for(int c=0; c<4; c++){
+				out[r] += aff[r+4*c] * in[c]; 
+			}
+		}
 		glColor4f(m_color[0], m_color[1], m_color[2], m_color[3]);
-		glRasterPos2f(m_pos[0], m_pos[1]); 
-		glPrint(m_text.c_str()); 
+		glRasterPos2f(out[0], out[1]); 
+		glPrint(m_text.c_str(), display); 
 	}
 };
 #endif
