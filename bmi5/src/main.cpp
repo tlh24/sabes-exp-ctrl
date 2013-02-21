@@ -690,13 +690,13 @@ void* mmap_thread(void*){
 				resp = getMmapStructure();
 			}
 			else if(*beg == string("clear_all")){
-				printf("clearing all data in memory"); 
+				printf("clearing all data in memory\n"); 
 				for(unsigned int i=0; i<g_objs.size(); i++)
 					g_objs[i]->clear();
 				resp = {"cleared all stored data\n"}; 
 			}
 			else if(*beg == string("delete_all")){
-				printf("deleting all objects"); 
+				printf("deleting all objects\n"); 
 				for(unsigned int i=0; i<g_objs.size(); i++){
 					delete g_objs[i];
 				}
@@ -1064,7 +1064,7 @@ static void clearDataCB(gpointer, gpointer parent_window){
 /* Destroy the dialog when the user responds to it (e.g. clicks a button) */
 	gint result = gtk_dialog_run(GTK_DIALOG(dialog));
 	if(result == GTK_RESPONSE_YES){
-		printf("clearing all data in memory"); 
+		printf("clearing all data in memory\n"); 
 		for(unsigned int i=0; i<g_objs.size(); i++)
 			g_objs[i]->clear();
 	}
