@@ -7,6 +7,7 @@ bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r');
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
 num_targets = 16;
+snt = sqrt(num_targets);
 
 for j=1:num_targets
  bmi5_cmd(strcat('make circle target',num2str(j)));
@@ -22,7 +23,8 @@ end
 eval(bmi5_cmd('mmap structure'));
 
 % first ask for a set of points. 
-w = linspace(-0.8, 0.8, 4); 
+w = linspace(-0.6, 0.6, snt);
+
 screen = zeros(num_targets, 4); 
 world = zeros(num_targets, 4); 
 screen(:,4) = 1; 
@@ -31,25 +33,16 @@ pm = zeros(3);
 
 if(mouse)
 	pm = eye(3);% mouse control.
-else
-	%pm(1,2) = -1; % y -> x
-	%pm(2,3) = -1; % z -> y
-	%pm(3,1) = 0; % x -> 0
-    
-    %pm = [   0   0  +1
-    %        -1   0   0   
-    %         0  -1   0  ];
-         
+else   
     % In addition to permuting from the native polhemus
     % axes to a more reasonable set of axes, this matrix
     % handles the conversion to mm from cm (polhemus native units)
     pm = [    0  -10    0
               0    0  -10  
             +10    0    0  ];
-         
 end
 
-snt = sqrt(num_targets); 
+
 i=1; 
 for yi = 1:snt
     for xi = 1:snt
@@ -64,7 +57,7 @@ for yi = 1:snt
     end
 end
 
-b5.cursor_scale = [15; 15]; % in mm
+b5.cursor_scale = [5; 5]; % in mm
 b5.cursor_color = [1; 1; 1; 1]; 
 b5.cursor_pos   = [0; 0];
 b5.cursor_draw  = 0;
@@ -109,7 +102,7 @@ end
 
 world2 = world; 
 world2(:,3) = 0; 
-q = world2\screen; % screen = world * q (transposed from opengl)
+q = world2\screen; % screen = world * q (q will be transposed from opengl)
 
 hold off
 plot(screen(:,1), screen(:,2), 'bo'); 

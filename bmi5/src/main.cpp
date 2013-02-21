@@ -56,7 +56,8 @@
 #include "shape.h"
 #include "polhemus.h"
 #include "fifohelp.h"
-#include "optotrak_sniff/etherstruct.h"
+#include "../optotrak_sniff/etherstruct.h"
+#include "glFont.h"
 
 using namespace std;
 using namespace boost;
@@ -168,7 +169,6 @@ int hostname_to_ip(char * hostname , char* ip){
 }
 */
 
-
 void errorDialog(char* msg){
 	GtkWidget *dialog, *label, *content_area;
 	dialog = gtk_dialog_new_with_buttons ("Error",
@@ -191,7 +191,8 @@ void errorDialog(char* msg){
 void destroy(GtkWidget *, gpointer){
 	//more cleanup later.
 	g_die = true;
-	KillFont(); 
+	KillFont(0); 
+	KillFont(1);
 	gtk_main_quit();
 }
 void updateCursPos(float x, float y){
@@ -237,7 +238,10 @@ static gboolean
 			glXGetProcAddressARB((const GLubyte*)"glXSwapIntervalSGI");  
 		if (glXSwapIntervalSGI)  
 				glXSwapIntervalSGI(g_glvsync ? 1 : 0); 
+		//font on this one too.
 	}
+	KillFont(h); 
+	BuildFont(h); 
 	
 	//save the viewport size.
 	GtkAllocation allocation;
@@ -275,7 +279,6 @@ static gboolean
 		}
 		g_glInitialized[h] = true;
 	}
-	BuildFont(); //so we're in the right context. 
 	//have to create the shapes here -- context again.
 	return TRUE;
 }
@@ -371,9 +374,14 @@ static gboolean refresh (gpointer ){
 	return TRUE;
 }
 string getMmapStructure(){
-	std::stringstream oss; 
+	std::stringstream oss;
+	char wd[4096];
+	if (getcwd(wd, 4096) == NULL) {
+		printf("error: cwd is too long to fit in buffer!");
+		exit(1);
+	}
 	oss << "% mmap structure (pass to bmi5_mmap())\n"; 
-	oss << "mex -O ../bmi5_mmap.cpp % to make sure you have the latest version.\n"; 
+	oss << "mex -O " << wd << "/matlab/bmi5_mmap.cpp % to make sure you have the latest version.\n"; 
 	oss << "clear b5; \n"; 
 	for(unsigned int i=0; i<g_objs.size(); i++){
 		oss << g_objs[i]->getStructInfo(); 
@@ -528,7 +536,7 @@ void* mmap_thread(void*){
 				if((*beg) == typ){
 					beg++; 
 					StarField* sf = new StarField(); 
-					sf->makeStars(3000, g_daglx[1]->getAR());
+					sf->makeStars(3000, g_daglx[1]->getAR()); //3k should be parameter?
 					if(beg != tokens.end())
 						name = (*beg); //name of the circle.
 					makeConf(sf, name); 
@@ -541,8 +549,22 @@ void* mmap_thread(void*){
 					if(beg != tokens.end())
 						name = (*beg); //name of the tone.
 					makeConf(tsz, name); 
+				} else {
+				typ = string("text"); 
+				if((*beg) == typ){
+					beg++; 
+					int nchars = 256; name = typ;
+					if(beg != tokens.end()) { 
+						name = (*beg); beg++; 
+					}
+					if(beg != tokens.end()) {
+						nchars = atoi(beg->c_str()); beg++;
+					}
+					nchars &= (0x1ff ^ 7); 
+					DisplayText* x = new DisplayText(nchars); 
+					makeConf(x, name); 
 				}
-				}}}}}
+				}}}}}}
 			}
 			else if(*beg == string("store")){
 				// store <type> <size> <name>
@@ -681,13 +703,13 @@ void* mmap_thread(void*){
 				resp = getMmapStructure();
 			}
 			else if(*beg == string("clear_all")){
-				printf("clearing all data in memory"); 
+				printf("clearing all data in memory\n"); 
 				for(unsigned int i=0; i<g_objs.size(); i++)
 					g_objs[i]->clear();
 				resp = {"cleared all stored data\n"}; 
 			}
 			else if(*beg == string("delete_all")){
-				printf("deleting all objects"); 
+				printf("deleting all objects\n"); 
 				for(unsigned int i=0; i<g_objs.size(); i++){
 					delete g_objs[i];
 				}
@@ -722,7 +744,12 @@ void* mmap_thread(void*){
 				resp += {"\tmake ring <name> <frac. thickness>\n"}; 
 				resp += {"\tmake square <name>\n"};
 				resp += {"\tmake open_square <name> <frac thickness>\n"}; 
-				resp += {"\tmake stars <name>\n"}; 
+				resp += {"\tmake stars <name>\n"};
+				resp += {"\tmake text <name> <nchars>\n"}; 
+				resp += {"\t\tDisplays text on the screen.\n"};
+				resp += {"\t\tnchars must be a multipe of 8\n"};
+				resp += {"\t\t<name>_str in b5 structure MUST NOT CHANGE SIZE.\n"};
+				resp += {"\t\te.g. you cannot do b5.text_str = 'something';\n"}; 
 				resp += {"\tmake tone <name>\n"};
 				resp += {"\t\tmake a tone generator\n"}; 
 				resp += {"\tstore <type> <size> <name>\n"};
@@ -1074,7 +1101,7 @@ static void clearDataCB(gpointer, gpointer parent_window){
 /* Destroy the dialog when the user responds to it (e.g. clicks a button) */
 	gint result = gtk_dialog_run(GTK_DIALOG(dialog));
 	if(result == GTK_RESPONSE_YES){
-		printf("clearing all data in memory"); 
+		printf("clearing all data in memory\n"); 
 		for(unsigned int i=0; i<g_objs.size(); i++)
 			g_objs[i]->clear();
 	}
@@ -1122,7 +1149,11 @@ int main(int argn, char** argc){
 	gtk_init (&argn, &argc);
 
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	#ifndef DEBUG
 	gtk_window_set_title (GTK_WINDOW (window), "sabes experimental control");
+	#else
+	gtk_window_set_title (GTK_WINDOW (window), "sabes experimental control *** DEBUG ***");	
+	#endif
 	gtk_window_set_default_size (GTK_WINDOW (window), 850, 650);
 
 	paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
@@ -1195,7 +1226,11 @@ int main(int argn, char** argc){
 	//make the aux / monkey window. 
 	
 	GtkWidget* top = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	#ifndef DEBUG
 	gtk_window_set_title (GTK_WINDOW (top), "subject view");
+	#else
+	gtk_window_set_title (GTK_WINDOW (top), "subject view *** DEBUG ***");	
+	#endif
 	gtk_window_set_default_size (GTK_WINDOW (top), 320, 240);
 	da2 = gtk_drawing_area_new ();
 	gtk_container_add (GTK_CONTAINER (top), da2);
@@ -1276,18 +1311,20 @@ int main(int argn, char** argc){
 	pthread_join(othread,NULL);
 	//pthread_join(mthread,NULL); 
 	pthread_join(bthread,NULL); 
-	//jackClose(0); 
+	#ifndef DEBUG
+		jackClose(0); 
+	#endif
 	//save data!!
 	writeMatlab(g_objs, (char *)"backup.mat", false); //the whole enchilada.
 	pthread_mutex_destroy(&mutex_fwrite);
 	pthread_mutex_destroy(&mutex_gobjs);
 	
-	delete g_daglx[0];
-	delete g_daglx[1]; 
-	delete g_tsc; 
 	for(unsigned int i=0; i<g_objs.size(); i++){
 		delete (g_objs[i]); 
 	}
+	delete g_daglx[0];
+	delete g_daglx[1]; 
+	delete g_tsc; 
 	
 	return 0; 
 }
