@@ -361,9 +361,14 @@ static gboolean refresh (gpointer ){
 	return TRUE;
 }
 string getMmapStructure(){
-	std::stringstream oss; 
+	std::stringstream oss;
+	char wd[4096];
+	if (getcwd(wd, 4096) == NULL) {
+		printf("error: cwd is too long to fit in buffer!");
+		exit(1);
+	}
 	oss << "% mmap structure (pass to bmi5_mmap())\n"; 
-	oss << "mex -O ../bmi5_mmap.cpp % to make sure you have the latest version.\n"; 
+	oss << "mex -O " << wd << "/matlab/bmi5_mmap.cpp % to make sure you have the latest version.\n"; 
 	oss << "clear b5; \n"; 
 	for(unsigned int i=0; i<g_objs.size(); i++){
 		oss << g_objs[i]->getStructInfo(); 
