@@ -345,13 +345,13 @@ static gboolean refresh (gpointer ){
 	gtk_label_set_text(GTK_LABEL(g_timeLabel), s.c_str()); 
 	char str[256];
 	size_t n = matlabFileSize(g_objs); 
-	snprintf(str, 256, "time:%.1f ms (mean)\n%.1f ms (last)\nfile size:%.2f MB", 
+	snprintf(str, 256, "time:\t%.1f ms (mean)\n\t\t%.1f ms (last)\nfile size:\t%.2f MB", 
 				g_matlabTimer.meanTime()*1000.0,
 				g_matlabTimer.lastTime()*1000.0, 
 				(float)n/(1024.f*1024.f));
 	gtk_label_set_text(GTK_LABEL(g_matlabTimeLabel), str); 
 	
- 	snprintf(str, 256, "frame rate: %4.1f Hz\nOpenGL run %.1f ms (mean)\n%.1f ms (last)", 
+ 	snprintf(str, 256, "fps:\t\t%4.1f Hz\ntime:\t%.1f ms (mean)\n\t\t%.1f ms (last)", 
 				g_frameRate, 
 				g_openGLTimer.meanTime()*1000.0, 
 				g_openGLTimer.lastTime()*1000.0); 
@@ -360,7 +360,7 @@ static gboolean refresh (gpointer ){
 	float loc[32];  
 	if(g_polhemus) g_polhemus->getLoc(gettime(), loc); 
 	if(g_polhemusConnected){
-		snprintf(str, 256, "connected\nx %4.2f cm\ny %4.2f cm\nz %4.2f cm", 
+		snprintf(str, 256, "connected\nx:\t\t%4.1f cm\ny:\t\t%4.1f cm\nz:\t\t%4.1f cm", 
 				loc[0], loc[1], loc[2]); 
 	}else{
 		snprintf(str, 256, "disconnected"); 
