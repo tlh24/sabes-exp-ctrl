@@ -579,7 +579,7 @@ void* mmap_thread(void*){
 						string ssize = *beg++; 
 						int size = atoi(ssize.c_str()); 
 						if(beg != tokens.end() && size > 0 && size < 1024){
-							name = (*beg++) + string("_"); 
+							name = (*beg++); 
 							//good, we have all the parameters
 							if(type == string("char")){
 								VectorSerialize<char>* obj = 
