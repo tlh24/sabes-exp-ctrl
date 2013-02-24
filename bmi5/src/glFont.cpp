@@ -54,7 +54,7 @@ void BuildFont(int display) {
 	XCloseDisplay(dpy);
 }
 void KillFont(int display){
-	printf("KillFont, %d\n", display); 
+	//printf("KillFont, %d\n", display); 
 	display &= 1; 
 	if(g_base[display]){
 		glDeleteLists(g_base[display], 96);                    // delete all 96 characters.
