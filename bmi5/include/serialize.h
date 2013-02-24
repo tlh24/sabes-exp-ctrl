@@ -151,9 +151,9 @@ public:
 
 class PolhemusPredict {
 public:
-	float			m_s[8][3]; //last 8 sensor measurements. 
-	long double m_t[32]; //time of the last 32 measurements (rate should be static!)
-	int			m_ptr; //circluar, obvi.
+	float			m_s[8][3]; 	//last 8 sensor measurements. 
+	long double 	m_t[32]; 	//time of the last 32 measurements (rate should be static!)
+	int				m_ptr; 		//circluar, obvi.
 	
 	PolhemusPredict(){
 		for(int i=0; i<24; i++)
@@ -361,8 +361,10 @@ public:
 			float freq = d[0]; 
 			float pan = d[1]; 
 			float scale = d[2]; 
-			float duration = d[3]; 
-			jackAddToneP(freq, pan, scale, duration); 
+			float duration = d[3];
+			#ifdef JACK
+			jackAddToneP(freq, pan, scale, duration);
+			#endif
 			double time = gettime();
 			v_time.push_back(time); 
 			v_ticks.push_back(g_tsc->getTicks()); 

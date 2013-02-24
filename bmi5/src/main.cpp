@@ -1297,8 +1297,11 @@ int main(int argn, char** argc){
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
 	
 	//jack audio. 
-	#ifndef DEBUG
-		jackInit(JACKPROCESS_TONES); // this needs to be a loadable module, debugging with it sucks
+	#ifdef JACK
+	jackInit(JACKPROCESS_TONES); // this needs to be a loadable module, debugging with it sucks
+	jackDisconnectAllPorts();
+	jackConnectFront();
+	jackConnectCenterSub();
 	#endif
 
 	g_mainWindow = (GtkWindow*)window; 
@@ -1311,7 +1314,7 @@ int main(int argn, char** argc){
 	pthread_join(othread,NULL);
 	//pthread_join(mthread,NULL); 
 	pthread_join(bthread,NULL); 
-	#ifndef DEBUG
+	#ifdef JACK
 		jackClose(0); 
 	#endif
 	//save data!!
