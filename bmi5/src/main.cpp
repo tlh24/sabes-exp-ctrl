@@ -530,11 +530,19 @@ void* mmap_thread(void*){
 					makeConf(shp, name); 
 				} else if((*beg) == string("stars")){
 					typ = string("stars");
-					beg++; 
+					beg++;
+					name = typ;
+					int numstars = 3000;
+					if(beg != tokens.end()) {
+						name = (*beg);
+						beg++;
+						if(beg != tokens.end()) {
+							numstars = abs(atoi(beg->c_str()));	// negatives not allowed
+							beg++;
+						}
+					}
 					StarField* sf = new StarField(); 
-					sf->makeStars(3000, g_daglx[1]->getAR()); //3k should be parameter?
-					if(beg != tokens.end())
-						name = (*beg); //name of the circle.
+					sf->makeStars(numstars, g_daglx[1]->getAR()); //3k should be parameter?
 					makeConf(sf, name); 
 				} else if((*beg) == string("tone")){
 					// add a tone-interpreter (can add multiple for polyphony).
@@ -743,7 +751,7 @@ void* mmap_thread(void*){
 				resp += {"\tmake ring <name> <frac thickness>\n"}; 
 				resp += {"\tmake square <name>\n"};
 				resp += {"\tmake open_square <name> <frac thickness>\n"}; 
-				resp += {"\tmake stars <name>\n"};
+				resp += {"\tmake stars <name> <num stars>\n"};
 				resp += {"\tmake text <name> <nchars>\n"}; 
 				resp += {"\t\tDisplays text on the screen.\n"};
 				resp += {"\t\tnchars must be a multipe of 8\n"};
