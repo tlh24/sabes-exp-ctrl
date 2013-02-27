@@ -542,7 +542,7 @@ void* mmap_thread(void*){
 						}
 					}
 					StarField* sf = new StarField(); 
-					sf->makeStars(numstars, g_daglx[1]->getAR()); //3k should be parameter?
+					sf->makeStars(numstars, g_daglx[1]->getAR());
 					makeConf(sf, name); 
 				} else if((*beg) == string("tone")){
 					// add a tone-interpreter (can add multiple for polyphony).
@@ -555,12 +555,15 @@ void* mmap_thread(void*){
 				} else if((*beg) == string("text")){
 					typ = string("text");
 					beg++; 
-					int nchars = 256; name = typ;
+					name = typ;
+					int nchars = 256;
 					if(beg != tokens.end()) { 
-						name = (*beg); beg++; 
-					}
-					if(beg != tokens.end()) {
-						nchars = atoi(beg->c_str()); beg++;
+						name = (*beg);
+						beg++; 
+						if(beg != tokens.end()) {
+							nchars = abs(atoi(beg->c_str()));	// negatives not allowed
+							beg++;
+						}
 					}
 					nchars &= (0x1ff ^ 7); 
 					DisplayText* x = new DisplayText(nchars); 
