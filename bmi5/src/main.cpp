@@ -491,17 +491,16 @@ void* mmap_thread(void*){
 			}; 
 			auto beg = tokens.begin(); 
 			if((*beg) == string("make")){
-				beg++; 
-				typ = string("circle"); 
-				if((*beg) == typ){
+				beg++;
+				if((*beg) == string("circle")){
+					typ = string("circle");
 					beg++; 
 					Circle* shp = new Circle(0.5, 64); 
 					if(beg != tokens.end())
 						name = (*beg); //name of the circle.
-					makeConf(shp, name); 
-				} else {
-				typ = string("ring"); 
-				if((*beg) == typ){
+					makeConf(shp, name);
+				} else if((*beg) == string("ring")) {
+					typ = string("ring");
 					beg++; 
 					float thick = 0.2; name = typ; 
 					if(beg != tokens.end()) {
@@ -510,18 +509,16 @@ void* mmap_thread(void*){
 						thick = clamp01(atof(beg->c_str())); 
 						beg++; }
 					Ring* shp = new Ring(0.5*(1-thick), 0.5, 64); 
-					makeConf(shp, name); 
-				} else {
-				typ = string("square"); 
-				if((*beg) == typ){
+					makeConf(shp, name);
+				} else if((*beg) == string("square")){
+					typ = string("square");
 					beg++; 
 					Square* shp = new Square(1.0); 
 					if(beg != tokens.end())
 						name = (*beg); //name of the circle.
  					makeConf(shp, name); 
-				} else {
-				typ = string("open_square"); 
-				if((*beg) == typ){
+				} else if((*beg) == string("open_square")){
+					typ = string("open_square"); 
 					beg++; 
 					float thick = 0.2; name = typ; 
 					if(beg != tokens.end()) {
@@ -531,40 +528,47 @@ void* mmap_thread(void*){
 						beg++; }
 					OpenSquare* shp = new OpenSquare(1.f-thick, 1.f); 
 					makeConf(shp, name); 
-				} else {
-				typ = string("stars"); 
-				if((*beg) == typ){
-					beg++; 
+				} else if((*beg) == string("stars")){
+					typ = string("stars");
+					beg++;
+					name = typ;
+					int numstars = 3000;
+					if(beg != tokens.end()) {
+						name = (*beg);
+						beg++;
+						if(beg != tokens.end()) {
+							numstars = abs(atoi(beg->c_str()));	// negatives not allowed
+							beg++;
+						}
+					}
 					StarField* sf = new StarField(); 
-					sf->makeStars(3000, g_daglx[1]->getAR()); //3k should be parameter?
-					if(beg != tokens.end())
-						name = (*beg); //name of the circle.
+					sf->makeStars(numstars, g_daglx[1]->getAR());
 					makeConf(sf, name); 
-				} else {
-				typ = string("tone"); 
-				if((*beg) == typ){
-					// add a tone-interpreter (can add multiple for polyphony). 
+				} else if((*beg) == string("tone")){
+					// add a tone-interpreter (can add multiple for polyphony).
+					typ = string("tone");
 					beg++; 
 					ToneSerialize* tsz = new ToneSerialize(); 
 					if(beg != tokens.end())
 						name = (*beg); //name of the tone.
 					makeConf(tsz, name); 
-				} else {
-				typ = string("text"); 
-				if((*beg) == typ){
+				} else if((*beg) == string("text")){
+					typ = string("text");
 					beg++; 
-					int nchars = 256; name = typ;
+					name = typ;
+					int nchars = 256;
 					if(beg != tokens.end()) { 
-						name = (*beg); beg++; 
-					}
-					if(beg != tokens.end()) {
-						nchars = atoi(beg->c_str()); beg++;
+						name = (*beg);
+						beg++; 
+						if(beg != tokens.end()) {
+							nchars = abs(atoi(beg->c_str()));	// negatives not allowed
+							beg++;
+						}
 					}
 					nchars &= (0x1ff ^ 7); 
 					DisplayText* x = new DisplayText(nchars); 
 					makeConf(x, name); 
 				}
-				}}}}}}
 			}
 			else if(*beg == string("store")){
 				// store <type> <size> <name>
@@ -676,27 +680,33 @@ void* mmap_thread(void*){
 				}
 			}
 			else if(*beg == string("tdtudp")){
-				// tdtudp <size> <ipaddress>
-				beg++; 
-				if(beg != tokens.end()){
-					string ssize = *beg++; 
-					int size = atoi(ssize.c_str()); 
-					if(beg != tokens.end() && size > 0 && size < 128){
-						string ipaddr = *beg++; 
-						int sock = openSocket((char*)ipaddr.c_str(), LISTEN_PORT); 
-						if(sock == 0){
-							resp = string("could not open socket to ") + ipaddr; 
-						} else {
-							if(!checkRZ(sock)){
-								resp = string("there does not seem to be an RZ2 at")+ipaddr; 
+				// tdtudp <name> <size> <ipaddress>
+				resp = string("could not interpret command --\nformat is tdtudp <name> <size> <ipaddress>\n");
+				beg++;
+				if(beg != tokens.end()) {
+					name = *beg;
+					beg++;
+					if(beg != tokens.end()) {
+						string ssize = *beg++; 
+						int size = atoi(ssize.c_str()); 
+						if(beg != tokens.end() && size > 0 && size < 128) {
+							string ipaddr = *beg++; 
+							int sock = openSocket((char*)ipaddr.c_str(), LISTEN_PORT); 
+							if(sock == 0){
+								resp = string("could not open socket to ") + ipaddr; 
 							} else {
-								TdtUdpSerialize* obj = new TdtUdpSerialize(sock, size); 
-								g_objs.push_back(obj); 
-								resp = string("successfully made a UDP connection object to")+ipaddr; 
+								if(!checkRZ(sock)){
+									resp = string("there does not seem to be an RZ2 at")+ipaddr; 
+								} else {
+									TdtUdpSerialize* obj = new TdtUdpSerialize(sock, size);
+									obj->m_name = name + string("_"); 
+									g_objs.push_back(obj); 
+									resp = string("successfully made a UDP connection object to")+ipaddr; 
+								}
 							}
-						}
-					} else resp = string("could not interpret command --\nformat is tdtudp <size> <ipaddress>\n"); 
-				} else resp = string("could not interpret command --\nformat is tdtudp <size> <ipaddress>\n"); 
+						} 
+					}
+				}
 			}
 			else if(*beg == string("mmap")){
 				// return the mmapinfo.
@@ -741,10 +751,10 @@ void* mmap_thread(void*){
 			else{
 				resp = {"Current command vocabulary:\n"};
 				resp += {"\tmake circle <name>\n"};
-				resp += {"\tmake ring <name> <frac. thickness>\n"}; 
+				resp += {"\tmake ring <name> <frac thickness>\n"}; 
 				resp += {"\tmake square <name>\n"};
 				resp += {"\tmake open_square <name> <frac thickness>\n"}; 
-				resp += {"\tmake stars <name>\n"};
+				resp += {"\tmake stars <name> <num stars>\n"};
 				resp += {"\tmake text <name> <nchars>\n"}; 
 				resp += {"\t\tDisplays text on the screen.\n"};
 				resp += {"\t\tnchars must be a multipe of 8\n"};
@@ -760,6 +770,7 @@ void* mmap_thread(void*){
 				resp += {"\tpolhemus <name> -- for getting polhemus sensor loc\n"}; 
 				resp += {"\tmouse <name> -- for getting mouse location\n"};
 				resp += {"\toptotrak <name> <nsensors> -- for getting optotrak location\n"}; 
+				resp += {"\ttdtudp <name> <size> <ipaddress> -- for talking to TDT\n"};
 				resp += {"\tmmap\n"}; 
 				resp += {"\t\treturn mmap structure information, for eval() in matlab\n"}; 
 				resp += {"\tclear_all\n"}; 
