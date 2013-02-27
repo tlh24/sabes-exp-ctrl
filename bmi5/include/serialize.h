@@ -459,7 +459,8 @@ public:
 			m_stor.push_back(0.f); 
 			m_last.push_back(0.0); 
 		}
-		m_bs = 0; 
+		m_bs = 0;
+		m_name = "udp";
 	}
 	~TdtUdpSerialize(){
 		disconnectRZ(m_sock); 
@@ -475,9 +476,9 @@ public:
 	virtual int nstored(){ return v_stor.size(); }
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("_time"); //only saved
-			case 1: return m_name + string("_ticks"); //in file.
-			case 2: return m_name + string("_udp"); 
+			case 0: return m_name + string("time"); //only saved
+			case 1: return m_name + string("ticks"); //in file.
+			case 2: return m_name + string("udp"); 
 		} return string{"none"};
 	}
 	virtual int getStoreClass(int indx){
