@@ -53,7 +53,6 @@ clean:
 	
 deps:
 	sudo apt-get install gdb libboost-dev libgtk-3-dev libgtkglext1-dev \
-	freeglut3-dev libmatio-dev libusb-1.0-0-dev libglew-dev libjack-jackd2-dev \
+	freeglut3-dev libmatio-dev libusb-1.0-0-dev libglew-dev \
 	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl \
-	libpcap-dev
-	
+	libjack-jackd2-dev libpcap-dev winbind
