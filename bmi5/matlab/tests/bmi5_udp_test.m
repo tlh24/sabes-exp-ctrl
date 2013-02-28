@@ -7,4 +7,9 @@ bmi5_cmd('tdtudp tdt2 32 169.230.191.127');     % connect by ip
 
 eval(bmi5_cmd('mmap structure'))
 
+
+b5.tdt1_udp(1) = 1;     % juice trigger
+b5.tdt1_udp(2) = 300;   % juice time (msec)
+bmi5_mmap(b5)
+b5.tdt1_udp(1) = 0;
 bmi5_mmap(b5)
