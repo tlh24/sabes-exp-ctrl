@@ -11,26 +11,37 @@
 #include <netdb.h> 
 #include <fcntl.h> 
 
-#define CP_printf printf
+//#define CP_printf printf
 #define INVALID_SOCKET 0
 
 int openSocket(char *strIPAddr, int port){
 	sockaddr_in sin;
+	
 	int sock= INVALID_SOCKET;
+
+	//do name resolution
+	hostent * targethost;
+	char * ipaddr;
+	targethost = gethostbyname(strIPAddr);
+	if (targethost) {
+		ipaddr=inet_ntoa(*(struct in_addr *)*targethost->h_addr_list);
+	}
+	else {
+		printf("hahahahha!\n");
+		ipaddr=strIPAddr;  //failed resolution...
+	}
 
 	// prepare the SIN to send to
 	memset(&sin, 0, sizeof(sockaddr_in));
 
 	sin.sin_family = AF_INET;
-	// sin.sin_addr.S_un.S_addr = ipAddr; //inet_addr("tdt_udp_0000000");
-	sin.sin_addr.s_addr = inet_addr(strIPAddr);
-
+	sin.sin_addr.s_addr = inet_addr(ipaddr);
 	sin.sin_port = htons(port);
 
-	CP_printf("UDP: Attempting to open UDP %s\n", strIPAddr);
+	printf("UDP: Attempting to open UDP %s\n", strIPAddr);
 
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
-	CP_printf("... socket created\n");
+	printf("... socket created\n");
 	if (sock == INVALID_SOCKET){
 		fprintf(stderr, "Failed to create the UDP socket: \n"); 
 	perror(":");
@@ -51,15 +62,15 @@ int openSocket(char *strIPAddr, int port){
 	{
 		close(sock);
 		sock = INVALID_SOCKET;
-		fprintf(stderr,"Failed to connect the UDP socket:\n"); 
+		fprintf(stderr,"Failed to connect the UDP socket:\n");
 		perror(":");
 	}
-	CP_printf("... done\n");
+	printf("... done\n");
 
 	return sock;
 }
 
-bool checkRZ(int sock){
+bool checkRZ(int sock) {
 	char req[HEADER_BYTES] = COMMAND_HEADER(GET_VERSION), resp[1024];
 	if (send(sock, req, HEADER_BYTES, 0) != HEADER_BYTES){
 		fprintf(stderr, "RZ: Failed to send GET_VERSION packet:\n"); 
@@ -80,7 +91,7 @@ bool checkRZ(int sock){
 	return true;
 }
 
-bool sendDataRZ(int sock, float *data, int count){
+bool sendDataRZ(int sock, float *data, int count) {
 	char *packet;
 	bool retval = false;
 	int i;
@@ -109,8 +120,7 @@ bool sendDataRZ(int sock, float *data, int count){
 	return retval;
 }
 
-void disconnectRZ(int sock)
-{
+void disconnectRZ(int sock) {
 	if (sock != INVALID_SOCKET){
 		char packet[HEADER_BYTES] = COMMAND_HEADER(FORGET_REMOTE_IP);
 		if (send(sock, packet, HEADER_BYTES, 0) != HEADER_BYTES){
