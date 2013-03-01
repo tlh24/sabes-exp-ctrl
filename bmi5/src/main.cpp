@@ -400,6 +400,13 @@ static void fullscreenCB(GtkWidget* w, gpointer p){
 	else
 		gtk_window_unfullscreen(top);
 }
+static void stickyCB(GtkWidget* w, gpointer p) {
+	GtkWindow* top = GTK_WINDOW(p); 
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+		gtk_window_stick(top);
+	else
+		gtk_window_unstick(top);
+}
 static void vsyncCB(GtkWidget* w, gpointer){
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
 		g_glvsync = true; 
@@ -1274,7 +1281,8 @@ int main(int argn, char** argc){
 	}; 
 	
 	//add a fullscreen checkbox to the gui.
-	makeCheckbox("Fullscreen", false, G_CALLBACK(fullscreenCB)); 
+	makeCheckbox("Fullscreen Subject View", false, G_CALLBACK(fullscreenCB)); 
+	makeCheckbox("Sticky Subject View", false, G_CALLBACK(stickyCB));
 	makeCheckbox("sync to Vblank\n(resize window to enact)", g_glvsync, G_CALLBACK(vsyncCB));  
 
 	g_signal_connect_swapped (window, "destroy",
