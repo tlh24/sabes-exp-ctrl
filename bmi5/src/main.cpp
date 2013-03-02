@@ -477,14 +477,23 @@ void* mmap_thread(void*){
 				write(pipe_out.m_fd, (void*)&code, 4); //this so we know how much to seek in matlab.
 				write(pipe_out.m_fd, q.c_str(), q.size()); 
 			}; 
-			auto makeConf = [&](Serialize* shp, string nam){
-				shp->m_name = nam + string("_"); 
-				g_objs.push_back(shp); 
+			auto makeConf = [&](Serialize* obj, string nam) {
+				obj->m_name = nam + string("_"); 
+				g_objs.push_back(obj); 
 				resp = {"made a "}; 
-				resp += typ; 
+				resp += typ;
 				resp += " named "; 
-				resp += shp->m_name; 
-				resp += {"\n"}; 
+				resp += nam; 
+				resp += "\n"; 
+			};
+			auto makeStoreConf = [&](Serialize * obj, string type, string nam) {
+				obj->m_name = nam;	// note: no postfixed underscore!
+				g_objs.push_back(obj); 
+				resp  = {"made a store ("}; 
+				resp += type;
+				resp += ") named "; 
+				resp += nam;
+				resp += "\n"; 
 			};
 			auto clamp01 = [&](float v){
 				return (v > 1 ? 1 : (v < 0 ? 0 : v)); 
@@ -517,14 +526,14 @@ void* mmap_thread(void*){
 						beg++; }
 					Ring* shp = new Ring(0.5*(1-thick), 0.5, 64); 
 					makeConf(shp, name);
-				} else if((*beg) == string("square")){
+				} else if ((*beg) == string("square")) {
 					typ = string("square");
 					beg++; 
 					Square* shp = new Square(1.0); 
 					if(beg != tokens.end())
 						name = (*beg); //name of the circle.
  					makeConf(shp, name); 
-				} else if((*beg) == string("open_square")){
+				} else if ((*beg) == string("open_square")) {
 					typ = string("open_square"); 
 					beg++; 
 					float thick = 0.2; name = typ; 
@@ -535,7 +544,7 @@ void* mmap_thread(void*){
 						beg++; }
 					OpenSquare* shp = new OpenSquare(1.f-thick, 1.f); 
 					makeConf(shp, name); 
-				} else if((*beg) == string("stars")){
+				} else if ((*beg) == string("stars")) {
 					typ = string("stars");
 					beg++;
 					name = typ;
@@ -551,15 +560,7 @@ void* mmap_thread(void*){
 					StarField* sf = new StarField(); 
 					sf->makeStars(numstars, g_daglx[1]->getAR());
 					makeConf(sf, name); 
-				} else if((*beg) == string("tone")){
-					// add a tone-interpreter (can add multiple for polyphony).
-					typ = string("tone");
-					beg++; 
-					ToneSerialize* tsz = new ToneSerialize(); 
-					if(beg != tokens.end())
-						name = (*beg); //name of the tone.
-					makeConf(tsz, name); 
-				} else if((*beg) == string("text")){
+				} else if ((*beg) == string("text")) {
 					typ = string("text");
 					beg++; 
 					name = typ;
@@ -575,129 +576,133 @@ void* mmap_thread(void*){
 					nchars &= (0x1ff ^ 7); 
 					DisplayText* x = new DisplayText(nchars); 
 					makeConf(x, name); 
-				}
-			}
-			else if(*beg == string("store")){
-				// store <type> <size> <name>
-				beg++; 
-				string error = {"could not interpret command --\n"}; 
-				error += {"format is: store <type> <size> <name>"}; 
-				string typedesc = {"type needs to be one of:\n"}; 
-				typedesc += {"char, uchar, int, float, double\n"}; 
-				if(beg != tokens.end()){
-					string type = *beg++; 
+				} else if ((*beg) == string("tone")) {
+					// make tone <name>
+					// add a tone-interpreter (can add multiple for polyphony)
+					typ = string("tone");
+					beg++;
+					name = typ;
+					if (beg != tokens.end()) {
+						name = (*beg);
+						beg++;
+					}
+					ToneSerialize* tsz = new ToneSerialize();
+					makeConf(tsz, name);
+				} else if (*beg == string("store")) {
+					// make store <type> <size> <name>
+					typ = string("store");
+					beg++;
+					name = typ;
+					string error = {"could not interpret command --\n"}; 
+					error += {"format is: store <type> <size> <name>"}; 
+					string typedesc = {"type needs to be one of:\n"}; 
+					typedesc += {"char, uchar, int, float, double\n"}; 
 					if(beg != tokens.end()){
-						string ssize = *beg++; 
-						int size = atoi(ssize.c_str()); 
-						if(beg != tokens.end() && size > 0 && size < 1024){
-							name = (*beg++); 
-							//good, we have all the parameters
-							if(type == string("char")){
-								VectorSerialize<char>* obj = 
-									new VectorSerialize<char>(size, MAT_C_INT8); 
-								obj->m_name = name; 
-								g_objs.push_back(obj); 
-								resp = string("made store type char\n"); 
-							} else if(type == string("uchar")){
-								VectorSerialize<unsigned char>* obj = 
-									new VectorSerialize<unsigned char>(size, MAT_C_UINT8); 
-								obj->m_name = name; 
-								g_objs.push_back(obj); 
-								resp = ("made store type uchar\n"); 
-							} else if(type == string("int")){
-								VectorSerialize<int>* obj = 
-									new VectorSerialize<int>(size, MAT_C_INT32); 
-								obj->m_name = name; 
-								g_objs.push_back(obj); 
-								resp = ("made store type int\n"); 
-							} else if(type == string("float")){ 
-								VectorSerialize<float>* obj = 
-									new VectorSerialize<float>(size, MAT_C_SINGLE); 
-								obj->m_name = name; 
-								g_objs.push_back(obj); 
-								resp = ("made store type float\n"); 
-							} else if(type == string("double")){ 
-								VectorSerialize<double>* obj = 
-									new VectorSerialize<double>(size, MAT_C_DOUBLE); 
-								obj->m_name = name; 
-								g_objs.push_back(obj); 
-								resp = ("made store type double\n"); 
-							} else{
-								resp = {"could not generate a store --\n"}; 
-								resp += typedesc;
-							}
+						string type = *beg++; 
+						if(beg != tokens.end()){
+							string ssize = *beg++; 
+							int size = atoi(ssize.c_str()); 
+							if(beg != tokens.end() && size > 0 && size < 1024){
+								name = (*beg++); 
+								//good, we have all the parameters
+								if(type == string("char")){
+									VectorSerialize<char>* obj = 
+										new VectorSerialize<char>(size, MAT_C_INT8);
+									makeStoreConf(obj, type, name);
+								} else if(type == string("uchar")){
+									VectorSerialize<unsigned char>* obj = 
+										new VectorSerialize<unsigned char>(size, MAT_C_UINT8); 
+									makeStoreConf(obj, type, name);
+								} else if(type == string("int")){
+									VectorSerialize<int>* obj = 
+										new VectorSerialize<int>(size, MAT_C_INT32); 
+									makeStoreConf(obj, type, name);
+								} else if(type == string("float")){ 
+									VectorSerialize<float>* obj = 
+										new VectorSerialize<float>(size, MAT_C_SINGLE); 
+									makeStoreConf(obj, type, name);
+								} else if(type == string("double")){ 
+									VectorSerialize<double>* obj = 
+										new VectorSerialize<double>(size, MAT_C_DOUBLE); 
+									makeStoreConf(obj, type, name);
+								} else{
+									resp = {"could not generate a store --\n"}; 
+									resp += typedesc;
+								}
+							} else resp = error + typedesc; 
 						} else resp = error + typedesc; 
 					} else resp = error + typedesc; 
-				} else resp = error + typedesc; 
-			}
-			else if(*beg == string("polhemus")){
-				// polhemus <name> -- more options later.
-				if(g_polhemusConnected){
+				} else if (*beg == string("polhemus")) {
+					// make polhemus <name> -- more options later. TODO: xxx
+					if(g_polhemusConnected){
+						typ = string("polhemus");
+						beg++; 
+						name = typ; 
+						if (beg != tokens.end()) {
+							name = (*beg);
+							beg++;
+						}
+						g_objsRm(g_polhemus); 
+						if(g_polhemus) delete g_polhemus; 
+						g_polhemus = new PolhemusSerialize();
+						makeConf(g_polhemus, name);
+					}else{
+						resp = string("could not initialize polhemus object "); 
+						resp += string(" -- not connected.\n"); 
+					}
+				} else if (*beg == string("mouse")) {
+					// make mouse <name> -- simple mouse control.
+					typ = string("mouse");
 					beg++; 
-					name = string("polhemus"); 
-					if(beg != tokens.end()){
-						name = *beg; beg++; }
-					g_objsRm(g_polhemus); 
-					if(g_polhemus) delete g_polhemus; 
-					g_polhemus = new PolhemusSerialize(); 
-					g_objs.push_back(g_polhemus); 
-					g_polhemus->m_name = name; 
-					resp = string("intialized polhemus object called"); 
-					resp += name; resp += string("\n"); 
-				}else{
-					resp = string("could not initialize polhemus object "); 
-					resp += string(" -- not connected.\n"); 
-				}
-			}
-			else if(*beg == string("mouse")){
-				// mouse <name> -- simple mouse control.
-				beg++; 
-				name = string("mouse"); 
-				if(beg != tokens.end()){
-					name = *beg; beg++; }
-				g_objsRm(g_mouse); 
-				if(g_mouse) delete g_mouse; 
-				g_mouse = new MouseSerialize(); 
-				g_objs.push_back(g_mouse); 
-				g_mouse->m_name = name; 
-				resp = string("intialized mouse object called "); 
-				resp += name; resp += string("\n"); 
-			}
-			else if(*beg == string("optotrak")){
-				// optotrak <name> <nsensors> -- definitely more options later!
-				if(g_optoConnected){
-					beg++; 
-					name = string("optotrak"); 
-					int nsensors = 1; 
-					if(beg != tokens.end()){
-						name = *beg; beg++; }
-					if(beg != tokens.end()){
-						nsensors = atoi(beg->c_str()); beg++; }
-					g_objsRm(g_opto); 
-					if(g_opto) delete g_opto; 
-					nsensors = nsensors < 1 ? 1 : (nsensors > 10 ? 10 : nsensors); 
-					g_opto = new OptoSerialize(nsensors); 
-					g_objs.push_back(g_opto); 
-					g_opto->m_name = name; 
-					resp = string("intialized optotrak object called"); 
-					resp += name; resp += string("\n"); 
-				}else{
-					resp = string("could not initialize optotrack object "); 
-					resp += string(" -- not connected.\n"); 
-				}
-			}
-			else if(*beg == string("tdtudp")){
-				// tdtudp <name> <size> <ipaddress>
-				resp = string("could not interpret command --\nformat is tdtudp <name> <size> <ipaddress>\n");
-				beg++;
-				if(beg != tokens.end()) {
-					name = *beg;
+					name = typ;
+					if (beg != tokens.end()) {
+						name = *beg;
+						beg++;
+					}
+					g_objsRm(g_mouse); 
+					if(g_mouse) delete g_mouse; 
+					g_mouse = new MouseSerialize();
+					makeConf(g_mouse, name);
+				} else if (*beg == string("optotrak")) {
+					// optotrak <name> <nsensors> -- definitely more options later!
+					if(g_optoConnected){
+						typ = string("optotrak");
+						beg++; 
+						name = typ;  
+						if (beg != tokens.end()) {
+							name = *beg;
+							beg++;
+						}
+						int nsensors = 1;
+						if(beg != tokens.end()) {
+							nsensors = atoi(beg->c_str());
+							beg++;
+						}
+						g_objsRm(g_opto); 
+						if(g_opto) delete g_opto; 
+						nsensors = nsensors < 1 ? 1 : (nsensors > 10 ? 10 : nsensors); 
+						g_opto = new OptoSerialize(nsensors);
+						makeConf(g_opto, name);
+					}else{
+						resp = string("could not initialize optotrack object "); 
+						resp += string(" -- not connected.\n"); 
+					}
+				} else if (*beg == string("tdtudp")) {
+					// make tdtudp <name> <size> <ipaddress>
+					typ = string("tdtudp");
 					beg++;
-					if(beg != tokens.end()) {
+					name = typ;
+					resp  = string("could not interpret command --\n");
+					resp += "format is tdtudp <name> <size> <ipaddress>\n";
+					if (beg != tokens.end()) {
+						name = *beg;
+						beg++;
+					}
+					if (beg != tokens.end()) {
 						string ssize = *beg++; 
-						int size = atoi(ssize.c_str()); 
-						if(beg != tokens.end() && size > 0 && size < 128) {
-							string ipaddr = *beg++; 
+						int size = atoi(ssize.c_str());
+						if (beg != tokens.end() && size > 0 && size < 128) {
+							string ipaddr = *beg++;
 							int sock = openSocket((char*)ipaddr.c_str(), LISTEN_PORT); 
 							if(sock == 0){
 								resp = string("could not open socket to ") + ipaddr; 
@@ -706,12 +711,11 @@ void* mmap_thread(void*){
 									resp = string("there does not seem to be an RZ2 at")+ipaddr; 
 								} else {
 									TdtUdpSerialize* obj = new TdtUdpSerialize(sock, size);
-									obj->m_name = name + string("_"); 
-									g_objs.push_back(obj); 
+									makeConf(obj, name);
 									resp = string("successfully made a UDP connection object to")+ipaddr; 
 								}
 							}
-						} 
+						}
 					}
 				}
 			}
@@ -769,15 +773,16 @@ void* mmap_thread(void*){
 				resp += {"\t\te.g. you cannot do b5.text_str = 'something';\n"}; 
 				resp += {"\tmake tone <name>\n"};
 				resp += {"\t\tmake a tone generator\n"}; 
-				resp += {"\tstore <type> <size> <name>\n"};
+				resp += {"\tmake store <type> <size> <name>\n"};
 				resp += {"\t\tmake a generic store for matlab data --\n"};
 				resp += {"\t\t<type> can be char, uchar, int, float, or double.\n"};
-				resp += {"\t\t<size> is the size of the vector 1-\n"}; 
-				resp += {"\t\tNOTE: in b5, all vectors are type DOUBLE, independent of disc storage type\n"}; 
-				resp += {"\tpolhemus <name> -- for getting polhemus sensor loc\n"}; 
-				resp += {"\tmouse <name> -- for getting mouse location\n"};
-				resp += {"\toptotrak <name> <nsensors> -- for getting optotrak location\n"}; 
-				resp += {"\ttdtudp <name> <size> <ipaddress> -- for talking to TDT\n"};
+				resp += {"\t\t<size> is the size of the vector\n"}; 
+				resp += {"\t\tNOTE: in b5, all vectors are type DOUBLE,\n"};
+				resp += {"\t\tindependent of disc storage type\n"}; 
+				resp += {"\tmake polhemus <name> -- for getting polhemus sensor loc\n"}; 
+				resp += {"\tmake mouse <name> -- for getting mouse location\n"};
+				resp += {"\tmake optotrak <name> <nsensors> -- for getting optotrak location\n"}; 
+				resp += {"\tmake tdtudp <name> <size> <ipaddress> -- for talking to TDT\n"};
 				resp += {"\tmmap\n"}; 
 				resp += {"\t\treturn mmap structure information, for eval() in matlab\n"}; 
 				resp += {"\tclear_all\n"}; 

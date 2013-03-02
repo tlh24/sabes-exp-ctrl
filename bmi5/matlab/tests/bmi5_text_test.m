@@ -1,9 +1,10 @@
+clear;
 global bmi5_out bmi5_in b5
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r');
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w');
 
-%bmi5_cmd('make text');
+bmi5_cmd('make text');
 bmi5_cmd('make text words'); % give a name
 bmi5_cmd('make text string 32');
 

@@ -220,7 +220,7 @@ public:
 	vector<double> v_ticks; 
 	
 	PolhemusSerialize() : Serialize() {
-		m_name = "polhemus"; 
+		m_name = "polhemus_"; 
 		m_sensors[0] = m_sensors[1] = m_sensors[2] = 0.0; 
 		m_time = 0; 
 		m_ticks = 0; 
@@ -257,9 +257,9 @@ public:
 	virtual int nstored(){return v_sensors.size();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("_sensors_o"); 
-			case 1: return m_name + string("_time_o"); 
-			case 2: return m_name + string("_ticks_o"); 
+			case 0: return m_name + string("sensors_o"); 
+			case 1: return m_name + string("time_o"); 
+			case 2: return m_name + string("ticks_o"); 
 		} return string{"none"};
 	}
 	virtual int getStoreClass(int indx){
@@ -307,7 +307,7 @@ class ToneSerialize : public Serialize {
 	vector<float> v_play; 
 public:
 	ToneSerialize() : Serialize() {
-		m_name = "tone"; 
+		m_name = "tone_"; 
 	}
 	~ToneSerialize(){
 	}
@@ -467,7 +467,7 @@ public:
 			m_last.push_back(0.0); 
 		}
 		m_bs = 0;
-		m_name = "udp";
+		m_name = "tdtudp_";
 	}
 	~TdtUdpSerialize(){
 		disconnectRZ(m_sock); 
@@ -603,6 +603,7 @@ public:
 	vector<PolhemusPredict*> m_pp; 
 	
 	OptoSerialize(int nsensors) : VectorSerialize(nsensors * 3, MAT_C_SINGLE){
+		m_name = "optotrak_";
 		m_nsensors = nsensors; 
 		m_time = 0; 
 		m_ticks = 0; 
@@ -647,9 +648,9 @@ public:
 	virtual int nstored(){ return VectorSerialize::nstored();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("_sensors_o"); 
-			case 1: return m_name + string("_time_o"); 
-			case 2: return m_name + string("_ticks_o"); 
+			case 0: return m_name + string("sensors_o"); 
+			case 1: return m_name + string("time_o"); 
+			case 2: return m_name + string("ticks_o"); 
 		} return string("none"); 
 	}
 	virtual int getStoreClass(int indx){
@@ -690,14 +691,16 @@ public:
 class MouseSerialize : public VectorSerialize<float> {
 public:
 	//no timing in this one -- synchronous to global timer.
-	MouseSerialize() : VectorSerialize(2, MAT_C_SINGLE){}
+	MouseSerialize() : VectorSerialize(2, MAT_C_SINGLE){
+		m_name = "mouse_";
+	}
 	~MouseSerialize(){}
 	virtual void store(){
 		m_stor[0] = g_mousePos[0]; 
 		m_stor[1] = g_mousePos[1]; 
 		VectorSerialize::store(); 
 	}
-	virtual string storeName(int ){ return m_name + string("_o"); } //output.
+	virtual string storeName(int ){ return m_name + string("o"); } //output.
 	virtual double* mmapRead(double* d){
 		*d++ = g_mousePos[0];
 		*d++ = g_mousePos[1]; 
