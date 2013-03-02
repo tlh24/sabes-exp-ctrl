@@ -303,7 +303,8 @@ class ToneSerialize : public Serialize {
 	vector<float> v_freq; 
 	vector<float> v_pan; 
 	vector<float> v_scale; 
-	vector<float> v_duration; 
+	vector<float> v_duration;
+	vector<float> v_play; 
 public:
 	ToneSerialize() : Serialize() {
 		m_name = "tone"; 
@@ -318,16 +319,18 @@ public:
 		v_pan.clear();
 		v_scale.clear(); 
 		v_duration.clear(); 
+		v_play.clear();
 	}
 	virtual int nstored(){return v_time.size();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("time"); //these are not output--
-			case 1: return m_name + string("ticks"); //only saved in file (below).
-			case 2: return m_name + string("freq_io"); //bidirectional.
+			case 0: return m_name + string("time"); // these are not output--
+			case 1: return m_name + string("ticks"); // only saved in file (below).
+			case 2: return m_name + string("freq");
 			case 3: return m_name + string("pan"); 
 			case 4: return m_name + string("scale"); 
-			case 5: return m_name + string("duration"); 
+			case 5: return m_name + string("duration");
+			case 6: return m_name + string("play_io"); // bidirectional.
 		} return string("none");
 	}
 	virtual int getStoreClass(int indx){
@@ -337,7 +340,8 @@ public:
 			case 2: return MAT_C_SINGLE;
 			case 3: return MAT_C_SINGLE; 
 			case 4: return MAT_C_SINGLE; 
-			case 5: return MAT_C_SINGLE; 
+			case 5: return MAT_C_SINGLE;
+			case 6: return MAT_C_SINGLE;
 		} return 0; 
 	}
 	virtual void getStoreDims(int , size_t* dims){
@@ -351,17 +355,19 @@ public:
 			case 3: return (void*)&(v_pan[i]); 
 			case 4: return (void*)&(v_scale[i]); 
 			case 5: return (void*)&(v_duration[i]); 
+			case 6: return (void*)&(v_play[i]);
 		} return NULL; 
 	}
-	virtual int numStores(){return 6;}
+	virtual int numStores(){return 7;}
 	virtual double* mmapRead(double* d){
 		//this is a one-way communication channel from matlab. 
 		d += 2; //skip ticks and time -- these are only saved in the file.
-		if(d[0] > 0.0){
-			float freq = d[0]; 
-			float pan = d[1]; 
-			float scale = d[2]; 
-			float duration = d[3];
+		float freq = d[0]; 
+		float pan = d[1]; 
+		float scale = d[2]; 
+		float duration = d[3];
+		bool play = (bool)d[4];
+		if (play) {
 			#ifdef JACK
 			jackAddToneP(freq, pan, scale, duration);
 			#endif
@@ -371,10 +377,11 @@ public:
 			v_freq.push_back(freq); 
 			v_pan.push_back(pan); 
 			v_scale.push_back(scale); 
-			v_duration.push_back(duration); 
-			d[0] = 0.0; //reset frequency.
+			v_duration.push_back(duration);
+			v_play.push_back(play);
+			d[4] = 0.0;	// reset play
 		}
-		d += 4; 
+		d += 5; 
 		return d; 
 	}
 };
