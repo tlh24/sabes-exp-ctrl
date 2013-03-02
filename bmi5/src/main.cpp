@@ -109,66 +109,6 @@ long double			g_nextVsyncTime = -1;
 //forward decl.
 void gobjsInit(); 
 
-//keep this around for controlling the microstimulator, juicer, etc.
-// n.b. superceded by TdtUdpSerialize.
-/*
-void UDP_RZ2(){
-	int sock; 
- 	sock = openSocket((char*)"169.230.191.195", LISTEN_PORT); 
-	//sock = setup_socket(LISTEN_PORT); // joey's RZ2. 
-	checkRZ(sock); 
-	unsigned char buf[1024]; 
-	double mean = 0; 
-	double var = 0; 
-	int np = 1; 
-	double last = 0; 
-	unsigned int oldpak = 0; 
-	unsigned int dropped = 0; 
-	while(1){
-		//currently the socket is blocking -- will wait for data.
-		unsigned int n = recv(sock, buf, 1024, 0);
-		if(n > 0 && n < 1024){
-			long double now = gettime(); 
- 			np++; 
-			double d = now - last; 
-			mean += d; 
-			double m = (mean / (double)np); 
-			var += (d - m)*(d - m);
-			//look for lost packets. 
-			unsigned int paknum = htonl(*(unsigned int*)(&(buf[4])));  
-			if(paknum - oldpak > 1 && paknum - oldpak < 20) 
-				dropped += paknum - oldpak; 
-			oldpak = paknum;
-			printf("%x bytes: ", n); 
-			for(unsigned int i=0; i<n; i++){
-				printf("%02x ", buf[i]); 
-			}
-			printf("\n"); 
-			printf("mean interpacket time %f std %f dropped %d\n", 
-					 m, sqrt(var / (double)np), dropped); 
-			last = now; 
-		}
-	}
-}
-int hostname_to_ip(char * hostname , char* ip){
-	struct hostent *he;
-	struct in_addr **addr_list;
-	int i;
-	if ( (he = gethostbyname( hostname ) ) == NULL){
-		// get the host info
-		herror("gethostbyname");
-		return 1;
-	}
-	addr_list = (struct in_addr **) he->h_addr_list;
-	for(i = 0; addr_list[i] != NULL; i++){
-		//Return the first one;
-		strcpy(ip , inet_ntoa(*addr_list[i]) );
-		return 0;
-	}
-	return 1;
-}
-*/
-
 void errorDialog(char* msg){
 	GtkWidget *dialog, *label, *content_area;
 	dialog = gtk_dialog_new_with_buttons ("Error",
