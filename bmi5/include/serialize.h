@@ -306,6 +306,8 @@ class ToneSerialize : public Serialize {
 	vector<float> v_duration;
 	vector<float> v_play; 
 public:
+	double m_time; 
+	double m_ticks;
 	ToneSerialize() : Serialize() {
 		m_name = "tone_"; 
 	}
@@ -361,27 +363,29 @@ public:
 	virtual int numStores(){return 7;}
 	virtual double* mmapRead(double* d){
 		//this is a one-way communication channel from matlab. 
-		d += 2; //skip ticks and time -- these are only saved in the file.
-		float freq = d[0]; 
-		float pan = d[1]; 
-		float scale = d[2]; 
-		float duration = d[3];
-		bool play = (bool)d[4];
+		float freq = d[2]; 
+		float pan = d[3]; 
+		float scale = d[4]; 
+		float duration = d[5];
+		bool play = (bool)d[6];
 		if (play) {
 			#ifdef JACK
 			jackAddToneP(freq, pan, scale, duration);
 			#endif
-			double time = gettime();
-			v_time.push_back(time); 
-			v_ticks.push_back(g_tsc->getTicks()); 
+			m_time  = gettime();
+			m_ticks = g_tsc->getTicks();
+			v_time.push_back(m_time); 
+			v_ticks.push_back(m_ticks); 
 			v_freq.push_back(freq); 
 			v_pan.push_back(pan); 
 			v_scale.push_back(scale); 
 			v_duration.push_back(duration);
 			v_play.push_back((float)play);
-			d[4] = 0.0;	// reset play
+			d[0] = m_time;	// { xxx this isnt working!
+			d[1] = m_ticks;	// { why?!
+			d[6] = 0.0;		// reset play
 		}
-		d += 5; 
+		d += 7; 
 		return d; 
 	}
 };
