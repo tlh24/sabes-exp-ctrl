@@ -1,11 +1,13 @@
+clear;
+
 global bmi5_out bmi5_in b5
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r');
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w');
 
 bmi5_cmd('make circle cursor');
-bmi5_cmd('polhemus finger');
-eval(bmi5_cmd('mmap structure'));
+bmi5_cmd('make polhemus finger');
+eval(bmi5_cmd('mmap'));
 
 b5.cursor_scale = [5; 5];       % in mm
 b5.cursor_color = [1; 1; 1; 1]; % white

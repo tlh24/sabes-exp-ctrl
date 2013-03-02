@@ -1,3 +1,5 @@
+clear;
+
 global bmi5_out bmi5_in b5
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r');
@@ -6,7 +8,7 @@ bmi5_cmd('make circle cursor');
 bmi5_cmd('make ring ring 0.5');
 bmi5_cmd('make square square'); 
 bmi5_cmd('make open_square os 0.5'); 
-eval(bmi5_cmd('mmap structure'));
+eval(bmi5_cmd('mmap'));
 
 b5.affine_m44 = eye(4); 
 b5.quadratic_m44 = zeros(4);
@@ -33,16 +35,18 @@ b5.os_pos = [-0.5 0.5];
 
 bmi5_mmap(b5);
 
+pause;
+
 % ----
 bmi5_cmd('delete_all')
 % ----
 
-bmi5_cmd('polhemus finger')
-bmi5_cmd('optotrak 3 finger')
-bmi5_cmd('mouse finger')
+bmi5_cmd('make polhemus finger');
+bmi5_cmd('make optotrak finger 3')
+bmi5_cmd('make mouse finger')
 bmi5_cmd('make circle cursor');
 bmi5_cmd('make ring ring 0.5');
-eval(bmi5_cmd('mmap structure'));
+eval(bmi5_cmd('mmap'));
 
 b5.affine_m44 = eye(4); 
 b5.quadratic_m44 = zeros(4);

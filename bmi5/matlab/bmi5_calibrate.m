@@ -15,12 +15,12 @@ end
 bmi5_cmd('make tone tone');
 bmi5_cmd('make circle cursor');
 if(mouse)
-	bmi5_cmd('mouse finger');
+	bmi5_cmd('make mouse finger');
 else
-	bmi5_cmd('polhemus finger'); 
+	bmi5_cmd('make polhemus finger'); 
 end
 
-eval(bmi5_cmd('mmap structure'));
+eval(bmi5_cmd('mmap'));
 
 % first ask for a set of points. 
 w = linspace(-0.6, 0.6, snt);
@@ -67,7 +67,7 @@ b5.quadratic_m44 = zeros(4);
 
 bmi5_mmap(b5);
 
-b5.tone_freq_io = 440; 
+b5.tone_freq = 440; 
 b5.tone_pan = 0;
 b5.tone_scale = 1;
 b5.tone_duration = 0.25;
@@ -85,11 +85,9 @@ for yi = 1:snt
 		screen(i,2) = w(yi);
         s = strcat('target',num2str(i),'_');
         b5.(strcat(s,'color')) = [1 0 0 1]; % red
-        b5.tone_freq_io = 440;
+        b5.tone_play_io = 1;
 		bmi5_mmap(b5); 
 		pause(2);
-        b5.tone_freq = 0; % need to add a 'play' flag.
-        bmi5_mmap(b5); % update sensors.
         if(mouse)
             p = (pm * [b5.finger_o;0])'; 
         else
