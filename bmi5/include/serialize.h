@@ -378,7 +378,7 @@ public:
 			v_pan.push_back(pan); 
 			v_scale.push_back(scale); 
 			v_duration.push_back(duration);
-			v_play.push_back(play);
+			v_play.push_back((float)play);
 			d[4] = 0.0;	// reset play
 		}
 		d += 5; 
@@ -455,8 +455,8 @@ public:
 	vector<float>		m_stor; 
 	vector<double> 		v_time; 
 	vector<double>		v_ticks; 
-	vector<vector<float> > v_stor; 
-	float*				m_bs; 
+	vector<vector<float> > v_stor;
+	float*				m_bs; // for coalescing memory
 	
 	TdtUdpSerialize(int sock, int size) : Serialize(){
 		//the sock should be created elsewhere -- so we can get error strings out.
@@ -478,47 +478,46 @@ public:
 	virtual void clear(){
 		v_time.clear(); 
 		v_ticks.clear(); 
-		v_stor.clear(); 
+		v_stor.clear();
 	}
 	virtual int nstored(){ return v_stor.size(); }
 	virtual string storeName(int indx){
 		switch(indx){
 			case 0: return m_name + string("time"); //only saved
 			case 1: return m_name + string("ticks"); //in file.
-			case 2: return m_name + string("udp"); 
+			case 2: return m_name + string("udp");
 		} return string{"none"};
 	}
 	virtual int getStoreClass(int indx){
 		switch(indx){
 			case 0: return MAT_C_DOUBLE; 
 			case 1: return MAT_C_DOUBLE; 
-			case 2: return MAT_C_SINGLE; 
+			case 2: return MAT_C_SINGLE;
 		} return 0; 
 	}
 	virtual void getStoreDims(int indx, size_t* dims){
 		switch(indx){
-			case 0: dims[0] = 1; dims[1] = 1; return; 
-			case 1: dims[0] = 1; dims[1] = 1; return; 
-			case 2: dims[0] = m_size; dims[1] = 1; return; 
+			case 0: dims[0] = dims[1] = 1; return; 
+			case 1: dims[0] = dims[1] = 1; return; 
+			case 2: dims[0] = m_size; dims[1] = 1; return;
 		}
 	}
 	virtual void* getStore(int indx, int k){
-		if(indx == 0)
-			return (void*)&(v_time[k]); 
-		else if(indx == 1)
-			return (void*)&(v_ticks[k]); 
-		else if(indx == 2){
-			//coalesce the memory -- <vector<vector>> is non-continuous in memory. 
-			if(m_bs) free(m_bs); 
-			int n = nstored(); 
-			m_bs = (float*)malloc(sizeof(float)*(n-k)*m_size); 
-			for(int i=0; i<n-k; i++){
-				for(int j=0; j<m_size; j++){
-					m_bs[j + i*m_size] = v_stor[i+k][j]; 
-				}
-			}
-			return (void*)(m_bs); 
-		} else return NULL; 
+		switch(indx) {
+			case 0: return (void*)&(v_time[k]);
+			case 1: return (void*)&(v_ticks[k]);
+			case 2: {
+					//coalesce the memory: <vector<vector>> is not contiguous. 
+					if(m_bs) free(m_bs); 
+					int n = nstored(); 
+					m_bs = (float*)malloc(sizeof(float)*(n-k)*m_size); 
+					for(int i=0; i<n-k; i++) {
+						for(int j=0; j<m_size; j++) {
+							m_bs[j + i*m_size] = v_stor[i+k][j]; 
+						}
+					}
+					return (void*)(m_bs); }
+		} return NULL;
 	}
 	virtual int numStores(){return 3;}
 	virtual double* mmapRead(double* d){
@@ -527,14 +526,14 @@ public:
 		for(int i=0; i<m_size; i++)
 			sames &= m_last[i] == d[i]; 
 		if(!sames){
-			for(int i=0; i<m_size; i++){
+			for (int i=0; i<m_size; i++) {
 				m_last[i] = d[i]; 
-				m_stor[i] = (float)d[i]; 
+				m_stor[i] = (float)d[i];
 			}
 			sendDataRZ(m_sock, &(m_stor[0]), m_size); //thread-synchronous is ok?
 			double time = gettime(); //save the time of TX.
 			v_ticks.push_back(g_tsc->getTicks()); 
-			v_time.push_back(time); 
+			v_time.push_back(time);
 			v_stor.push_back(m_stor); 
 		}
 		d += m_size; 
@@ -545,7 +544,7 @@ public:
 //convenience class for saving 4x4 calibration matrix (affine, quadratic). 
 class Matrix44Serialize : public Serialize {
 public: 
-	array<double,16>				m_cmp;
+	array<double,16>			m_cmp;
 	array<float,16>				m_x; 
 	vector<array<float,16> >	v_x; 
 	

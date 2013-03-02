@@ -8,23 +8,22 @@ bmi5_cmd('make tdtudp tdt2 14 169.230.191.127');     % connect by ip
 
 eval(bmi5_cmd('mmap'))
 
-
 b5.tdt1_udp(1) = 1;     % juice trigger
-b5.tdt1_udp(2) = 300;   % juice time (msec)
+b5.tdt1_udp(2) = 500;   % juice time (msec)
 bmi5_mmap(b5)
 b5.tdt1_udp(1) = 0;
 bmi5_mmap(b5)
 
 % fields 1-8 are boring scalar stim values
 % fields 9-14 each hold 16 bits of the 96-bit stimchan vector
-udp{1} = 1;     % StimFreqHz
-udp{2} = 100;   % StimPWUs
-udp{3} = 0;     % StimAmpUA
-udp{4} = 25;    % StimIPIUs
-udp{5} = 0;     % StimNumPulses
-udp{6} = 1;     % StimMonBank
-udp{7} = 0;     % StimGo
-udp{8} = 0;     % StimAbort
+udp{1} = 0;     % StimGo
+udp{2} = 0;     % StimAbort
+udp{3} = 100;   % StimFreqHz
+udp{4} = 100;   % StimPWUs
+udp{5} = 0;     % StimAmpUA
+udp{6} = 25;    % StimIPIUs
+udp{7} = 0;     % StimNumPulses
+udp{8} = 1;     % StimMonBank
 
 stimchans = false(1,96);
 stimchans(5)  = 1;
@@ -47,4 +46,14 @@ for i=1:length(udp),
 end
 bmi5_mmap(b5)
 
-% TODO: make UDP objects have send command
+udp{1} = 1;
+for i=1:length(udp),
+    b5.tdt2_udp(i) = udp{i};
+end
+bmi5_mmap(b5)
+
+udp{1} = 0;
+for i=1:length(udp),
+    b5.tdt2_udp(i) = udp{i};
+end
+bmi5_mmap(b5)
