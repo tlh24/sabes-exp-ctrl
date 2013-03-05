@@ -717,3 +717,4 @@ size_t matlabFileSize(vector<Serialize*> tosave);
 size_t mmapFileSize(vector<Serialize*> tosave); 
 bool matlabHasNewData(vector<Serialize*> tosave); 
 #endif
+
