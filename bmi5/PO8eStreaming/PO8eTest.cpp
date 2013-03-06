@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 					 cards[x]->flushBufferedData(numSamples);
 					 bytes += numSamples * nchan * bps; 
 					 if(frame %10 == 0){
-					 	printf("%d samples at %d bps of %d chan: %Lf MB/sec\n", numSamples, bps, nchan,
+					 	printf("%zd samples at %d bps of %d chan: %Lf MB/sec\n", numSamples, bps, nchan,
 								 ((long double)bytes) / ((gettime() - starttime)*(1024.0*1024.0))); 
 					 }
             }

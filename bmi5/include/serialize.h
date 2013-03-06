@@ -151,9 +151,9 @@ public:
 
 class PolhemusPredict {
 public:
-	float			m_s[8][3]; //last 8 sensor measurements. 
-	long double m_t[32]; //time of the last 32 measurements (rate should be static!)
-	int			m_ptr; //circluar, obvi.
+	float			m_s[8][3]; 	//last 8 sensor measurements. 
+	long double 	m_t[32]; 	//time of the last 32 measurements (rate should be static!)
+	int				m_ptr; 		//circluar, obvi.
 	
 	PolhemusPredict(){
 		for(int i=0; i<24; i++)
@@ -220,7 +220,7 @@ public:
 	vector<double> v_ticks; 
 	
 	PolhemusSerialize() : Serialize() {
-		m_name = "polhemus"; 
+		m_name = "polhemus_"; 
 		m_sensors[0] = m_sensors[1] = m_sensors[2] = 0.0; 
 		m_time = 0; 
 		m_ticks = 0; 
@@ -257,9 +257,9 @@ public:
 	virtual int nstored(){return v_sensors.size();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("_sensors_o"); 
-			case 1: return m_name + string("_time_o"); 
-			case 2: return m_name + string("_ticks_o"); 
+			case 0: return m_name + string("sensors_o"); 
+			case 1: return m_name + string("time_o"); 
+			case 2: return m_name + string("ticks_o"); 
 		} return string{"none"};
 	}
 	virtual int getStoreClass(int indx){
@@ -303,10 +303,13 @@ class ToneSerialize : public Serialize {
 	vector<float> v_freq; 
 	vector<float> v_pan; 
 	vector<float> v_scale; 
-	vector<float> v_duration; 
+	vector<float> v_duration;
+	vector<float> v_play; 
 public:
+	double m_time; 
+	double m_ticks;
 	ToneSerialize() : Serialize() {
-		m_name = "tone"; 
+		m_name = "tone_"; 
 	}
 	~ToneSerialize(){
 	}
@@ -318,16 +321,18 @@ public:
 		v_pan.clear();
 		v_scale.clear(); 
 		v_duration.clear(); 
+		v_play.clear();
 	}
 	virtual int nstored(){return v_time.size();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("time"); //these are not output--
-			case 1: return m_name + string("ticks"); //only saved in file (below).
-			case 2: return m_name + string("freq_io"); //bidirectional.
+			case 0: return m_name + string("time"); // these are not output--
+			case 1: return m_name + string("ticks"); // only saved in file (below).
+			case 2: return m_name + string("freq");
 			case 3: return m_name + string("pan"); 
 			case 4: return m_name + string("scale"); 
-			case 5: return m_name + string("duration"); 
+			case 5: return m_name + string("duration");
+			case 6: return m_name + string("play_io"); // bidirectional.
 		} return string("none");
 	}
 	virtual int getStoreClass(int indx){
@@ -337,7 +342,8 @@ public:
 			case 2: return MAT_C_SINGLE;
 			case 3: return MAT_C_SINGLE; 
 			case 4: return MAT_C_SINGLE; 
-			case 5: return MAT_C_SINGLE; 
+			case 5: return MAT_C_SINGLE;
+			case 6: return MAT_C_SINGLE;
 		} return 0; 
 	}
 	virtual void getStoreDims(int , size_t* dims){
@@ -351,28 +357,35 @@ public:
 			case 3: return (void*)&(v_pan[i]); 
 			case 4: return (void*)&(v_scale[i]); 
 			case 5: return (void*)&(v_duration[i]); 
+			case 6: return (void*)&(v_play[i]);
 		} return NULL; 
 	}
-	virtual int numStores(){return 6;}
+	virtual int numStores(){return 7;}
 	virtual double* mmapRead(double* d){
 		//this is a one-way communication channel from matlab. 
-		d += 2; //skip ticks and time -- these are only saved in the file.
-		if(d[0] > 0.0){
-			float freq = d[0]; 
-			float pan = d[1]; 
-			float scale = d[2]; 
-			float duration = d[3]; 
-			jackAddToneP(freq, pan, scale, duration); 
-			double time = gettime();
-			v_time.push_back(time); 
-			v_ticks.push_back(g_tsc->getTicks()); 
+		float freq = d[2]; 
+		float pan = d[3]; 
+		float scale = d[4]; 
+		float duration = d[5];
+		bool play = (bool)d[6];
+		if (play) {
+			#ifdef JACK
+			jackAddToneP(freq, pan, scale, duration);
+			#endif
+			m_time  = gettime();
+			m_ticks = g_tsc->getTicks();
+			v_time.push_back(m_time); 
+			v_ticks.push_back(m_ticks); 
 			v_freq.push_back(freq); 
 			v_pan.push_back(pan); 
 			v_scale.push_back(scale); 
-			v_duration.push_back(duration); 
-			d[0] = 0.0; //reset frequency.
+			v_duration.push_back(duration);
+			v_play.push_back((float)play);
+			d[0] = m_time;	// { xxx this isnt working!
+			d[1] = m_ticks;	// { why?!
+			d[6] = 0.0;		// reset play
 		}
-		d += 4; 
+		d += 7; 
 		return d; 
 	}
 };
@@ -446,8 +459,8 @@ public:
 	vector<float>		m_stor; 
 	vector<double> 		v_time; 
 	vector<double>		v_ticks; 
-	vector<vector<float> > v_stor; 
-	float*				m_bs; 
+	vector<vector<float> > v_stor;
+	float*				m_bs; // for coalescing memory
 	
 	TdtUdpSerialize(int sock, int size) : Serialize(){
 		//the sock should be created elsewhere -- so we can get error strings out.
@@ -457,7 +470,8 @@ public:
 			m_stor.push_back(0.f); 
 			m_last.push_back(0.0); 
 		}
-		m_bs = 0; 
+		m_bs = 0;
+		m_name = "tdtudp_";
 	}
 	~TdtUdpSerialize(){
 		disconnectRZ(m_sock); 
@@ -468,47 +482,46 @@ public:
 	virtual void clear(){
 		v_time.clear(); 
 		v_ticks.clear(); 
-		v_stor.clear(); 
+		v_stor.clear();
 	}
 	virtual int nstored(){ return v_stor.size(); }
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("_time"); //only saved
-			case 1: return m_name + string("_ticks"); //in file.
-			case 2: return m_name + string("_udp"); 
+			case 0: return m_name + string("time"); //only saved
+			case 1: return m_name + string("ticks"); //in file.
+			case 2: return m_name + string("udp");
 		} return string{"none"};
 	}
 	virtual int getStoreClass(int indx){
 		switch(indx){
 			case 0: return MAT_C_DOUBLE; 
 			case 1: return MAT_C_DOUBLE; 
-			case 2: return MAT_C_SINGLE; 
+			case 2: return MAT_C_SINGLE;
 		} return 0; 
 	}
 	virtual void getStoreDims(int indx, size_t* dims){
 		switch(indx){
-			case 0: dims[0] = 1; dims[1] = 1; return; 
-			case 1: dims[0] = 1; dims[1] = 1; return; 
-			case 2: dims[0] = m_size; dims[1] = 1; return; 
+			case 0: dims[0] = dims[1] = 1; return; 
+			case 1: dims[0] = dims[1] = 1; return; 
+			case 2: dims[0] = m_size; dims[1] = 1; return;
 		}
 	}
 	virtual void* getStore(int indx, int k){
-		if(indx == 0)
-			return (void*)&(v_time[k]); 
-		else if(indx == 1)
-			return (void*)&(v_ticks[k]); 
-		else if(indx == 2){
-			//coalesce the memory -- <vector<vector>> is non-continuous in memory. 
-			if(m_bs) free(m_bs); 
-			int n = nstored(); 
-			m_bs = (float*)malloc(sizeof(float)*(n-k)*m_size); 
-			for(int i=0; i<n-k; i++){
-				for(int j=0; j<m_size; j++){
-					m_bs[j + i*m_size] = v_stor[i+k][j]; 
-				}
-			}
-			return (void*)(m_bs); 
-		} else return NULL; 
+		switch(indx) {
+			case 0: return (void*)&(v_time[k]);
+			case 1: return (void*)&(v_ticks[k]);
+			case 2: {
+					//coalesce the memory: <vector<vector>> is not contiguous. 
+					if(m_bs) free(m_bs); 
+					int n = nstored(); 
+					m_bs = (float*)malloc(sizeof(float)*(n-k)*m_size); 
+					for(int i=0; i<n-k; i++) {
+						for(int j=0; j<m_size; j++) {
+							m_bs[j + i*m_size] = v_stor[i+k][j]; 
+						}
+					}
+					return (void*)(m_bs); }
+		} return NULL;
 	}
 	virtual int numStores(){return 3;}
 	virtual double* mmapRead(double* d){
@@ -517,14 +530,14 @@ public:
 		for(int i=0; i<m_size; i++)
 			sames &= m_last[i] == d[i]; 
 		if(!sames){
-			for(int i=0; i<m_size; i++){
+			for (int i=0; i<m_size; i++) {
 				m_last[i] = d[i]; 
-				m_stor[i] = (float)d[i]; 
+				m_stor[i] = (float)d[i];
 			}
 			sendDataRZ(m_sock, &(m_stor[0]), m_size); //thread-synchronous is ok?
 			double time = gettime(); //save the time of TX.
 			v_ticks.push_back(g_tsc->getTicks()); 
-			v_time.push_back(time); 
+			v_time.push_back(time);
 			v_stor.push_back(m_stor); 
 		}
 		d += m_size; 
@@ -535,7 +548,7 @@ public:
 //convenience class for saving 4x4 calibration matrix (affine, quadratic). 
 class Matrix44Serialize : public Serialize {
 public: 
-	array<double,16>				m_cmp;
+	array<double,16>			m_cmp;
 	array<float,16>				m_x; 
 	vector<array<float,16> >	v_x; 
 	
@@ -593,6 +606,7 @@ public:
 	vector<PolhemusPredict*> m_pp; 
 	
 	OptoSerialize(int nsensors) : VectorSerialize(nsensors * 3, MAT_C_SINGLE){
+		m_name = "optotrak_";
 		m_nsensors = nsensors; 
 		m_time = 0; 
 		m_ticks = 0; 
@@ -637,9 +651,9 @@ public:
 	virtual int nstored(){ return VectorSerialize::nstored();}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("_sensors_o"); 
-			case 1: return m_name + string("_time_o"); 
-			case 2: return m_name + string("_ticks_o"); 
+			case 0: return m_name + string("sensors_o"); 
+			case 1: return m_name + string("time_o"); 
+			case 2: return m_name + string("ticks_o"); 
 		} return string("none"); 
 	}
 	virtual int getStoreClass(int indx){
@@ -680,14 +694,16 @@ public:
 class MouseSerialize : public VectorSerialize<float> {
 public:
 	//no timing in this one -- synchronous to global timer.
-	MouseSerialize() : VectorSerialize(2, MAT_C_SINGLE){}
+	MouseSerialize() : VectorSerialize(2, MAT_C_SINGLE){
+		m_name = "mouse_";
+	}
 	~MouseSerialize(){}
 	virtual void store(){
 		m_stor[0] = g_mousePos[0]; 
 		m_stor[1] = g_mousePos[1]; 
 		VectorSerialize::store(); 
 	}
-	virtual string storeName(int ){ return m_name + string("_o"); } //output.
+	virtual string storeName(int ){ return m_name + string("o"); } //output.
 	virtual double* mmapRead(double* d){
 		*d++ = g_mousePos[0];
 		*d++ = g_mousePos[1]; 
@@ -701,3 +717,4 @@ size_t matlabFileSize(vector<Serialize*> tosave);
 size_t mmapFileSize(vector<Serialize*> tosave); 
 bool matlabHasNewData(vector<Serialize*> tosave); 
 #endif
+

@@ -17,10 +17,14 @@ for i=1:5000
 	if A(1,193) - prev ~= 1
 		skip = skip + 1; 
 	end
-	prev = A(1,193); 
-	image(A(:,1:192)/300); 
-	colormap gray
-	drawnow
+	prev = A(1,193);
+	if 1
+		imagesc(A(:,1:192)/128);
+		ylabel('lag');
+		xlabel('neuron'); 
+		colormap gray
+		drawnow
+	end
 end
 d = toc()
 frame_rate = 5000/d
