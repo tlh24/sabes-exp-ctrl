@@ -43,7 +43,7 @@
 #include <algorithm>
 #include <functional>
 
-// myopen common
+// myopen common                                                                                                                                                                                                                                                                                                                                                                                                                                                             xx7x 
 #include "mmaphelp.h"
 #include "gettime.h"
 #include "timesync.h"
