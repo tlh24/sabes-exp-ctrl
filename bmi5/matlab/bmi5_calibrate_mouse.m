@@ -1,16 +1,7 @@
-function [] = bmi5_calibrate(type)
-% function [] = bmi5_calibrate(type)
-% type = 1 -> mouse control. 
-% type = 2 -> optotrak (downstairs)
-% anything else -> polhemus. 
+function [] = bmi5_calibrate_mouse() 
 global bmi5_in bmi5_out b5;
 
-if(type == 2)
-	cd('/home/tlh24/sabes-exp-ctrl/bmi5/matlab');
-else
-	cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
-end
-
+cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
@@ -22,14 +13,7 @@ for j=1:num_targets
 end
 bmi5_cmd('make tone tone');
 bmi5_cmd('make circle cursor');
-if(type == 1)
-	bmi5_cmd('make mouse finger');
-elseif(type == 2)
-    bmi5_cmd('make optotrak finger 3'); %three sensors.
-else
-	bmi5_cmd('make polhemus finger'); 
-end
-
+bmi5_cmd('make mouse finger');
 eval(bmi5_cmd('mmap'));
 
 % first ask for a set of points. 
@@ -39,23 +23,12 @@ screen = zeros(num_targets, 4);
 world = zeros(num_targets, 4); 
 screen(:,4) = 1; 
 world(:,4) = 1; 
-pm = zeros(3); 
+pm = zeros(3);
+pm = eye(3);% mouse control.
 
-if(type == 1)
-	pm = eye(3);% mouse control.
-elseif(type == 2)
-	pm = zeros(3); % stay in mm.
-	pm(1,1) = 1; % x->x
-	pm(2,3) = 1; % z->y
-	pm(3,2) = 1; % y->z
-else 
-    % In addition to permuting from the native polhemus
-    % axes to a more reasonable set of axes, this matrix
-    % handles the conversion to mm from cm (polhemus native units)
-    pm = [    0  -10    0
-              0    0  -10  
-            +10    0    0  ];
-end
+
+
+
 
 
 i=1; 
@@ -103,11 +76,7 @@ for yi = 1:snt
         b5.tone_play_io = 1;
 		bmi5_mmap(b5); 
 		pause(2);
-        if(type == 1)
-            p = (pm * [b5.finger_o;0])'; 
-		else
-            p = (pm * [b5.finger_sensors_o])'; 
-        end
+        p = (pm * [b5.finger_o;0])'; 
 		world(i,1:3) = p(1:3);
 		i=i+1;
 	end
@@ -122,13 +91,7 @@ plot(screen(:,1), screen(:,2), 'bo');
 hold on
 pred = world * q; 
 plot(pred(:,1), pred(:,2), 'ro'); 
-if(type == 1)
-	save('calibration_mouse.mat','q','pm'); 
-elseif(type == 2)
-	save('calibration_opto.mat','q','pm'); 
-else
-	save('calibration.mat','q','pm'); 
-end
+save('calibration_mouse.mat','q','pm'); 
 
 % turn off all targets
 for j=1:num_targets
@@ -147,7 +110,7 @@ b5.cursor_draw = 1;
 bmi5_mmap(b5); 
 
 while(1)
-	p = pm * [b5.finger_sensors_o];
+	p = pm * [b5.finger_o];
 	b5.cursor_pos = p(1:2); 
 	bmi5_mmap(b5); 
 end
