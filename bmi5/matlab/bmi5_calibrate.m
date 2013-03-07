@@ -1,7 +1,15 @@
-function [] = bmi5_calibrate(mouse)
+function [] = bmi5_calibrate(type)
+% function [] = bmi5_calibrate(type)
+% type = 1 -> mouse control. 
+% type = 2 -> optotrak (downstairs)
+% anything else -> polhemus. 
 global bmi5_in bmi5_out b5;
 
-cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
+if(type == 2)
+	cd('/home/tlh24/sabes-exp-ctrl/bmi5/matlab');
+else
+	cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
+end
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
@@ -14,8 +22,10 @@ for j=1:num_targets
 end
 bmi5_cmd('make tone tone');
 bmi5_cmd('make circle cursor');
-if(mouse)
+if(type == 1)
 	bmi5_cmd('make mouse finger');
+elseif(type == 2)
+    bmi5_cmd('make optotrak finger 3'); %three sensors.
 else
 	bmi5_cmd('make polhemus finger'); 
 end
@@ -31,9 +41,14 @@ screen(:,4) = 1;
 world(:,4) = 1; 
 pm = zeros(3); 
 
-if(mouse)
+if(type == 1)
 	pm = eye(3);% mouse control.
-else   
+elseif(type == 2)
+	pm = zeros(3); % stay in mm.
+	pm(1,1) = 1; % x->x
+	pm(2,3) = 1; % z->y
+	pm(3,2) = 1; % y->z
+else 
     % In addition to permuting from the native polhemus
     % axes to a more reasonable set of axes, this matrix
     % handles the conversion to mm from cm (polhemus native units)
@@ -88,9 +103,9 @@ for yi = 1:snt
         b5.tone_play_io = 1;
 		bmi5_mmap(b5); 
 		pause(2);
-        if(mouse)
+        if(type == 1)
             p = (pm * [b5.finger_o;0])'; 
-        else
+		else
             p = (pm * [b5.finger_sensors_o])'; 
         end
 		world(i,1:3) = p(1:3);
@@ -107,8 +122,10 @@ plot(screen(:,1), screen(:,2), 'bo');
 hold on
 pred = world * q; 
 plot(pred(:,1), pred(:,2), 'ro'); 
-if(mouse)
+if(type == 1)
 	save('calibration_mouse.mat','q','pm'); 
+elseif(type == 2)
+	save('calibration_opto.mat','q','pm'); 
 else
 	save('calibration.mat','q','pm'); 
 end
