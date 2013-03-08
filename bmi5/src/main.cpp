@@ -1206,7 +1206,7 @@ int main(int argn, char** argc){
 	g_signal_connect (da2, "realize", 
 			G_CALLBACK (realize1), (void*)1);
 	//in order to receive keypresses, must be focusable!
-	//gtk_widget_set_can_focus(da2, TRUE);
+	//gtk_widget_set_can_focus( da2, TRUE);
 	
 	gtk_widget_set_events (da2, GDK_EXPOSURE_MASK
 			| GDK_LEAVE_NOTIFY_MASK
