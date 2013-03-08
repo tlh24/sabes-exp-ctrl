@@ -1,4 +1,4 @@
-# The following can be set at the commandline
+# The following can be set at the command line
 # ie: make DBG=true JACK=false
 DBG = false
 JACK = true
@@ -12,11 +12,12 @@ OBJS := src/main.o src/tdt_udp.o src/glInfo.o src/glFont.o src/polhemus.o \
 CFLAGS := -Iinclude -I/usr/local/include -I../../myopen/common_host
 CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
--Wextra -Werror -pedantic -std=c++11 -rdynamic
-LDFLAGS := -rdynamic -lrt -lGL -lGLU -lGLEW -lusb-1.0 -lhdf5
+-Wextra -Werror -pedantic -std=c++11 
+LDFLAGS := -lrt -lGL -lGLU -lGLEW -lusb-1.0
 
 ifeq ($(strip $(DBG)),true)
-	CFLAGS += -g -DDEBUG
+	CFLAGS  += -g -rdynamic -DDEBUG
+	LDFLAGS += -rdynamic
 else
 	CFLAGS += -O3
 endif
@@ -31,7 +32,7 @@ GLIBS = gtk+-3.0
 GTKFLAGS = `pkg-config --cflags $(GLIBS) `
 GTKLD = `pkg-config --libs $(GLIBS) `
 
-all: bmi5
+all: bmi5 opto glxgears
 
 src/%.o : src/%.cpp 
 	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
