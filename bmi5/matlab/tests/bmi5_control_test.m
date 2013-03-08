@@ -3,7 +3,7 @@ global bmi5_in bmi5_out b5;
 
 b5 = [];
 
-cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
+%cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
@@ -12,11 +12,11 @@ bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w');
 bmi5_cmd('make circle cursor'); 
 bmi5_cmd('make stars stars'); 
 bmi5_cmd('make circle target'); 
-bmi5_cmd('polhemus finger');
+bmi5_cmd('make polhemus finger');
 bmi5_cmd('make tone tone');  % tone object, not actual tone.
-eval(bmi5_cmd('mmap structure')); 
+eval(bmi5_cmd('mmap')); 
 
-b5.tone_freq_io = 440; 
+b5.tone_freq = 440; 
 b5.tone_pan = 0;
 b5.tone_scale = 1;
 b5.tone_duration = 1;

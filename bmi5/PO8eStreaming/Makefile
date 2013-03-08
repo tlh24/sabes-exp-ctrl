@@ -1,10 +1,12 @@
 
 LDFLAGS = -lrt -lPO8eStreaming
 
+CPP = g++
+
 all: stream
 
 stream: PO8eTest.cpp
-	g++ -o $@ -g $(LDFLAGS) $<
+	$(CPP) -o $@ -g $(LDFLAGS) $<
 
 clean:
 	rm -rf stream *.o

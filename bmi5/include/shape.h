@@ -314,7 +314,7 @@ public: //do something like the flow field common in the lab.
 		m_lastTime = 0.0; 
 		m_starSize = 3.0; 
 		m_startTime = gettime(); 
-		m_name = string{"dots"};
+		m_name = string{"stars"};
 	}
 	~StarField(){
 		if(m_v) free(m_v); m_v = NULL;
