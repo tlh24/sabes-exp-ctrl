@@ -1,4 +1,4 @@
-function [] = bmi5_calibrate(type)
+% function [] = bmi5_calibrate(type)
 % function [] = bmi5_calibrate(type)
 % type = 1 -> mouse control. 
 % type = 2 -> optotrak (downstairs)
@@ -14,7 +14,7 @@ end
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
-num_targets = 16;
+num_targets = 9;
 snt = sqrt(num_targets);
 
 for j=1:num_targets
@@ -29,6 +29,9 @@ elseif(type == 2)
 else
 	bmi5_cmd('make polhemus finger'); 
 end
+
+% visibility rectangle. 
+bmi5_cmd('make square opto_visible');
 
 eval(bmi5_cmd('mmap'));
 
@@ -46,7 +49,7 @@ if(type == 1)
 elseif(type == 2)
 	pm = zeros(3); % stay in mm.
 	pm(1,1) = 1; % x->x
-	pm(2,3) = 1; % z->y
+	pm(2,3) = 10; % z->y
 	pm(3,2) = 1; % y->z
 else 
     % In addition to permuting from the native polhemus
@@ -87,6 +90,10 @@ b5.tone_pan = 0;
 b5.tone_scale = 1;
 b5.tone_duration = 0.25;
 
+b5.opto_visible_scale = [1.8 1.8]; 
+b5.opto_visible_color = [1 0 0 0.3];
+b5.opto_visible_draw = 0; 
+
 pause(10);
 
 i=1;
@@ -94,7 +101,7 @@ for yi = 1:snt
 	for xi = 1:snt
         for j=1:num_targets
             s = strcat('target',num2str(j),'_');
-            b5.(strcat(s,'color')) = [0 1 0 1]; % green
+            b5.(strcat(s,'color')) = [0 1 0 1]; % green5
         end
 		screen(i,1) = w(xi); 
 		screen(i,2) = w(yi);
@@ -102,9 +109,21 @@ for yi = 1:snt
         b5.(strcat(s,'color')) = [1 0 0 1]; % red
         b5.tone_play_io = 1;
 		bmi5_mmap(b5); 
-		pause(2);
+		time_start = b5.time_o; 
+		while(b5.time_o - time_start < 2.5 || b5.opto_visible_draw == 1)
+			bmi5_mmap(b5); 
+			% update visibility.
+			if(sum(abs(b5.finger_sensors_o(1:3))) > 1e6)
+				b5.opto_visible_draw = 1; 
+			else
+				b5.opto_visible_draw = 0; 
+			end
+		end
+		bmi5_mmap(b5); 
         if(type == 1)
             p = (pm * [b5.finger_o;0])'; 
+		elseif(type == 2)
+			p = (pm * [b5.finger_sensors_o(1:3)])'; 
 		else
             p = (pm * [b5.finger_sensors_o])'; 
         end
@@ -147,10 +166,10 @@ b5.cursor_draw = 1;
 bmi5_mmap(b5); 
 
 while(1)
-	p = pm * [b5.finger_sensors_o];
+	p = pm * [b5.finger_sensors_o(1:3)];
 	b5.cursor_pos = p(1:2); 
 	bmi5_mmap(b5); 
 end
 
-end
+%end
 
