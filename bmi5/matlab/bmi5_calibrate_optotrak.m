@@ -22,6 +22,7 @@ for j=1:num_targets
 end
 bmi5_cmd('make tone tone');
 bmi5_cmd('make circle cursor');
+
 if(type == 1)
 	bmi5_cmd('make mouse finger');
 elseif(type == 2)
@@ -63,7 +64,6 @@ else
             +10    0    0  ];
 end
 
-
 i=1; 
 for yi = 1:snt
     for xi = 1:snt
@@ -104,7 +104,7 @@ for yi = 1:snt
 	for xi = 1:snt
         for j=1:num_targets
             s = strcat('target',num2str(j),'_');
-            b5.(strcat(s,'color')) = [0 1 0 1]; % green5
+            b5.(strcat(s,'color')) = [0 1 0 1]; % green
         end
 		screen(i,1) = w(xi); 
 		screen(i,2) = w(yi);
@@ -129,7 +129,7 @@ for yi = 1:snt
 			p = (pm * [b5.finger_sensors_o(1:3)])'; 
 		else
             p = (pm * [b5.finger_sensors_o])'; 
-        end
+		end
 		world(i,1:3) = p(1:3);
 		i=i+1;
 	end
