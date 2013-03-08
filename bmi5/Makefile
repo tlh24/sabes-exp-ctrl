@@ -32,7 +32,7 @@ GLIBS = gtk+-3.0
 GTKFLAGS = `pkg-config --cflags $(GLIBS) `
 GTKLD = `pkg-config --libs $(GLIBS) `
 
-all: bmi5 opto glxgears
+all: bmi5 glxgears
 
 src/%.o : src/%.cpp 
 	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
