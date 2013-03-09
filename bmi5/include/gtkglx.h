@@ -3,7 +3,6 @@
 
 // gtkglext is not compatible with gtk-3.0
 // but, we can manage our own GLX calls.
-// this really should be a class -- we'll have multiple GLX contexts.
 
 /* needed headers: (in this order)
 #include <gtk/gtk.h>

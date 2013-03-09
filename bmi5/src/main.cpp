@@ -72,6 +72,7 @@ int			g_frame = 0;
 int 		g_nCommand = 0; //number of matlab commands recieved.
 bool 		g_glInitialized[2] = {false};
 bool		g_glvsync = false; 
+bool		g_renderOpView = false; 
 float		g_mousePos[2]; 
 bool		g_die = false; 
 bool		g_record = false; 
@@ -226,7 +227,6 @@ static gboolean
 static gboolean
 draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	long double t = gettime(); 
-	g_openGLTimer.enter(); 
 	int h = (int)((long long)p & 0xf);
 	if(h <0 || h>1) g_assert_not_reached ();
 	if (!(g_daglx[h]->expose(da))){
@@ -237,27 +237,34 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 		g_lastFrame = t; 
 		g_frameRate = 0.9 * g_frameRate + 0.1 / dt; 
 	}
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glClearColor(0,0,0,1); 
-	glShadeModel(GL_FLAT);
-	
-	/// draw objects
-	//update before the swap for minimum display latency. 
-	pthread_mutex_lock(&mutex_gobjs); 
-	if(da == g_da[1]){ 
-		t = gettime(); 
+	if(da == g_da[1] || g_renderOpView){
+		g_openGLTimer.enter(); 
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glClearColor(0,0,0,1); 
+		glShadeModel(GL_FLAT);
+		
+		/// draw objects
+		//update before the swap for minimum display latency. 
+		pthread_mutex_lock(&mutex_gobjs); 
+		float ar = 1.f;
+		if(da == g_da[1]){ 
+			t = gettime(); 
+			for(unsigned int i=0; i<g_objs.size(); i++)
+				g_objs[i]->move(g_daglx[1]->getAR(), t);
+		}else{
+			//convert between aspect-ratios. 
+			ar = g_daglx[1]->getAR() / g_daglx[0]->getAR(); 
+		}
 		for(unsigned int i=0; i<g_objs.size(); i++)
-			g_objs[i]->move(g_daglx[1]->getAR(), t);
-	}
-	for(unsigned int i=0; i<g_objs.size(); i++)
-		g_objs[i]->draw(h); 
-	pthread_mutex_unlock(&mutex_gobjs); 
-	/// end
+			g_objs[i]->draw(h, ar); 
+		pthread_mutex_unlock(&mutex_gobjs); 
+		/// end
 
-	g_daglx[h]->swap(); //always double buffered
-	g_openGLTimer.exit(); 
+		g_daglx[h]->swap(); //always double buffered
+		g_openGLTimer.exit(); 
+	}
 	if(da == g_da[1]){
 		if(g_record) g_frameSerialize->store(g_frame); 
 		g_frame++; 
@@ -353,6 +360,12 @@ static void vsyncCB(GtkWidget* w, gpointer){
 	else
 		g_glvsync = false; 
 }
+static void opViewCB(GtkWidget* w, gpointer){
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+		g_renderOpView = true; 
+	else
+		g_renderOpView = false; 
+}
 void flush_pipe(int fid){
 	fcntl(fid, F_SETFL, O_NONBLOCK);
 	char* d = (char*)malloc(1024*8); 
@@ -365,7 +378,7 @@ void flush_pipe(int fid){
 }
 /* matlab interaction -- through shared memory. */
 void* mmap_thread(void*){
-	size_t length = 256*8; //mmapFileSize(g_objs); 
+	size_t length = 8*1024*8; //mmapFileSize(g_objs); 
 	mmapHelp mmh(length, BMI5_CTRL_MMAP);
 	mmh.prinfo();
 
@@ -427,7 +440,7 @@ void* mmap_thread(void*){
 				resp += "\n"; 
 			};
 			auto makeStoreConf = [&](Serialize * obj, string type, string nam) {
-				obj->m_name = nam;	// note: no postfixed underscore!
+				obj->m_name = nam + string("_"); 
 				g_objs.push_back(obj); 
 				resp  = {"made a store ("}; 
 				resp += type;
@@ -1117,14 +1130,14 @@ int main(int argn, char** argc){
 	#else
 	gtk_window_set_title (GTK_WINDOW (window), "sabes experimental control *** DEBUG ***");	
 	#endif
-	gtk_window_set_default_size (GTK_WINDOW (window), 850, 650);
+	gtk_window_set_default_size (GTK_WINDOW (window), g_renderOpView?800:220, 650);
 
 	paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_container_add (GTK_CONTAINER (window), paned);
 
 	//left: gui etc. 
 	v1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_widget_set_size_request(GTK_WIDGET(v1), 170, 650);
+	gtk_widget_set_size_request(GTK_WIDGET(v1), 200, 650);
 	g_timeLabel = gtk_label_new("time: "); 
 	gtk_container_add (GTK_CONTAINER (v1), g_timeLabel );
 	
@@ -1228,7 +1241,10 @@ int main(int argn, char** argc){
 	//add a fullscreen checkbox to the gui.
 	makeCheckbox("Fullscreen Subject View", false, G_CALLBACK(fullscreenCB)); 
 	makeCheckbox("Sticky Subject View", false, G_CALLBACK(stickyCB));
-	makeCheckbox("sync to Vblank\n(resize window to enact)", g_glvsync, G_CALLBACK(vsyncCB));  
+	makeCheckbox("sync to Vblank\n(resize window to enact)", 
+					 g_glvsync, G_CALLBACK(vsyncCB));  
+	makeCheckbox("Render Operator View\n(needed for mouse control)", 
+					 g_renderOpView, G_CALLBACK(opViewCB));
 
 	g_signal_connect_swapped (window, "destroy",
 			G_CALLBACK (destroy), NULL);
