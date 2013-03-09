@@ -41,7 +41,7 @@ pause;
 bmi5_cmd('delete_all')
 % ----
 
-bmi5_cmd('make polhemus finger');
+bmi5_cmd('make polhemus finger')
 bmi5_cmd('make optotrak finger 3')
 bmi5_cmd('make mouse finger')
 bmi5_cmd('make circle cursor');

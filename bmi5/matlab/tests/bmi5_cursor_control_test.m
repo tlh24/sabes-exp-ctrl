@@ -14,7 +14,9 @@ b5.cursor_color = [1; 1; 1; 1]; % white
 b5.cursor_pos   = [0; 0];
 b5.cursor_draw  = 1;
 
-load('../calibration.mat'); % load pm & q. 
+%load('../calibration_opto.mat'); % load pm & q. 
+%load('../calibration_mouse.mat'); % load pm & q. 
+load('../calibration_polhemus.mat'); % load pm & q. 
 
 qp = q'; 
 q2 = eye(4); 

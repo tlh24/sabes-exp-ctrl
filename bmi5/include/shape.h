@@ -139,14 +139,16 @@ class Shape : public Serialize {
 			m_needConfig[display] = false; 
 		}
 	}
-	void setupDrawMatrices(int display){
+	void setupDrawMatrices(int display, float ar){
 		//first pre-multiply the local->world with the world->screen matrix. 
-		float m[4][4]; //world matrix.
+		float m[4][4]; //local->world matrix.
 		for(int i=0; i<16; i++) m[0][i] = 0.f; 
+		float xar = ar < 1.f ? ar : 1.f; 
+		float yar = ar > 1.f ? 1.f/ar : 1.f; 
 		m[0][3] = m_trans[0]; 
 		m[1][3] = m_trans[1]; 
-		m[0][0] = m_scale[0]; 
-		m[1][1] = m_scale[1]; 
+		m[0][0] = m_scale[0] * xar; 
+		m[1][1] = m_scale[1] * yar; 
 		m[2][2] = m[3][3] = 1.f; 
 		float n[4][4]; 
 		float* aff = g_affine44->data(); 
@@ -167,14 +169,14 @@ class Shape : public Serialize {
 		int quadloc = glGetUniformLocation(m_program[display], "quadratic_matrix"); 
 		if(quadloc >= 0)glUniformMatrix4fv(quadloc, 1, GL_FALSE, g_quadratic44->data());
 	}
-	virtual void draw(int display){
+	virtual void draw(int display, float ar){
 		configure(display); //if we need it.
 		if(m_draw){
-			setupDrawMatrices(display); 
+			setupDrawMatrices(display, ar); 
 			int colorloc = glGetUniformLocation(m_program[display], "uniform_color"); 
 			if(colorloc >= 0) glUniform4f(colorloc, m_color[0], m_color[1], m_color[2], m_color[3]);
 			
-			if(m_program[0] == 0){ //boring square mode! DEBUG. 
+			if(m_program[display] == 0){ //boring square mode! DEBUG. 
 				glBegin(GL_TRIANGLE_FAN); 
 				float scl = 0.5; 
 				glVertex3f(1.f*scl, 1.f*scl, 0.f);
@@ -190,32 +192,7 @@ class Shape : public Serialize {
 		}
 	}
 	virtual void move(float, long double){} //no velocity here.
-	void enable(bool d){
-		if(d) m_draw = 1; else m_draw = 0; 
-	}
-	void translate(float x, float y){ //in real-world coordinates. 
-		m_trans[0] = x; m_trans[1] = y; 
-	}
-	void scale(float s){
-		m_scale[0] = m_scale[1] = s;
-	}
-	void scale(float x, float y){
-		m_scale[0] = x; m_scale[1] = y; 
-	}
-	void setColor(float r, float g, float b){
-		m_color[0] = r; 
-		m_color[1] = g; 
-		m_color[2] = b; 
-	}
-	void setAlpha(float a){
-		m_color[3] = a; 
-	}
-	void setColor4d(double* c){
-		for(int i=0; i<4; i++){
-			m_color[i] = (float)c[i]; 
-		}
-	}
-	//serialization. 
+///serialization. 
 	unsigned char floatToU8(float in){
 		in *= 255; 
 		in = in > 255.f ? 255.f : in; 
@@ -227,14 +204,27 @@ class Shape : public Serialize {
 		v_scale.clear(); 
 		v_trans.clear(); 
 	}
-	virtual void store(){
-		v_draw.push_back(m_draw); 
+	virtual bool store(){
 		array<unsigned char,4> color; 
 		for(int i=0; i<4; i++)
 			color[i] = floatToU8(m_color[i]); 
-		v_color.push_back(color);
-		v_scale.push_back(m_scale); 
-		v_trans.push_back(m_trans); 
+		bool same = true; 
+		if(nstored() > 0){
+			same &= (m_draw == v_draw.back()); 
+			for(int i=0; i<4; i++)
+				same &= (color[i] == (v_color.back())[i]); 
+			for(int i=0; i<2; i++){
+				same &= (m_scale[i] == (v_scale.back())[i]);
+				same &= (m_trans[i] == (v_trans.back())[i]); 
+			}
+		} else same = false; 
+		if(!same){
+			v_draw.push_back(m_draw); 
+			v_color.push_back(color);
+			v_scale.push_back(m_scale); 
+			v_trans.push_back(m_trans); 
+		}
+		return !same; 
 	}
 	virtual int nstored(){ return v_color.size(); }
 	virtual string storeName(int indx){
@@ -255,11 +245,11 @@ class Shape : public Serialize {
 	}
 	virtual void getStoreDims(int indx, size_t* dims){
 		switch(indx){
-			case 0: dims[0] = 1; dims[1] = 1; break; 
-			case 1: dims[0] = 4; dims[1] = 1; break; 
-			case 2: dims[0] = 2; dims[1] = 1; break;
-			case 3: dims[0] = 2; dims[1] = 1; break; 
-			default: dims[0] = 0; dims[1] = 0; break;
+			case 0: dims[0] = 1; dims[1] = 1; return; 
+			case 1: dims[0] = 4; dims[1] = 1; return; 
+			case 2: dims[0] = 2; dims[1] = 1; return;
+			case 3: dims[0] = 2; dims[1] = 1; return; 
+			default: dims[0] = 0; dims[1] = 0; return;
 		}
 	}
 	virtual void* getStore(int indx, int i){
@@ -320,7 +310,7 @@ public: //do something like the flow field common in the lab.
 		if(m_v) free(m_v); m_v = NULL;
 		if(m_pvel) free(m_pvel); m_pvel = NULL;
 		if(m_age) free(m_age); m_age = NULL; 
-		deleteBuffers(); 
+		//deleteBuffers(); 
 		v_vel.clear(); 
 		v_coherence.clear(); 
 	}
@@ -383,7 +373,13 @@ public: //do something like the flow field common in the lab.
 		}
 	}
 	virtual void move(float ar, long double time){
-		//will need to update this to permit
+		unsigned int basecol = 0; 
+		basecol += (unsigned int)(m_color[2] * 255) & 255; 
+		basecol <<= 8;
+		basecol += (unsigned int)(m_color[1] * 255) & 255; 
+		basecol <<= 8; 
+		basecol += (unsigned int)(m_color[0] * 255) & 255; 
+		if(!m_v || !m_pvel || !m_age) return; 
 		float dt = (float)(time - m_lastTime); 
 		float a[2]; a[0] = ar*1.1f; a[1] = 1.1f; 
 		int k = (int)floor(m_n * m_coherence);
@@ -427,18 +423,18 @@ public: //do something like the flow field common in the lab.
 					m_v[i].color = (unsigned int)(255*uniform() + 255*255*uniform() + 255*255*255*uniform());
 					m_v[i].color &= 0xffff5fff; //debug!  you should not see this.
 				} else {
-					m_v[i].color = 0x00ffffff; 
+					m_v[i].color = basecol; 
 				}
 			}
 		}
 		m_lastTime = time; 
 	}
-	virtual void draw(int display){
+	virtual void draw(int display, float ar){
 		configure(display); 
 		//this is a little more complicated, as we need to do a memcpy and user shaders.
-		if(m_draw){
+		if(m_draw && m_v && m_pvel && m_age){
 			glPointSize(m_starSize); 
-			setupDrawMatrices(display); 
+			setupDrawMatrices(display, ar); 
 			
 			glBindVertexArray(m_vao[display]);
 			glBindBuffer(GL_ARRAY_BUFFER, m_vbo[display]); // Bind our Vertex Buffer Object
@@ -463,73 +459,63 @@ public: //do something like the flow field common in the lab.
 		if(s){ m_starSize = 30.0; m_fade = true; }
 	}
 	void setFade(bool s){ m_fade = s; }
-	// serialization
+/// serialization
 	virtual void clear(){
 		Shape::clear(); 
 		v_vel.clear(); 
 		v_coherence.clear(); 
 	}
-	virtual void store(){
-		Shape::store(); 
-		v_vel.push_back(m_vel); 
-		v_coherence.push_back(m_coherence); 
-	}
-	virtual string storeName(int indx){
-		if(indx < Shape::numStores()){
-			return Shape::storeName(indx); 
-		}else{
-			indx -= Shape::numStores(); 
-			switch(indx){
-				case 0: return m_name + string("vel"); 
-				case 1: return m_name + string("coherence"); 
-			} return string("none"); 
-		}
-	}
-	virtual int getStoreClass(int indx){
-		if(indx < Shape::numStores()){
-			return Shape::getStoreClass(indx); 
-		}else{
-			indx -= Shape::numStores(); 
-			switch(indx){
-				case 0: return MAT_C_SINGLE; 
-				case 1: return MAT_C_SINGLE; 
-			} return 0; 
-		}
-	}
-	virtual void getStoreDims(int indx, size_t* dims){
-		if(indx < Shape::numStores()){
-			Shape::getStoreDims(indx, dims); 
-		}else{
-			indx -= Shape::numStores(); 
-			switch(indx){
-				case 0: dims[0] = 2; dims[1] = 1; break; 
-				case 1: dims[0] = 1; dims[1] = 1; break; 
+	virtual bool store(){
+		bool same = true; 
+		if(nstored() > 0){
+			for(int i=0; i<2; i++)
+				same &= (m_vel[i] == (v_vel.back())[i]); 
+			same &= (m_coherence == v_coherence.back()); 
+		} else same = false; 
+		if(!same){
+			same &= !Shape::store(); 
+			if(!same){
+				v_vel.push_back(m_vel); 
+				v_coherence.push_back(m_coherence); 
 			}
 		}
+		return !same; 
+	}
+	virtual string storeName(int indx){
+		switch(indx){
+			case 0: return m_name + string("vel"); 
+			case 1: return m_name + string("coherence"); 
+		} return Shape::storeName(indx - 2); 
+	}
+	virtual int getStoreClass(int indx){
+		switch(indx){
+			case 0: return MAT_C_SINGLE; 
+			case 1: return MAT_C_SINGLE; 
+		} return Shape::getStoreClass(indx - 2); 
+	}
+	virtual void getStoreDims(int indx, size_t* dims){
+		switch(indx){
+			case 0: dims[0] = 2; dims[1] = 1; return; 
+			case 1: dims[0] = 1; dims[1] = 1; return; 
+		} return Shape::getStoreDims(indx-2, dims); 
 	}
 	virtual void* getStore(int indx, int i){
-		if(indx < Shape::numStores()){
-			return Shape::getStore(indx, i); 
-		}else{
-			indx -= Shape::numStores(); 
-			switch(indx){
-				case 0: return (void*)&((v_vel[i])[0]); 
-				case 1: return (void*)&((v_coherence[i]));
-			} return NULL; 
-		}
+		switch(indx){
+			case 0: return (void*)&((v_vel[i])[0]); 
+			case 1: return (void*)&((v_coherence[i]));
+		} return Shape::getStore(indx-2, i);
 	}
 	virtual int numStores() { return Shape::numStores() + 2; }
 	virtual double* mmapRead(double* d){
-		d = Shape::mmapRead(d); 
 		for(int i=0; i<2; i++)
 			m_vel[i] = *d++; 
 		m_coherence = *d++; 
-		return d; 
+		return Shape::mmapRead(d);
 	}
 };
 
 class Circle : public Shape {
-	float 	m_radius; 
+	float 	m_radius; // fixed!
 public:
 	Circle(float radius, int ns) : Shape(){
 		m_radius = radius; 
@@ -550,7 +536,7 @@ public:
 }; 
 
 class Ring : public Shape {
-	float	m_ir; 
+	float	m_ir; //all fixed!
 	float	m_or; 
 	int	m_ns; 
 public:
@@ -582,7 +568,7 @@ public:
 		m_w = width * 0.5f; 
 		m_n = 5; 
 		m_needConfig[0] = m_needConfig[1] = true; 
-		m_drawmode = GL_TRIANGLE_STRIP; 
+		m_drawmode = GL_TRIANGLE_FAN; 
 	}
 	~Square(){}
 	virtual void fill(float* v){
@@ -616,108 +602,90 @@ public:
 class DisplayText : public VectorSerialize<char> {
 public: 
 	string	m_text; 
-	double			m_time; 
-	array<double,2>	m_pos; //double so the comparisons work properly.
-	array<double,4>	m_color; 
-	vector<double>	v_time; 
+	array<float,2>	m_pos; //double so the comparisons work properly.
+	array<unsigned char,4>	m_color; 
 	vector<array<float,2>> v_pos;
 	vector<array<unsigned char,4>> v_color; 
 	
 	DisplayText(int size) : VectorSerialize(size, MAT_C_INT8){
 		m_text = string("test!"); 
-		m_pos[0] = 10; m_pos[1] = 10; 
+		m_pos[0] = 0; m_pos[1] = 0; 
 		for(int i=0; i<4; i++)
 			m_color[i] = 1.f; 
 	}
 	~DisplayText(){
 		clear(); 
 	}
-	virtual void store(){} //in mmap()
+	virtual bool store(){
+		bool same = true; 
+		if(nstored() > 0){
+			for(int i=0; i<2; i++)
+				same &= (m_pos[i] == (v_pos.back())[i]); 
+			for(int i=0; i<4; i++)
+				same &= (m_color[i] == (v_color.back())[i]); 
+		} else same = false; 
+		if(!same){
+			same &= !VectorSerialize::store(); 
+			if(!same){
+				v_pos.push_back(m_pos); 
+				v_color.push_back(m_color); 
+			}
+		}
+		return !same; 
+	} 
 	virtual void clear(){
-		VectorSerialize::clear(); 
-		v_time.clear(); 
+		VectorSerialize::clear();  
 		v_pos.clear(); 
 		v_color.clear(); 
 	}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("str"); 
-			case 1: return m_name + string("time_o"); 
-			case 2: return m_name + string("pos");
-			case 3: return m_name + string("color"); 
-		} return string("none"); 
+			case 0: return m_name + string("pos");
+			case 1: return m_name + string("color"); 
+		} return VectorSerialize::storeName(indx - 2); 
+
 	}
 	virtual int getStoreClass(int indx){
 		switch(indx){
-			case 0: return VectorSerialize::getStoreClass(indx); 
-			case 1: return MAT_C_DOUBLE; 
-			case 2: return MAT_C_SINGLE;
-			case 3: return MAT_C_UINT8; 
-		} return 0; 
+			case 0: return MAT_C_SINGLE;
+			case 1: return MAT_C_UINT8; 
+		} return VectorSerialize::getStoreClass(indx - 2); 
 	}
 	virtual void getStoreDims(int indx, size_t* dims){
 		switch(indx){
-			case 0: VectorSerialize::getStoreDims(indx, dims); return; 
-			case 1: dims[0] = 1; dims[1] = 1; return; 
-			case 2: dims[0] = 2; dims[1] = 1; return;
-			case 3: dims[0] = 4; dims[1] = 1; return; 
-		}
+			case 0: dims[0] = 2; dims[1] = 1; return;
+			case 1: dims[0] = 4; dims[1] = 1; return; 
+		} return VectorSerialize::getStoreDims(indx - 2, dims); 
 	}
-	virtual void* getStore(int indx, int i){
+	virtual void* getStore(int indx, int i){ 
 		switch(indx){
-			case 0: return VectorSerialize::getStore(indx, i); 
-			case 1: return (void*)&(v_time[i]); 
-			case 2: return (void*)&((v_pos[i])[0]);
-			case 3: return (void*)&((v_color[i])[0]); 
-		} return NULL; 
+			case 0: return (void*)&((v_pos[i])[0]);
+			case 1: return (void*)&((v_color[i])[0]); 
+		} return VectorSerialize::getStore(indx - 2, i);
 	}
-	virtual int numStores(){return 4;}
+	virtual int numStores(){return VectorSerialize::numStores() + 2;}
 	virtual double* mmapRead(double *d){
+		for(int i=0; i<2; i++)
+			m_pos[i] = *d++;
+		for(int i=0; i<4; i++)
+			m_color[i] = (char)((*d++) * 255.0); 
+		d = VectorSerialize::mmapRead(d); 
+		//copy data to string.
 		m_text.reserve(m_size); //just in case..
 		char* s = (char*)m_text.data(); 
-		int i; 
-		for(i=0; i<m_size; i++)
-			s[i] = (char)(*d++); 
-		//see if the strings are the same. 
-		bool same = true; 
-		for(i=0; i<m_size; i++){
-			if(s[i] != m_stor[i]) same = false; 
-		}
-		for(i=0; i<2; i++){
-			if(d[i+1] != m_pos[i]) same = false; 
-		}
-		for(i=0; i<4; i++){
-			if(d[i+3] != m_color[i]) same = false; 
-		}
-		if(!same){
-			for(i=0; i<m_size; i++)
-				m_stor[i] = s[i]; 
-			for(i=0; i<2; i++)
-				m_pos[i] = d[i+1];
-			for(i=0; i<4; i++)
-				m_color[i] = d[i+3]; 
-			v_stor.push_back(m_stor); 
-			m_time = gettime(); 
-			v_time.push_back(m_time); 
-			array<float,2> pos; 
-			pos[0] = m_pos[0]; pos[1] = m_pos[1]; 
-			v_pos.push_back(pos); 
-			array<unsigned char,4> color; 
-			for(i=0; i<4; i++)
-				color[i] = (char)(m_color[i] * 255.f); 
-			v_color.push_back(color);
-		}
-		d[0] = m_time; //ala polhemus
-		d += 7; //time, pos, color.
+		for(int i=0; i<m_size; i++)
+			s[i] = m_stor[i]; 
 		return d; 
 	}
-	virtual void draw(int display){
+	virtual void draw(int display, float ar){
 		//need to convert world coords to screen. 
+		float xar = ar < 1.f ? ar : 1.f; 
+		float yar = ar > 1.f ? 1.f/ar : 1.f; 
 		float in[4], out[4]; 
 		for(int i=0; i<4; i++){
 			in[i] = out[i] = 0.f; 
 		}
-		in[0] = m_pos[0]; in[1] = m_pos[1]; 
+		in[0] = m_pos[0]*xar; in[1] = m_pos[1]*yar; 
 		float* aff = g_affine44->data(); //in matlab/openGL row major order.
 		for(int r=0; r<4; r++){
 			for(int c=0; c<4; c++){

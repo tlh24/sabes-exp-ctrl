@@ -29,8 +29,13 @@ b5.stars_coherence  = 0.5;
 b5.dots_coherence   = 0.75;
 b5.asters_coherence = 0.95;
 
+b5.stars_color = [1 1 1 1]; % white 
+b5.dots_color = [0 1 1 1]; % cyan
+b5.asters_color = [1 0.2 0.8 1]; % redish-magenta.
+
 b5.stars_draw  = 1;
 b5.dots_draw   = 1;
 b5.asters_draw = 1;
 
 bmi5_mmap(b5);
+

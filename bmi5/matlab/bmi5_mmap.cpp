@@ -61,7 +61,7 @@ void mexFunction( int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ] )
 	//we can do better.
 	//call this mex function to pass commands; returns new values; 
 	//does not do synchronization (at present). 
-	size_t length = 256*8;
+	size_t length = 8*1024*8;
 	int ret = 0; 
 	if(nrhs == 1){
 		mmapHelp mmh(length, BMI5_CTRL_MMAP, false); // probably too much time here..
