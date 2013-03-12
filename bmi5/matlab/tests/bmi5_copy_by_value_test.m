@@ -9,13 +9,10 @@ foo(1).time = 0;
 
 fprintf('*** fill structure ***\n');
 for i=1:5
-
-	%bmi5_mmap(b5); % update in-place. 
-    b5 = bmi5_mmap(b5); % return a new structure.
-    foo(i).time = b5.time_o;  % get the time
-
+	%bmi5_mmap(b5);             % update in-place. old semantics.
+    b5 = bmi5_mmap(b5);         % return a new structure. new semantics.
+    foo(i).time = b5.time_o;    % save the time
     fprintf('foo(%d).time: %0.2f\n',i,foo(i).time);
-
     pause(1);
 end
 

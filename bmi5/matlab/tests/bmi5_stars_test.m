@@ -37,5 +37,5 @@ b5.stars_draw  = 1;
 b5.dots_draw   = 1;
 b5.asters_draw = 1;
 
-bmi5_mmap(b5);
+b5 = bmi5_mmap(b5);
 

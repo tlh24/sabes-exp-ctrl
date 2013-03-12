@@ -24,4 +24,4 @@ b5.string_v   = [double('hi') zeros(1,30)]'; %length 32 -- see above.
 b5.string_color = [0 1 0 1];
 b5.string_pos   = [-0.5 -0.5]; 
 
-bmi5_mmap(b5);
+b5 = bmi5_mmap(b5);

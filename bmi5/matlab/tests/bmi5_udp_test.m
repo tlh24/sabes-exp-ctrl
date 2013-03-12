@@ -10,9 +10,9 @@ eval(bmi5_cmd('mmap'))
 
 b5.tdt1_udp(1) = 1;     % juice trigger
 b5.tdt1_udp(2) = 500;   % juice time (msec)
-bmi5_mmap(b5)
+b5 = bmi5_mmap(b5)
 b5.tdt1_udp(1) = 0;
-bmi5_mmap(b5)
+b5 = bmi5_mmap(b5)
 
 % fields 1-8 are boring scalar stim values
 % fields 9-14 each hold 16 bits of the 96-bit stimchan vector
@@ -44,16 +44,16 @@ udp{14} = bin2dec(tmp(81:96));
 for i=1:length(udp),
     b5.tdt2_udp(i) = udp{i};
 end
-bmi5_mmap(b5)
+b5 = bmi5_mmap(b5)
 
 udp{1} = 1;
 for i=1:length(udp),
     b5.tdt2_udp(i) = udp{i};
 end
-bmi5_mmap(b5)
+b5 = bmi5_mmap(b5)
 
 udp{1} = 0;
 for i=1:length(udp),
     b5.tdt2_udp(i) = udp{i};
 end
-bmi5_mmap(b5)
+b5 = bmi5_mmap(b5)
