@@ -11,14 +11,14 @@
 #define B5_IO (B5_IN | B5_OUT)
 
 
-void doMmap(const mxArray *prhs[], double *b, bool read, int nfields, char* out){
+void doMmap(mxArray *oa, double *b, bool read, int nfields, char* out){
 	for(int f=0; f<nfields; f++){
-		mxArray* field = mxGetFieldByNumber(prhs[0], 0, f); 
+		mxArray* field = mxGetFieldByNumber(oa, 0, f); 
 		if(field){
 			int m = mxGetM(field); 
 			int n = mxGetN(field);
 			if(0){
-				const char* fieldname = mxGetFieldNameByNumber(prhs[0], f); 
+				const char* fieldname = mxGetFieldNameByNumber(oa, f); 
 				mexPrintf("%s is %d by %d ", fieldname, m, n); 
 				if(out[f]) mexPrintf("out "); 
 				else mexPrintf("in "); 
@@ -59,17 +59,23 @@ char* getInOut(const mxArray *prhs[ ], int nfields){
 void mexFunction( int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ] ) {
 	//matlab built-in mmap funtionality too slow (scales with # of variables). 
 	//we can do better.
-	//call this mex function to pass commands; returns new values; 
-	//does not do synchronization (at present). 
+	// call bmi5_mmap(b5) to modify b5 in-place (careful, matlab sometimes copies-by-reference)
+	// or b5 = bmi5_mmap(b5) to get a completely new structure (malloc, memcpy)
 	size_t length = 8*1024*8;
+	mxArray* oa = 0; //output array.
 	int ret = 0; 
 	if(nrhs == 1){
 		mmapHelp mmh(length, BMI5_CTRL_MMAP, false); // probably too much time here..
 		double* b = (double*)mmh.m_addr; // but matlab does not easily support persistent data structures. 
 		int nfields = mxGetNumberOfFields(prhs[0]); 
 		char* out = getInOut(prhs, nfields); 
+		if(nlhs == 1){
+			oa = mxDuplicateArray(prhs[0]); //deep copy.
+		} else {
+			oa = (mxArray*)prhs[0]; 
+		}
 	// INCOMING DATA!
-		doMmap(prhs, b, true, nfields, out); 
+		doMmap(oa, b, true, nfields, out); 
 	//sync here, to save time.
 		int pipe_in = open(BMI5_IN_FIFO, O_RDWR); 
 		if(pipe_in <= 0){
@@ -89,14 +95,20 @@ void mexFunction( int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ] )
 			close(pipe_out); 
 		}
 	// OUTGOING DATA!
-		doMmap(prhs, b, false, nfields, out); 
+		doMmap(oa, b, false, nfields, out); 
 		free(out); 
 	}else{
 		mexPrintf("bmi5_mmap: please supply the b5 structure as an argument.\n"); 
 	}
 	if(nlhs == 1){
-		plhs[0] = mxCreateDoubleMatrix(1,1,mxREAL);
-    	double* outMatrix = mxGetPr(plhs[0]);
-		outMatrix[0] = (double)ret; 
+		if(oa)
+			plhs[0] = oa; 
+		else {
+			mexPrintf("bmi5_mmap: need b5 as an input argument if you want an output.\n"); 
+			plhs[0] = mxCreateDoubleMatrix(1,1,mxREAL);
+    		double* outMatrix = mxGetPr(plhs[0]);
+			outMatrix[0] = (double)ret; 
+		}
 	}
 }
+

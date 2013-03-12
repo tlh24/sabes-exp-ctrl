@@ -10,7 +10,8 @@ foo(1).time = 0;
 fprintf('*** fill structure ***\n');
 for i=1:5
 
-    bmi5_mmap(b5);
+	%bmi5_mmap(b5); % update in-place. 
+    b5 = bmi5_mmap(b5); % return a new structure.
     foo(i).time = b5.time_o;  % get the time
 
     fprintf('foo(%d).time: %0.2f\n',i,foo(i).time);
