@@ -306,7 +306,7 @@ static gboolean refresh (gpointer ){
 	
 	float loc[32];  
 	if(g_polhemus) g_polhemus->getLoc(gettime(), loc); 
-	if(g_polhemusConnected){
+	if(g_polhemusConnected && g_polhemus){
 		snprintf(str, 256, "connected\nx:\t\t%4.1f cm\ny:\t\t%4.1f cm\nz:\t\t%4.1f cm", 
 				loc[0], loc[1], loc[2]); 
 	}else{
