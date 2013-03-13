@@ -33,7 +33,7 @@ b5.os_scale = [0.5 0.5];
 b5.os_color = [1 1 0 1]; %yellow
 b5.os_pos = [-0.5 0.5]; 
 
-bmi5_mmap(b5);
+b5 = bmi5_mmap(b5);
 
 pause;
 
@@ -61,9 +61,9 @@ b5.ring_scale = [0.5 0.5];
 b5.ring_color = [0 1 0 1]; %green
 b5.ring_pos = [0.5 -0.5]; 
 
-bmi5_mmap(b5);
+b5 = bmi5_mmap(b5);
 
 while(1)
     b5.cursor_pos = b5.finger_o; 
-    bmi5_mmap(b5);
+    b5 = bmi5_mmap(b5);
 end

@@ -26,7 +26,7 @@ b5.target_draw = 1;
 b5.target_color = [0 1 0 1]; 
 b5.target_scale = [0.2 0.2]; 
 
-bmi5_mmap(b5);
+b5 = bmi5_mmap(b5);
 
 n = 20000;
 tic
@@ -35,7 +35,7 @@ for i=1:n
 	b5.target_pos = -1* b5.cursor_pos; 
 	b5.stars_vel = 0.1*[sin(toc()); cos(toc())]; 
 
-	bmi5_mmap(b5);
+	b5 = bmi5_mmap(b5);
 % 	if(code ~= 0)
 % 		disp('unexpected response from bmi5_out pipe'); 
 % 	end

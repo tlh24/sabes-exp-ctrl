@@ -24,10 +24,10 @@ q2(1:2, 1:2) = qp(1:2, 1:2);
 q2(1:2, 4) = qp(1:2, 4); 
 b5.affine_m44 = q2; 
 
-bmi5_mmap(b5); 
+b5 = bmi5_mmap(b5); 
 
 while(1)
     p = pm * b5.finger_sensors_o; 
     b5.cursor_pos = p(1:2); 
-    bmi5_mmap(b5);
+    b5 = bmi5_mmap(b5);
 end

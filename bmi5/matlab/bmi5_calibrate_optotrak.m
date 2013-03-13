@@ -86,7 +86,7 @@ b5.cursor_draw  = 0;
 b5.affine_m44 = eye(4); 
 b5.quadratic_m44 = zeros(4); 
 
-bmi5_mmap(b5);
+b5 = bmi5_mmap(b5);
 
 b5.tone_freq = 440; 
 b5.tone_pan = 0;
@@ -111,10 +111,10 @@ for yi = 1:snt
         s = strcat('target',num2str(i),'_');
         b5.(strcat(s,'color')) = [1 0 0 1]; % red
         b5.tone_play_io = 1;
-		bmi5_mmap(b5); 
+		b5 = bmi5_mmap(b5); 
 		time_start = b5.time_o; 
 		while(b5.time_o - time_start < 2.5 || b5.opto_visible_draw == 1)
-			bmi5_mmap(b5); 
+			b5 = bmi5_mmap(b5); 
 			% update visibility.
 			if(sum(abs(b5.finger_sensors_o(1:3))) > 1e6)
 				b5.opto_visible_draw = 1; 
@@ -122,7 +122,7 @@ for yi = 1:snt
 				b5.opto_visible_draw = 0; 
 			end
 		end
-		bmi5_mmap(b5); 
+		b5 = bmi5_mmap(b5); 
         if(type == 1)
             p = (pm * [b5.finger_o;0])'; 
 		elseif(type == 2)
@@ -157,7 +157,7 @@ for j=1:num_targets
     s = strcat('target',num2str(j),'_');
     b5.(strcat(s,'draw')) = 0;
 end
-bmi5_mmap(b5);
+b5 = bmi5_mmap(b5);
 
 % set up affine matrix
 qp = q'; 
@@ -166,26 +166,26 @@ q2(1:2, 1:2) = qp(1:2, 1:2);
 q2(1:2, 4) = qp(1:2, 4); 
 b5.affine_m44 = q2; 
 b5.cursor_draw = 1;
-bmi5_mmap(b5); 
+b5 = bmi5_mmap(b5); 
 
 while(1)
 	p = pm * [b5.finger_sensors_o(1:3)];
 	b5.cursor_pos = p(1:2); 
-	bmi5_mmap(b5); 
+	b5 = bmi5_mmap(b5); 
 end
 
 %end
 b5.opto_visible_draw = 1;
-bmi5_mmap(b5); 
+b5 = bmi5_mmap(b5); 
 pause(4); 
 b5.opto_visible_draw = 0;
-bmi5_mmap(b5); 
+b5 = bmi5_mmap(b5); 
 n = 600; 
 data = zeros(3,n); 
 for(i=1:n)
-	bmi5_mmap(b5); 
+	b5 = bmi5_mmap(b5); 
 	data(:,i) = b5.finger_sensors_o(1:3);
 	pause(0.1); 
 end
 b5.opto_visible_draw = 1;
-bmi5_mmap(b5); 
+b5 = bmi5_mmap(b5); 

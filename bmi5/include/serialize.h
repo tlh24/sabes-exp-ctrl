@@ -657,19 +657,21 @@ public:
 class MouseSerialize : public VectorSerialize<float> {
 public:
 	//timing via VectorSerialize.
-	MouseSerialize() : VectorSerialize(2, MAT_C_SINGLE){
+	MouseSerialize() : VectorSerialize(3, MAT_C_SINGLE){
 		m_name = "mouse_";
 	}
 	~MouseSerialize(){}
 	virtual bool store(){
 		m_stor[0] = g_mousePos[0]; 
-		m_stor[1] = g_mousePos[1]; 
+		m_stor[1] = g_mousePos[1];
+		m_stor[2] = 0.f;
 		return VectorSerialize::store(); 
 	}
-	virtual string storeName(int ){ return m_name + string("o"); } //output.
+	virtual string storeName(int ){ return m_name + string("sensors_o"); } //output.
 	virtual double* mmapRead(double* d){
 		*d++ = g_mousePos[0];
-		*d++ = g_mousePos[1]; 
+		*d++ = g_mousePos[1];
+		*d++ = 0.f; 
 		return d; 
 	}
 };
