@@ -5,11 +5,7 @@
 % anything else -> polhemus. 
 global bmi5_in bmi5_out b5;
 
-if(type == 2)
-	cd('/home/tlh24/sabes-exp-ctrl/bmi5/matlab');
-else
-	cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
-end
+cd('/home/motorlab/sabes-exp-ctrl/bmi5/matlab');
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
@@ -23,13 +19,8 @@ end
 bmi5_cmd('make tone tone');
 bmi5_cmd('make circle cursor');
 
-if(type == 1)
-	bmi5_cmd('make mouse finger');
-elseif(type == 2)
-    bmi5_cmd('make optotrak finger 3'); %three sensors.
-else
-	bmi5_cmd('make polhemus finger'); 
-end
+bmi5_cmd('make optotrak finger 3'); %three sensors.
+
 
 % visibility rectangle. 
 bmi5_cmd('make square opto_visible');
@@ -81,7 +72,7 @@ end
 b5.cursor_scale = [5; 5]; % in mm
 b5.cursor_color = [1; 1; 1; 1]; 
 b5.cursor_pos   = [0; 0];
-b5.cursor_draw  = 0;
+b5.cursor_draw  = 1;
 
 b5.affine_m44 = eye(4); 
 b5.quadratic_m44 = zeros(4); 
@@ -123,13 +114,7 @@ for yi = 1:snt
 			end
 		end
 		b5 = bmi5_mmap(b5); 
-        if(type == 1)
-            p = (pm * [b5.finger_o;0])'; 
-		elseif(type == 2)
-			p = (pm * [b5.finger_sensors_o(1:3)])'; 
-		else
-            p = (pm * [b5.finger_sensors_o])'; 
-		end
+		p = (pm * [b5.finger_sensors_o(1:3)])'; 
 		world(i,1:3) = p(1:3);
 		i=i+1;
 	end
@@ -144,13 +129,7 @@ plot(screen(:,1), screen(:,2), 'bo');
 hold on
 pred = world * q; 
 plot(pred(:,1), pred(:,2), 'ro'); 
-if(type == 1)
-	save('calibration_mouse.mat','q','pm'); 
-elseif(type == 2)
-	save('calibration_opto.mat','q','pm'); 
-else
-	save('calibration.mat','q','pm'); 
-end
+save('calibration_opto.mat','q','pm'); 
 
 % turn off all targets
 for j=1:num_targets
@@ -160,6 +139,7 @@ end
 b5 = bmi5_mmap(b5);
 
 % set up affine matrix
+load('calibration_opto.mat'); 
 qp = q'; 
 q2 = eye(4); 
 q2(1:2, 1:2) = qp(1:2, 1:2); 
