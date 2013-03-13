@@ -1,11 +1,11 @@
 function [] = bmi5_calibrate_mouse() 
-global bmi5_in bmi5_out b5;
+global bmi5_in bmi5_out;
 
 cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
-num_targets = 16;
+num_targets = 9;
 snt = sqrt(num_targets);
 
 for j=1:num_targets
@@ -17,7 +17,7 @@ bmi5_cmd('make mouse finger');
 eval(bmi5_cmd('mmap'));
 
 % first ask for a set of points. 
-w = linspace(-0.6, 0.6, snt);
+w = linspace(-0.7, 0.7, snt);
 
 screen = zeros(num_targets, 4); 
 world = zeros(num_targets, 4); 
@@ -26,18 +26,13 @@ world(:,4) = 1;
 pm = zeros(3);
 pm = eye(3);% mouse control.
 
-
-
-
-
-
 i=1; 
 for yi = 1:snt
     for xi = 1:snt
 		x = w(xi); 
 		y = w(yi);
         s = strcat('target',num2str(i),'_');
-        b5.(strcat(s,'scale')) = [0.1 ; 0.1];
+        b5.(strcat(s,'scale')) = [0.05 ; 0.05];
         b5.(strcat(s,'color')) = [0; 1; 0; 1];
         b5.(strcat(s,'pos')) = [x ; y];
         b5.(strcat(s,'draw'))  = 1;
@@ -60,7 +55,7 @@ b5.tone_pan = 0;
 b5.tone_scale = 1;
 b5.tone_duration = 0.25;
 
-pause(10);
+pause(5);
 
 i=1;
 for yi = 1:snt
@@ -75,8 +70,9 @@ for yi = 1:snt
         b5.(strcat(s,'color')) = [1 0 0 1]; % red
         b5.tone_play_io = 1;
 		b5 = bmi5_mmap(b5); 
-		pause(2);
-        p = (pm * [b5.finger_o;0])'; 
+		pause(1.5);
+        b5 = bmi5_mmap(b5);
+        p = (pm * [b5.finger_sensors_o])'; 
 		world(i,1:3) = p(1:3);
 		i=i+1;
 	end
@@ -110,7 +106,7 @@ b5.cursor_draw = 1;
 b5 = bmi5_mmap(b5); 
 
 while(1)
-	p = pm * [b5.finger_o];
+	p = pm * [b5.finger_sensors_o];
 	b5.cursor_pos = p(1:2); 
 	b5 = bmi5_mmap(b5); 
 end
