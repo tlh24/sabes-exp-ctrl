@@ -622,6 +622,7 @@ public:
 		}
 		m_pp.clear(); 
 	}
+	virtual bool store(){ return false; } //override -- called below.
 	bool store(float* data){
 		//assumes there is m_nsensors * 3 floats in *data. 
 		m_time = gettime(); 

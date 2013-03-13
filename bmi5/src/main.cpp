@@ -1130,7 +1130,7 @@ int main(int argn, char** argc){
 	#else
 	gtk_window_set_title (GTK_WINDOW (window), "sabes experimental control *** DEBUG ***");	
 	#endif
-	gtk_window_set_default_size (GTK_WINDOW (window), g_renderOpView?800:260, 650);
+	gtk_window_set_default_size (GTK_WINDOW (window), g_renderOpView?800:290, 650);
 
 	paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_container_add (GTK_CONTAINER (window), paned);
