@@ -400,9 +400,10 @@ public:
 	}
 	virtual bool store(){
 		bool same = true; //delta compression.
-		if(nstored() > 0){
+		int n = nstored(); 
+		if(n > 0){
 			for(int i=0; i<m_size; i++)
-				same &= (m_stor[i] == (v_stor.back())[i]); 
+				same &= (m_stor[i] == v_stor[n-1][i]); 
 		} else same = false; 
 		if(!same){
 			m_time = gettime(); 

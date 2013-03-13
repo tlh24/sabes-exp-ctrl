@@ -1,7 +1,7 @@
 # The following can be set at the command line
 # ie: make DBG=true JACK=false
-DBG = false
-JACK = true
+DBG = true
+JACK = false
 
 CPP = g++
 CC  = gcc
@@ -45,6 +45,7 @@ bmi5: $(OBJS)
 	
 opto: bmi5 # enables packet-capture privelages on bmi5. 
 	sudo setcap cap_net_raw,cap_net_admin=eip bmi5
+	sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/gdb
 	
 glxgears: src/glxgears.c
 	$(CPP) -O3 -o $@ -lrt -lGL $<

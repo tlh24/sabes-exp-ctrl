@@ -208,14 +208,15 @@ class Shape : public Serialize {
 		array<unsigned char,4> color; 
 		for(int i=0; i<4; i++)
 			color[i] = floatToU8(m_color[i]); 
+		int n = nstored(); 
 		bool same = true; 
-		if(nstored() > 0){
-			same &= (m_draw == v_draw.back()); 
+		if(n > 0){
+			same &= (m_draw == v_draw[n-1]); 
 			for(int i=0; i<4; i++)
-				same &= (color[i] == (v_color.back())[i]); 
+				same &= (color[i] == (v_color[n-1])[i]); 
 			for(int i=0; i<2; i++){
-				same &= (m_scale[i] == (v_scale.back())[i]);
-				same &= (m_trans[i] == (v_trans.back())[i]); 
+				same &= (m_scale[i] == (v_scale[n-1])[i]);
+				same &= (m_trans[i] == (v_trans[n-1])[i]); 
 			}
 		} else same = false; 
 		if(!same){
@@ -466,11 +467,12 @@ public: //do something like the flow field common in the lab.
 		v_coherence.clear(); 
 	}
 	virtual bool store(){
+		int n = nstored(); 
 		bool same = true; 
-		if(nstored() > 0){
+		if(n > 0){
 			for(int i=0; i<2; i++)
-				same &= (m_vel[i] == (v_vel.back())[i]); 
-			same &= (m_coherence == v_coherence.back()); 
+				same &= (m_vel[i] == (v_vel[n-1])[i]); 
+			same &= (m_coherence == v_coherence[n-1]); 
 		} else same = false; 
 		if(!same){
 			same &= !Shape::store(); 
@@ -617,12 +619,13 @@ public:
 		clear(); 
 	}
 	virtual bool store(){
+		int n = nstored(); 
 		bool same = true; 
-		if(nstored() > 0){
+		if(n > 0){
 			for(int i=0; i<2; i++)
-				same &= (m_pos[i] == (v_pos.back())[i]); 
+				same &= (m_pos[i] == (v_pos[n-1])[i]); 
 			for(int i=0; i<4; i++)
-				same &= (m_color[i] == (v_color.back())[i]); 
+				same &= (m_color[i] == (v_color[n-1])[i]); 
 		} else same = false; 
 		if(!same){
 			same &= !VectorSerialize::store(); 
