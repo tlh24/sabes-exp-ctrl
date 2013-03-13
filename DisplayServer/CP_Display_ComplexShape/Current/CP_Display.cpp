@@ -26,7 +26,7 @@
 
 #define COM_THREAD_WAIT_MS 1000  // time to wait for threads to finish up
 
-char g_szVersion[] = "CP_Display: Ver 0.04  April 7th, 2008";
+char g_szVersion[] = "CP_Display: Ver 1.00  October 17th, 2011";
 char g_szAppTitile[] = "CP_Display";
 
 char x_szMutexName[] = "CP_Display_Application_Mutex";

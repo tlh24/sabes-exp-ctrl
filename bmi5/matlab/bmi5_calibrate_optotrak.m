@@ -1,8 +1,3 @@
-% function [] = bmi5_calibrate(type)
-% function [] = bmi5_calibrate(type)
-% type = 1 -> mouse control. 
-% type = 2 -> optotrak (downstairs)
-% anything else -> polhemus. 
 global bmi5_in bmi5_out b5;
 
 cd('/home/motorlab/sabes-exp-ctrl/bmi5/matlab');
@@ -21,7 +16,6 @@ bmi5_cmd('make circle cursor');
 
 bmi5_cmd('make optotrak finger 3'); %three sensors.
 
-
 % visibility rectangle. 
 bmi5_cmd('make square opto_visible');
 
@@ -36,24 +30,14 @@ screen(:,4) = 1;
 world(:,4) = 1; 
 pm = zeros(3); 
 
-if(type == 1)
-	pm = eye(3);% mouse control.
-elseif(type == 2)
-	% this matrix was arrived at by moving an optotrak emitter 
-	% randomly in the experimental plane, 
-	% then taking the PCA.  
-	pm = zeros(3); 
-	pm(1,:) = [1 0 1] * -0.5390; % positive to right.
-	pm(2,:) = [-1 0 1] * 3.4396; % positive forward. 
-	pm(3,:) = [0 -1 0]; % positive up (uncalibrated)
-else 
-    % In addition to permuting from the native polhemus
-    % axes to a more reasonable set of axes, this matrix
-    % handles the conversion to mm from cm (polhemus native units)
-    pm = [    0  -10    0
-              0    0  -10  
-            +10    0    0  ];
-end
+% this matrix was arrived at by moving an optotrak emitter 
+% randomly in the experimental plane, 
+% then taking the PCA.  
+pm = zeros(3); 
+pm(1,:) = [1 0 1] * -0.5390; % positive to right.
+pm(2,:) = [-1 0 1] * 3.4396; % positive forward. 
+pm(3,:) = [0 -1 0]; % positive up (uncalibrated)
+
 
 i=1; 
 for yi = 1:snt
@@ -72,7 +56,7 @@ end
 b5.cursor_scale = [5; 5]; % in mm
 b5.cursor_color = [1; 1; 1; 1]; 
 b5.cursor_pos   = [0; 0];
-b5.cursor_draw  = 1;
+b5.cursor_draw  = 0;
 
 b5.affine_m44 = eye(4); 
 b5.quadratic_m44 = zeros(4); 

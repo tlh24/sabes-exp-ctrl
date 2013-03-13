@@ -45,6 +45,7 @@ bmi5: $(OBJS)
 	
 opto: bmi5 # enables packet-capture privelages on bmi5. 
 	sudo setcap cap_net_raw,cap_net_admin=eip bmi5
+	sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/gdb
 	
 glxgears: src/glxgears.c
 	$(CPP) -O3 -o $@ -lrt -lGL $<
