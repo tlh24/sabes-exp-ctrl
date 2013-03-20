@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <gsl/gsl_fit.h>
 
 using namespace std; 
 class Serialize{
@@ -154,15 +155,23 @@ public:
 class PolhemusPredict {
 public:
 	float			m_s[8][3]; 	//last 8 sensor measurements. 
+	double		m_tfit[8];  //used in linear fit.
+	double		m_sfit[8]; 
+	double		m_fit[3][2]; //[0] = offset, [1] = estimate of velocity, native sensor units/sec. 
 	long double 	m_t[32]; 	//time of the last 32 measurements (rate should be static!)
-	int				m_ptr; 		//circluar, obvi.
+	long double		m_avg; //smoothed time of the last incoming sample.
+	int			m_ptr; 		//circluar, obvi.
+	int			m_nsmooth; //over how many samples to average; max 8;
 	
 	PolhemusPredict(){
 		for(int i=0; i<24; i++)
 			m_s[0][i] = 0.f; 
 		for(int i=0; i<32; i++)
 			m_t[i] = 0.0; 
+		for(int i=0; i<6; i++)
+			m_fit[0][i] = 0.0; 
 		m_ptr = 0; 
+		m_nsmooth = 6; 
 	}
 	~PolhemusPredict(){}
 	void add(long double time, float* s){
@@ -170,40 +179,50 @@ public:
 		for(int i=0; i<3; i++)
 			m_s[m_ptr & 7][i] = s[i]; 
 		m_ptr++; 
+		update(); 
 	}
-	void predict(long double time, float* s){
+	void update(){
+		//update the linear model used to predict position. 
 		//critical assumptions: stream is actually sampled at a constant rate, 
 		//even if it does not come in at a constant rate. 
-		// does not assume that argument time is on that interval. 
+		//also, this should be called in add() thread to prevent m_ptr contention.
 		int n = m_ptr; 
-		long double mean = m_t[(n-1)&31] - m_t[(n+2)&31]; //don't read m_ptr -- other thread may write.
-		mean /= 29; //mean period.
-		//calculate the time of the most recent sample (n-1) in terms of last 29 samples.
+		long double mean = m_t[(n-1)&31] - m_t[n&31];
+		mean /= 31; //mean period.
+		//calculate the time of the most recent sample (n-1) in terms of last 32 samples.
 		long double avg = 0; 
-		for(int i=0; i<30; i++)
+		for(int i=0; i<32; i++)
 			avg += m_t[(n-1-i)&31] + mean*i; 
-		avg /= 30; 
-		// calculate the velocity (units / sample, assuming constant sampling rate)
-		float vel[3]; 
-		for(int j=0; j<3; j++){
-			vel[j] = 0; 
-			for(int i=0; i<5; i++){
-				vel[j] += m_s[(n-1-i)&7][j] - m_s[(n-2-i)&7][j]; 
-			}
-			vel[j] /= 5; 
+		m_avg = avg / 32; 
+		//fit a line to the last 8 samples.
+		for(int j=0; j<m_nsmooth; j++)
+			m_tfit[j] = -1.0*mean*j; //relative to the most recent sample (avg). 
+		double cov00, cov01, cov11, sumsq; //ignore.
+		for(int i=0; i<3; i++){
+			for(int j=0; j<m_nsmooth; j++)
+				m_sfit[j] = m_s[(n-1-j)&7][i]; //relative to the most recent sample (avg). 
+			gsl_fit_linear(m_tfit, 1, m_sfit, 1, m_nsmooth, &(m_fit[i][0]), &(m_fit[i][1]),
+								&cov00, &cov01, &cov11, &sumsq);
 		}
-		if(mean > 0.001){
-			float dt = (float)((time - avg)/mean);  
-			for(int j=0; j<3; j++){
-				float here = 0.f; 
-				for(int i=0; i<5; i++)
-					here += m_s[(n-1-i)&7][j] + vel[j]*i; //more overeager noise suppression.
-				here /= 5; 
-				s[j] = here + vel[j]*dt; 
-			}
-		}else{
-			for(int i=0; i<3; i++) s[i] = 0.f;
+	}
+	void predict(long double time, float* s){
+		time -= m_avg; 
+		for(int i=0; i<3; i++){
+			s[i] = m_fit[i][0] + m_fit[i][1] * time; 
 		}
+	}
+	void test(){
+		float x[3]; 
+		for(int i=0; i<64; i++){
+			x[0] = x[1] = x[2] = (float)i;
+			add((long double)i / 2.5, x); 
+		}
+		for(int i=0; i<32; i++){
+			x[0] = x[1] = x[2] = (float)(i+64);
+			add((long double)(i+64) / 2.5, x); 
+		}
+		predict(96.0/2.5, x); 
+		printf("PolhemusPredict::test() should be 96, is %f\n", x[0]); 
 	}
 };
 
@@ -647,8 +666,8 @@ public:
 		} return string("none"); 
 	}
 	virtual double* mmapRead(double* d){
-		*d++ = m_time; 
-		getLoc(m_time, m_stor.data()); 
+		*d++ = m_time; //last time the sensors were read. 
+		getLoc(gettime(), m_stor.data()); //sample position now.
 		for(int i=0; i<3*m_nsensors; i++){
 			*d++ = m_stor[i]; //float->double.
 		}

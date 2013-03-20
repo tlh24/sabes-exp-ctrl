@@ -950,7 +950,7 @@ void* opto_thread(void* ){
 		printf("Optotrak: eth1 net %x mask %x\n", net, mask); 
 	}
 	/* Open the session in promiscuous mode */
-	handle = pcap_open_live(dev, 1024, 1, 10, errbuf); //second to last argument: timeout. 
+	handle = pcap_open_live(dev, 1024, 1, 5, errbuf); //second to last argument: timeout, ms
 	if (handle == NULL) {
 		fprintf(stderr, "Optotrak: Couldn't open device %s: %s\n", "eth1", errbuf);
 		fprintf(stderr, "\t\ttry 'make opto' to set permissions.\n"); 
@@ -1121,6 +1121,10 @@ int main(int argn, char** argc){
 	GtkWidget *da1, *da2, *paned, *v1, *frame;
 	
 	g_startTime = gettime(); 
+	
+	PolhemusPredict* pp = new PolhemusPredict();
+	pp->test(); 
+	delete(pp);
 	
 	gtk_init (&argn, &argc);
 
