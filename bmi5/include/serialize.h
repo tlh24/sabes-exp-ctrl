@@ -480,6 +480,110 @@ public:
 	}
 }; 
 
+//same as VectorSerialize, except two variables -- position and velocity e.g.
+//yea, copypasta.  sorry.
+template <class T> 
+class VectorSerialize2 : public Serialize {
+public:
+	int	m_size; 
+	int	m_type; 
+	double				m_time; 
+	vector<T> 			m_stor;
+	vector<T> 			m_stor2; 
+	vector<double>		v_time; 
+	vector<vector<T> > v_stor;
+	vector<vector<T> > v_stor2; 
+	T*		m_bs; 
+
+	VectorSerialize2(int size, int matiotype) : Serialize(){
+		m_size = size; 
+		m_type = matiotype; 
+		for(int i=0; i<size; i++){
+			m_stor.push_back((T)0);
+			m_stor2.push_back((T)0); 
+		}
+		m_bs = NULL;
+	}
+	~VectorSerialize2(){ 
+		clear(); 
+		free(m_bs);
+	}
+	virtual bool store(){
+		bool same = true; //delta compression.
+		int n = nstored(); 
+		if(n > 0){
+			for(int i=0; i<m_size; i++){ 
+				same &= (m_stor[i] == v_stor[n-1][i]);
+				same &= (m_stor2[i] == v_stor2[n-1][i]); 
+			}
+		} else same = false; 
+		if(!same){
+			m_time = gettime(); 
+			v_time.push_back(m_time); 
+			v_stor.push_back(m_stor);
+			v_stor2.push_back(m_stor2); 
+		}
+		return !same; 
+	}
+	virtual void clear(){
+		v_time.clear(); 
+		v_stor.clear();
+		v_stor2.clear(); 
+	}
+	virtual int nstored(){ return v_stor.size(); }
+	virtual string storeName(int indx){ 
+		switch(indx){
+			case 0: return m_name + string("time_o"); 
+			case 1: return m_name + string("v");
+			case 2: return m_name + string("v2"); 
+		} return string("none"); 
+	}
+	virtual int getStoreClass(int indx){ 
+		switch(indx){
+			case 0: return MAT_C_DOUBLE; 
+			case 1: case 2: return m_type;
+		} return 0; 
+	}
+	virtual void getStoreDims(int indx, size_t* dims){
+		switch(indx){
+			case 0: dims[0] = 1; dims[1] = 1; return; 
+			case 1: case 2: dims[0] = m_size; dims[1] = 1; return;
+		}
+	}
+	virtual void* getStore(int indx, int k){
+		//coalesce the memory -- <vector<vector>> is non-continuous in memory. 
+		if(indx == 0){
+			return (void*)&(v_time[k]); 
+		} else if(indx == 1 || indx == 2){
+			if(m_bs) free(m_bs); 
+			int n = nstored(); //atomic -- if we're not careful, may change during read!
+			m_bs = (T*)malloc(sizeof(T)*(n-k)*m_size); 
+			for(int i=0; i<n-k; i++){
+				if(indx == 1){
+					for(int j=0; j<m_size; j++)
+						m_bs[j + i*m_size] = v_stor[i+k][j]; 
+				}else{
+					for(int j=0; j<m_size; j++)
+						m_bs[j + i*m_size] = v_stor2[i+k][j]; 
+				}
+				
+			}
+			return (void*)(m_bs); 
+		} else return NULL;
+	}
+	virtual int numStores(){ return 3; }
+	virtual double* mmapRead(double* d){
+		*d++ = m_time; //when the vector was updated.
+		for(int i=0; i<m_size; i++){
+			m_stor[i] = (T)(*d++); 
+		}
+		for(int i=0; i<m_size; i++){
+			m_stor2[i] = (T)(*d++); 
+		}
+		return d; 
+	}
+}; 
+
 //class for sending float data to TDT -- 
 //exact protocol depends on the RCX file running on the RZ2.
 //class saves timing information for when the packet was sent. 
@@ -622,12 +726,12 @@ public:
 	float* data(){ return m_x.data(); }; 
 }; 
 
-class OptoSerialize : public VectorSerialize<float> {
+class OptoSerialize : public VectorSerialize2<float> {
 public:
 	int m_nsensors; //number of sensors. 
 	vector<PolhemusPredict*> m_pp; 
 	
-	OptoSerialize(int nsensors) : VectorSerialize(nsensors * 3, MAT_C_SINGLE){
+	OptoSerialize(int nsensors) : VectorSerialize2(nsensors * 3, MAT_C_SINGLE){
 		m_name = "optotrak_";
 		m_nsensors = nsensors; 
 		for(int i=0; i<m_nsensors; i++){
@@ -651,7 +755,11 @@ public:
 		for(int i=0; i<m_nsensors*3; i++){
 			m_stor[i] = data[i]; 
 		}
-		VectorSerialize::store(); 
+		for(int i=0; i<m_nsensors; i++){
+			for(int j=0; j<3; j++)
+				m_stor2[i*3+j] = m_pp[i]->m_fit[j][1]; //vel. 
+		}
+		VectorSerialize2::store(); 
 		return true; 
 	}
 	void getLoc(double now, float* out){
@@ -663,6 +771,7 @@ public:
 		switch(indx){
 			case 0: return m_name + string("time_o"); 
 			case 1: return m_name + string("sensors_o"); //default is input; override.
+			case 2: return m_name + string("sensorvel_o"); //default is input; override.
 		} return string("none"); 
 	}
 	virtual double* mmapRead(double* d){
@@ -670,6 +779,10 @@ public:
 		getLoc(gettime(), m_stor.data()); //sample position now.
 		for(int i=0; i<3*m_nsensors; i++){
 			*d++ = m_stor[i]; //float->double.
+		}
+		for(int i=0; i<m_nsensors; i++){
+			for(int j=0; j<3; j++)
+				*d++ = m_pp[i]->m_fit[j][1]; 
 		}
  		return d; 
 	}
