@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <gsl/gsl_fit.h>
 
 using namespace std; 
 class Serialize{
@@ -154,15 +155,23 @@ public:
 class PolhemusPredict {
 public:
 	float			m_s[8][3]; 	//last 8 sensor measurements. 
+	double		m_tfit[8];  //used in linear fit.
+	double		m_sfit[8]; 
+	double		m_fit[3][2]; //[0] = offset, [1] = estimate of velocity, native sensor units/sec. 
 	long double 	m_t[32]; 	//time of the last 32 measurements (rate should be static!)
-	int				m_ptr; 		//circluar, obvi.
+	long double		m_avg; //smoothed time of the last incoming sample.
+	int			m_ptr; 		//circluar, obvi.
+	int			m_nsmooth; //over how many samples to average; max 8;
 	
 	PolhemusPredict(){
 		for(int i=0; i<24; i++)
 			m_s[0][i] = 0.f; 
 		for(int i=0; i<32; i++)
 			m_t[i] = 0.0; 
+		for(int i=0; i<6; i++)
+			m_fit[0][i] = 0.0; 
 		m_ptr = 0; 
+		m_nsmooth = 6; 
 	}
 	~PolhemusPredict(){}
 	void add(long double time, float* s){
@@ -170,40 +179,50 @@ public:
 		for(int i=0; i<3; i++)
 			m_s[m_ptr & 7][i] = s[i]; 
 		m_ptr++; 
+		update(); 
 	}
-	void predict(long double time, float* s){
+	void update(){
+		//update the linear model used to predict position. 
 		//critical assumptions: stream is actually sampled at a constant rate, 
 		//even if it does not come in at a constant rate. 
-		// does not assume that argument time is on that interval. 
+		//also, this should be called in add() thread to prevent m_ptr contention.
 		int n = m_ptr; 
-		long double mean = m_t[(n-1)&31] - m_t[(n+2)&31]; //don't read m_ptr -- other thread may write.
-		mean /= 29; //mean period.
-		//calculate the time of the most recent sample (n-1) in terms of last 29 samples.
+		long double mean = m_t[(n-1)&31] - m_t[n&31];
+		mean /= 31; //mean period.
+		//calculate the time of the most recent sample (n-1) in terms of last 32 samples.
 		long double avg = 0; 
-		for(int i=0; i<30; i++)
+		for(int i=0; i<32; i++)
 			avg += m_t[(n-1-i)&31] + mean*i; 
-		avg /= 30; 
-		// calculate the velocity (units / sample, assuming constant sampling rate)
-		float vel[3]; 
-		for(int j=0; j<3; j++){
-			vel[j] = 0; 
-			for(int i=0; i<5; i++){
-				vel[j] += m_s[(n-1-i)&7][j] - m_s[(n-2-i)&7][j]; 
-			}
-			vel[j] /= 5; 
+		m_avg = avg / 32; 
+		//fit a line to the last 8 samples.
+		for(int j=0; j<m_nsmooth; j++)
+			m_tfit[j] = -1.0*mean*j; //relative to the most recent sample (avg). 
+		double cov00, cov01, cov11, sumsq; //ignore.
+		for(int i=0; i<3; i++){
+			for(int j=0; j<m_nsmooth; j++)
+				m_sfit[j] = m_s[(n-1-j)&7][i]; //relative to the most recent sample (avg). 
+			gsl_fit_linear(m_tfit, 1, m_sfit, 1, m_nsmooth, &(m_fit[i][0]), &(m_fit[i][1]),
+								&cov00, &cov01, &cov11, &sumsq);
 		}
-		if(mean > 0.001){
-			float dt = (float)((time - avg)/mean);  
-			for(int j=0; j<3; j++){
-				float here = 0.f; 
-				for(int i=0; i<5; i++)
-					here += m_s[(n-1-i)&7][j] + vel[j]*i; //more overeager noise suppression.
-				here /= 5; 
-				s[j] = here + vel[j]*dt; 
-			}
-		}else{
-			for(int i=0; i<3; i++) s[i] = 0.f;
+	}
+	void predict(long double time, float* s){
+		time -= m_avg; 
+		for(int i=0; i<3; i++){
+			s[i] = m_fit[i][0] + m_fit[i][1] * time; 
 		}
+	}
+	void test(){
+		float x[3]; 
+		for(int i=0; i<64; i++){
+			x[0] = x[1] = x[2] = (float)i;
+			add((long double)i / 2.5, x); 
+		}
+		for(int i=0; i<32; i++){
+			x[0] = x[1] = x[2] = (float)(i+64);
+			add((long double)(i+64) / 2.5, x); 
+		}
+		predict(96.0/2.5, x); 
+		printf("PolhemusPredict::test() should be 96, is %f\n", x[0]); 
 	}
 };
 
@@ -461,6 +480,110 @@ public:
 	}
 }; 
 
+//same as VectorSerialize, except two variables -- position and velocity e.g.
+//yea, copypasta.  sorry.
+template <class T> 
+class VectorSerialize2 : public Serialize {
+public:
+	int	m_size; 
+	int	m_type; 
+	double				m_time; 
+	vector<T> 			m_stor;
+	vector<T> 			m_stor2; 
+	vector<double>		v_time; 
+	vector<vector<T> > v_stor;
+	vector<vector<T> > v_stor2; 
+	T*		m_bs; 
+
+	VectorSerialize2(int size, int matiotype) : Serialize(){
+		m_size = size; 
+		m_type = matiotype; 
+		for(int i=0; i<size; i++){
+			m_stor.push_back((T)0);
+			m_stor2.push_back((T)0); 
+		}
+		m_bs = NULL;
+	}
+	~VectorSerialize2(){ 
+		clear(); 
+		free(m_bs);
+	}
+	virtual bool store(){
+		bool same = true; //delta compression.
+		int n = nstored(); 
+		if(n > 0){
+			for(int i=0; i<m_size; i++){ 
+				same &= (m_stor[i] == v_stor[n-1][i]);
+				same &= (m_stor2[i] == v_stor2[n-1][i]); 
+			}
+		} else same = false; 
+		if(!same){
+			m_time = gettime(); 
+			v_time.push_back(m_time); 
+			v_stor.push_back(m_stor);
+			v_stor2.push_back(m_stor2); 
+		}
+		return !same; 
+	}
+	virtual void clear(){
+		v_time.clear(); 
+		v_stor.clear();
+		v_stor2.clear(); 
+	}
+	virtual int nstored(){ return v_stor.size(); }
+	virtual string storeName(int indx){ 
+		switch(indx){
+			case 0: return m_name + string("time_o"); 
+			case 1: return m_name + string("v");
+			case 2: return m_name + string("v2"); 
+		} return string("none"); 
+	}
+	virtual int getStoreClass(int indx){ 
+		switch(indx){
+			case 0: return MAT_C_DOUBLE; 
+			case 1: case 2: return m_type;
+		} return 0; 
+	}
+	virtual void getStoreDims(int indx, size_t* dims){
+		switch(indx){
+			case 0: dims[0] = 1; dims[1] = 1; return; 
+			case 1: case 2: dims[0] = m_size; dims[1] = 1; return;
+		}
+	}
+	virtual void* getStore(int indx, int k){
+		//coalesce the memory -- <vector<vector>> is non-continuous in memory. 
+		if(indx == 0){
+			return (void*)&(v_time[k]); 
+		} else if(indx == 1 || indx == 2){
+			if(m_bs) free(m_bs); 
+			int n = nstored(); //atomic -- if we're not careful, may change during read!
+			m_bs = (T*)malloc(sizeof(T)*(n-k)*m_size); 
+			for(int i=0; i<n-k; i++){
+				if(indx == 1){
+					for(int j=0; j<m_size; j++)
+						m_bs[j + i*m_size] = v_stor[i+k][j]; 
+				}else{
+					for(int j=0; j<m_size; j++)
+						m_bs[j + i*m_size] = v_stor2[i+k][j]; 
+				}
+				
+			}
+			return (void*)(m_bs); 
+		} else return NULL;
+	}
+	virtual int numStores(){ return 3; }
+	virtual double* mmapRead(double* d){
+		*d++ = m_time; //when the vector was updated.
+		for(int i=0; i<m_size; i++){
+			m_stor[i] = (T)(*d++); 
+		}
+		for(int i=0; i<m_size; i++){
+			m_stor2[i] = (T)(*d++); 
+		}
+		return d; 
+	}
+}; 
+
 //class for sending float data to TDT -- 
 //exact protocol depends on the RCX file running on the RZ2.
 //class saves timing information for when the packet was sent. 
@@ -603,12 +726,12 @@ public:
 	float* data(){ return m_x.data(); }; 
 }; 
 
-class OptoSerialize : public VectorSerialize<float> {
+class OptoSerialize : public VectorSerialize2<float> {
 public:
 	int m_nsensors; //number of sensors. 
 	vector<PolhemusPredict*> m_pp; 
 	
-	OptoSerialize(int nsensors) : VectorSerialize(nsensors * 3, MAT_C_SINGLE){
+	OptoSerialize(int nsensors) : VectorSerialize2(nsensors * 3, MAT_C_SINGLE){
 		m_name = "optotrak_";
 		m_nsensors = nsensors; 
 		for(int i=0; i<m_nsensors; i++){
@@ -632,7 +755,11 @@ public:
 		for(int i=0; i<m_nsensors*3; i++){
 			m_stor[i] = data[i]; 
 		}
-		VectorSerialize::store(); 
+		for(int i=0; i<m_nsensors; i++){
+			for(int j=0; j<3; j++)
+				m_stor2[i*3+j] = m_pp[i]->m_fit[j][1]; //vel. 
+		}
+		VectorSerialize2::store(); 
 		return true; 
 	}
 	void getLoc(double now, float* out){
@@ -644,13 +771,18 @@ public:
 		switch(indx){
 			case 0: return m_name + string("time_o"); 
 			case 1: return m_name + string("sensors_o"); //default is input; override.
+			case 2: return m_name + string("sensorvel_o"); //default is input; override.
 		} return string("none"); 
 	}
 	virtual double* mmapRead(double* d){
-		*d++ = m_time; 
-		getLoc(m_time, m_stor.data()); 
+		*d++ = m_time; //last time the sensors were read. 
+		getLoc(gettime(), m_stor.data()); //sample position now.
 		for(int i=0; i<3*m_nsensors; i++){
 			*d++ = m_stor[i]; //float->double.
+		}
+		for(int i=0; i<m_nsensors; i++){
+			for(int j=0; j<3; j++)
+				*d++ = m_pp[i]->m_fit[j][1]; 
 		}
  		return d; 
 	}

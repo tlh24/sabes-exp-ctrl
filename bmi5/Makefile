@@ -28,7 +28,7 @@ ifeq ($(strip $(JACK)),true)
 	OBJS += ../../myopen/common_host/jacksnd.o
 endif
 	
-GLIBS = gtk+-3.0
+GLIBS = gtk+-3.0 gsl
 GTKFLAGS = `pkg-config --cflags $(GLIBS) `
 GTKLD = `pkg-config --libs $(GLIBS) `
 
