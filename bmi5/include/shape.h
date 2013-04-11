@@ -604,12 +604,15 @@ public:
 class DisplayText : public VectorSerialize<char> {
 public: 
 	string	m_text; 
+	char		m_draw; 
 	array<float,2>	m_pos; //double so the comparisons work properly.
+	vector<char> v_draw; 
 	array<unsigned char,4>	m_color; 
 	vector<array<float,2>> v_pos;
 	vector<array<unsigned char,4>> v_color; 
 	
 	DisplayText(int size) : VectorSerialize(size, MAT_C_INT8){
+		m_draw = 1; 
 		m_text = string("test!"); 
 		m_pos[0] = 0; m_pos[1] = 0; 
 		for(int i=0; i<4; i++)
@@ -622,6 +625,7 @@ public:
 		int n = nstored(); 
 		bool same = true; 
 		if(n > 0){
+			same &= (m_draw == v_draw[n-1]); 
 			for(int i=0; i<2; i++)
 				same &= (m_pos[i] == (v_pos[n-1])[i]); 
 			for(int i=0; i<4; i++)
@@ -630,6 +634,7 @@ public:
 		if(!same){
 			same &= !VectorSerialize::store(); 
 			if(!same){
+				v_draw.push_back(m_draw); 
 				v_pos.push_back(m_pos); 
 				v_color.push_back(m_color); 
 			}
@@ -638,36 +643,42 @@ public:
 	} 
 	virtual void clear(){
 		VectorSerialize::clear();  
+		v_draw.clear(); 
 		v_pos.clear(); 
 		v_color.clear(); 
 	}
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("pos");
-			case 1: return m_name + string("color"); 
-		} return VectorSerialize::storeName(indx - 2); 
+			case 0: return m_name + string("draw");
+			case 1: return m_name + string("pos");
+			case 2: return m_name + string("color"); 
+		} return VectorSerialize::storeName(indx - 3); 
 
 	}
 	virtual int getStoreClass(int indx){
 		switch(indx){
-			case 0: return MAT_C_SINGLE;
-			case 1: return MAT_C_UINT8; 
-		} return VectorSerialize::getStoreClass(indx - 2); 
+			case 0: return MAT_C_INT8;
+			case 1: return MAT_C_SINGLE;
+			case 2: return MAT_C_UINT8; 
+		} return VectorSerialize::getStoreClass(indx - 3); 
 	}
 	virtual void getStoreDims(int indx, size_t* dims){
 		switch(indx){
-			case 0: dims[0] = 2; dims[1] = 1; return;
-			case 1: dims[0] = 4; dims[1] = 1; return; 
-		} return VectorSerialize::getStoreDims(indx - 2, dims); 
+			case 0: dims[0] = 1; dims[1] = 1; return;
+			case 1: dims[0] = 2; dims[1] = 1; return;
+			case 2: dims[0] = 4; dims[1] = 1; return; 
+		} return VectorSerialize::getStoreDims(indx - 3, dims); 
 	}
 	virtual void* getStore(int indx, int i){ 
 		switch(indx){
-			case 0: return (void*)&((v_pos[i])[0]);
-			case 1: return (void*)&((v_color[i])[0]); 
-		} return VectorSerialize::getStore(indx - 2, i);
+			case 0: return (void*)&(v_draw[i]);
+			case 1: return (void*)&((v_pos[i])[0]);
+			case 2: return (void*)&((v_color[i])[0]); 
+		} return VectorSerialize::getStore(indx - 3, i);
 	}
-	virtual int numStores(){return VectorSerialize::numStores() + 2;}
+	virtual int numStores(){return VectorSerialize::numStores() + 3;}
 	virtual double* mmapRead(double *d){
+		m_draw = *d++ > 0.0 ? 1 : 0; 
 		for(int i=0; i<2; i++)
 			m_pos[i] = *d++;
 		for(int i=0; i<4; i++)
@@ -681,23 +692,25 @@ public:
 		return d; 
 	}
 	virtual void draw(int display, float ar){
-		//need to convert world coords to screen. 
-		float xar = ar < 1.f ? ar : 1.f; 
-		float yar = ar > 1.f ? 1.f/ar : 1.f; 
-		float in[4], out[4]; 
-		for(int i=0; i<4; i++){
-			in[i] = out[i] = 0.f; 
-		}
-		in[0] = m_pos[0]*xar; in[1] = m_pos[1]*yar; 
-		float* aff = g_affine44->data(); //in matlab/openGL row major order.
-		for(int r=0; r<4; r++){
-			for(int c=0; c<4; c++){
-				out[r] += aff[r+4*c] * in[c]; 
+		if(m_draw){
+			//need to convert world coords to screen. 
+			float xar = ar < 1.f ? ar : 1.f; 
+			float yar = ar > 1.f ? 1.f/ar : 1.f; 
+			float in[4], out[4]; 
+			for(int i=0; i<4; i++){
+				in[i] = out[i] = 0.f; 
 			}
+			in[0] = m_pos[0]*xar; in[1] = m_pos[1]*yar; 
+			float* aff = g_affine44->data(); //in matlab/openGL row major order.
+			for(int r=0; r<4; r++){
+				for(int c=0; c<4; c++){
+					out[r] += aff[r+4*c] * in[c]; 
+				}
+			}
+			glColor4f(m_color[0], m_color[1], m_color[2], m_color[3]);
+			glRasterPos2f(out[0], out[1]); 
+			glPrint(m_text.c_str(), display); 
 		}
-		glColor4f(m_color[0], m_color[1], m_color[2], m_color[3]);
-		glRasterPos2f(out[0], out[1]); 
-		glPrint(m_text.c_str(), display); 
 	}
 };
 #endif

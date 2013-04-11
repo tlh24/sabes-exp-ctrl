@@ -26,3 +26,22 @@ b5.string_pos   = [-0.5 -0.5];
 
 b5 = bmi5_mmap(b5);
 
+<<<<<<< HEAD
+=======
+% test 'draw' toggle. 
+pause(1);
+
+b5.text_draw = 0; 
+b5 = bmi5_mmap(b5);
+pause(1);
+
+b5.words_draw = 0; 
+b5.text_draw = 1; 
+b5 = bmi5_mmap(b5);
+pause(1);
+
+b5.string_draw = 0; 
+b5.words_draw = 1; 
+b5 = bmi5_mmap(b5);
+pause(1);
+>>>>>>> 902f13a19edded1ab9961570262266eff365bcc8
