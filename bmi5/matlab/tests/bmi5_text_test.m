@@ -25,3 +25,4 @@ b5.string_color = [0 1 0 1];
 b5.string_pos   = [-0.5 -0.5]; 
 
 b5 = bmi5_mmap(b5);
+

@@ -72,7 +72,7 @@ b5.opto_visible_scale = [1.8 1.8];
 b5.opto_visible_color = [1 0 0 0.3];
 b5.opto_visible_draw = 0; 
 
-pause(10);
+pause(30);
 
 i=1;
 for yi = 1:snt
@@ -88,7 +88,7 @@ for yi = 1:snt
         b5.tone_play_io = 1;
 		b5 = bmi5_mmap(b5); 
 		time_start = b5.time_o; 
-		while(b5.time_o - time_start < 2.5 || b5.opto_visible_draw == 1)
+		while(b5.time_o - time_start < 5 || b5.opto_visible_draw == 1)
 			b5 = bmi5_mmap(b5); 
 			% update visibility.
 			if(sum(abs(b5.finger_sensors_o(1:3))) > 1e6)
