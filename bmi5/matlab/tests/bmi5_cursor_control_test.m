@@ -27,7 +27,8 @@ b5.affine_m44 = q2;
 b5 = bmi5_mmap(b5); 
 
 while(1)
-    p = pm * b5.finger_sensors_o; 
+%     p = pm * b5.finger_sensors_o; 
+    p = b5.finger_sensors_o; 
     b5.cursor_pos = p(1:2); 
     b5 = bmi5_mmap(b5);
 end

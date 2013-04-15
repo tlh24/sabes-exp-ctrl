@@ -1,11 +1,11 @@
 function [] = bmi5_calibrate_polhemus()
 global bmi5_in bmi5_out;
 
-cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
+cd('/home/motorlab/sabes-exp-ctrl/bmi5/matlab');
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
-num_targets = 25;
+num_targets = 16;
 snt = sqrt(num_targets);
 
 %bmi5_cmd('delete_all');
@@ -76,7 +76,7 @@ for yi = 1:snt
         b5.(strcat(s,'color')) = [1 0 0 1]; % red
         b5.tone_play_io = 1;
 		b5 = bmi5_mmap(b5); 
-		pause(1);
+		pause(3);
         b5 = bmi5_mmap(b5);
         p = (pm * [b5.finger_sensors_o])'; 
 		world(i,1:3) = p(1:3);

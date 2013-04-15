@@ -66,6 +66,8 @@ using namespace boost;
 #define BMI5_IN_FIFO	"/tmp/bmi5_in.fifo"
 #define BMI5_OUT_FIFO	"/tmp/bmi5_out.fifo"
 
+#define SERIAL_PORT "/dev/ttyS0"
+
 double 		g_frameRate = 0.0; 
 long double	g_lastFrame = 0.0; 
 int			g_frame = 0;
@@ -807,7 +809,7 @@ void* polhemus_thread(void* ){
 	
 	unsigned char buf[BUF_SIZE];
 	int count, start, len, i;
-	string deviceName = {"/dev/ttyS1"}; 
+	string deviceName = {SERIAL_PORT}; 
 	
 	//init the communication obj.
 	polhemus* pol = new polhemus(); 
