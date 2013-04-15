@@ -226,88 +226,6 @@ public:
 	}
 };
 
-// this one's a bit different, 
-// since the polhemus thread runs *asynchronously* from the display thread.
-// ideally we want to keep an estimate of velocity, and forward-project position
-// to prevent temporal noise from coupling into spatial noise. 
-class PolhemusSerialize : public Serialize {
-public: 
-	PolhemusPredict*	m_pp; 
-	array<float,3>		m_sensors; //these here for copying to mmap.
-	double				m_time;
-	vector<array<float,3>> v_sensors; 
-	vector<double>	v_time; 
-	
-	PolhemusSerialize() : Serialize() {
-		m_name = "polhemus_"; 
-		m_sensors[0] = m_sensors[1] = m_sensors[2] = 0.0; 
-		m_time = 0; 
-		m_pp = new PolhemusPredict(); 
-	}
-	~PolhemusSerialize(){ clear(); delete m_pp;}
-	bool store(float* data){ //called after serial data reception.
-		double time = gettime(); 
-		m_pp->add(time, data); 
-		m_time = time; 
-		v_time.push_back(m_time); 
-		for(int i=0; i<3; i++)
-			m_sensors[i] = data[i]; 
-		v_sensors.push_back(m_sensors); 
-		return true;
-	}
-	void update(float* data){ //used for status, etc -- does not store anything in the vectors.
-		for(int i=0; i<3; i++)
-			m_sensors[i] = data[i]; 
-		m_pp->add(gettime(), data); 
-	}
-	void getLoc(double now, float* out){
-		m_pp->predict(now, out); 
-	}
-	virtual void clear(){
-		v_sensors.clear(); 
-		v_time.clear(); 
-	}
-	virtual bool store(){
-		//printf("error: you must call store(float*)\n"); 
-		return false;
-	}
-	virtual int nstored(){return v_sensors.size();}
-	virtual string storeName(int indx){
-		switch(indx){
-			case 0: return m_name + string("sensors_o"); 
-			case 1: return m_name + string("time_o"); 
-		} return string{"none"};
-	}
-	virtual int getStoreClass(int indx){
-		switch(indx){
-			case 0: return MAT_C_SINGLE; 
-			case 1: return MAT_C_DOUBLE; 
-		} return 0; 
-	}
-	virtual void getStoreDims(int indx, size_t* dims){
-		switch(indx){
-			case 0: dims[0] = 3; dims[1] = 1; return; 
-			case 1: dims[0] = 1; dims[1] = 1; return; 
-		}
-	}
-	virtual void* getStore(int indx, int i){
-		switch(indx){
-			case 0: return (void*)&(v_sensors[i]); 
-			case 1: return (void*)&(v_time[i]); 
-		} return NULL; 
-	}
-	virtual int numStores(){return 2;}
-	virtual double* mmapRead(double* d){
-		float out[3]; 
-		double time = gettime(); 
-		getLoc(time, out); // this will change on every update, so no delta compression.
-		for(int i=0; i<3; i++){
-			*d++ = out[i]; 
-		}
-		*d++ = time; 
- 		return d; 
-	}
-}; 
 
 class ToneSerialize : public Serialize {
 	vector<double> v_time; 
@@ -724,6 +642,99 @@ public:
 		return d; 
 	}
 	float* data(){ return m_x.data(); }; 
+}; 
+// this one's a bit different, 
+// since the polhemus thread runs *asynchronously* from the display thread.
+// ideally we want to keep an estimate of velocity, and forward-project position
+// to prevent temporal noise from coupling into spatial noise. 
+class PolhemusSerialize : public Serialize {
+public: 
+	PolhemusPredict*	m_pp; 
+	double				m_time;
+	array<float,3>		m_sensors; //these here for copying to mmap.
+	array<float,3>		m_vel; 
+	vector<double>		v_time; 
+	vector<array<float,3>> v_sensors;
+	vector<array<float,3>> v_vel; 
+	
+	PolhemusSerialize() : Serialize() {
+		m_name = "polhemus_"; 
+		m_sensors[0] = m_sensors[1] = m_sensors[2] = 0.0;
+		m_vel[0] = m_vel[1] = m_vel[2] = 0.0; 
+		m_time = 0; 
+		m_pp = new PolhemusPredict(); 
+	}
+	~PolhemusSerialize(){ clear(); delete m_pp;}
+	bool store(float* data){ //called after serial data reception; always store.
+		double time = gettime(); 
+		m_pp->add(time, data); 
+		m_time = time; 
+		v_time.push_back(m_time); 
+		update(data); //copies into member variables.
+		v_sensors.push_back(m_sensors); 
+		v_vel.push_back(m_vel); 
+		return true;
+	}
+	void update(float* data){ //used for status, etc -- does not store anything in the vectors.
+		for(int i=0; i<3; i++)
+			m_sensors[i] = data[i]; 
+		m_pp->add(gettime(), data); 
+		for(int i=0; i<3; i++) //copy the velocity.
+			m_vel[i] = m_pp->m_fit[i][1]; 
+	}
+	void getLoc(double now, float* out){
+		m_pp->predict(now, out); 
+	}
+	virtual void clear(){
+		v_sensors.clear(); 
+		v_vel.clear(); 
+		v_time.clear(); 
+	}
+	virtual bool store(){
+		//printf("error: you must call store(float*)\n"); 
+		return false;
+	}
+	virtual int nstored(){return v_sensors.size();}
+	virtual string storeName(int indx){
+		switch(indx){
+			case 0: return m_name + string("time_o"); 
+			case 1: return m_name + string("sensors_o");
+			case 2: return m_name + string("sensorvel_o"); 
+		} return string{"none"};
+	}
+	virtual int getStoreClass(int indx){
+		switch(indx){
+			case 0: return MAT_C_DOUBLE; 
+			case 1: return MAT_C_SINGLE;
+			case 2: return MAT_C_SINGLE; 
+		} return 0; 
+	}
+	virtual void getStoreDims(int indx, size_t* dims){
+		switch(indx){
+			case 0: dims[0] = 1; dims[1] = 1; return; 
+			case 1: dims[0] = 3; dims[1] = 1; return; 
+			case 2: dims[0] = 3; dims[1] = 1; return; 
+		}
+	}
+	virtual void* getStore(int indx, int i){
+		switch(indx){
+			case 0: return (void*)&(v_time[i]); 
+			case 1: return (void*)&(v_sensors[i]);
+			case 2: return (void*)&(v_vel[i]); 
+		} return NULL; 
+	}
+	virtual int numStores(){return 3;}
+	virtual double* mmapRead(double* d){
+		float out[3]; 
+		double time = gettime(); 
+		*d++ = time; 
+		getLoc(time, out); // this will change on every update, so no delta compression.
+		for(int i=0; i<3; i++)
+			*d++ = out[i]; 
+		for(int i=0; i<3; i++)
+			*d++ = m_vel[i]; // n.b: not interpolated. 
+ 		return d; 
+	}
 }; 
 
 class OptoSerialize : public VectorSerialize2<float> {
