@@ -188,6 +188,7 @@ class Shape : public Serialize {
 				glBindVertexArray(m_vao[display]);
 				glDrawArrays(m_drawmode, 0, m_n);  
 				glBindVertexArray(0);
+				glUseProgram(0); 
 			}
 		}
 	}

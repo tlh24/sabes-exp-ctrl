@@ -1,7 +1,7 @@
 # The following can be set at the command line
 # ie: make DBG=true JACK=false
-DBG = true
-JACK = false
+DBG = false
+JACK = true
 
 CPP = g++
 CC  = gcc
