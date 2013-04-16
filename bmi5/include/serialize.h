@@ -663,6 +663,7 @@ public:
 		m_vel[0] = m_vel[1] = m_vel[2] = 0.0; 
 		m_time = 0; 
 		m_pp = new PolhemusPredict(); 
+		m_pp->m_nsmooth = 8; 
 	}
 	~PolhemusSerialize(){ clear(); delete m_pp;}
 	bool store(float* data){ //called after serial data reception; always store.
@@ -670,8 +671,11 @@ public:
 		m_pp->add(time, data); 
 		m_time = time; 
 		v_time.push_back(m_time); 
-		update(data); //copies into member variables.
+		for(int i=0; i<3; i++)
+			m_sensors[i] = data[i]; 
 		v_sensors.push_back(m_sensors); 
+		for(int i=0; i<3; i++) //copy the velocity.
+			m_vel[i] = m_pp->m_fit[i][1]; 
 		v_vel.push_back(m_vel); 
 		return true;
 	}
