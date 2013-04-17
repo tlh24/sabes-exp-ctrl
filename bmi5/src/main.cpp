@@ -293,7 +293,11 @@ static gboolean refresh (gpointer ){
 	string s = g_tsc->getInfo(); 
 	gtk_label_set_text(GTK_LABEL(g_timeLabel), s.c_str()); 
 	char str[256];
-	size_t n = matlabFileSize(g_objs); 
+	size_t n = 0; 
+	if(pthread_mutex_trylock(&mutex_gobjs) == 0){
+		n = matlabFileSize(g_objs); //no problem if it's locked elsewhere; this is just GUI. 
+		pthread_mutex_unlock(&mutex_gobjs); 
+	}
 	snprintf(str, 256, "time:\t%.1f ms (mean)\n\t\t%.1f ms (last)\nfile size:\t%.2f MB", 
 				g_matlabTimer.meanTime()*1000.0,
 				g_matlabTimer.lastTime()*1000.0, 
@@ -528,7 +532,6 @@ void* mmap_thread(void*){
 							beg++;
 						}
 					}
-					nchars &= (0x1ff ^ 7); 
 					DisplayText* x = new DisplayText(nchars); 
 					makeConf(x, name); 
 				} else if ((*beg) == string("tone")) {
@@ -686,6 +689,10 @@ void* mmap_thread(void*){
 			}
 			else if(*beg == string("delete_all")){
 				printf("deleting all objects\n"); 
+				//prevent dangling pointers -- these all can be deleted through g_objs
+				if(g_polhemus) g_polhemus = 0; 
+				if(g_mouse) g_mouse = 0; 
+				if(g_opto) g_opto = 0; 
 				for(unsigned int i=0; i<g_objs.size(); i++){
 					delete g_objs[i];
 				}
@@ -723,9 +730,10 @@ void* mmap_thread(void*){
 				resp += {"\tmake stars <name> <num stars>\n"};
 				resp += {"\tmake text <name> <nchars>\n"}; 
 				resp += {"\t\tDisplays text on the screen.\n"};
-				resp += {"\t\tnchars must be a multipe of 8\n"};
-				resp += {"\t\t<name>_str in b5 structure MUST NOT CHANGE SIZE.\n"};
-				resp += {"\t\te.g. you cannot do b5.text_str = 'something';\n"}; 
+				resp += {"\t\tnchars should be less than 256\n"};
+				resp += {"\t\t<name>_v in b5 structure MUST NOT CHANGE SIZE.\n"};
+				resp += {"\t\te.g. you cannot only do b5.text_v = 'something';\n"}; 
+				resp += {"\t\tdo: b5.text_v = [double(msg) zeros(1,nchars-length(msg))]';"};
 				resp += {"\tmake tone <name>\n"};
 				resp += {"\t\tmake a tone generator\n"}; 
 				resp += {"\tmake store <type> <size> <name>\n"};
@@ -1136,14 +1144,14 @@ int main(int argn, char** argc){
 	#else
 	gtk_window_set_title (GTK_WINDOW (window), "sabes experimental control *** DEBUG ***");	
 	#endif
-	gtk_window_set_default_size (GTK_WINDOW (window), g_renderOpView?800:290, 650);
+	gtk_window_set_default_size (GTK_WINDOW (window), g_renderOpView?800:270, 650);
 
 	paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_container_add (GTK_CONTAINER (window), paned);
 
 	//left: gui etc. 
 	v1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_widget_set_size_request(GTK_WIDGET(v1), 200, 650);
+	gtk_widget_set_size_request(GTK_WIDGET(v1), 270, 650);
 	g_timeLabel = gtk_label_new("time: "); 
 	gtk_container_add (GTK_CONTAINER (v1), g_timeLabel );
 	
