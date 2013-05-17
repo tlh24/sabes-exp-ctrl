@@ -333,16 +333,11 @@ static gboolean refresh (gpointer ){
 }
 string getMmapStructure(){
 	std::stringstream oss;
-	char wd[4096];
-	if (getcwd(wd, 4096) == NULL) {
-		printf("error: cwd is too long to fit in buffer!");
-		exit(1);
-	}
-	oss << "% mmap structure (pass to bmi5_mmap())\n"; 
-	oss << "mex -O " << wd << "/matlab/bmi5_mmap.cpp % to make sure you have the latest version.\n"; 
+	oss << "% mmap structure (pass to bmi5_mmap())\n";
+	oss << "mex -O " << g_basedirname << "/matlab/bmi5_mmap.cpp % to make sure you have the latest version.\n";
 	oss << "clear b5; \n"; 
 	for(unsigned int i=0; i<g_objs.size(); i++){
-		oss << g_objs[i]->getStructInfo(); 
+		oss << g_objs[i]->getStructInfo();
 	}
 	return oss.str();
 }
@@ -778,7 +773,7 @@ void* backup_thread(void*){
 	char dirname[256]; 
 	int i = 1; 
 	while(found){
-		snprintf(dirname, 256, "%d-%d-%d_%04d", tm.tm_year+1900, 
+		snprintf(dirname, 256, "/tmp/%d-%d-%d_%04d", tm.tm_year+1900, 
 					tm.tm_mon+1, tm.tm_mday, i); //maybe should have a prefix here?
 		struct stat st; 
 		int err = stat(dirname, &st);
