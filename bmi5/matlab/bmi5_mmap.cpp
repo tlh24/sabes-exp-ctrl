@@ -1,6 +1,6 @@
 #include <mex.h>
 #include <string.h>
-#include "../../../myopen/common_host/mmaphelp.h"
+#include "mmaphelp.h" // expects to be installed in e.g. /usr/local/include
 
 #define BMI5_CTRL_MMAP	"/tmp/bmi5_control.mmap"
 #define BMI5_IN_FIFO	"/tmp/bmi5_in.fifo"
