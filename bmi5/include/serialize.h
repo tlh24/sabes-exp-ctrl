@@ -186,7 +186,8 @@ public:
 		//critical assumptions: stream is actually sampled at a constant rate, 
 		//even if it does not come in at a constant rate. 
 		//also, this should be called in add() thread to prevent m_ptr contention.
-		int n = m_ptr; 
+		int n = m_ptr;
+		if (n < 4) return; 
 		long double mean = m_t[(n-1)&31] - m_t[n&31];
 		mean /= 31; //mean period.
 		//calculate the time of the most recent sample (n-1) in terms of last 32 samples.
