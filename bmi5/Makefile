@@ -5,6 +5,7 @@ JACK = true
 
 CPP = g++
 CC  = gcc
+TARGET = /usr/local/bin
 
 OBJS := src/main.o src/tdt_udp.o src/glInfo.o src/glFont.o src/polhemus.o \
 	src/writematlab.o ../../myopen/common_host/gettime.o
@@ -57,3 +58,15 @@ deps:
 	libgtkglext1-dev freeglut3-dev libmatio-dev libusb-1.0-0-dev libglew-dev \
 	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl \
 	libjack-jackd2-dev libpcap-dev winbind
+
+install:
+	install -d $(TARGET)
+	install bmi5 -t $(TARGET)
+	install -d $(TARGET)/glsl
+	install glsl/fragment.glsl -t $(TARGET)/glsl
+	install glsl/vertex.glsl -t $(TARGET)/glsl
+	install glsl/vertex_flatcolor.glsl -t $(TARGET)/glsl
+	install -d $(TARGET)/matlab
+	install matlab/bmi5_mmap.cpp -t $(TARGET)/matlab
+	install -d /usr/local/include
+	install ../../myopen/common_host/mmaphelp.h -t /usr/local/include
