@@ -4,7 +4,7 @@
 
 extern Matrix44Serialize*	g_affine44; //used for translating world->screen coordinates.
 extern Matrix44Serialize*	g_quadratic44;
-
+extern string 				g_basedirname;
 
 #define PI 3.141592653589793
 class Shape : public Serialize {
@@ -121,7 +121,9 @@ class Shape : public Serialize {
 		}
 	}
 	virtual void makeShaders(int index){
-		makeShadersNamed(index, "vertex_flatcolor.glsl", "fragment.glsl"); 
+		string vertex   = g_basedirname + "/glsl/" + "vertex_flatcolor.glsl";
+		string fragment = g_basedirname + "/glsl/" + "fragment.glsl";
+		makeShadersNamed(index, vertex.c_str(), fragment.c_str()); 
 	}
 	virtual void fill(float* v){
 		for(int i=0; i<m_n; i++){
@@ -365,7 +367,9 @@ public: //do something like the flow field common in the lab.
 		m_drawmode = GL_POINTS; 
 	}
 	virtual void makeShaders(int index){
-		makeShadersNamed(index, "vertex.glsl", "fragment.glsl"); 
+		string vertex   = g_basedirname + "/glsl/" + "vertex.glsl";
+		string fragment = g_basedirname + "/glsl/" + "fragment.glsl";
+		makeShadersNamed(index, vertex.c_str(), fragment.c_str()); 
 	}
 	virtual void configure(int display){
 		if(m_needConfig[display]){

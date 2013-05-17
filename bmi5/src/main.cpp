@@ -59,6 +59,9 @@
 #include "../optotrak_sniff/etherstruct.h"
 #include "glFont.h"
 
+#include "fenv.h" // for debugging nan problems
+#include "libgen.h"
+
 using namespace std;
 using namespace boost;
 
@@ -108,6 +111,8 @@ vector<Serialize*> 	g_objs; //container for each of these, and more!
 pthread_mutex_t		mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
 pthread_mutex_t		mutex_gobjs; 
 long double			g_nextVsyncTime = -1; 
+
+string 				g_basedirname;
 
 //forward decl.
 void gobjsInit(); 
@@ -1126,6 +1131,23 @@ void gobjsInit(){
 }
 
 int main(int argn, char** argc){
+
+#ifdef DEBUG
+   //feenableexcept(FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW);  // Enable (some) floating point exceptions
+   feenableexcept(FE_INVALID|FE_OVERFLOW);  // Enable (some) floating point exceptions
+#endif
+
+	char linkname[4096];
+	char * dname;
+	// get directory of current exe
+		ssize_t r = readlink("/proc/self/exe", linkname, 4096);
+		if (r < 0) {
+    	perror("/proc/self/exe");
+    	exit(EXIT_FAILURE);
+	}
+	dname = dirname(linkname);
+	g_basedirname = dname;
+
 	//setup a window with openGL. 
 	GtkWidget *window;
 	GtkWidget *da1, *da2, *paned, *v1, *frame;
