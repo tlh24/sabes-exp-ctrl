@@ -14,11 +14,13 @@ class Shape : public Serialize {
 		unsigned int m_vao[2]; 
 		unsigned int m_vbo[2]; 
 		unsigned int m_drawmode; 
+		double		m_time; 
 		char			m_draw; 
 		GLuint 		m_program[2]; 
 		array<float,4>	m_color;
 		array<float,2> m_scale; 
 		array<float,2> m_trans;
+		vector<double> v_time; 
 		vector<char> v_draw; 
 		vector<array<unsigned char,4>> v_color; 
 		vector<array<float,2>> v_scale; 
@@ -203,6 +205,7 @@ class Shape : public Serialize {
 		return (unsigned char)in; 
 	}
 	virtual void clear(){
+		v_time.clear(); 
 		v_color.clear();
 		v_scale.clear(); 
 		v_trans.clear(); 
@@ -223,6 +226,7 @@ class Shape : public Serialize {
 			}
 		} else same = false; 
 		if(!same){
+			v_time.push_back(m_time); 
 			v_draw.push_back(m_draw); 
 			v_color.push_back(color);
 			v_scale.push_back(m_scale); 
@@ -230,43 +234,49 @@ class Shape : public Serialize {
 		}
 		return !same; 
 	}
-	virtual int nstored(){ return v_color.size(); }
+	virtual int nstored(){ return v_time.size(); }
 	virtual string storeName(int indx){
 		switch(indx){
-			case 0: return m_name + string("draw"); 
-			case 1: return m_name + string("color");
-			case 2: return m_name + string("scale");
-			case 3: return m_name + string("pos");
+			case 0: return m_name + string("time_o"); 
+			case 1: return m_name + string("draw"); 
+			case 2: return m_name + string("color");
+			case 3: return m_name + string("scale");
+ 			case 4: return m_name + string("pos");
 		} return string("none"); 
 	}
 	virtual int getStoreClass(int indx){
 		switch(indx){ 
-			case 0: return MAT_C_INT8; 
-			case 1: return MAT_C_UINT8;
-			case 2: return MAT_C_SINGLE;
+			case 0: return MAT_C_DOUBLE; 
+			case 1: return MAT_C_INT8; 
+			case 2: return MAT_C_UINT8;
 			case 3: return MAT_C_SINGLE;
+			case 4: return MAT_C_SINGLE;
 		} return 0; 
 	}
 	virtual void getStoreDims(int indx, size_t* dims){
 		switch(indx){
 			case 0: dims[0] = 1; dims[1] = 1; return; 
-			case 1: dims[0] = 4; dims[1] = 1; return; 
-			case 2: dims[0] = 2; dims[1] = 1; return;
-			case 3: dims[0] = 2; dims[1] = 1; return; 
+			case 1: dims[0] = 1; dims[1] = 1; return; 
+			case 2: dims[0] = 4; dims[1] = 1; return; 
+			case 3: dims[0] = 2; dims[1] = 1; return;
+			case 4: dims[0] = 2; dims[1] = 1; return; 
 			default: dims[0] = 0; dims[1] = 0; return;
 		}
 	}
 	virtual void* getStore(int indx, int i){
 		switch(indx){
-			case 0: return (void*)&((v_draw[i])); 
-			case 1: return (void*)&((v_color[i])[0]); 
-			case 2: return (void*)&((v_scale[i])[0]); 
-			case 3: return (void*)&((v_trans[i])[0]); 
+			case 0: return (void*)&((v_time[i])); 
+			case 1: return (void*)&((v_draw[i])); 
+			case 2: return (void*)&((v_color[i])[0]); 
+			case 3: return (void*)&((v_scale[i])[0]); 
+			case 4: return (void*)&((v_trans[i])[0]); 
 		} return NULL; 
 	}
-	virtual int numStores() {return 4;}
+	virtual int numStores() {return 5;}
 	virtual double* mmapRead(double* d){
 		int i; 
+		m_time = gettime(); 
+		*d++ = m_time; 
 		m_draw = *d++ > 0.0 ? 1 : 0; 
 		for(i=0; i<4; i++)
 			m_color[i] = *d++;
@@ -472,19 +482,31 @@ public: //do something like the flow field common in the lab.
 		v_coherence.clear(); 
 	}
 	virtual bool store(){
+		array<unsigned char,4> color; 
+		for(int i=0; i<4; i++)
+			color[i] = floatToU8(m_color[i]); 
 		int n = nstored(); 
 		bool same = true; 
 		if(n > 0){
+			same &= (m_draw == v_draw[n-1]); 
+			for(int i=0; i<4; i++)
+				same &= (color[i] == (v_color[n-1])[i]); 
+			for(int i=0; i<2; i++){
+				same &= (m_scale[i] == (v_scale[n-1])[i]);
+				same &= (m_trans[i] == (v_trans[n-1])[i]); 
+			}
 			for(int i=0; i<2; i++)
 				same &= (m_vel[i] == (v_vel[n-1])[i]); 
 			same &= (m_coherence == v_coherence[n-1]); 
 		} else same = false; 
 		if(!same){
-			same &= !Shape::store(); 
-			if(!same){
-				v_vel.push_back(m_vel); 
-				v_coherence.push_back(m_coherence); 
-			}
+			v_time.push_back(m_time); 
+			v_draw.push_back(m_draw); 
+			v_color.push_back(color);
+			v_scale.push_back(m_scale); 
+			v_trans.push_back(m_trans); 
+			v_vel.push_back(m_vel); 
+			v_coherence.push_back(m_coherence); 
 		}
 		return !same; 
 	}
