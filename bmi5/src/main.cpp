@@ -773,7 +773,7 @@ void* backup_thread(void*){
 	char dirname[256]; 
 	int i = 1; 
 	while(found){
-		snprintf(dirname, 256, "/tmp/%d-%d-%d_%04d", tm.tm_year+1900, 
+		snprintf(dirname, 256, "/tmp/%04d-%02d-%02d_%04d", tm.tm_year+1900, 
 					tm.tm_mon+1, tm.tm_mday, i); //maybe should have a prefix here?
 		struct stat st; 
 		int err = stat(dirname, &st);
