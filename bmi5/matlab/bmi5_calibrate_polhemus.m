@@ -1,14 +1,17 @@
 function [] = bmi5_calibrate_polhemus()
 global bmi5_in bmi5_out;
 
-cd('/home/motorlab/sabes-exp-ctrl/bmi5/matlab');
+THE_PATH = '/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab'; % adjust as needed
+
+cd(THE_PATH);
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
-num_targets = 16;
+num_targets = 25;
 snt = sqrt(num_targets);
 
-%bmi5_cmd('delete_all');
+bmi5_cmd('clear_all');
+bmi5_cmd('delete_all');
 
 for j=1:num_targets
  bmi5_cmd(strcat('make circle target',num2str(j)));
@@ -19,7 +22,8 @@ bmi5_cmd('make polhemus finger');
 eval(bmi5_cmd('mmap'));
 
 % first ask for a set of points. 
-w = linspace(-0.7, 0.7, snt);
+wx = linspace(-0.7, 0.7, snt);
+wy = linspace(-0.8, 0.3, snt);
 
 screen = zeros(num_targets, 4); 
 world = zeros(num_targets, 4); 
@@ -35,8 +39,8 @@ pm = [    0  -10    0
 i=1; 
 for yi = 1:snt
     for xi = 1:snt
-		x = w(xi); 
-		y = w(yi);
+		x = wx(xi); 
+		y = wy(yi);
         s = strcat('target',num2str(i),'_');
         b5.(strcat(s,'scale')) = [0.05 ; 0.05];
         b5.(strcat(s,'color')) = [0; 1; 0; 1];
@@ -70,8 +74,8 @@ for yi = 1:snt
             s = strcat('target',num2str(j),'_');
             b5.(strcat(s,'color')) = [0 1 0 1]; % green
         end
-		screen(i,1) = w(xi); 
-		screen(i,2) = w(yi);
+		screen(i,1) = wx(xi); 
+		screen(i,2) = wy(yi);
         s = strcat('target',num2str(i),'_');
         b5.(strcat(s,'color')) = [1 0 0 1]; % red
         b5.tone_play_io = 1;
