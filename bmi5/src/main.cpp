@@ -410,6 +410,10 @@ void* mmap_thread(void*){
 			pthread_mutex_lock(&mutex_gobjs); 
 			for(unsigned int i=0; i<g_objs.size(); i++)
 				b = g_objs[i]->mmapRead(b); 
+			//add alignment check. 
+			int count = (int)((long long)b - (long long)mmh.m_addr); 
+			count /= 8; 
+			*b = (double)count; 
 			if(g_record){
 				for(unsigned int i=0; i<g_objs.size(); i++)
 					g_objs[i]->store(); //store when changes were commanded.
