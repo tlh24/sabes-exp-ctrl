@@ -185,10 +185,10 @@ static void drawObjects() {
 	sixenseAllControllerData acd;
 	float rot_mat[4][4];
 	float colors[4][3] = {
-		1.0f, 0.0f, 0.0f,
-		0.8f, 0.8f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f };
+		{1.0f, 0.0f, 0.0f},
+		{0.8f, 0.8f, 0.0f},
+		{0.0f, 1.0f, 0.0f},
+		{0.0f, 0.0f, 1.0f} };
 
 		int left_index = sixenseUtils::getTheControllerManager()->getIndex( sixenseUtils::ControllerManager::P1L );
 		int right_index = sixenseUtils::getTheControllerManager()->getIndex( sixenseUtils::ControllerManager::P1R );
@@ -284,15 +284,15 @@ void collectDataForGraph()
 	accel_hist.push_back( derivs.getAcceleration() );
 
 	// Constrain the queues to a maximum size
-	if( vel_hist.size() > log_history_size ) {
+	if( vel_hist.size() > (float)log_history_size ) {
 		vel_hist.pop_front();
 	}
 
-	if( accel_hist.size() > log_history_size ) {
+	if( accel_hist.size() > (float)log_history_size ) {
 		accel_hist.pop_front();
 	}
 
-	if( pos_hist.size() > log_history_size ) {
+	if( pos_hist.size() > (float)log_history_size ) {
 		pos_hist.pop_front();
 	}
 
@@ -349,7 +349,7 @@ void drawGraph( std::deque<sixenseMath::Vector3> &hist_list ) {
 	// Draw
 	glBegin( GL_LINES );
 
-	int axis = 2;
+	//int axis = 2; // wtf?!
 	for( int axis=0; axis<3; axis++ ) {
 
 		glColor3f( axis_colors[axis][0], axis_colors[axis][1], axis_colors[axis][2] );
@@ -502,11 +502,11 @@ void draw_mouse_pointers() {
 
 // Write a bunch of instruction text, as well as the current position and rotation information
 void draw_controller_info() {
-	const double t = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
-	const double a = t*90.0;
+	//const double t = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
+	//const double a = t*90.0;
 	sixenseAllControllerData acd;
 	int i, base, cont;
-	int hpb_on;
+	//int hpb_on;
 	float camera_offset[3] = { 0, -1.0f, -6.0f };
 
 	glClearColor(0.6f,0.6f,0.7f,1.0f);
@@ -626,6 +626,8 @@ void draw_controller_info() {
 //     tracking is possible.
 void controller_manager_setup_callback( sixenseUtils::ControllerManager::setup_step step ) {
 
+	(void)step;	// busy work for -Werror=unused-parameter
+
 	if( sixenseUtils::getTheControllerManager()->isMenuVisible() ) {
 
 		// Turn on the flag that tells the graphics system to draw the instruction screen instead of the controller information. The game
@@ -719,8 +721,8 @@ void check_for_button_presses( sixenseAllControllerData *acd ) {
 	// ValuatorEventSwitches can be used to test against any floating point value, including position, velocity, trigger positions, joystick positions, rotation angles, etc.
 	static sixenseUtils::EventSwitchBase *left_height_switch = new sixenseUtils::ValuatorEventSwitch( 200.0f, new FlashObjectTrigger( flash_left_controller_frames ), new sixenseUtils::NullEventTrigger );
 	static sixenseUtils::EventSwitchBase *right_height_switch = new sixenseUtils::ValuatorEventSwitch( 200.0f, new FlashObjectTrigger( flash_right_controller_frames ), new sixenseUtils::NullEventTrigger );
-	left_button_switch->test( (acd->controllers)[left_index].pos[1] ); // test the y position (height)
-	right_button_switch->test( (acd->controllers)[right_index].pos[1] );
+	left_height_switch->test( (acd->controllers)[left_index].pos[1] ); // test the y position (height)
+	right_height_switch->test( (acd->controllers)[right_index].pos[1] );
 
 }
 
@@ -797,6 +799,10 @@ static void
 static void
 	key(unsigned char key, int x, int y)
 {
+
+	(void)x;	// prevent the compoiler from complaining 
+	(void)y;
+
 	switch (key)
 	{
 	case 27 :
@@ -844,8 +850,8 @@ const GLfloat high_shininess[] = { 100.0f };
 
 int main(int argc, char *argv[])
 {
-	int i;
-	float hemi_vec[3] = { 0, 1, 0 };
+	//int i;
+	//float hemi_vec[3] = { 0, 1, 0 };
 
 	glutInitWindowSize(640,480);
 	glutInitWindowPosition(40,40);

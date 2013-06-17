@@ -232,8 +232,8 @@ namespace sixenseMath {
 
 	private:
 		double _a, _b, _c, _d;
-		Vector3	_norm;
 		Vector3	_p0, _p1, _p2;
+		Vector3	_norm;
 
 	};
 

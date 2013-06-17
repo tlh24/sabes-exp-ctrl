@@ -498,9 +498,9 @@ inline Vector3 Quat::operator *(const Vector3 rhs) const {
 inline float Quat::dot(const Quat rhs) const {
 	Vector4 t(*this), that(rhs);
 
-	float dot = t * that;
+	float _dot = t * that;
 
-	return dot;
+	return _dot;
 }
 
 inline Quat Quat::operator *(const Quat rhs) const {
@@ -777,8 +777,8 @@ inline Vector3 Matrix3::row( const int i ) {
 	return Vector3( _cols[0][i], _cols[1][i], _cols[2][i] );
 }
 
-inline void Matrix3::set_col( const int which, const Vector3 col ) {
-	_cols[which] = col;
+inline void Matrix3::set_col( const int which, const Vector3 _col ) {
+	_cols[which] = _col;
 }
 
 inline bool Matrix3::is_identity() {
@@ -1157,8 +1157,8 @@ inline Vector4 Matrix4::row( const int i ) {
 	return Vector4( _cols[0][i], _cols[1][i], _cols[2][i], _cols[3][i] );
 }
 
-inline void Matrix4::set_col( const int which, const Vector4 col ) {
-	_cols[which] = col;
+inline void Matrix4::set_col( const int which, const Vector4 _col ) {
+	_cols[which] = _col;
 }
 
 inline float Matrix4::trace() {

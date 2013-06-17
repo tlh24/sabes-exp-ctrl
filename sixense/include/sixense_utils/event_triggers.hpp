@@ -24,6 +24,7 @@ namespace sixenseUtils {
 
 	class EventTriggerBase {
 	public:
+		virtual ~EventTriggerBase() {};
 		virtual void trigger() const = 0;
 	};
 
