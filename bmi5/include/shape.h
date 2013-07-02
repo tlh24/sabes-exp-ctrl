@@ -36,7 +36,7 @@ class Shape : public Serialize {
 		m_program[0] = m_program[1] = 0; 
 		m_draw = 0; 
 #ifdef DEBUG
-		m_draw = 1; 
+		m_draw = 3; //default to 'on'
 #endif
 	}
 	void deleteBuffers(){
@@ -175,7 +175,7 @@ class Shape : public Serialize {
 	}
 	virtual void draw(int display, float ar){
 		configure(display); //if we need it.
-		if(m_draw){
+		if(m_draw & (1<<display)){
 			setupDrawMatrices(display, ar); 
 			int colorloc = glGetUniformLocation(m_program[display], "uniform_color"); 
 			if(colorloc >= 0) glUniform4f(colorloc, m_color[0], m_color[1], m_color[2], m_color[3]);
@@ -277,7 +277,7 @@ class Shape : public Serialize {
 		int i; 
 		m_time = gettime(); 
 		*d++ = m_time; 
-		m_draw = *d++ > 0.0 ? 1 : 0; 
+		m_draw = (char)floor(*d++); 
 		for(i=0; i<4; i++)
 			m_color[i] = *d++;
 		for(i=0; i<2; i++)
@@ -448,7 +448,7 @@ public: //do something like the flow field common in the lab.
 	virtual void draw(int display, float ar){
 		configure(display); 
 		//this is a little more complicated, as we need to do a memcpy and user shaders.
-		if(m_draw && m_v && m_pvel && m_age){
+		if((m_draw & (1<<display)) && m_v && m_pvel && m_age){
 			glPointSize(m_starSize); 
 			setupDrawMatrices(display, ar); 
 			
@@ -639,7 +639,7 @@ public:
 	vector<array<unsigned char,4>> v_color; 
 	
 	DisplayText(int size) : VectorSerialize(size, MAT_C_INT8){
-		m_draw = 1; 
+		m_draw = 3; 
 		m_text = string("test!"); 
 		m_pos[0] = 0; m_pos[1] = 0; 
 		for(int i=0; i<4; i++)
@@ -705,7 +705,7 @@ public:
 	}
 	virtual int numStores(){return VectorSerialize::numStores() + 3;}
 	virtual double* mmapRead(double *d){
-		m_draw = *d++ > 0.0 ? 1 : 0; 
+		m_draw = (char)floor(*d++); 
 		for(int i=0; i<2; i++)
 			m_pos[i] = *d++;
 		for(int i=0; i<4; i++)
@@ -719,7 +719,7 @@ public:
 		return d; 
 	}
 	virtual void draw(int display, float ar){
-		if(m_draw){
+		if(m_draw & (1<<display)){
 			//need to convert world coords to screen. 
 			float xar = ar < 1.f ? ar : 1.f; 
 			float yar = ar > 1.f ? 1.f/ar : 1.f; 

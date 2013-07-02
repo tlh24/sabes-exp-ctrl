@@ -84,8 +84,8 @@ bool		g_record = false;
 bool		g_polhemusConnected = false; 
 bool		g_optoConnected = false; 
 GtkWindow* 	g_mainWindow; //used for dialogs, etc. 
-gtkglx*  	g_daglx[2]; //human, monkey.
-GtkWidget* 	g_da[2]; //draw areas. 
+gtkglx*  	g_daglx[2]; //monkey, human.
+GtkWidget* 	g_da[2]; //draw areas, same order as above. 
 GtkWidget* 	g_timeLabel; 
 GtkWidget* 	g_matlabTimeLabel; 
 GtkWidget* 	g_openglTimeLabel; 
@@ -145,8 +145,8 @@ void destroy(GtkWidget *, gpointer){
 }
 void updateCursPos(float x, float y){
 	//always relative to the human view.
-	g_mousePos[0] = x/(g_daglx[0]->m_size[0]);
-	g_mousePos[1] = y/(g_daglx[0]->m_size[1]);
+	g_mousePos[0] = x/(g_daglx[1]->m_size[0]);
+	g_mousePos[1] = y/(g_daglx[1]->m_size[1]);
 	//convert to -1 to +1
 	for(int i=0; i<2; i++){
 		g_mousePos[i] -= 0.5f;
@@ -180,7 +180,7 @@ static gboolean
 		g_assert_not_reached ();
 	}
 	//sync? only want for one monitor.
-	if(h == 1){
+	if(h == 0){
 		glXSwapIntervalSGIFunc glXSwapIntervalSGI = 0;  
 		glXSwapIntervalSGI = (glXSwapIntervalSGIFunc)  
 			glXGetProcAddressARB((const GLubyte*)"glXSwapIntervalSGI");  
@@ -239,12 +239,12 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 	if (!(g_daglx[h]->expose(da))){
 		g_assert_not_reached ();
 	}
-	if(da == g_da[1]){ //monkey view
+	if(da == g_da[0]){ //monkey view
 		double dt = t - g_lastFrame; 
 		g_lastFrame = t; 
 		g_frameRate = 0.9 * g_frameRate + 0.1 / dt; 
 	}
-	if(da == g_da[1] || g_renderOpView){
+	if(da == g_da[0] || g_renderOpView){
 		g_openGLTimer.enter(); 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glMatrixMode(GL_MODELVIEW);
@@ -256,13 +256,13 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 		//update before the swap for minimum display latency. 
 		pthread_mutex_lock(&mutex_gobjs); 
 		float ar = 1.f;
-		if(da == g_da[1]){ 
+		if(da == g_da[0]){ 
 			t = gettime(); 
 			for(unsigned int i=0; i<g_objs.size(); i++)
-				g_objs[i]->move(g_daglx[1]->getAR(), t);
+				g_objs[i]->move(g_daglx[0]->getAR(), t);
 		}else{
 			//convert between aspect-ratios. 
-			ar = g_daglx[1]->getAR() / g_daglx[0]->getAR(); 
+			ar = g_daglx[0]->getAR() / g_daglx[1]->getAR(); 
 		}
 		for(unsigned int i=0; i<g_objs.size(); i++)
 			g_objs[i]->draw(h, ar); 
@@ -272,7 +272,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p){
 		g_daglx[h]->swap(); //always double buffered
 		g_openGLTimer.exit(); 
 	}
-	if(da == g_da[1]){
+	if(da == g_da[0]){
 		if(g_record) g_frameSerialize->store(g_frame); 
 		g_frame++; 
 		g_nextVsyncTime = g_vsyncTimer.add(gettime()); 
@@ -339,6 +339,11 @@ string getMmapStructure(){
 	for(unsigned int i=0; i<g_objs.size(); i++){
 		oss << g_objs[i]->getStructInfo();
 	}
+	oss << "b5_numdoubles = 0;\n"; 
+	oss << "b5c = struct2cell(b5);\n"; 
+	oss << "for i=1:size(b5c)\n"; 
+	oss << "\tb5_numdoubles = b5_numdoubles + numel(b5c{i});\n"; 
+	oss << "end\n clear b5c;\n b5_numdoubles\n"; 
 	return oss.str();
 }
 static void printMmapStructure(GtkWidget*, gpointer ){
@@ -521,7 +526,7 @@ void* mmap_thread(void*){
 						}
 					}
 					StarField* sf = new StarField(); 
-					sf->makeStars(numstars, g_daglx[1]->getAR());
+					sf->makeStars(numstars, g_daglx[0]->getAR());
 					makeConf(sf, name); 
 				} else if ((*beg) == string("text")) {
 					typ = string("text");
@@ -1213,14 +1218,14 @@ int main(int argn, char** argc){
 	putenv((char *)"__GL_SYNC_TO_VBLANK=0"); //don't sync to vertical blanking.  individually per window.
 	putenv((char *)"__GL_SYNC_DISPLAY_DEVICE=CRT-1"); //sync to this display device. (use nvidia-settings)
 	gtk_widget_set_double_buffered (da1, FALSE);
-	g_daglx[0] = new gtkglx(da1); 
+	g_daglx[1] = new gtkglx(da1); 
  
 	g_signal_connect (da1, "configure-event",
-			G_CALLBACK (configure1), 0);
+			G_CALLBACK (configure1), (void*)1);
 	g_signal_connect (da1, "draw",
-			G_CALLBACK (draw1), 0);
+			G_CALLBACK (draw1), (void*)1);
 	g_signal_connect (da1, "realize", 
-			G_CALLBACK (realize1), 0);
+			G_CALLBACK (realize1), (void*)1);
 	g_signal_connect (da1, "motion_notify_event",
 			G_CALLBACK (motion_notify_event), NULL);
 	//in order to receive keypresses, must be focusable!
@@ -1246,14 +1251,14 @@ int main(int argn, char** argc){
 	da2 = gtk_drawing_area_new ();
 	gtk_container_add (GTK_CONTAINER (top), da2);
 	gtk_widget_set_double_buffered (da2, FALSE);
-	g_daglx[1] = new gtkglx(da2); 
+	g_daglx[0] = new gtkglx(da2); 
 	
 	g_signal_connect (da2, "configure-event",
-			G_CALLBACK (configure1), (void*)1);
+			G_CALLBACK (configure1), (void*)0);
 	g_signal_connect (da2, "draw",
-			G_CALLBACK (draw1), (void*)1);
+			G_CALLBACK (draw1), (void*)0);
 	g_signal_connect (da2, "realize", 
-			G_CALLBACK (realize1), (void*)1);
+			G_CALLBACK (realize1), (void*)0);
 	//in order to receive keypresses, must be focusable!
 	//gtk_widget_set_can_focus( da2, TRUE);
 	
@@ -1288,8 +1293,8 @@ int main(int argn, char** argc){
 	gtk_widget_show (top);
 	
 	//add a refresh timeout. 
-	g_da[0] = da1; 
-	g_da[1] = da2; 
+	g_da[1] = da1; //human
+	g_da[0] = da2; //monkey
 	g_timeout_add (4, refresh, da1); //250 Hz, approximate. 
 	
 	g_polhemus = 0; 
