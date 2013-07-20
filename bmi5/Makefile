@@ -35,14 +35,14 @@ GTKLD = `pkg-config --libs $(GLIBS) `
 
 all: bmi5 glxgears
 
-src/%.o : src/%.cpp 
+src/%.o: src/%.cpp 
 	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
 	
 %.o: ../../myopen/common_host/%.cpp\
 	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
 
 bmi5: $(OBJS)
-	$(CPP) -o $@ $(GTKLD) $(LDFLAGS) -lmatio -lpcap $(OBJS)
+	$(CPP) -o $@ $(GTKLD) $(LDFLAGS) -lmatio -lhdf5 -lpcap $(OBJS)
 	
 opto: bmi5 # enables packet-capture privelages on bmi5. 
 	sudo setcap cap_net_raw,cap_net_admin=eip bmi5
