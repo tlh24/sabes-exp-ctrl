@@ -1318,10 +1318,10 @@ int main(int argn, char** argc){
 	
 	//jack audio. 
 	#ifdef JACK
-	jackInit(JACKPROCESS_TONES); // this needs to be a loadable module, debugging with it sucks
-	jackDisconnectAllPorts();
+	jackInit("bmi5", JACKPROCESS_TONES);
 	jackConnectFront();
 	jackConnectCenterSub();
+	jackTest();
 	#endif
 
 	g_mainWindow = (GtkWindow*)window; 
