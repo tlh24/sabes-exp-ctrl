@@ -1141,14 +1141,16 @@ int main(int argn, char** argc){
    feenableexcept(FE_INVALID|FE_OVERFLOW);  // Enable (some) floating point exceptions
 #endif
 
-	char linkname[4096];
-	char * dname;
-	// get directory of current exe
-		ssize_t r = readlink("/proc/self/exe", linkname, 4096);
-		if (r < 0) {
-    	perror("/proc/self/exe");
-    	exit(EXIT_FAILURE);
+	char linkname[1024];
+	char *dname;
+
+	memset(linkname, 0, sizeof(linkname));
+
+	if (readlink("/proc/self/exe", linkname, sizeof(linkname)-1) < 1) {
+		perror("readlink");
+		exit(EXIT_FAILURE);
 	}
+
 	dname = dirname(linkname);
 	g_basedirname = dname;
 
