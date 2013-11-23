@@ -170,6 +170,7 @@ public:
 			m_t[i] = 0.0; 
 		for(int i=0; i<6; i++)
 			m_fit[0][i] = 0.0; 
+		m_avg = 0;
 		m_ptr = 0; 
 		m_nsmooth = 6; 
 	}
