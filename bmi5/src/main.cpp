@@ -668,7 +668,7 @@ void* mmap_thread(void*){
 					if (beg != tokens.end()) {
 						string ssize = *beg++; 
 						int size = atoi(ssize.c_str());
-						if (beg != tokens.end() && size > 0 && size < 128) {
+						if (beg != tokens.end() && size > 0 && size < 256) {
 							string ipaddr = *beg++;
 							int sock = openSocket((char*)ipaddr.c_str(), LISTEN_PORT); 
 							if(sock == 0){

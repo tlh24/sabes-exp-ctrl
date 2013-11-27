@@ -510,11 +510,11 @@ public:
 class TdtUdpSerialize : public Serialize {
 public: 
 	int					m_sock; 
-	int 					m_size; 
+	int 				m_size; 
 	double				m_time; 
 	vector<double>		m_last; // note double.
 	vector<float>		m_stor; 
-	vector<double> 	v_time; 
+	vector<double> 		v_time; 
 	vector<vector<float> > v_stor;
 	float*				m_bs; // for coalescing memory
 	
