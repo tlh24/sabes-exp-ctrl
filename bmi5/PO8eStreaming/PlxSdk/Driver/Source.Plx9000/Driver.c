@@ -99,6 +99,7 @@ static struct pci_device_id PlxPciIdTable[] =
     { 0x10B5, 0x1860, PCI_ANY_ID, PCI_ANY_ID, 0x000000, 0x000000 },
     { 0x10B5, 0xC860, PCI_ANY_ID, PCI_ANY_ID, 0x000000, 0x000000 },
     { 0x10B5, 0x5406, PCI_ANY_ID, PCI_ANY_ID, 0x000000, 0x000000 },
+	 { 0x4550, 0x0854, PCI_ANY_ID, PCI_ANY_ID, 0x000000, 0x000000 },
 #elif (PLX_CHIP == 9056)
     { 0x10B5, 0x9056, PCI_ANY_ID, PCI_ANY_ID, 0x000000, 0x000000 },
     { 0x10B5, 0x5601, PCI_ANY_ID, PCI_ANY_ID, 0x000000, 0x000000 },
@@ -145,17 +146,17 @@ Plx_init_module(
 
     DebugPrintf_Cont(("\n"));
     DebugPrintf(("<========================================================>\n"));
-    DebugPrintf((
+    printk(
         "PLX driver v%d.%02d (%d-bit) - built on %s %s\n",
         PLX_SDK_VERSION_MAJOR, PLX_SDK_VERSION_MINOR,
         (U32)(sizeof(PLX_UINT_PTR) * 8),
         __DATE__, __TIME__
-        ));
+        );
 
-    DebugPrintf((
+    printk(
         "Supports Linux kernel version %s\n",
         UTS_RELEASE
-        ));
+        );
 
     // Allocate memory for the Driver Object
     pGbl_DriverObject =
@@ -170,10 +171,10 @@ Plx_init_module(
         return (-ENOMEM);
     }
 
-    DebugPrintf((
+    printk(
         "Allocated global driver object (%p)\n",
         pGbl_DriverObject
-        ));
+        );
 
     // Clear the driver object
     RtlZeroMemory(
@@ -217,10 +218,10 @@ Plx_init_module(
             &(pGbl_DriverObject->DispatchTable)
             );
 
-    DebugPrintf((
+    printk(
         "Registered driver (MajorID = %03d)\n",
         pGbl_DriverObject->MajorID
-        ));
+        );
 
     // Register the driver
     status = pci_register_driver( &PlxPciDriver );
@@ -371,16 +372,20 @@ PlxDispatch_Probe(
         ));
 
     // Verify PLX device
-    if (pDev->vendor != PLX_VENDOR_ID)
-        status = -ENODEV;
+    //if (pDev->vendor != PLX_VENDOR_ID)
+   //     status = -ENODEV;
 
     // Make sure the PCI Header type is 0
-    if (pDev->hdr_type != 0)
+    if (pDev->hdr_type != 0){
         status = -ENODEV;
+		  DebugPrintf(("PCI Header type is not 0\n")); 
+	 }
 
     // Must be a function 0 device
-    if (PCI_FUNC(pDev->devfn) != 0)
+    if (PCI_FUNC(pDev->devfn) != 0){
         status = -ENODEV;
+		  DebugPrintf(("Not a function 0 device\n")); 
+	 }
 
     if (status != 0)
     {
