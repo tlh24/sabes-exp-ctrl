@@ -193,8 +193,9 @@ void polhemus::Close(){
   }
 
   else if (m_cnxType==RS232_CNX){  // return attributes to initial settings
-    tcsetattr(m_rs232Port,TCSANOW,&m_initialAtt);
-    close(m_rs232Port);
+   printf("polhemus: closing serial connection.\n");  
+	tcsetattr(m_rs232Port,TCSANOW,&m_initialAtt);
+	 close(m_rs232Port);
     m_rs232Port=-1;
   }
 

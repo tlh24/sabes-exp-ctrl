@@ -856,13 +856,13 @@ void* polhemus_thread(void* ){
 		len = pol->Read(buf,BUF_SIZE);  // keep trying till we get a response
 		if(len > 0)rxbytes += len; 
 		count++; 
-	} while (len > 0);
+	} while (len > 0 || count < 20);
 	
 	if(rxbytes <= 0){
 		g_polhemusConnected = false; 
-		cout << "could not connect to polhemus." << endl; 
+		cout << "polhemus: could not connect." << endl; 
 	} else {
-		cout << "connection established to Polhemus .." << endl; 
+		cout << "polhemus: connection established .." << endl; 
 		// first establish comm and clear out any residual trash data
 		double frames = 0; 
 		//put it in centimeter mode. 
@@ -928,8 +928,13 @@ void* polhemus_thread(void* ){
 				}
 			}
 		}
-		pol->Write((void*)("p"), 1); //stop continuous mode.
+		printf("polhemus: stopping continuous mode.\n"); 
+		pol->Write("p"); //stop continuous mode.
 		usleep(500); 
+		pol->Write("f0\r"); 
+		usleep(1e4);
+		len = pol->Read(buf, BUF_SIZE); //throw away.
+		usleep(1e4);
 	}
 	pol->Close(); 
 	return NULL;
