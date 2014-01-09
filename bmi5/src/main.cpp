@@ -89,7 +89,8 @@ GtkWidget* 	g_da[2]; //draw areas, same order as above.
 GtkWidget* 	g_timeLabel; 
 GtkWidget* 	g_matlabTimeLabel; 
 GtkWidget* 	g_openglTimeLabel; 
-GtkWidget* 	g_polhemusLabel; 
+GtkWidget* 	g_polhemusLabel;
+string 		g_polhemusLabelStr;
 GtkWidget* 	g_optoLabel; 
 string		g_optoLabelStr; 
 TimeSyncClient * g_tsc; 
@@ -139,6 +140,7 @@ void errorDialog(char* msg){
 void destroy(GtkWidget *, gpointer){
 	//more cleanup later.
 	g_die = true;
+	sleep(1);
 	KillFont(0); 
 	KillFont(1);
 	gtk_main_quit();
@@ -315,20 +317,38 @@ static gboolean refresh (gpointer ){
 				g_openGLTimer.lastTime()*1000.0); 
 	gtk_label_set_text(GTK_LABEL(g_openglTimeLabel), str); 
 	
-	float loc[32];  
-	if(g_polhemus) g_polhemus->getLoc(gettime(), loc); 
-	if(g_polhemusConnected && g_polhemus){
-		snprintf(str, 256, "connected\nx:\t\t%4.1f cm\ny:\t\t%4.1f cm\nz:\t\t%4.1f cm", 
-				loc[0], loc[1], loc[2]); 
-	}else{
-		snprintf(str, 256, "disconnected"); 
+	float loc[48];
+	string con;
+
+	con = g_polhemusConnected ? string("connected\n") : string("disconnected\n");
+	if (g_polhemus) {
+		g_polhemus->getLoc(gettime(), loc);
+
+		ostringstream oss;
+		oss << std::setprecision(2);
+		oss << std::fixed;
+		int nsensors = g_polhemus->m_nsensors;
+		float* ff = loc; 
+		auto clampfloat = [&](float w){
+			return fabs(w) > 1e6 ? 0 : w;; 
+		};
+		for(int j=0; j<nsensors; j++){
+			oss << "marker_" << (j+1) << " "; 
+			oss << " x:" << clampfloat(*ff++);
+			oss << " y:" << clampfloat(*ff++); 
+			oss << " z:" << clampfloat(*ff++) << "\n"; 
+			//ff += 3; 
+		}
+		con += oss.str();
 	}
-	gtk_label_set_text(GTK_LABEL(g_polhemusLabel), str); 
+	gtk_label_set_text(GTK_LABEL(g_polhemusLabel), con.c_str());
 	
-	if(g_opto) g_opto->getLoc(gettime(), loc); 
-	string con = g_optoConnected ? string("connected\n"):string("disconnected\n"); 
+	if(g_opto) 
+		g_opto->getLoc(gettime(), loc);
+	con  = g_optoConnected ? string("connected\n") : string("disconnected\n");
 	con += g_optoLabelStr;
-	gtk_label_set_text(GTK_LABEL(g_optoLabel), con.c_str()); 
+	gtk_label_set_text(GTK_LABEL(g_optoLabel), con.c_str());
+
 	return TRUE;
 }
 string getMmapStructure(){
@@ -600,7 +620,7 @@ void* mmap_thread(void*){
 						} else resp = error + typedesc; 
 					} else resp = error + typedesc; 
 				} else if (*beg == string("polhemus")) {
-					// make polhemus <name> -- more options later. TODO: xxx
+					// make polhemus <name> <nsensors> -- more options later. TODO: xxx
 					if(g_polhemusConnected){
 						typ = string("polhemus");
 						beg++; 
@@ -609,9 +629,16 @@ void* mmap_thread(void*){
 							name = (*beg);
 							beg++;
 						}
-						g_objsRm(g_polhemus); 
-						if(g_polhemus) delete g_polhemus; 
-						g_polhemus = new PolhemusSerialize();
+						int nsensors = 1;
+						if(beg != tokens.end()) {
+							nsensors = atoi(beg->c_str());
+							beg++;
+						}
+						g_objsRm(g_polhemus);
+						if (g_polhemus)
+							delete g_polhemus;
+						nsensors = nsensors < 1 ? 1 : (nsensors > 8 ? 8 : nsensors);
+						g_polhemus = new PolhemusSerialize(nsensors);
 						makeConf(g_polhemus, name);
 					}else{
 						resp = string("could not initialize polhemus object "); 
@@ -646,7 +673,8 @@ void* mmap_thread(void*){
 							beg++;
 						}
 						g_objsRm(g_opto); 
-						if(g_opto) delete g_opto; 
+						if (g_opto)
+							delete g_opto; 
 						nsensors = nsensors < 1 ? 1 : (nsensors > 10 ? 10 : nsensors); 
 						g_opto = new OptoSerialize(nsensors);
 						makeConf(g_opto, name);
@@ -820,7 +848,7 @@ void* backup_thread(void*){
 #define BUF_SIZE 1000
 char g_circBuff[1024]; 
 unsigned int g_cbPtr = 0; 
-unsigned int g_cbRN = 0; //pointer to the last carrige return.
+unsigned int g_cbRN = 0; // pointer to the last carrige return.
 
 void* polhemus_thread(void* ){
 	
@@ -851,7 +879,7 @@ void* polhemus_thread(void* ){
 	int rxbytes = 0; 
 	do {
 		if(count <20)
-			pol->Write("p"); //request position data (and stop continuous..)
+			pol->Write("p"); //request position data (and stop continuous...)
 		usleep(10000); 
 		len = pol->Read(buf,BUF_SIZE);  // keep trying till we get a response
 		if(len > 0)rxbytes += len; 
@@ -883,25 +911,24 @@ void* polhemus_thread(void* ){
 		while(!g_die){
 			//pol->Write((void*)("p"), 1); //request position data.
 			start = count = 0;
-			memset(buf, 0, 40); 
+			memset(buf, 0, 16*20); // max markers * 20 bytes 
 			do {
 				len = pol->Read(buf+start, BUF_SIZE-start); 
 				if(len>0) start+=len;
 				usleep(300);
 			} while((len>0));
-			if(start > 0){
+			if(start > 0) {
 				//frame starts with 'LY_P', and is 8 bytes. This is followed by 3 4-byte floats.
 				//total frame is hence 20 bytes. 
 				for(i=0; i<start; i++){
-					g_circBuff[g_cbPtr % 1024] = buf[i]; 
-					g_cbPtr++; 
+					g_circBuff[g_cbPtr % 1024] = buf[i];
+					g_cbPtr++;
 				}
 				// align to frame.
 				while(((g_circBuff[g_cbRN % 1024] != 'L') || 
-					(g_circBuff[(g_cbRN+1) % 1024] != 'Y') || 
-					(g_circBuff[(g_cbRN+2) % 1024] != 0x01)) &&
-					g_cbRN + 20 <= g_cbPtr){
-					g_cbRN++; 
+					(g_circBuff[(g_cbRN+1) % 1024] != 'Y')) &&
+					g_cbRN + 20 <= g_cbPtr) {
+					g_cbRN++;
 				}
 				//printf("polhemus lag: %d\n", g_cbPtr - g_cbRN); 
 				//this will either leave us aligned at the start of a frame
@@ -909,22 +936,32 @@ void* polhemus_thread(void* ){
 				//copy between the current /r/n. 
 				while(g_circBuff[g_cbRN % 1024] == 'L' && 
 					g_circBuff[(g_cbRN+1) % 1024] == 'Y' && 
-					g_cbRN + 20 <= g_cbPtr){
+					g_cbRN + 20 <= g_cbPtr) {
+
+					int markerid = (int)g_circBuff[(g_cbRN+2) % 1024]; // convert to int
+
+					if (!g_polhemus) {
+						g_cbRN += 20;
+						continue;
+					}
+
+					if (markerid < 1 || markerid > g_polhemus->m_nsensors) {
+						g_cbRN += 20;
+						continue;
+					}
+
 					for(i=0; i<20 && (g_cbRN+i) < g_cbPtr; i++){
 						buf[i] = g_circBuff[(g_cbRN+i) % 1024]; 
 					}
-					buf[i] = 0; 
-					//this data is used, move the pointer forward one. 
+					buf[i] = 0; // not sure why we need to do this? xxx
+					// this data is used, move the pointer forward one frame
 					g_cbRN += 20;
 					float* pData=(float*)(buf+8);			// header is first 8 bytes
-					if(g_polhemus){
-						if(g_record) 
-							g_polhemus->store(pData); 
-						else
-							g_polhemus->update(pData); // for status, etc.
+					if(g_polhemus && g_record) {
+						g_polhemus->store(markerid-1,pData);
 					}
-					frames += 1; 
-					usleep(1800); 
+					frames += 1;
+					usleep(1800);
 				}
 			}
 		}
@@ -991,7 +1028,7 @@ void* opto_thread(void* ){
 	}
 	/* Grab a packet */
 	int packets = 0; 
-	float g[32]; 
+	float g[32];
 	k = 0; 
 	while(!g_die){
 		packet = pcap_next(handle, &header);
@@ -1045,7 +1082,7 @@ void* opto_thread(void* ){
 						oss << " z:" << clampfloat(*ff++) << "\n"; 
 						ff += 3; 
 					}
-					g_optoLabelStr = oss.str(); 
+					g_optoLabelStr = oss.str();
 					if(g_opto){
 						//assume (for Certus) there is no orientation data. 
 						int m = 0; 
@@ -1056,7 +1093,7 @@ void* opto_thread(void* ){
 							}
 							f++; 
 						}
-						g_opto->store(g); 
+						g_opto->store(g);
 					}
 				}
 			}else{
