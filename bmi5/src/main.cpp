@@ -893,6 +893,7 @@ void* polhemus_thread(void* ){
 		cout << "polhemus: connection established .." << endl; 
 		// first establish comm and clear out any residual trash data
 		double frames = 0; 
+		float markerData[16*3]; 
 		//put it in centimeter mode. 
 		pol->Write("U1\r"); 
 		usleep(1e4);
@@ -958,7 +959,10 @@ void* polhemus_thread(void* ){
 					g_cbRN += 20;
 					float* pData=(float*)(buf+8);			// header is first 8 bytes
 					if(g_polhemus && g_record) {
-						g_polhemus->store(markerid-1,pData);
+						for(int j=0; j<3; j++)
+							markerData[(markerid-1)*3 + j] = pData[j]; 
+						if(markerid ==  g_polhemus->m_nsensors)
+							g_polhemus->store(markerData);
 					}
 					frames += 1;
 					usleep(1800);
