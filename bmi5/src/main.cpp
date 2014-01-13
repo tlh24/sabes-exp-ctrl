@@ -645,7 +645,11 @@ void *mmap_thread(void *)
 						} else resp = error + typedesc;
 					} else resp = error + typedesc;
 				} else if (*beg == string("polhemus")) {
-					// make polhemus <name> <nsensors> -- more options later. TODO: xxx
+					// make polhemus
+					// (or)
+					// make polhemus <name> 
+					// (or)
+					// make polhemus <name> <nsensors>
 					if (g_polhemusConnected) {
 						typ = string("polhemus");
 						beg++;
@@ -798,9 +802,9 @@ void *mmap_thread(void *)
 				resp += {"\t\t<size> is the size of the vector\n"};
 				resp += {"\t\tNOTE: in b5, all vectors are type DOUBLE,\n"};
 				resp += {"\t\tindependent of disc storage type\n"};
-				resp += {"\tmake polhemus <name> -- for getting polhemus sensor loc\n"};
+				resp += {"\tmake polhemus <name> [<nsensors>]-- for getting polhemus sensor loc\n"};
 				resp += {"\tmake mouse <name> -- for getting mouse location\n"};
-				resp += {"\tmake optotrak <name> <nsensors> -- for getting optotrak location\n"};
+				resp += {"\tmake optotrak <name> [<nsensors>] -- for getting optotrak location\n"};
 				resp += {"\tmake tdtudp <name> <size> <ipaddress> -- for talking to TDT\n"};
 				resp += {"\tmmap\n"};
 				resp += {"\t\treturn mmap structure information, for eval() in matlab\n"};

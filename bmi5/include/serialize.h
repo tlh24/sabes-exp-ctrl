@@ -844,19 +844,6 @@ public:
 		VectorSerialize2::store();
 		return true;
 	}
-	// store data from a single sensor
-	// sensor is zero-indexed
-	bool store(int sensor, float *data) {
-		m_time = gettime();
-		// assumes that there are 3 floats in *data
-		m_pp[sensor]->add(m_time, data);
-		for (int j=0; j<3; j++) {
-			m_stor[sensor*3+j] = data[j];
-			m_stor2[sensor*3+j] = m_pp[sensor]->m_fit[j][1]; // vel.
-		}
-		VectorSerialize2::store();
-		return true;
-	}
 	void getLoc(double now, float *out) {
 		for (int i=0; i<m_nsensors; i++) {
 			m_pp[i]->predict(now, &(out[i*3]));
