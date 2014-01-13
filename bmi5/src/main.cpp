@@ -871,14 +871,13 @@ void *backup_thread(void *)
  */
 #define BUF_SIZE 1000
 char g_circBuff[1024];
-unsigned int g_cbPtr = 0;
-unsigned int g_cbRN = 0; // pointer to the last carrige return.
+unsigned int g_cbPtr = 0;	// write pointer
+unsigned int g_cbRN = 0; 	// pointer to the last carrige return (read pointer).
 
 void *polhemus_thread(void * )
 {
-
 	unsigned char buf[BUF_SIZE];
-	int count, start, len, i;
+	int count, len, i;
 	string deviceName = {SERIAL_PORT};
 
 	//init the communication obj.
@@ -904,10 +903,11 @@ void *polhemus_thread(void * )
 	int rxbytes = 0;
 	do {
 		if (count <20)
-			pol->Write("p"); //request position data (and stop continuous...)
-		usleep(10000);
+			pol->Write("p"); // request position data (and stop continuous...)
+		usleep(1e4);
 		len = pol->Read(buf,BUF_SIZE);  // keep trying till we get a response
-		if (len > 0)rxbytes += len;
+		if (len > 0)
+			rxbytes += len;
 		count++;
 	} while (len > 0 || count < 20);
 
@@ -919,41 +919,44 @@ void *polhemus_thread(void * )
 		// first establish comm and clear out any residual trash data
 		double frames = 0;
 		float markerData[16*3];
-		//put it in centimeter mode.
-		pol->Write("U1\r");
+		
+		// put it in centimeter mode
+		pol->Write("U1\r"); 
 		usleep(1e4);
-		len = pol->Read(buf, BUF_SIZE); //throw away.
-		usleep(1e4);
-		//now put it in binary (faster than ascii!) mode:
+		len = pol->Read(buf, BUF_SIZE); // throw away.
+		
+		// now put it in binary (faster than ascii!) mode
 		pol->Write("f1\r");
 		usleep(1e4);
-		len = pol->Read(buf, BUF_SIZE); //throw away.
-		usleep(1e4);
+		len = pol->Read(buf, BUF_SIZE); // throw away.
+
 		// we only care about x, y, z -- faster (lower latency) transmission.
-		pol->Write("O*,2\r"); //this command turns off sending Euler angles.
-		pol->Write("c\r"); //request continuous data.
+		pol->Write("O*,2\r"); // this command turns off sending Euler angles.
+		pol->Write("c\r"); // request continuous data.
+		usleep(300);
+
 		// and read the data in a loop.
 		g_cbPtr = g_cbRN = 0;
 		while (!g_die) {
-			//pol->Write((void*)("p"), 1); //request position data.
-			start = count = 0;
-			memset(buf, 0, 16*20); // max markers * 20 bytes
+			count = 0;
+			memset(buf, 0, 16*20); // max markers * 20 bytes. is this necessasry???
 			do {
-				len = pol->Read(buf+start, BUF_SIZE-start);
-				if (len>0) start+=len;
+				len = pol->Read(buf+count, BUF_SIZE-count);
+				if (len>0) 
+					count+=len;
 				usleep(300);
 			} while ((len>0));
-			if (start > 0) {
+			if (count > 0) {
 				//frame starts with 'LY_P', and is 8 bytes. This is followed by 3 4-byte floats.
 				//total frame is hence 20 bytes.
-				for (i=0; i<start; i++) {
+				for (i=0; i<count; i++) {
 					g_circBuff[g_cbPtr % 1024] = buf[i];
 					g_cbPtr++;
 				}
 				// align to frame.
 				while (((g_circBuff[g_cbRN % 1024] != 'L') ||
 				        (g_circBuff[(g_cbRN+1) % 1024] != 'Y')) &&
-				       g_cbRN + 20 <= g_cbPtr) {
+				       (g_cbRN + 20 <= g_cbPtr)) {
 					g_cbRN++;
 				}
 				//printf("polhemus lag: %d\n", g_cbPtr - g_cbRN);
@@ -1001,6 +1004,9 @@ void *polhemus_thread(void * )
 		usleep(1e4);
 		len = pol->Read(buf, BUF_SIZE); //throw away.
 		usleep(1e4);
+		pol->Write("\x19\r"); // send the reset command ^Y
+		usleep(1e4);
+		len = pol->Read(buf, BUF_SIZE); //throw away.
 	}
 	pol->Close();
 	return NULL;
