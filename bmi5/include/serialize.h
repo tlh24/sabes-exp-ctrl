@@ -817,6 +817,7 @@ public:
 		m_nsensors = nsensors;
 		for (int i=0; i<m_nsensors; i++) {
 			m_pp.push_back(new PolhemusPredict());
+			m_pp[i]->m_nsmooth = 8;
 		}
 	}
 	~PolhemusSerialize() {
