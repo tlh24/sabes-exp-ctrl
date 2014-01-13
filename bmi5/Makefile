@@ -1,5 +1,7 @@
 # The following can be set at the command line
 # ie: make DBG=true JACK=false
+#
+# install dependencies with make deps
 DBG = false
 JACK = true
 
@@ -57,7 +59,7 @@ deps:
 	sudo apt-get install gcc g++ gdb libboost-dev libgtk-3-dev \
 	libgtkglext1-dev freeglut3-dev libusb-1.0-0-dev libglew-dev \
 	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl \
-	libjack-jackd2-dev libpcap-dev winbind
+	libjack-jackd2-dev libpcap-dev winbind astyle
 
 install:
 	install -d $(TARGET)
@@ -70,3 +72,10 @@ install:
 	install matlab/bmi5_mmap.cpp -t $(TARGET)/matlab
 	install -d /usr/local/include
 	install ../../myopen/common_host/mmaphelp.h -t /usr/local/include
+
+pretty:
+	# "-rm" means that make ignores errors, if any
+	astyle -A8 --indent=tab -H -k3 include/*.h
+	-rm include/*.h.orig
+	astyle -A8 --indent=tab -H -k3 src/*.cpp
+	-rm src/*.cpp.orig

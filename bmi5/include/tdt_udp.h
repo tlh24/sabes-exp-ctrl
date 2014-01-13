@@ -1,31 +1,30 @@
 #ifndef _TDT_RZ_UDP_H_
 #define _TDT_RZ_UDP_H_
 
-enum
-{
-    // configuration values
-    PROTOCOL_VERSION = 1,
-    LISTEN_PORT = 22022,
+enum {
+	// configuration values
+	PROTOCOL_VERSION = 1,
+	LISTEN_PORT = 22022,
 
-    /* values pertaining to the protocol */
-    HEADER_0         = 0x55,
-    HEADER_0_RZ2     = 0x00,
-    HEADER_1         = 0xAA,
-    HEADER_2_RZ2     = 0x00,
-    HEADER_BYTES     = 4, // max of the two headers
-    COMMAND_OFFSET   = 2,
-    COUNT_OFFSET     = 3,
-    DATA_OFFSET      = 4,
+	/* values pertaining to the protocol */
+	HEADER_0         = 0x55,
+	HEADER_0_RZ2     = 0x00,
+	HEADER_1         = 0xAA,
+	HEADER_2_RZ2     = 0x00,
+	HEADER_BYTES     = 4, // max of the two headers
+	COMMAND_OFFSET   = 2,
+	COUNT_OFFSET     = 3,
+	DATA_OFFSET      = 4,
 
-    /* packet/command types */
-    DATA_PACKET       = 0,
-    GET_VERSION       = 1,
-    SET_REMOTE_IP     = 2,
-    FORGET_REMOTE_IP  = 3,
-    RESET_TO_DEFAULTS = 0xFF, /* only valid once after FTP places a new image */
+	/* packet/command types */
+	DATA_PACKET       = 0,
+	GET_VERSION       = 1,
+	SET_REMOTE_IP     = 2,
+	FORGET_REMOTE_IP  = 3,
+	RESET_TO_DEFAULTS = 0xFF, /* only valid once after FTP places a new image */
 
-    /* maximum number of samples in a packet (determined by the sendable size) */
-    MAX_SAMPLES = 244,
+	/* maximum number of samples in a packet (determined by the sendable size) */
+	MAX_SAMPLES = 244,
 };
 
 #define BUFFER_SIZE (HEADER_BYTES + MAX_SAMPLES * 4)
