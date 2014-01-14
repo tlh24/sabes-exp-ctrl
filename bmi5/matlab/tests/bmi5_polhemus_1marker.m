@@ -2,9 +2,12 @@ clear;
 
 global bmi5_out bmi5_in b5
 
-CalibrationFile = '/home/motorlab/sw/sabes-exp-ctrl/bmi5/matlab/calibration_polhemus.mat';
+BASEPATH = '/home/joeyo/';
 
-cd('/home/motorlab/sw/sabes-exp-ctrl/bmi5/matlab');
+CalibrationFile = fullfile(BASEPATH,'sw/sabes-exp-ctrl/bmi5/matlab/calibration_polhemus.mat');
+
+cd(fullfile(BASEPATH,'sw/sabes-exp-ctrl/bmi5/matlab'));
+
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r');
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w');
 
