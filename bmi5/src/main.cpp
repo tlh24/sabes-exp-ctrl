@@ -899,17 +899,21 @@ void *polhemus_thread(void * )
 		g_polhemusConnected = true;
 	}
 	//flush the buffer, sync things up.
+
+	pol->Write("O*,2\r"); // turn off Euler angles (no response is sent).
+	usleep(5e4);
+
 	count = 0;
 	int rxbytes = 0;
 	do {
-		if (count <20)
-			pol->Write("p"); // request position data (and stop continuous...)
-		usleep(1e4);
+		pol->Write("p"); // request position data (and stop continuous...)
+		usleep(5e4); // 5e4 us is way way slower than polhemus should be able to handle 
 		len = pol->Read(buf,BUF_SIZE);  // keep trying till we get a response
-		if (len > 0)
-			rxbytes += len;
+		rxbytes += len > 0 ? len : 0;
 		count++;
-	} while (len > 0 || count < 20);
+		//if (len > 0) printf("%.*s\n", len, buf); else printf("NO DATA!\n");
+
+	} while (count < 10);
 
 	if (rxbytes <= 0) {
 		g_polhemusConnected = false;
@@ -920,20 +924,19 @@ void *polhemus_thread(void * )
 		double frames = 0;
 		float markerData[16*3];
 		
-		// put it in centimeter mode
-		pol->Write("U1\r"); 
-		usleep(1e4);
-		len = pol->Read(buf, BUF_SIZE); // throw away.
-		
-		// now put it in binary (faster than ascii!) mode
-		pol->Write("f1\r");
-		usleep(1e4);
-		len = pol->Read(buf, BUF_SIZE); // throw away.
+		pol->Write("U1\r"); // put polhemus in centimeter mode (no response is sent)
+		usleep(5e4);
 
 		// we only care about x, y, z -- faster (lower latency) transmission.
-		pol->Write("O*,2\r"); // this command turns off sending Euler angles.
+		pol->Write("O*,2\r"); // turn off Euler angles (no response is sent).
+		usleep(5e4);
+
+		// now put it in binary (faster than ascii!) mode
+		pol->Write("f1\r"); // no response is sent
+		usleep(5e4);
+
 		pol->Write("c\r"); // request continuous data.
-		usleep(300);
+		usleep(5e4);
 
 		// and read the data in a loop.
 		g_cbPtr = g_cbRN = 0;
@@ -998,15 +1001,21 @@ void *polhemus_thread(void * )
 			}
 		}
 		printf("polhemus: stopping continuous mode.\n");
-		pol->Write("p"); //stop continuous mode.
-		usleep(500);
-		pol->Write("f0\r");
-		usleep(1e4);
-		len = pol->Read(buf, BUF_SIZE); //throw away.
-		usleep(1e4);
-		pol->Write("\x19\r"); // send the reset command ^Y
-		usleep(1e4);
-		len = pol->Read(buf, BUF_SIZE); //throw away.
+
+		pol->Write("f0\r"); // ascii mode (no response is sent)
+		usleep(5e4);
+
+		do {
+			pol->Write("p"); // stop continuous mode.
+			usleep(5e4);
+			len = pol->Read(buf, BUF_SIZE); // throw away.
+			count++;
+			//if (len > 0) printf("%.*s\n", len, buf); else printf("NO DATA!\n");
+		} while (count < 10);
+
+		//pol->Write("\x19\r"); // send the reset command ^Y
+		//usleep(1e4);
+		//len = pol->Read(buf, BUF_SIZE); //throw away.
 	}
 	pol->Close();
 	return NULL;
