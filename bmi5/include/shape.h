@@ -730,8 +730,11 @@ public:
 	vector<array<unsigned char,4>> v_color;
 
 	DisplayText(int size) : VectorSerialize(size, MAT_C_INT8) {
+		m_draw = 0;
+#ifdef DEBUG
 		m_draw = 3;
-		m_text = string("test!");
+#endif
+		m_text = string("debug text!");
 		m_pos[0] = 0;
 		m_pos[1] = 0;
 		for (int i=0; i<4; i++)
