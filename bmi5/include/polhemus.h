@@ -34,54 +34,55 @@ Licensed under the GNU Lesser General Public License version 2.1 or later.
 #include <libusb-1.0/libusb.h>
 #include <termios.h>
 
-enum{NO_CNX=-1,USB_CNX,RS232_CNX};
+enum {NO_CNX=-1,USB_CNX,RS232_CNX};
 
 
-class polhemus {
+class polhemus
+{
 
 
- public:
+public:
 
-  polhemus();
-  ~polhemus();
+	polhemus();
+	~polhemus();
 
-  int UsbConnect(int trackerType);
-  int Rs232Connect(const char* port,int baud=115200);
-  int Write(void* data,int len);
-  int Write(const char* data);
-  int Read(void* buf,int maxLen);
-  int GetCnxType();
-  void Close();
+	int UsbConnect(int trackerType);
+	int Rs232Connect(const char *port,int baud=115200);
+	int Write(void *data,int len);
+	int Write(const char *data);
+	int Read(void *buf,int maxLen);
+	int GetCnxType();
+	void Close();
 
- private:
+private:
 	int UsbConnect2(int Vid,int Pid,int writeEp, int readEp);
-	int WriteUsbData(void* data,int len);
-	int WriteRs232Data(void* data,int len);
-	int ReadUsbData(void* buf,int len);
-	int ReadRs232Data(void* buf,int maxLen);
+	int WriteUsbData(void *data,int len);
+	int WriteRs232Data(void *data,int len);
+	int ReadUsbData(void *buf,int len);
+	int ReadRs232Data(void *buf,int maxLen);
 
 
-  libusb_device_handle* m_handle;
-  int m_cnxType;
-  int m_usbWriteEp;
-  int m_usbReadEp;
-  int m_usbVid;
-  int m_usbPid;
-  int m_bCloseUsbLibrary;
+	libusb_device_handle *m_handle;
+	int m_cnxType;
+	int m_usbWriteEp;
+	int m_usbReadEp;
+	int m_usbVid;
+	int m_usbPid;
+	int m_bCloseUsbLibrary;
 
-  int m_FtContUsb;  // Fastrak needs some special flags 
-  int m_isFt;       // It is a special case since it puts its USB continuous data
-  int m_lastFtCont; // over an interrupt endpoint
+	int m_FtContUsb;  // Fastrak needs some special flags
+	int m_isFt;       // It is a special case since it puts its USB continuous data
+	int m_lastFtCont; // over an interrupt endpoint
 
-  int m_rs232Port;
-  struct termios m_initialAtt;
+	int m_rs232Port;
+	struct termios m_initialAtt;
 
-  pthread_mutex_t m_mutex;
+	pthread_mutex_t m_mutex;
 
 
 
 };
 
-enum{TRKR_LIB_HS,TRKR_LIB,TRKR_PAT,TRKR_FT,NUM_SUPP_TRKS};
+enum {TRKR_LIB_HS,TRKR_LIB,TRKR_PAT,TRKR_FT,NUM_SUPP_TRKS};
 
 #endif

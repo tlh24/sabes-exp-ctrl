@@ -1,9 +1,9 @@
 % too slow -- mmap memory.  works well.
-m = memmapfile('/tmp/binned', 'Format', {'uint16' [10 194] 'x'}); 
+m = memmapfile('/tmp/binned.mmap', 'Format', {'uint16' [10 194] 'x'}); 
 A = m.Data(1).x;
 
-pipe_out = fopen('bmipipe_out', 'r'); 
-pipe_in = fopen('bmipipe_in', 'w'); 
+pipe_out = fopen('/tmp/gtkclient_out.fifo', 'r'); 
+pipe_in = fopen('/tmp/gtkclient_in.fifo', 'w'); 
 
 skip = 0;
 prev = 0;
