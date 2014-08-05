@@ -4,7 +4,11 @@
 # install dependencies with make deps
 DBG = false
 JACK = true
-LABJACK = true
+LABJACK = false
+
+ifeq	($(shell hostname),chupacabra)
+	LABJACK = true
+endif
 
 CPP = g++
 CC  = gcc
