@@ -4,19 +4,20 @@
 # install dependencies with make deps
 DBG = false
 JACK = true
+LABJACK = true
 
 CPP = g++
 CC  = gcc
 TARGET = /usr/local/bin
 
 OBJS := src/main.o src/tdt_udp.o src/glInfo.o src/glFont.o src/polhemus.o \
-	src/writematlab.o src/gettime.o
+	src/writematlab.o src/gettime.o 
 
 CFLAGS := -Iinclude -I/usr/local/include -I../../myopen/common_host
 CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
 -Wextra -Werror -pedantic -std=c++11 
-LDFLAGS := -lrt -lGL -lGLU -lGLEW -lusb-1.0
+LDFLAGS := -lrt -lGL -lGLU -lGLEW -lusb-1.0 
 
 ifeq ($(strip $(DBG)),true)
 	CFLAGS  += -g -rdynamic -DDEBUG
@@ -29,6 +30,12 @@ ifeq ($(strip $(JACK)),true)
 	CFLAGS += -DJACK
 	LDFLAGS += -ljack
 	OBJS += src/jacksnd.o
+endif
+
+ifeq ($(strip $(LABJACK)),true)
+	CFLAGS += -DLABJACK
+	LDFLAGS += -llabjackusb
+	OBJS += src/u6.o
 endif
 	
 GLIBS = gtk+-3.0 gsl

@@ -492,7 +492,7 @@ public:
 	virtual double *mmapRead(double *d) {
 		*d++ = m_time; //when the vector was updated.
 		for (int i=0; i<m_size; i++) {
-			m_stor[i] = (T)(*d++);
+			m_stor[i] = (T)(*d++); //default input.
 		}
 		return d;
 	}
@@ -939,6 +939,46 @@ public:
 		for (int i=0; i<m_nsensors; i++) {
 			for (int j=0; j<3; j++)
 				*d++ = m_pp[i]->m_fit[j][1];
+		}
+		return d;
+	}
+};
+
+class LabjackSerialize : public VectorSerialize<float>
+{
+public:
+	int m_nsensors; //number of sensors (analog inputs)
+
+	LabjackSerialize(int nsensors) : VectorSerialize(nsensors, MAT_C_SINGLE) {
+		m_name = "labjack_";
+		m_nsensors = nsensors;
+	}
+	~LabjackSerialize() {
+		clear();
+	}
+	virtual bool store() {
+		return false;      //override -- called with argument below.
+	}
+	bool store(float *data) {
+		m_time = gettime(); 
+		for (int i=0; i<m_nsensors; i++) {
+			m_stor[i] = data[i];
+		}
+		VectorSerialize::store();
+		return true;
+	}
+	virtual string storeName(int indx) {
+		switch (indx) {
+		case 0:
+			return m_name + string("time_o");
+		case 1:
+			return m_name + string("sensors_o"); //default is input; override.
+		} return string("none");
+	}
+	virtual double *mmapRead(double *d) {
+		*d++ = m_time; //last time the sensors were read.
+		for (int i=0; i<m_nsensors; i++) {
+			*d++ = m_stor[i]; //float->double, output.
 		}
 		return d;
 	}
