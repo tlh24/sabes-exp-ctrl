@@ -44,7 +44,7 @@ int doMmap(mxArray *oa, double *b, bool read, int nfields, char* out){
 	//check alignment from bmi5 -- alarmingly easy to mess this up!
 	if(!read && w != (int)(*b)){
 		mexPrintf("bmi5_mmap: misalignment error!\n");
-		mexPrintf("  you gave %d in struture.\n", w);  
+		mexPrintf(" you gave %d in struture, expected %d.\n", w, (int)(*b));  
 	}
 }
 

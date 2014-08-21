@@ -12,4 +12,5 @@ clean:
 	rm -rf stream *.o
 	
 install:
+	sudo cp libPO8eStreaming.so /usr/local/lib
 	sudo ./mkdevs
