@@ -1,7 +1,7 @@
 function [] = bmi5_calibrate_polhemus()
 global bmi5_in bmi5_out;
 
-THE_PATH = '/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab'; % adjust as needed
+THE_PATH = '/home/motorlab/sw/sabes-exp-ctrl/bmi5/matlab'; % adjust as needed
 
 cd(THE_PATH);
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 

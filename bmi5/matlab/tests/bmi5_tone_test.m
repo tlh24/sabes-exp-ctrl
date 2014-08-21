@@ -5,7 +5,7 @@ bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r');
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w');
 bmi5_cmd('make tone');       % no name
 bmi5_cmd('make tone beep');  % with name
-eval(bmi5_cmd('mmap'));
+eval(bmi5_cmd('mmap'))
 
 b5.tone_freq = 440;     % hz
 b5.tone_pan = 0;        % left/right pan

@@ -1414,7 +1414,7 @@ int main(int argn, char **argc)
 #ifdef JACK
 	jackInit("bmi5", JACKPROCESS_TONES);
 	jackConnectFront();
-	jackConnectCenterSub();
+	//jackConnectCenterSub();
 	jackTest();
 #endif
 
