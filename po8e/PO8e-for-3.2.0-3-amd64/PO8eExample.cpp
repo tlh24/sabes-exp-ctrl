@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     if (0 == total)
     {
         printf("  exiting\n");
-        exit(0);
+        exit(1);
     }
 
     // connect to the first (0) card
