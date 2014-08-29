@@ -19,6 +19,7 @@ install:
 	install libPO8eStreaming.so $(TARGET)
 	install -d $(MODULE_DIR)
 	install Plx9054.ko $(MODULE_DIR)
+	install Plx9054.rules /etc/udev/rules.d
 	install Plx9054.sh /lib/udev
 	depmod
 	modprobe Plx9054
