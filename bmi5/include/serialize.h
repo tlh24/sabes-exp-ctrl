@@ -960,7 +960,7 @@ public:
 		return false;      //override -- called with argument below.
 	}
 	bool store(float *data) {
-		m_time = gettime(); 
+		m_time = gettime();
 		for (int i=0; i<m_nsensors; i++) {
 			m_stor[i] = data[i];
 		}
@@ -973,7 +973,8 @@ public:
 			return m_name + string("time_o");
 		case 1:
 			return m_name + string("sensors_o"); //default is input; override.
-		} return string("none");
+		}
+		return string("none");
 	}
 	virtual double *mmapRead(double *d) {
 		*d++ = m_time; //last time the sensors were read.
