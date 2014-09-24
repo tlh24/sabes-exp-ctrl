@@ -338,18 +338,18 @@ class StarField : public Shape
 {
 public: //do something like the flow field common in the lab.
 	array<float,2> m_vel; //in screen units/second.
-	double *m_age; //arb. units.
+	double *m_phase; // each stars phase
 	starStruct *m_v; //vertices, backing store.
 	float *m_pvel; //individual point velocities for variable coherence.
 	float	m_coherence;
 	float	m_starSize;
+	float 	m_lifetime; // how long before a star is drawn elsewhere
 	GLuint	m_colorbuffer;
 	long double m_lastTime; //oh god it's been years...
 	long double m_startTime;
-	bool	m_awesome = false;
-	bool	m_fade = false;
 	vector<array<float,2>> v_vel;
 	vector<float> v_coherence;
+	vector <float> v_lifetime;
 	// we can assume that the other parts don't change during the experiment.
 
 	StarField() : Shape() {
@@ -357,8 +357,9 @@ public: //do something like the flow field common in the lab.
 		m_vel[1] = 0.1f;
 		m_v = NULL;
 		m_pvel = NULL;
-		m_age = 0;
+		m_phase = NULL;
 		m_coherence = 1.0f;
+		m_lifetime = 1.0f;
 		m_lastTime = 0.0;
 		m_starSize = 3.0;
 		m_startTime = gettime();
@@ -369,11 +370,12 @@ public: //do something like the flow field common in the lab.
 		m_v = NULL;
 		if (m_pvel) free(m_pvel);
 		m_pvel = NULL;
-		if (m_age) free(m_age);
-		m_age = NULL;
+		if (m_phase) free(m_phase);
+		m_phase = NULL;
 		//deleteBuffers();
 		v_vel.clear();
 		v_coherence.clear();
+		v_lifetime.clear();
 	}
 	virtual void makeVAO(starStruct *vertices, bool del, int display) {
 		//this method differs from Shape::makeVAO in that each vertex has a color.
@@ -410,18 +412,15 @@ public: //do something like the flow field common in the lab.
 		m_pvel = NULL;
 		m_v = (starStruct *)malloc(nstars * sizeof(starStruct));
 		m_pvel = (float *)malloc(nstars * 2 * sizeof(float));
-		m_age = (double *)malloc(nstars * sizeof(double));
+		m_phase = (double *)malloc(nstars * sizeof(double));
 		for (int i=0; i<nstars; i++) {
 			m_v[i].position[0] = (uniform() - 0.5)*ar*2.f;
 			m_v[i].position[1] = (uniform() - 0.5)*2.f;
-			if (m_awesome)
-				m_v[i].color = (unsigned int)(255*uniform() + 255*255*uniform() + 255*255*255*uniform());
-			else
-				m_v[i].color = 0xffffffff;
+			m_v[i].color = 0xffffffff;
 			float angle = PI * 2.0 * ((float)rand() / (float)RAND_MAX);
 			m_pvel[i*2+0] = sinf(angle);
 			m_pvel[i*2+1] = cosf(angle);
-			m_age[i] = uniform()*PI*2.0;
+			m_phase[i] = uniform()*PI*2.0;
 		}
 		m_n = nstars;
 		m_needConfig[0] = m_needConfig[1] = true;
@@ -441,12 +440,14 @@ public: //do something like the flow field common in the lab.
 	}
 	virtual void move(float ar, long double time) {
 		unsigned int basecol = 0;
+		basecol += (unsigned int)(m_color[3] * 255) & 255;
+		basecol <<= 8;
 		basecol += (unsigned int)(m_color[2] * 255) & 255;
 		basecol <<= 8;
 		basecol += (unsigned int)(m_color[1] * 255) & 255;
 		basecol <<= 8;
 		basecol += (unsigned int)(m_color[0] * 255) & 255;
-		if (!m_v || !m_pvel || !m_age) return;
+		if (!m_v || !m_pvel || !m_phase) return;
 		float dt = (float)(time - m_lastTime);
 		float a[2];
 		a[0] = ar*1.1f;
@@ -472,30 +473,21 @@ public: //do something like the flow field common in the lab.
 				m_v[i].position[j] = f;
 			}
 		}
+
+		double fq = 1/(m_lifetime+1e-6); // dot lifetime freq; protect div-0
+
 		for (int i=0; i<m_n; i++) {
-			double d = time-m_age[i];
-			int c = (int)(255.0 *
-			              (-0.52 * cos(d) + 0.5));
-			c = c > 255 ? 255: c;
-			c = c < 0 ? 0 : c;
-			if (!m_fade) {
-				if (c) c = 255;       //saturate.
-			}
-			c &= 0xff;
-			m_v[i].color &= 0x00ffffff;
-			m_v[i].color += (c << 24);
-			// if it's completely transparent, update the position.
-			if (d > PI*2.0) {
-				m_age[i] += PI*2.0;
+
+			m_v[i].color = basecol;
+
+			double d  = cos(2.0*PI*fq*time			+ m_phase[i]);
+			double dp = cos(2.0*PI*fq*m_lastTime	+ m_phase[i]); // previous
+
+			// update the position.
+			if (d > 0 && dp <= 0) {
 				for (int j=0; j<2; j++) {
 					float f = (uniform() - 0.5)*a[j]*2.f;
 					m_v[i].position[j] = f;
-				}
-				if (m_awesome) {
-					m_v[i].color = (unsigned int)(255*uniform() + 255*255*uniform() + 255*255*255*uniform());
-					m_v[i].color &= 0xffff5fff; //debug!  you should not see this.
-				} else {
-					m_v[i].color = basecol;
 				}
 			}
 		}
@@ -504,7 +496,7 @@ public: //do something like the flow field common in the lab.
 	virtual void draw(int display, float ar) {
 		configure(display);
 		//this is a little more complicated, as we need to do a memcpy and user shaders.
-		if ((m_draw & (1<<display)) && m_v && m_pvel && m_age) {
+		if ((m_draw & (1<<display)) && m_v && m_pvel && m_phase) {
 			glPointSize(m_starSize);
 			setupDrawMatrices(display, ar);
 
@@ -530,24 +522,18 @@ public: //do something like the flow field common in the lab.
 	void setCoherence(double c) {
 		m_coherence = c;
 	}
+	void setLifetime(double x) {
+		m_lifetime = x;
+	}
 	void setStarSize(double ss) {
 		m_starSize = ss;
-	}
-	void setAwesome(bool s) {
-		m_awesome = s;
-		if (s) {
-			m_starSize = 30.0;
-			m_fade = true;
-		}
-	}
-	void setFade(bool s) {
-		m_fade = s;
 	}
 /// serialization
 	virtual void clear() {
 		Shape::clear();
 		v_vel.clear();
 		v_coherence.clear();
+		v_lifetime.clear();
 	}
 	virtual bool store() {
 		array<unsigned char,4> color;
@@ -566,6 +552,7 @@ public: //do something like the flow field common in the lab.
 			for (int i=0; i<2; i++)
 				same &= (m_vel[i] == (v_vel[n-1])[i]);
 			same &= (m_coherence == v_coherence[n-1]);
+			same &= (m_lifetime == v_lifetime[n-1]);
 		} else same = false;
 		if (!same) {
 			v_time.push_back(m_time);
@@ -575,6 +562,7 @@ public: //do something like the flow field common in the lab.
 			v_trans.push_back(m_trans);
 			v_vel.push_back(m_vel);
 			v_coherence.push_back(m_coherence);
+			v_lifetime.push_back(m_lifetime);
 		}
 		return !same;
 	}
@@ -584,8 +572,10 @@ public: //do something like the flow field common in the lab.
 			return m_name + string("vel");
 		case 1:
 			return m_name + string("coherence");
+		case 2:
+			return m_name + string("lifetime");
 		}
-		return Shape::storeName(indx - 2);
+		return Shape::storeName(indx - 3);
 	}
 	virtual int getStoreClass(int indx) {
 		switch (indx) {
@@ -593,8 +583,10 @@ public: //do something like the flow field common in the lab.
 			return MAT_C_SINGLE;
 		case 1:
 			return MAT_C_SINGLE;
+		case 2:
+			return MAT_C_SINGLE;
 		}
-		return Shape::getStoreClass(indx - 2);
+		return Shape::getStoreClass(indx - 3);
 	}
 	virtual void getStoreDims(int indx, size_t *dims) {
 		switch (indx) {
@@ -606,8 +598,12 @@ public: //do something like the flow field common in the lab.
 			dims[0] = 1;
 			dims[1] = 1;
 			return;
+		case 2:
+			dims[0] = 1;
+			dims[1] = 1;
+			return;
 		}
-		return Shape::getStoreDims(indx-2, dims);
+		return Shape::getStoreDims(indx-3, dims);
 	}
 	virtual void *getStore(int indx, int i) {
 		switch (indx) {
@@ -615,16 +611,19 @@ public: //do something like the flow field common in the lab.
 			return (void *)&((v_vel[i])[0]);
 		case 1:
 			return (void *)&((v_coherence[i]));
+		case 2:
+			return (void *)&((v_lifetime[i]));
 		}
-		return Shape::getStore(indx-2, i);
+		return Shape::getStore(indx-3, i);
 	}
 	virtual int numStores() {
-		return Shape::numStores() + 2;
+		return Shape::numStores() + 3;
 	}
 	virtual double *mmapRead(double *d) {
 		for (int i=0; i<2; i++)
 			m_vel[i] = *d++;
 		m_coherence = *d++;
+		m_lifetime = *d++;
 		return Shape::mmapRead(d);
 	}
 };
