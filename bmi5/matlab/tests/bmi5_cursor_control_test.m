@@ -1,13 +1,13 @@
 clear;
-
+bmi5_cmd('delete_all');
 global bmi5_out bmi5_in b5
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r');
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w');
 
-bmi5_cmd('make circle cursor');
-bmi5_cmd('make polhemus finger');
-eval(bmi5_cmd('mmap'));
+bmi5_cmd('make circle cursor')
+bmi5_cmd('make polhemus finger')
+eval(bmi5_cmd('mmap'))
 
 b5.cursor_scale = [5; 5];       % in mm
 b5.cursor_color = [1; 1; 1; 1]; % white
@@ -16,7 +16,7 @@ b5.cursor_draw  = 1;
 
 %load('../calibration_opto.mat'); % load pm & q. 
 %load('../calibration_mouse.mat'); % load pm & q. 
-load('../calibration_polhemus.mat'); % load pm & q. 
+load('~/sabes-exp-ctrl/bmi5/matlab/calibration_polhemus.mat'); % load pm & q. 
 
 qp = q'; 
 q2 = eye(4); 
@@ -28,6 +28,7 @@ b5 = bmi5_mmap(b5);
 
 while(1)
     p = pm * b5.finger_sensors_o; 
+%    p = b5.finger_sensors_o; 
     b5.cursor_pos = p(1:2); 
     b5 = bmi5_mmap(b5);
 end

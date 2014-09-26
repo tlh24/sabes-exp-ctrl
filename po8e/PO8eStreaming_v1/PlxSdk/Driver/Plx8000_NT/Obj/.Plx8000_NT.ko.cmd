@@ -1,0 +1,1 @@
+cmd_/home/motorlab/plx_sdk/PlxSdk/Driver/Plx8000_NT.ko := ld -r -m elf_x86_64 -T /usr/src/linux-headers-3.2.0-4-common/scripts/module-common.lds --build-id  -o /home/motorlab/plx_sdk/PlxSdk/Driver/Plx8000_NT.ko /home/motorlab/plx_sdk/PlxSdk/Driver/Plx8000_NT.o /home/motorlab/plx_sdk/PlxSdk/Driver/Plx8000_NT.mod.o

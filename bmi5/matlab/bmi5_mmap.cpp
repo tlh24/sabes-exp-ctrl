@@ -1,6 +1,6 @@
 #include <mex.h>
 #include <string.h>
-#include "../../../myopen/common_host/mmaphelp.h"
+#include "mmaphelp.h" // expects to be installed in e.g. /usr/local/include
 
 #define BMI5_CTRL_MMAP	"/tmp/bmi5_control.mmap"
 #define BMI5_IN_FIFO	"/tmp/bmi5_in.fifo"
@@ -11,7 +11,8 @@
 #define B5_IO (B5_IN | B5_OUT)
 
 
-void doMmap(mxArray *oa, double *b, bool read, int nfields, char* out){
+int doMmap(mxArray *oa, double *b, bool read, int nfields, char* out){
+	int w = 0; 
 	for(int f=0; f<nfields; f++){
 		mxArray* field = mxGetFieldByNumber(oa, 0, f); 
 		if(field){
@@ -36,8 +37,14 @@ void doMmap(mxArray *oa, double *b, bool read, int nfields, char* out){
 						else *b++; 
 					}
 				}
+				w += n*m; 
 			}
 		}
+	}
+	//check alignment from bmi5 -- alarmingly easy to mess this up!
+	if(!read && w != (int)(*b)){
+		mexPrintf("bmi5_mmap: misalignment error!\n");
+		mexPrintf(" you gave %d in struture, expected %d.\n", w, (int)(*b));  
 	}
 }
 
@@ -72,7 +79,7 @@ void mexFunction( int nlhs, mxArray *plhs[ ], int nrhs, const mxArray *prhs[ ] )
 		if(nlhs == 1){
 			oa = mxDuplicateArray(prhs[0]); //deep copy.
 		} else {
-			oa = (mxArray*)prhs[0]; 
+			oa = (mxArray*)prhs[0]; //shallow copy.
 		}
 	// INCOMING DATA!
 		doMmap(oa, b, true, nfields, out); 

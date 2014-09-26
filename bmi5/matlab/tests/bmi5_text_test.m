@@ -25,3 +25,23 @@ b5.string_color = [0 1 0 1];
 b5.string_pos   = [-0.5 -0.5]; 
 
 b5 = bmi5_mmap(b5);
+
+% test 'draw' toggle. 
+pause(1);
+
+b5.text_draw = 0; 
+b5 = bmi5_mmap(b5);
+pause(1);
+
+b5.words_draw = 0; 
+b5.text_draw = 1; 
+b5 = bmi5_mmap(b5);
+pause(1);
+
+b5.string_draw = 0; 
+b5.words_draw = 1; 
+b5 = bmi5_mmap(b5);
+pause(1);
+
+b5.string_draw = 1; 
+b5 = bmi5_mmap(b5);

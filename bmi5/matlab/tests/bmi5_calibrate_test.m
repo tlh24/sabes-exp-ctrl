@@ -1,17 +1,17 @@
 function [] = bmi5_calibrate_test(mouse)
-global bmi5_in bmi5_out;
+global b5 bmi5_in bmi5_out;
 
-cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
+cd('/home/motorlab/sabes-exp-ctrl/bmi5/matlab');
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
 bmi5_cmd('make circle cursor');
-if(mouse)
+if(mouse > 0)
 	load('calibration_mouse.mat');
     bmi5_cmd('make mouse finger');
 else
     load('calibration_polhemus.mat');
-    bmi5_cmd('make polhemus finger');
+    bmi5_cmd('make polhemus finger')
 end
 bmi5_cmd('mmap')
 eval(bmi5_cmd('mmap'));
@@ -33,7 +33,7 @@ b5.affine_m44 = q2;
 b5 = bmi5_mmap(b5);
 
 while(1)
-	p = pm * b5.finger_sensors_o;
+	p = pm * b5.finger_sensors_o; % p is now in rwc. 
 	b5.cursor_pos = p(1:2); 
 	b5 = bmi5_mmap(b5);
 end
