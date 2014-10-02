@@ -70,7 +70,9 @@ deps:
 	sudo apt-get install gcc g++ gdb libboost-dev libgtk-3-dev \
 	libgtkglext1-dev freeglut3-dev libusb-1.0-0-dev libglew-dev \
 	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl \
-	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck libmatio-dev
+	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck
+	@echo ""
+	@echo "  Note: please download and install libmatio version >= 1.50"
 
 check:
 	cppcheck -Iinclude -I/usr/local/include -I../../myopen/common_host \
