@@ -58,7 +58,7 @@ public:
 	}
 	//drawing routines -- opengl -- not all need implement.
 	virtual void	draw(int, float) {}
-	virtual void	move(float, long double) {}
+	virtual void	move(long double) {}
 	// reads/writes parameters from a mmaped file (address).
 	// all mmap variables are doubles, for convenience.
 	virtual string getMmapInfo() {

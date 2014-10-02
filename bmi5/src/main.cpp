@@ -279,7 +279,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p)
 		if (da == g_da[0]) {
 			t = gettime();
 			for (unsigned int i=0; i<g_objs.size(); i++)
-				g_objs[i]->move(g_daglx[0]->getAR(), t);
+				g_objs[i]->move(t);
 		} else {
 			//convert between aspect-ratios.
 			ar = g_daglx[0]->getAR() / g_daglx[1]->getAR();
@@ -538,6 +538,7 @@ void *mmap_thread(void *)
 				if ((*beg) == string("circle")) {
 					typ = string("circle");
 					beg++;
+					name = typ;
 					Circle *shp = new Circle(0.5, 64);
 					if (beg != tokens.end())
 						name = (*beg); //name of the circle.
@@ -560,9 +561,12 @@ void *mmap_thread(void *)
 				} else if ((*beg) == string("square")) {
 					typ = string("square");
 					beg++;
-					Square *shp = new Square(1.0);
-					if (beg != tokens.end())
-						name = (*beg); //name of the circle.
+					name = typ;
+					if (beg != tokens.end()) {
+						name = (*beg); // name of the square.
+						beg++;
+					}
+					Square *shp = new Square(1.f);
 					makeConf(shp, name);
 				} else if ((*beg) == string("open_square")) {
 					typ = string("open_square");
@@ -570,7 +574,7 @@ void *mmap_thread(void *)
 					float thick = 0.2;
 					name = typ;
 					if (beg != tokens.end()) {
-						name = (*beg);
+						name = (*beg); // name of the open square
 						beg++;
 					}
 					if (beg != tokens.end()) {
@@ -593,7 +597,23 @@ void *mmap_thread(void *)
 						}
 					}
 					StarField *sf = new StarField();
-					sf->makeStars(numstars, g_daglx[0]->getAR());
+					sf->makeStars(numstars);
+					makeConf(sf, name);
+				} else if ((*beg) == string("stars_circle")) {
+					typ = string("stars_circle");
+					beg++;
+					name = typ;
+					int numstars = 3000;
+					if (beg != tokens.end()) {
+						name = (*beg);
+						beg++;
+						if (beg != tokens.end()) {
+							numstars = abs(atoi(beg->c_str()));	// negatives not allowed
+							beg++;
+						}
+					}
+					StarFieldCircle *sf = new StarFieldCircle();
+					sf->makeStars(numstars);
 					makeConf(sf, name);
 				} else if ((*beg) == string("text")) {
 					typ = string("text");
@@ -835,6 +855,7 @@ void *mmap_thread(void *)
 				resp += {"\tmake square <name>\n"};
 				resp += {"\tmake open_square <name> <frac thickness>\n"};
 				resp += {"\tmake stars <name> <num stars>\n"};
+				resp += {"\tmake stars_circle <name> <num stars>\n"};
 				resp += {"\tmake text <name> <nchars>\n"};
 				resp += {"\t\tDisplays text on the screen.\n"};
 				resp += {"\t\tnchars should be less than 256\n"};
@@ -1490,6 +1511,8 @@ void gobjsInit()
 int main(int argn, char **argc)
 {
 	(void) signal(SIGINT, destroy);
+
+	srand(time(NULL)); // seed rng
 
 	lockfile lf = lockfile("/tmp/bmi5.lock");
 	if (lf.lock()) {
