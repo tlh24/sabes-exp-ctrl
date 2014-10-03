@@ -24,7 +24,7 @@ CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 LDFLAGS := -lrt -lGL -lGLU -lGLEW -lusb-1.0 
 
 ifeq ($(strip $(DBG)),true)
-	CFLAGS  += -g -rdynamic -DDEBUG
+	CFLAGS  += -O0 -g -rdynamic -DDEBUG
 	LDFLAGS += -rdynamic
 else
 	CFLAGS += -O3
@@ -70,7 +70,14 @@ deps:
 	sudo apt-get install gcc g++ gdb libboost-dev libgtk-3-dev \
 	libgtkglext1-dev freeglut3-dev libusb-1.0-0-dev libglew-dev \
 	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl \
-	libjack-jackd2-dev libpcap-dev winbind astyle
+	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck
+	@echo ""
+	@echo "  Note: please download and install libmatio version >= 1.50"
+
+check:
+	cppcheck -Iinclude -I/usr/local/include -I../../myopen/common_host \
+	--enable=all \
+	src/*.cpp
 
 install:
 	install -d $(TARGET)
