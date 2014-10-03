@@ -24,7 +24,7 @@ bmi5_cmd('make polhemus finger');
 eval(bmi5_cmd('mmap structure'));
 
 % first ask for a set of points. 
-wx = linspace(-0.7, 0.7, snt);
+wx = linspace(-0.6, 0.6, snt);
 wy = linspace(-0.8, 0.3, snt);
 
 screen = zeros(num_targets, 4); 
@@ -67,7 +67,7 @@ b5.tone_pan = 0;
 b5.tone_scale = 1;
 b5.tone_duration = 0.25;
 
-pause(20);
+pause(30);
 
 i=1;
 for yi = 1:snt

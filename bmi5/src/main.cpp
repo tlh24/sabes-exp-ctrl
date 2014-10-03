@@ -48,6 +48,7 @@
 #include "gettime.h"
 #include "timesync.h"
 #include "perftimer.h"
+#include "fifohelp.h"
 
 //local.
 #include "tdt_udp.h"
@@ -55,7 +56,6 @@
 #include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
-#include "fifohelp.h"
 #include "../optotrak_sniff/etherstruct.h"
 #include "glFont.h"
 
@@ -794,6 +794,7 @@ void *mmap_thread(void *)
 				if (g_polhemus) g_polhemus = 0;
 				if (g_mouse) g_mouse = 0;
 				if (g_opto) g_opto = 0;
+                if (g_labjack) g_labjack = 0;
 				for (unsigned int i=0; i<g_objs.size(); i++) {
 					delete g_objs[i];
 				}
@@ -1193,9 +1194,9 @@ void *opto_thread(void * )
 #ifdef LABJACK
 void* labjack_thread(void* ){
 	const uint8 settlingFactor = 0; //0=5us, 1=10us, 2=100us, 3=1ms, 4=10ms.  Default 0.
-	const uint8 gainIndex = 0; //0 = +-10V, 1 = +-1V, 2 = +-100mV, 3 = +-10mV, 15=autorange.  Default 0.
+	const uint8 gainIndex = 2; //0 = +-10V, 1 = +-1V, 2 = +-100mV, 3 = +-10mV, 15=autorange.  Default 0.
 	const uint8 resolution = 1; //1=default, 1-8 for high-speed ADC, 9-13 for high-res ADC on U6-Pro. Default 1.
-	const uint8 differential = 0; //Indicates whether to do differential readings.  Default 0 (false).
+	const uint8 differential = 1; //Indicates whether to do differential readings.  Default 0 (false).
 	g_labjackLabelStr = string("disconnected"); 
 	/// init the USB device.
 	HANDLE hDevice = 0; 
@@ -1382,10 +1383,11 @@ void* labjack_thread(void* ){
 
 			//Getting AIN voltages
 			for(j = 0; j < numChannels; j++){
-				double d = 0.0; 
-				bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
-				getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
-				valueAIN[j] = d; 
+                double d = 0.0;
+                bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
+                getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
+                valueAIN[j] = d;
+                j = j + differential;     
 			}
 			// copy over the data! 
 			if(g_labjack){
