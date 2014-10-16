@@ -43,11 +43,13 @@
 #include <algorithm>
 #include <functional>
 
-// myopen common                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+// myopen common
+#include "lockfile.h"
 #include "mmaphelp.h"
 #include "gettime.h"
 #include "timesync.h"
 #include "perftimer.h"
+#include "fifohelp.h"
 
 //local.
 #include "tdt_udp.h"
@@ -55,7 +57,6 @@
 #include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
-#include "fifohelp.h"
 #include "../optotrak_sniff/etherstruct.h"
 #include "glFont.h"
 
@@ -87,7 +88,7 @@ bool		g_die = false;
 bool		g_record = false;
 bool		g_polhemusConnected = false;
 bool		g_optoConnected = false;
-bool		g_labjackConnected = false; 
+bool		g_labjackConnected = false;
 GtkWindow 	*g_mainWindow; //used for dialogs, etc.
 gtkglx  	*g_daglx[2]; //monkey, human.
 GtkWidget 	*g_da[2]; //draw areas, same order as above.
@@ -96,9 +97,9 @@ GtkWidget 	*g_matlabTimeLabel;
 GtkWidget 	*g_openglTimeLabel;
 GtkWidget 	*g_polhemusLabel;
 GtkWidget 	*g_optoLabel;
-string		g_optoLabelStr; 
-GtkWidget	*g_labjackLabel; 
-string		g_labjackLabelStr; 
+string		g_optoLabelStr;
+GtkWidget	*g_labjackLabel;
+string		g_labjackLabelStr;
 TimeSyncClient *g_tsc;
 unsigned char g_writeBuffer[1024*1024];
 PerfTimer	g_matlabTimer;
@@ -145,14 +146,18 @@ void errorDialog(char *msg)
 	gtk_container_add (GTK_CONTAINER (content_area), label);
 	gtk_widget_show_all (dialog);
 }
-void destroy(GtkWidget *, gpointer)
+void destroy(int)
 {
 	//more cleanup later.
 	g_die = true;
 	sleep(1);
+	gtk_main_quit();
 	KillFont(0);
 	KillFont(1);
-	gtk_main_quit();
+}
+void destroyGUI(GtkWidget *, gpointer)
+{
+	destroy(SIGINT);
 }
 void updateCursPos(float x, float y)
 {
@@ -274,7 +279,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p)
 		if (da == g_da[0]) {
 			t = gettime();
 			for (unsigned int i=0; i<g_objs.size(); i++)
-				g_objs[i]->move(g_daglx[0]->getAR(), t);
+				g_objs[i]->move(t);
 		} else {
 			//convert between aspect-ratios.
 			ar = g_daglx[0]->getAR() / g_daglx[1]->getAR();
@@ -307,6 +312,10 @@ static int realize1(GtkWidget *w, gpointer p)
 
 static gboolean refresh (gpointer )
 {
+
+	if (g_die)
+		return false;
+
 	//GtkWidget **da = GTK_WIDGET (user_data);
 	gtk_widget_queue_draw (g_da[0]);
 	gtk_widget_queue_draw (g_da[1]);
@@ -363,7 +372,7 @@ static gboolean refresh (gpointer )
 	if (g_opto)
 		g_opto->getLoc(gettime(), loc);
 	con  = g_optoConnected ? string("connected\n") : string("disconnected\n");
-	con += g_optoLabelStr; 
+	con += g_optoLabelStr;
 	gtk_label_set_text(GTK_LABEL(g_optoLabel), con.c_str());
 
 #ifdef LABJACK
@@ -371,7 +380,7 @@ static gboolean refresh (gpointer )
 #else
 	gtk_label_set_text(GTK_LABEL(g_labjackLabel), "disabled in build.");
 #endif
-	
+
 	return TRUE;
 }
 string getMmapStructure()
@@ -531,6 +540,7 @@ void *mmap_thread(void *)
 				if ((*beg) == string("circle")) {
 					typ = string("circle");
 					beg++;
+					name = typ;
 					Circle *shp = new Circle(0.5, 64);
 					if (beg != tokens.end())
 						name = (*beg); //name of the circle.
@@ -553,9 +563,12 @@ void *mmap_thread(void *)
 				} else if ((*beg) == string("square")) {
 					typ = string("square");
 					beg++;
-					Square *shp = new Square(1.0);
-					if (beg != tokens.end())
-						name = (*beg); //name of the circle.
+					name = typ;
+					if (beg != tokens.end()) {
+						name = (*beg); // name of the square.
+						beg++;
+					}
+					Square *shp = new Square(1.f);
 					makeConf(shp, name);
 				} else if ((*beg) == string("open_square")) {
 					typ = string("open_square");
@@ -563,7 +576,7 @@ void *mmap_thread(void *)
 					float thick = 0.2;
 					name = typ;
 					if (beg != tokens.end()) {
-						name = (*beg);
+						name = (*beg); // name of the open square
 						beg++;
 					}
 					if (beg != tokens.end()) {
@@ -586,7 +599,23 @@ void *mmap_thread(void *)
 						}
 					}
 					StarField *sf = new StarField();
-					sf->makeStars(numstars, g_daglx[0]->getAR());
+					sf->makeStars(numstars);
+					makeConf(sf, name);
+				} else if ((*beg) == string("stars_circle")) {
+					typ = string("stars_circle");
+					beg++;
+					name = typ;
+					int numstars = 3000;
+					if (beg != tokens.end()) {
+						name = (*beg);
+						beg++;
+						if (beg != tokens.end()) {
+							numstars = abs(atoi(beg->c_str()));	// negatives not allowed
+							beg++;
+						}
+					}
+					StarFieldCircle *sf = new StarFieldCircle();
+					sf->makeStars(numstars);
 					makeConf(sf, name);
 				} else if ((*beg) == string("text")) {
 					typ = string("text");
@@ -662,7 +691,7 @@ void *mmap_thread(void *)
 				} else if (*beg == string("polhemus")) {
 					// make polhemus
 					// (or)
-					// make polhemus <name> 
+					// make polhemus <name>
 					// (or)
 					// make polhemus <name> <nsensors>
 					if (g_polhemusConnected) {
@@ -756,10 +785,10 @@ void *mmap_thread(void *)
 							}
 						}
 					}
-				} else if (*beg == string("labjack")){
-					// make labjack <name> <number of analog inputs> 
-					if(g_labjackConnected){
-						typ = string("labjack"); 
+				} else if (*beg == string("labjack")) {
+					// make labjack <name> <number of analog inputs>
+					if (g_labjackConnected) {
+						typ = string("labjack");
 						beg++;
 						name = typ;
 						if (beg != tokens.end()) {
@@ -796,6 +825,7 @@ void *mmap_thread(void *)
 				if (g_polhemus) g_polhemus = 0;
 				if (g_mouse) g_mouse = 0;
 				if (g_opto) g_opto = 0;
+                if (g_labjack) g_labjack = 0;
 				for (unsigned int i=0; i<g_objs.size(); i++) {
 					delete g_objs[i];
 				}
@@ -828,6 +858,7 @@ void *mmap_thread(void *)
 				resp += {"\tmake square <name>\n"};
 				resp += {"\tmake open_square <name> <frac thickness>\n"};
 				resp += {"\tmake stars <name> <num stars>\n"};
+				resp += {"\tmake stars_circle <name> <num stars>\n"};
 				resp += {"\tmake text <name> <nchars>\n"};
 				resp += {"\t\tDisplays text on the screen.\n"};
 				resp += {"\t\tnchars should be less than 256\n"};
@@ -948,7 +979,7 @@ void *polhemus_thread(void * )
 	int rxbytes = 0;
 	do {
 		pol->Write("p"); // request position data (and stop continuous...)
-		usleep(5e4); // 5e4 us is way way slower than polhemus should be able to handle 
+		usleep(5e4); // 5e4 us is way way slower than polhemus should be able to handle
 		len = pol->Read(buf,BUF_SIZE);  // keep trying till we get a response
 		rxbytes += len > 0 ? len : 0;
 		count++;
@@ -964,7 +995,7 @@ void *polhemus_thread(void * )
 		// first establish comm and clear out any residual trash data
 		double frames = 0;
 		float markerData[16*3];
-		
+
 		pol->Write("U1\r"); // put polhemus in centimeter mode (no response is sent)
 		usleep(5e4);
 
@@ -986,7 +1017,7 @@ void *polhemus_thread(void * )
 			memset(buf, 0, 16*20); // max markers * 20 bytes. is this necessasry???
 			do {
 				len = pol->Read(buf+count, BUF_SIZE-count);
-				if (len>0) 
+				if (len>0)
 					count+=len;
 				usleep(300);
 			} while ((len>0));
@@ -1193,43 +1224,44 @@ void *opto_thread(void * )
 }
 
 #ifdef LABJACK
-void* labjack_thread(void* ){
+void *labjack_thread(void * )
+{
 	const uint8 settlingFactor = 0; //0=5us, 1=10us, 2=100us, 3=1ms, 4=10ms.  Default 0.
-	const uint8 gainIndex = 0; //0 = +-10V, 1 = +-1V, 2 = +-100mV, 3 = +-10mV, 15=autorange.  Default 0.
+	const uint8 gainIndex = 2; //0 = +-10V, 1 = +-1V, 2 = +-100mV, 3 = +-10mV, 15=autorange.  Default 0.
 	const uint8 resolution = 1; //1=default, 1-8 for high-speed ADC, 9-13 for high-res ADC on U6-Pro. Default 1.
-	const uint8 differential = 0; //Indicates whether to do differential readings.  Default 0 (false).
+	const uint8 differential = 1; //Indicates whether to do differential readings.  Default 0 (false).
 	g_labjackLabelStr = string("disconnected"); 
 	/// init the USB device.
-	HANDLE hDevice = 0; 
-	u6CalibrationInfo caliInfo; 
-	int numChannels = 0; 
+	HANDLE hDevice = 0;
+	u6CalibrationInfo caliInfo;
+	int numChannels = 0;
 	uint8 *sendBuff=0, *recBuff=0;
 	//Opening first found U6 over USB
-	if( (hDevice = openUSBConnection(-1)) == NULL )
+	if ( (hDevice = openUSBConnection(-1)) == NULL )
 		return 0;
 	//Get calibration information from U6
-	if( getCalibrationInfo(hDevice, &caliInfo) < 0 ){
+	if ( getCalibrationInfo(hDevice, &caliInfo) < 0 ) {
 		closeUSBConnection(hDevice);
-		return 0; 
+		return 0;
 	}
-	g_labjackConnected = true; 
-	g_labjackLabelStr = string("connected, unconfigured"); 
-	/// wait for configuration through matlab. 
-	while(!g_die && numChannels == 0){
-		if(g_labjack){
-			numChannels = g_labjack->m_nsensors; 	
+	g_labjackConnected = true;
+	g_labjackLabelStr = string("connected, unconfigured");
+	/// wait for configuration through matlab.
+	while (!g_die && numChannels == 0) {
+		if (g_labjack) {
+			numChannels = g_labjack->m_nsensors;
 		}
-		if(!numChannels) sleep(1); 
+		if (!numChannels) sleep(1);
 	}
-	if(numChannels > 0){
-		/// setup the feedback command. 
+	if (numChannels > 0) {
+		/// setup the feedback command.
 		uint16 checksumTotal, bits16;
 		uint32 bits32;
 
 		int sendChars, recChars, i, j, sendSize, recSize;
 		float valueAIN[14];
 
-		for( i = 0; i < 14; i++ )
+		for ( i = 0; i < 14; i++ )
 			valueAIN[i] = 9999;
 
 		//Setting up a Feedback command that will set CIO0-3 as input, and
@@ -1239,7 +1271,7 @@ void* labjack_thread(void* ){
 
 		sendBuff[1] = (uint8)(0xF8);  //Command byte
 		sendBuff[2] = 6;              //Number of data words (.5 word for echo, 5.5
-												//words for IOTypes and data)
+		//words for IOTypes and data)
 		sendBuff[3] = (uint8)(0x00);  //Extended command number
 
 		sendBuff[6] = 0;    //Echo
@@ -1251,7 +1283,7 @@ void* labjack_thread(void* ){
 		sendBuff[12] = 0;   //Direction (for EIO)
 		sendBuff[13] = 0;   //Direction (for CIO)
 
-	//Setting DAC0 with 2.5 volt output
+		//Setting DAC0 with 2.5 volt output
 		sendBuff[14] = 38;    //IOType is DAC0(16-bit)
 
 		//Value is 2.5 volts (in binary)
@@ -1264,41 +1296,39 @@ void* labjack_thread(void* ){
 		extendedChecksum(sendBuff, 18);
 
 		//Sending command to U6
-		if( (sendChars = LJUSB_Write(hDevice, sendBuff, 18)) < 18 ){
-			if(sendChars == 0)
+		if ( (sendChars = LJUSB_Write(hDevice, sendBuff, 18)) < 18 ) {
+			if (sendChars == 0)
 				printf("Feedback (CIO input) error : write failed\n");
 			else
 				printf("Feedback (CIO input) error : did not write all of the buffer\n");
 			goto cleanmem;
 		}
 		//Reading response from U6
-		if( (recChars = LJUSB_Read(hDevice, recBuff, 10)) < 10 ){
-			if( recChars == 0 )
-			{
+		if ( (recChars = LJUSB_Read(hDevice, recBuff, 10)) < 10 ) {
+			if ( recChars == 0 ) {
 				printf("Feedback (CIO input) error : read failed\n");
 				goto cleanmem;
-			}
-			else
+			} else
 				printf("Feedback (CIO input) error : did not read all of the buffer\n");
 		}
 		checksumTotal = extendedChecksum16(recBuff, 10);
-		if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5] ){
+		if ( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5] ) {
 			printf("Feedback (CIO input) error : read buffer has bad checksum16(MSB)\n");
 			goto cleanmem;
 		}
-		if( (uint8)(checksumTotal & 0xff) != recBuff[4] ){
+		if ( (uint8)(checksumTotal & 0xff) != recBuff[4] ) {
 			printf("Feedback (CIO input) error : read buffer has bad checksum16(LBS)\n");
 			goto cleanmem;
 		}
-		if( extendedChecksum8(recBuff) != recBuff[0] ){
+		if ( extendedChecksum8(recBuff) != recBuff[0] ) {
 			printf("Feedback (CIO input) error : read buffer has bad checksum8\n");
 			goto cleanmem;
 		}
-		if( recBuff[1] != (uint8)(0xF8) || recBuff[3] != (uint8)(0x00) ){
+		if ( recBuff[1] != (uint8)(0xF8) || recBuff[3] != (uint8)(0x00) ) {
 			printf("Feedback (CIO input) error : read buffer has wrong command bytes \n");
 			goto cleanmem;
 		}
-		if( recBuff[6] != 0 ){
+		if ( recBuff[6] != 0 ) {
 			printf("Feedback (CIO input) error : received errorcode %d for frame %d in Feedback response. \n", recBuff[6], recBuff[7]);
 			goto cleanmem;
 		}
@@ -1307,13 +1337,13 @@ void* labjack_thread(void* ){
 		free(recBuff);
 
 		//Setting up Feedback command that will run infinity times.
-		if( ((sendSize = 7+numChannels*4) % 2) != 0 )
+		if ( ((sendSize = 7+numChannels*4) % 2) != 0 )
 			sendSize++;
-		sendBuff = (uint8*)malloc(sendSize*sizeof(uint8)); //Creating an array of size sendSize
+		sendBuff = (uint8 *)malloc(sendSize*sizeof(uint8)); //Creating an array of size sendSize
 
-		if( ((recSize = 9+numChannels*3) % 2) != 0 )
+		if ( ((recSize = 9+numChannels*3) % 2) != 0 )
 			recSize++;
-		recBuff = (uint8*)malloc(recSize*sizeof(uint8));   //Creating an array of size recSize
+		recBuff = (uint8 *)malloc(recSize*sizeof(uint8));  //Creating an array of size recSize
 
 		sendBuff[1] = (uint8)(0xF8);     //Command byte
 		sendBuff[2] = (sendSize - 6)/2;  //Number of data words
@@ -1322,88 +1352,88 @@ void* labjack_thread(void* ){
 		sendBuff[6] = 0;     //Echo
 
 		//Setting AIN read commands
-		for( j = 0; j < numChannels; j++ ){
+		for ( j = 0; j < numChannels; j++ ) {
 			sendBuff[7 + j*4] = 2;     //IOType is AIN24
 
 			//Positive Channel (bits 0 - 4), LongSettling (bit 6) and QuickSample (bit 7)
 			sendBuff[8 + j*4] = j; //Positive Channel
 			sendBuff[9 + j*4] = (uint8)(resolution&15) + (uint8)((gainIndex&15)*16);   //ResolutionIndex(Bits 0-3), GainIndex(Bits 4-7)
 			sendBuff[10 + j*4] = (uint8)(settlingFactor&7);  //SettlingFactor(Bits 0-2)
-			if( j%2 == 0 )
+			if ( j%2 == 0 )
 				sendBuff[10 + j*4] += (uint8)((differential&1)*128);   //Differential(Bits 7)
 		}
 		extendedChecksum(sendBuff, sendSize);
 		ostringstream oss;
-		oss << "connected, " << g_labjack->m_nsensors << " channels\n"; 
-		oss << "green status light should be blinking."; 
-		g_labjackLabelStr = oss.str(); 
-		
-		i=0; 
-		while(!g_die){
+		oss << "connected, " << g_labjack->m_nsensors << " channels\n";
+		oss << "green status light should be blinking.";
+		g_labjackLabelStr = oss.str();
+
+		i=0;
+		while (!g_die) {
 			//Sending command to U6
-			if( (sendChars = LJUSB_Write(hDevice, sendBuff, sendSize)) < sendSize ){
-				if(sendChars == 0)
-						printf("Feedback error (Iteration %d): write failed\n", i);
+			if ( (sendChars = LJUSB_Write(hDevice, sendBuff, sendSize)) < sendSize ) {
+				if (sendChars == 0)
+					printf("Feedback error (Iteration %d): write failed\n", i);
 				else
-						printf("Feedback error (Iteration %d): did not write all of the buffer\n", i);
+					printf("Feedback error (Iteration %d): did not write all of the buffer\n", i);
 				goto cleanmem;
 			}
 			//Reading response from U6
-			if( (recChars = LJUSB_Read(hDevice, recBuff, recSize)) < recSize ){
-				if( recChars == 0 )
-				{
-						printf("Feedback error (Iteration %d): read failed\n", i);
-						goto cleanmem;
+			if ( (recChars = LJUSB_Read(hDevice, recBuff, recSize)) < recSize ) {
+				if ( recChars == 0 ) {
+					printf("Feedback error (Iteration %d): read failed\n", i);
+					goto cleanmem;
 				}
 			}
 			checksumTotal = extendedChecksum16(recBuff, recChars);
-			if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5] ){
+			if ( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5] ) {
 				printf("Feedback error (Iteration %d): read buffer has bad checksum16(MSB)\n", i);
 				goto cleanmem;
 			}
-			if( (uint8)(checksumTotal & 0xff) != recBuff[4] ){
+			if ( (uint8)(checksumTotal & 0xff) != recBuff[4] ) {
 				printf("Feedback error (Iteration %d): read buffer has bad checksum16(LBS)\n", i);
 				goto cleanmem;
 			}
-			if( extendedChecksum8(recBuff) != recBuff[0] ){
+			if ( extendedChecksum8(recBuff) != recBuff[0] ) {
 				printf("Feedback error (Iteration %d): read buffer has bad checksum8\n", i);
 				goto cleanmem;
 			}
-			if( recBuff[1] != (uint8)(0xF8) || recBuff[3] != (uint8)(0x00) ){
+			if ( recBuff[1] != (uint8)(0xF8) || recBuff[3] != (uint8)(0x00) ) {
 				printf("Feedback error (Iteration %d): read buffer has wrong command bytes \n", i);
 				goto cleanmem;
 			}
-			if( recBuff[6] != 0 ){
+			if ( recBuff[6] != 0 ) {
 				printf("Feedback error (Iteration %d): received errorcode %d for frame %d in Feedback response. \n", i, recBuff[6], recBuff[7]);
 				goto cleanmem;
 			}
-			if( recChars != recSize ){
+			if ( recChars != recSize ) {
 				printf("Feedback error (Iteration %d): received packet if %d size when expecting %d\n", i, recChars, recSize);
 				goto cleanmem;
 			}
 
 			//Getting AIN voltages
 			for(j = 0; j < numChannels; j++){
-				double d = 0.0; 
-				bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
-				getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
-				valueAIN[j] = d; 
+                double d = 0.0;
+                bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
+                getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
+                valueAIN[j] = d;
+                j = j + differential;     
 			}
-			// copy over the data! 
-			if(g_labjack){
-				g_labjack->store(valueAIN); 
+			// copy over the data!
+			if (g_labjack) {
+				g_labjack->store(valueAIN);
 			}
-			usleep(200); // could be longer, really. 
-			i++; 
+			usleep(200); // could be longer, really.
+			i++;
 		}
 	}
 cleanmem:
-	if(sendBuff) free(sendBuff);
-	if(recBuff) free(recBuff);
-	printf("labjack: closing USB handle\n"); 
+	if (sendBuff) free(sendBuff);
+	if (recBuff) free(recBuff);
+	printf("labjack: closing USB handle\n");
 	closeUSBConnection(hDevice);
-	g_labjackLabelStr = string("Error!  Disconnected.\nTry unplugging the labjack\nand restarting bmi5."); 
-	return 0; 
+	g_labjackLabelStr = string("Error!  Disconnected.\nTry unplugging the labjack\nand restarting bmi5.");
+	return 0;
 }
 
 #endif
@@ -1484,6 +1514,14 @@ void gobjsInit()
 
 int main(int argn, char **argc)
 {
+	(void) signal(SIGINT, destroy);
+
+	srand(time(NULL)); // seed rng
+
+	lockfile lf = lockfile("/tmp/bmi5.lock");
+	if (lf.lock()) {
+		return 1;
+	}
 
 #ifdef DEBUG
 	//feenableexcept(FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW);  // Enable (some) floating point exceptions
@@ -1546,9 +1584,7 @@ int main(int argn, char **argc)
 	g_openglTimeLabel = makeLabel("OpenGL stats", "mean:-- max:--");
 	g_polhemusLabel = makeLabel("Polhemus stats", "x -; y -; z -;");
 	g_optoLabel = makeLabel("Optotrak stats", "x -; y -; z -;");
-#ifdef LABJACK
 	g_labjackLabel = makeLabel("Labjack", "  ");
-#endif
 
 	GtkWidget *button = gtk_button_new_with_label ("Write data to disk");
 	g_signal_connect(button, "clicked", G_CALLBACK(saveMatlabData), window);
@@ -1641,7 +1677,7 @@ int main(int argn, char **argc)
 	             g_renderOpView, G_CALLBACK(opViewCB));
 
 	g_signal_connect_swapped (window, "destroy",
-	                          G_CALLBACK (destroy), NULL);
+	                          G_CALLBACK (destroyGUI), NULL);
 
 	gtk_widget_show (window);
 	gtk_widget_show (top);
@@ -1653,7 +1689,7 @@ int main(int argn, char **argc)
 
 	g_polhemus = 0;
 	g_opto = 0;
-	g_labjack = 0; 
+	g_labjack = 0;
 	g_mouse = 0;
 	pthread_mutex_lock(&mutex_gobjs);
 	gobjsInit();
@@ -1686,7 +1722,7 @@ int main(int argn, char **argc)
 	gtk_widget_show_all (window);
 
 	g_record = true;
-	gtk_main ();
+	gtk_main();
 
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
 	pthread_join(othread,NULL);
@@ -1706,6 +1742,8 @@ int main(int argn, char **argc)
 	delete g_daglx[0];
 	delete g_daglx[1];
 	delete g_tsc;
+
+	lf.unlock();
 
 	return 0;
 }

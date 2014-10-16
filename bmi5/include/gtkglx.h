@@ -17,7 +17,7 @@
 class gtkglx
 {
 	Colormap 		m_xcolormap;
-	GdkVisual 		*m_visual;
+	//GdkVisual 		*m_visual;
 	XVisualInfo 	*m_xvisual;
 	Display 		*m_display;
 	GLXContext 		m_context;
@@ -26,7 +26,7 @@ public:
 	float				m_size[2];
 
 	gtkglx(GtkWidget *) {
-		GdkScreen 		*screen;
+		//GdkScreen 		*screen;
 		int 				xscreen;
 		Window 			root;
 
@@ -36,9 +36,9 @@ public:
 
 		m_display = gdk_x11_get_default_xdisplay ();
 		xscreen = DefaultScreen (m_display);
-		screen = gdk_screen_get_default ();
+		//screen = gdk_screen_get_default ();
 		m_xvisual = glXChooseVisual (m_display, xscreen, attributes);
-		m_visual = gdk_x11_screen_lookup_visual (screen, m_xvisual->visualid);
+		//m_visual = gdk_x11_screen_lookup_visual (screen, m_xvisual->visualid);
 		root = RootWindow (m_display, xscreen);
 		m_xcolormap = XCreateColormap(m_display, root,
 		                              m_xvisual->visual, AllocNone);
@@ -48,8 +48,8 @@ public:
 	~gtkglx() {
 		glXDestroyContext (m_display, m_context);
 		XFreeColormap (m_display, m_xcolormap);
+		//g_object_unref (G_OBJECT(m_visual));
 		XFree (m_xvisual);
-		g_object_unref (G_OBJECT(m_visual));
 	}
 	int configure(GtkWidget *widget) {
 		GtkAllocation allocation;

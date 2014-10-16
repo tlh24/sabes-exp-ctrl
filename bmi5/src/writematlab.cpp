@@ -80,9 +80,11 @@ void writeMatlab(vector<Serialize *> tosave, char *filename, bool backup)
 				size_t dims2[2];
 				dims2[0] = dims[0];
 				dims2[1] = dims[1];
-				field = Mat_VarCreate(s.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims2, f, 0);
-				Mat_VarWrite(matfp,field,MAT_COMPRESSION_NONE);
-				Mat_VarFree(field);
+				if (f != NULL) {
+					field = Mat_VarCreate(s.c_str(), (matio_classes)cls, (matio_types)typ, 2, dims2, f, 0);
+					Mat_VarWrite(matfp,field,MAT_COMPRESSION_NONE);
+					Mat_VarFree(field);
+				}
 			}
 		}
 		if (backup) tosave[j]->m_lastBackup = n;
@@ -120,7 +122,8 @@ bool matlabHasNewData(vector<Serialize *> tosave)
 	for (unsigned int j=0; j<tosave.size(); j++) {
 		int n = tosave[j]->nstored();
 		int k = tosave[j]->m_lastBackup;
-		if ( n > k ) return true;
+		if (n > k)
+			return true;
 	}
 	return false;
 }
