@@ -102,9 +102,10 @@ public:
 		clear();
 	}
 	virtual bool store() {
-		double time = gettime();
-		double ticks = g_tsc->getTicks();
-		v_time.push_back(time);
+		long double time = 0.0; 
+		double ticks; 
+		g_tsc->getTicks(time, ticks);
+		v_time.push_back((double)time);
 		v_ticks.push_back(ticks);
 		v_frame.push_back(g_frame);
 		return true; //stored!
@@ -159,9 +160,10 @@ public:
 	}
 	virtual double *mmapRead(double *d) {
 		//this is actually a write (all variables output)
-		double time = gettime();
-		double ticks = g_tsc->getTicks();
-		*d++ = time;
+		long double time = 0.0;
+		double ticks = 0.0;
+		g_tsc->getTicks(time, ticks);
+		*d++ = (double)time;
 		*d++ = ticks;
 		*d++ = (double)g_frame;
 		return d;
@@ -188,8 +190,9 @@ public:
 		return false;       //dummy.
 	}
 	virtual bool store(int frame) {
-		m_time = gettime();
-		m_ticks = g_tsc->getTicks();
+		long double time = 0.0;
+		g_tsc->getTicks(time, m_ticks);
+		m_time = (double)time; 
 		m_frame = frame;
 		v_time.push_back(m_time);
 		v_ticks.push_back(m_ticks);

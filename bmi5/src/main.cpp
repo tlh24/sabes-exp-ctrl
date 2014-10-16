@@ -311,7 +311,9 @@ static gboolean refresh (gpointer )
 	gtk_widget_queue_draw (g_da[0]);
 	gtk_widget_queue_draw (g_da[1]);
 	//can do other pre-frame GUI update stuff here.
-	g_tsc->getTicks(); //force mmap update.
+	long double time; 
+	double ticks; 
+	g_tsc->getTicks(time, ticks); //force mmap update.
 	string s = g_tsc->getInfo();
 	gtk_label_set_text(GTK_LABEL(g_timeLabel), s.c_str());
 	char str[256];
