@@ -150,7 +150,7 @@ public:
 		//first pre-multiply the local->world with the world->screen matrix.
 		float m[4][4]; //local->world matrix.
 		for (int i=0; i<16; i++) m[0][i] = 0.f;
-		float xar = ar < 1.f ? ar : 1.f;
+		float xar = ar < 1.f ? ar     : 1.f;
 		float yar = ar > 1.f ? 1.f/ar : 1.f;
 		m[0][3] = m_trans[0];
 		m[1][3] = m_trans[1];
@@ -199,8 +199,8 @@ public:
 			}
 		}
 	}
-	virtual void move(float, long double) {} //no velocity here.
-///serialization.
+	virtual void move(long double) {} //no velocity here.
+	///serialization.
 	unsigned char floatToU8(float in) {
 		in *= 255;
 		in = in > 255.f ? 255.f : in;
@@ -338,18 +338,19 @@ class StarField : public Shape
 {
 public: //do something like the flow field common in the lab.
 	array<float,2> m_vel; //in screen units/second.
-	double *m_age; //arb. units.
+	double *m_phase; // each stars phase
 	starStruct *m_v; //vertices, backing store.
 	float *m_pvel; //individual point velocities for variable coherence.
 	float	m_coherence;
-	float	m_starSize;
+	float	m_starsize;
+	float 	m_lifetime; // how long before a star is drawn elsewhere
 	GLuint	m_colorbuffer;
 	long double m_lastTime; //oh god it's been years...
 	long double m_startTime;
-	bool	m_awesome = false;
-	bool	m_fade = false;
 	vector<array<float,2>> v_vel;
 	vector<float> v_coherence;
+	vector <float> v_lifetime;
+	vector <float> v_starsize;
 	// we can assume that the other parts don't change during the experiment.
 
 	StarField() : Shape() {
@@ -357,10 +358,11 @@ public: //do something like the flow field common in the lab.
 		m_vel[1] = 0.1f;
 		m_v = NULL;
 		m_pvel = NULL;
-		m_age = 0;
+		m_phase = NULL;
 		m_coherence = 1.0f;
+		m_lifetime = 1.0f;
 		m_lastTime = 0.0;
-		m_starSize = 3.0;
+		m_starsize = 2.0;
 		m_startTime = gettime();
 		m_name = string {"stars"};
 	}
@@ -369,11 +371,13 @@ public: //do something like the flow field common in the lab.
 		m_v = NULL;
 		if (m_pvel) free(m_pvel);
 		m_pvel = NULL;
-		if (m_age) free(m_age);
-		m_age = NULL;
+		if (m_phase) free(m_phase);
+		m_phase = NULL;
 		//deleteBuffers();
 		v_vel.clear();
 		v_coherence.clear();
+		v_lifetime.clear();
+		v_starsize.clear();
 	}
 	virtual void makeVAO(starStruct *vertices, bool del, int display) {
 		//this method differs from Shape::makeVAO in that each vertex has a color.
@@ -401,7 +405,10 @@ public: //do something like the flow field common in the lab.
 	float uniform() {
 		return ((float)rand() / (float)RAND_MAX);
 	}
-	void makeStars(int nstars, float ar) {
+	float norm(float a, float b) {
+		return sqrtf(a*a + b*b);
+	}
+	virtual void makeStars(int nstars) {
 		//distribute the stars uniformly over w, h.
 		//this just requires scaling some rand() s.
 		if (m_v) free(m_v);
@@ -410,18 +417,15 @@ public: //do something like the flow field common in the lab.
 		m_pvel = NULL;
 		m_v = (starStruct *)malloc(nstars * sizeof(starStruct));
 		m_pvel = (float *)malloc(nstars * 2 * sizeof(float));
-		m_age = (double *)malloc(nstars * sizeof(double));
+		m_phase = (double *)malloc(nstars * sizeof(double));
 		for (int i=0; i<nstars; i++) {
-			m_v[i].position[0] = (uniform() - 0.5)*ar*2.f;
+			m_v[i].position[0] = (uniform() - 0.5)*2.f;
 			m_v[i].position[1] = (uniform() - 0.5)*2.f;
-			if (m_awesome)
-				m_v[i].color = (unsigned int)(255*uniform() + 255*255*uniform() + 255*255*255*uniform());
-			else
-				m_v[i].color = 0xffffffff;
-			float angle = PI * 2.0 * ((float)rand() / (float)RAND_MAX);
-			m_pvel[i*2+0] = sinf(angle);
-			m_pvel[i*2+1] = cosf(angle);
-			m_age[i] = uniform()*PI*2.0;
+			m_v[i].color = 0xffffffff;
+			float angle = uniform()*PI*2.f;
+			m_pvel[i*2+0] = sinf(angle); // unit vector
+			m_pvel[i*2+1] = cosf(angle); // not a velocity
+			m_phase[i] = uniform()*PI*2.0;
 		}
 		m_n = nstars;
 		m_needConfig[0] = m_needConfig[1] = true;
@@ -439,63 +443,53 @@ public: //do something like the flow field common in the lab.
 			m_needConfig[display] = false;
 		}
 	}
-	virtual void move(float ar, long double time) {
+	virtual void move(long double time) {
+
+		if (!m_v || !m_pvel || !m_phase) return;
+
 		unsigned int basecol = 0;
+		basecol += (unsigned int)(m_color[3] * 255) & 255;
+		basecol <<= 8;
 		basecol += (unsigned int)(m_color[2] * 255) & 255;
 		basecol <<= 8;
 		basecol += (unsigned int)(m_color[1] * 255) & 255;
 		basecol <<= 8;
 		basecol += (unsigned int)(m_color[0] * 255) & 255;
-		if (!m_v || !m_pvel || !m_age) return;
+
 		float dt = (float)(time - m_lastTime);
-		float a[2];
-		a[0] = ar*1.1f;
-		a[1] = 1.1f;
+		double fq = 1/(m_lifetime+1e-6); // dot lifetime freq; protect div-0
+
+		float scaled_vel[2];
+		scaled_vel[0] = m_vel[0] / m_scale[0];
+		scaled_vel[1] = m_vel[1] / m_scale[1];
+		float speed = norm(scaled_vel[0], scaled_vel[1]);
+
 		int k = (int)floor(m_n * m_coherence);
-		float speed = sqrtf(m_vel[0]*m_vel[0] + m_vel[1]*m_vel[1]);
-		for (int i=0; i<k; i++) {
-			for (int j=0; j<2; j++) {
-				float f = m_v[i].position[j];
-				f += m_vel[j] * dt;
-				if (f < a[j]) f += a[j]*2.0f;
-				if (f > a[j]) f -= a[j]*2.0f;
-				m_v[i].position[j] = f;
-			}
-		}
-		for (int i=k; i<m_n; i++) { //draw randoms second. not that they need be in order..
-			for (int j=0; j<2; j++) {
-				float f = m_v[i].position[j];
-				float v = m_pvel[i*2+j];
-				f += v * speed * dt;
-				if (f < a[j]) f += a[j]*2.0f;
-				if (f > a[j]) f -= a[j]*2.0f;
-				m_v[i].position[j] = f;
-			}
-		}
 		for (int i=0; i<m_n; i++) {
-			double d = time-m_age[i];
-			int c = (int)(255.0 *
-			              (-0.52 * cos(d) + 0.5));
-			c = c > 255 ? 255: c;
-			c = c < 0 ? 0 : c;
-			if (!m_fade) {
-				if (c) c = 255;       //saturate.
+			for (int j=0; j<2; j++) {
+				float f = m_v[i].position[j];
+				float v;
+				if (i<k)	// coherent stars
+					v = scaled_vel[j];
+				else 		// random stars
+					v = m_pvel[i*2+j] * speed;
+				f += v * dt;
+				if (f < 0.5f) f += 1.f;
+				if (f > 0.5f) f -= 1.f;
+				m_v[i].position[j] = f;
 			}
-			c &= 0xff;
-			m_v[i].color &= 0x00ffffff;
-			m_v[i].color += (c << 24);
-			// if it's completely transparent, update the position.
-			if (d > PI*2.0) {
-				m_age[i] += PI*2.0;
+
+			m_v[i].color = basecol;
+
+			double d  = cos(2.0*PI*fq*time			+ m_phase[i]);
+			double dp = cos(2.0*PI*fq*m_lastTime	+ m_phase[i]); // previous
+
+			// update the position.
+			// if lifetime is negative, stars live forever
+			if (d > 0 && dp <= 0 && m_lifetime > 0.f) {
 				for (int j=0; j<2; j++) {
-					float f = (uniform() - 0.5)*a[j]*2.f;
+					float f = uniform() - 0.5f;
 					m_v[i].position[j] = f;
-				}
-				if (m_awesome) {
-					m_v[i].color = (unsigned int)(255*uniform() + 255*255*uniform() + 255*255*255*uniform());
-					m_v[i].color &= 0xffff5fff; //debug!  you should not see this.
-				} else {
-					m_v[i].color = basecol;
 				}
 			}
 		}
@@ -504,8 +498,8 @@ public: //do something like the flow field common in the lab.
 	virtual void draw(int display, float ar) {
 		configure(display);
 		//this is a little more complicated, as we need to do a memcpy and user shaders.
-		if ((m_draw & (1<<display)) && m_v && m_pvel && m_age) {
-			glPointSize(m_starSize);
+		if ((m_draw & (1<<display)) && m_v && m_pvel && m_phase) {
+			glPointSize(m_starsize);
 			setupDrawMatrices(display, ar);
 
 			glBindVertexArray(m_vao[display]);
@@ -530,24 +524,19 @@ public: //do something like the flow field common in the lab.
 	void setCoherence(double c) {
 		m_coherence = c;
 	}
+	void setLifetime(double x) {
+		m_lifetime = x;
+	}
 	void setStarSize(double ss) {
-		m_starSize = ss;
+		m_starsize = ss;
 	}
-	void setAwesome(bool s) {
-		m_awesome = s;
-		if (s) {
-			m_starSize = 30.0;
-			m_fade = true;
-		}
-	}
-	void setFade(bool s) {
-		m_fade = s;
-	}
-/// serialization
+	// serialization
 	virtual void clear() {
 		Shape::clear();
 		v_vel.clear();
 		v_coherence.clear();
+		v_lifetime.clear();
+		v_starsize.clear();
 	}
 	virtual bool store() {
 		array<unsigned char,4> color;
@@ -566,6 +555,8 @@ public: //do something like the flow field common in the lab.
 			for (int i=0; i<2; i++)
 				same &= (m_vel[i] == (v_vel[n-1])[i]);
 			same &= (m_coherence == v_coherence[n-1]);
+			same &= (m_lifetime == v_lifetime[n-1]);
+			same &= (m_starsize == v_starsize[n-1]);
 		} else same = false;
 		if (!same) {
 			v_time.push_back(m_time);
@@ -575,6 +566,8 @@ public: //do something like the flow field common in the lab.
 			v_trans.push_back(m_trans);
 			v_vel.push_back(m_vel);
 			v_coherence.push_back(m_coherence);
+			v_lifetime.push_back(m_lifetime);
+			v_starsize.push_back(m_starsize);
 		}
 		return !same;
 	}
@@ -584,8 +577,12 @@ public: //do something like the flow field common in the lab.
 			return m_name + string("vel");
 		case 1:
 			return m_name + string("coherence");
+		case 2:
+			return m_name + string("lifetime");
+		case 3:
+			return m_name + string("starsize");
 		}
-		return Shape::storeName(indx - 2);
+		return Shape::storeName(indx - 4);
 	}
 	virtual int getStoreClass(int indx) {
 		switch (indx) {
@@ -593,8 +590,12 @@ public: //do something like the flow field common in the lab.
 			return MAT_C_SINGLE;
 		case 1:
 			return MAT_C_SINGLE;
+		case 2:
+			return MAT_C_SINGLE;
+		case 3:
+			return MAT_C_SINGLE;
 		}
-		return Shape::getStoreClass(indx - 2);
+		return Shape::getStoreClass(indx - 4);
 	}
 	virtual void getStoreDims(int indx, size_t *dims) {
 		switch (indx) {
@@ -606,8 +607,16 @@ public: //do something like the flow field common in the lab.
 			dims[0] = 1;
 			dims[1] = 1;
 			return;
+		case 2:
+			dims[0] = 1;
+			dims[1] = 1;
+			return;
+		case 3:
+			dims[0] = 1;
+			dims[1] = 1;
+			return;
 		}
-		return Shape::getStoreDims(indx-2, dims);
+		return Shape::getStoreDims(indx-4, dims);
 	}
 	virtual void *getStore(int indx, int i) {
 		switch (indx) {
@@ -615,17 +624,125 @@ public: //do something like the flow field common in the lab.
 			return (void *)&((v_vel[i])[0]);
 		case 1:
 			return (void *)&((v_coherence[i]));
+		case 2:
+			return (void *)&((v_lifetime[i]));
+		case 3:
+			return (void *)&((v_starsize[i]));
 		}
-		return Shape::getStore(indx-2, i);
+		return Shape::getStore(indx-4, i);
 	}
 	virtual int numStores() {
-		return Shape::numStores() + 2;
+		return Shape::numStores() + 4;
 	}
 	virtual double *mmapRead(double *d) {
 		for (int i=0; i<2; i++)
 			m_vel[i] = *d++;
 		m_coherence = *d++;
+		m_lifetime = *d++;
+		m_starsize = *d++;
 		return Shape::mmapRead(d);
+	}
+};
+
+class StarFieldCircle : public StarField
+{
+public:
+	StarFieldCircle() {}
+	~StarFieldCircle() {}
+	void makeStars(int nstars) {
+		//distribute the stars uniformly over w, h.
+		//this just requires scaling some rand() s.
+		if (m_v) free(m_v);
+		m_v = NULL;
+		if (m_pvel) free(m_pvel);
+		m_pvel = NULL;
+		m_v = (starStruct *)malloc(nstars * sizeof(starStruct));
+		m_pvel = (float *)malloc(nstars * 2 * sizeof(float));
+		m_phase = (double *)malloc(nstars * sizeof(double));
+		for (int i=0; i<nstars; i++) {
+
+			// draw uniformly in a circle with radius 0.5
+			float x = uniform()*PI*2.f;
+			float u = random()+random();
+			float r = u > 1 ? 2-u : u;
+			m_v[i].position[0] = 0.5f*r*cosf(x);
+			m_v[i].position[1] = 0.5f*r*sinf(x);
+
+			m_v[i].color = 0xffffffff;
+			float angle = uniform()*PI*2.f;
+			m_pvel[i*2+0] = sinf(angle); // unit vector
+			m_pvel[i*2+1] = cosf(angle); // not a velocity
+			m_phase[i] = uniform()*PI*2.0;
+		}
+		m_n = nstars;
+		m_needConfig[0] = m_needConfig[1] = true;
+		m_drawmode = GL_POINTS;
+	}
+	virtual void move(long double time) {
+
+		if (!m_v || !m_pvel || !m_phase) return;
+
+		unsigned int basecol = 0;
+		basecol += (unsigned int)(m_color[3] * 255) & 255;
+		basecol <<= 8;
+		basecol += (unsigned int)(m_color[2] * 255) & 255;
+		basecol <<= 8;
+		basecol += (unsigned int)(m_color[1] * 255) & 255;
+		basecol <<= 8;
+		basecol += (unsigned int)(m_color[0] * 255) & 255;
+
+		float dt = (float)(time - m_lastTime);
+		double fq = 1/(m_lifetime+1e-6); // dot lifetime freq; protect div-0
+
+		float scaled_vel[2];
+		scaled_vel[0] = m_vel[0] / m_scale[0];
+		scaled_vel[1] = m_vel[1] / m_scale[1];
+		float speed = norm(scaled_vel[0], scaled_vel[1]);
+
+		int k = (int)floor(m_n * m_coherence);
+		for (int i=0; i<m_n; i++) {
+
+			float p[2];
+			for (int j=0; j<2; j++) {
+				p[j] = m_v[i].position[j];
+				float v;
+				if (i<k)	// coherent stars
+					v = scaled_vel[j];
+				else 		// random stars
+					v = m_pvel[i*2+j] * speed;
+				p[j] += v * dt;
+			}
+			float r = norm(m_v[i].position[0], m_v[i].position[1]);
+			if (r > 0.5 && speed > 0) {
+				float angle = atan2(p[1],p[0]);
+				angle += PI;
+				p[0] = 0.5 * cosf(angle);
+				p[1] = 0.5 * sinf(angle);
+			}
+			m_v[i].position[0] = p[0];
+			m_v[i].position[1] = p[1];
+
+			m_v[i].color = basecol;
+
+			double d  = cos(2.0*PI*fq*time			+ m_phase[i]);
+			double dp = cos(2.0*PI*fq*m_lastTime	+ m_phase[i]); // previous
+
+			// update the position.
+			// if lifetime is negative, stars live forever
+			if (d > 0 && dp <= 0 && m_lifetime > 0.f) {
+				// draw uniformly in a circle with radius 0.5
+				float a = uniform();
+				float b = uniform();
+				if (b < a) {
+					float tmp = b;
+					b = a;
+					a = tmp;
+				}
+				m_v[i].position[0] = 0.5f*b*cosf(PI*2.f*a/b);
+				m_v[i].position[1] = 0.5f*b*sinf(PI*2.f*a/b);
+			}
+		}
+		m_lastTime = time;
 	}
 };
 

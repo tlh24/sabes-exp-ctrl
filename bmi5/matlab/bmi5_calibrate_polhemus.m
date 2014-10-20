@@ -1,9 +1,12 @@
 function [] = bmi5_calibrate_polhemus()
+
 global bmi5_in bmi5_out;
 
-THE_PATH = '/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab'; % adjust as needed
 
-cd(THE_PATH);
+BASEPATH = '/home/motorlab/';
+CalibrationFile = fullfile(BASEPATH,'sw/sabes-exp-ctrl/bmi5/matlab/calibration_polhemus.mat');
+
+
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
@@ -19,10 +22,10 @@ end
 bmi5_cmd('make tone tone');
 bmi5_cmd('make circle cursor');
 bmi5_cmd('make polhemus finger'); 
-eval(bmi5_cmd('mmap'));
+eval(bmi5_cmd('mmap structure'));
 
 % first ask for a set of points. 
-wx = linspace(-0.7, 0.7, snt);
+wx = linspace(-0.6, 0.6, snt);
 wy = linspace(-0.8, 0.3, snt);
 
 screen = zeros(num_targets, 4); 
@@ -65,7 +68,7 @@ b5.tone_pan = 0;
 b5.tone_scale = 1;
 b5.tone_duration = 0.25;
 
-pause(5);
+pause(30);
 
 i=1;
 for yi = 1:snt
@@ -80,7 +83,7 @@ for yi = 1:snt
         b5.(strcat(s,'color')) = [1 0 0 1]; % red
         b5.tone_play_io = 1;
 		b5 = bmi5_mmap(b5); 
-		pause(3);
+		pause(5);
         b5 = bmi5_mmap(b5);
         p = (pm * [b5.finger_sensors_o])'; 
 		world(i,1:3) = p(1:3);
@@ -97,7 +100,7 @@ plot(screen(:,1), screen(:,2), 'bo');
 hold on
 pred = world * q; 
 plot(pred(:,1), pred(:,2), 'ro'); 
-save('calibration_polhemus.mat','q','pm'); 
+save(CalibrationFile,'q','pm'); 
 
 % turn off all targets
 for j=1:num_targets
