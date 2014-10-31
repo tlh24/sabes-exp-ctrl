@@ -69,8 +69,9 @@ clean:
 deps:
 	sudo apt-get install gcc g++ gdb libboost-dev libgtk-3-dev \
 	libgtkglext1-dev freeglut3-dev libusb-1.0-0-dev libglew-dev \
-	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl \
-	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck
+	libblas-dev liblapack-dev libfftw3-dev qjackctl \
+	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck \
+	libhdf5-7 libhdf5-dev libhdf5-serial-dev zlib1g zlib1g-dev
 	@echo ""
 	@echo "  Note: please download and install libmatio version >= 1.50"
 
