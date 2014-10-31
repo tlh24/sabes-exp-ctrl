@@ -102,8 +102,8 @@ public:
 		clear();
 	}
 	virtual bool store() {
-		long double time = 0.0; 
-		double ticks; 
+		long double time = 0.0;
+		double ticks;
 		g_tsc->getTicks(time, ticks);
 		v_time.push_back((double)time);
 		v_ticks.push_back(ticks);
@@ -192,7 +192,7 @@ public:
 	virtual bool store(int frame) {
 		long double time = 0.0;
 		g_tsc->getTicks(time, m_ticks);
-		m_time = (double)time; 
+		m_time = (double)time;
 		m_frame = frame;
 		v_time.push_back(m_time);
 		v_ticks.push_back(m_ticks);

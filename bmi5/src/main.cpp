@@ -320,8 +320,8 @@ static gboolean refresh (gpointer )
 	gtk_widget_queue_draw (g_da[0]);
 	gtk_widget_queue_draw (g_da[1]);
 	//can do other pre-frame GUI update stuff here.
-	long double time; 
-	double ticks; 
+	long double time;
+	double ticks;
 	g_tsc->getTicks(time, ticks); //force mmap update.
 	string s = g_tsc->getInfo();
 	gtk_label_set_text(GTK_LABEL(g_timeLabel), s.c_str());
@@ -825,7 +825,7 @@ void *mmap_thread(void *)
 				if (g_polhemus) g_polhemus = 0;
 				if (g_mouse) g_mouse = 0;
 				if (g_opto) g_opto = 0;
-                if (g_labjack) g_labjack = 0;
+				if (g_labjack) g_labjack = 0;
 				for (unsigned int i=0; i<g_objs.size(); i++) {
 					delete g_objs[i];
 				}
@@ -1230,7 +1230,7 @@ void *labjack_thread(void * )
 	const uint8 gainIndex = 2; //0 = +-10V, 1 = +-1V, 2 = +-100mV, 3 = +-10mV, 15=autorange.  Default 0.
 	const uint8 resolution = 1; //1=default, 1-8 for high-speed ADC, 9-13 for high-res ADC on U6-Pro. Default 1.
 	const uint8 differential = 1; //Indicates whether to do differential readings.  Default 0 (false).
-	g_labjackLabelStr = string("disconnected"); 
+	g_labjackLabelStr = string("disconnected");
 	/// init the USB device.
 	HANDLE hDevice = 0;
 	u6CalibrationInfo caliInfo;
@@ -1412,12 +1412,12 @@ void *labjack_thread(void * )
 			}
 
 			//Getting AIN voltages
-			for(j = 0; j < numChannels; j++){
-                double d = 0.0;
-                bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
-                getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
-                valueAIN[j] = d;
-                j = j + differential;     
+			for (j = 0; j < numChannels; j++) {
+				double d = 0.0;
+				bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
+				getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
+				valueAIN[j] = d;
+				j = j + differential;
 			}
 			// copy over the data!
 			if (g_labjack) {
