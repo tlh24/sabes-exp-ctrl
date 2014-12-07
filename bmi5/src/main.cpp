@@ -312,7 +312,6 @@ static int realize1(GtkWidget *w, gpointer p)
 
 static gboolean refresh (gpointer )
 {
-
 	if (g_die)
 		return false;
 

@@ -19,7 +19,7 @@ void BuildFont(int display)
 	Display *dpy;
 	XFontStruct *fontInfo;  // storage for our font.
 
-	g_base[display] = glGenLists(96);                      // storage for 96 characters.
+	g_base[display] = glGenLists(189);                      // storage for 189 characters.
 
 	// load the font.  what fonts any of you have is going
 	// to be system dependent, but on my system they are
@@ -33,7 +33,7 @@ void BuildFont(int display)
 	// value, and will be around only long enough to load
 	// the font.
 	dpy = XOpenDisplay(NULL); // default to DISPLAY env.
-	fontInfo = XLoadQueryFont(dpy, "-adobe-helvetica-medium-r-normal--16-*-*-*-p-*-iso8859-1");
+	fontInfo = XLoadQueryFont(dpy, "-adobe-helvetica-medium-r-normal--18-*-*-*-p-*-iso8859-1");
 	if (fontInfo == NULL) {
 		fontInfo = XLoadQueryFont(dpy, "fixed");
 		if (fontInfo == NULL) {
@@ -43,9 +43,9 @@ void BuildFont(int display)
 	// after loading this font info, this would probably be the time
 	// to rotate, scale, or otherwise twink your fonts.
 
-	// start at character 32 (space), get 96 characters (a few characters past z), and
+	// start at character 32 (space), get 189 characters (a few characters past z), and
 	// store them starting at base.
-	glXUseXFont(fontInfo->fid, 32, 96, g_base[display]);
+	glXUseXFont(fontInfo->fid, 32, 189, g_base[display]);
 
 	// free that font's info now that we've got the
 	// display lists.
@@ -59,7 +59,7 @@ void KillFont(int display)
 	//printf("KillFont, %d\n", display);
 	display &= 1;
 	if (g_base[display]) {
-		glDeleteLists(g_base[display], 96);                    // delete all 96 characters.
+		glDeleteLists(g_base[display], 189);                    // delete all 189 characters.
 		g_base[display] = 0;
 	}
 }

@@ -6,7 +6,7 @@ bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w');
 bmi5_cmd('make store int 1 scalar');
 eval(bmi5_cmd('mmap'));
 
-for i=1:(100*60*60)
+for i=1:(100*60*1)
     b5.scalar_v = i; 
     b5 = bmi5_mmap(b5);
     pause(0.01); 
