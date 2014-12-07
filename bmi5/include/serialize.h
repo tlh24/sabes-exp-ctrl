@@ -951,16 +951,16 @@ public:
 	}
 };
 
-class LabjackSerialize : public VectorSerialize<float>
+class LabjackSerializeAIN : public VectorSerialize<float>
 {
 public:
 	int m_nsensors; //number of sensors (analog inputs)
 
-	LabjackSerialize(int nsensors) : VectorSerialize(nsensors, MAT_C_SINGLE) {
-		m_name = "labjack_";
+	LabjackSerializeAIN(int nsensors) : VectorSerialize(nsensors, MAT_C_SINGLE) {
+		m_name = "labjackAIN_";
 		m_nsensors = nsensors;
 	}
-	~LabjackSerialize() {
+	~LabjackSerializeAIN() {
 		clear();
 	}
 	virtual bool store() {
@@ -988,6 +988,41 @@ public:
 		for (int i=0; i<m_nsensors; i++) {
 			*d++ = m_stor[i]; //float->double, output.
 		}
+		return d;
+	}
+};
+
+class LabjackSerializeDOUT : public VectorSerialize<float>
+{
+public:
+	int m_nchannels; //number of sensors (analog inputs)
+
+	LabjackSerializeDOUT(int nchannels) : VectorSerialize(nchannels, MAT_C_SINGLE) {
+		m_name = "labjackDOUT_";
+		m_nchannels = nchannels;
+	}
+	~LabjackSerializeDOUT() {
+		clear();
+	}
+	virtual bool store() {
+		return false;      //override -- called with argument below.
+	}
+	virtual string storeName(int indx) {
+		switch (indx) {
+		case 0:
+			return m_name + string("time_o");
+		case 1:
+			return m_name + string("channels"); //default is input; override.
+		}
+		return string("none");
+	}
+	virtual double *mmapRead(double *d) {
+		m_time = gettime(); //time bmi5 retreives DOUT values.
+		*d = m_time;
+		for (int i=0; i<m_nchannels; i++) {
+			m_stor[i] = d[i+1]; //double->float, input.
+		}
+		d += (m_nchannels + 1);
 		return d;
 	}
 };
