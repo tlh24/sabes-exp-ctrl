@@ -836,7 +836,8 @@ void *mmap_thread(void *)
 				if (g_polhemus) g_polhemus = 0;
 				if (g_mouse) g_mouse = 0;
 				if (g_opto) g_opto = 0;
-                if (g_labjack_AIN) g_labjack_AIN = 0;
+				if (g_labjack_AIN) g_labjack_AIN = 0;
+				if (g_labjack_DOUT) g_labjack_DOUT = 0;
 				for (unsigned int i=0; i<g_objs.size(); i++) {
 					delete g_objs[i];
 				}
@@ -1718,6 +1719,7 @@ int main(int argn, char **argc)
 	g_polhemus = 0;
 	g_opto = 0;
 	g_labjack_AIN = 0;
+	g_labjack_DOUT = 0;
 	g_mouse = 0;
 	pthread_mutex_lock(&mutex_gobjs);
 	gobjsInit();
