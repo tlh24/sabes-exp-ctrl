@@ -7,7 +7,7 @@ DBG = false
 JACK = true
 LABJACK = false
 
-ifeq	($(shell hostname),chupacabra)
+ifeq ($(shell hostname),chupacabra)
 	LABJACK = true
 endif
 
@@ -43,6 +43,14 @@ ifeq ($(strip $(LABJACK)),true)
 	OBJS += src/u6.o
 endif
 	
+ifeq ($(shell lsb_release -sc), wheezy)
+	HDFLIB = -lhdf5
+else 
+	ifeq ($(shell lsb_release -sc), jessie)
+		HDFLIB = -lhdf5_serial
+	endif
+endif
+
 GLIBS = gtk+-3.0 gsl
 GTKFLAGS = `pkg-config --cflags $(GLIBS) `
 GTKLD = `pkg-config --libs $(GLIBS) `
@@ -56,7 +64,7 @@ src/%.o: ../../myopen/common_host/%.cpp
 	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
 
 bmi5: $(OBJS)
-	$(CPP) -o $@ $(GTKLD) $(LDFLAGS) -lmatio -lhdf5_serial -lpcap $(OBJS)
+	$(CPP) -o $@ $(GTKLD) $(LDFLAGS) $(HDFLIB) -lmatio -lpcap $(OBJS)
 	
 opto: bmi5 # enables packet-capture privelages on bmi5. 
 	sudo setcap cap_net_raw,cap_net_admin=eip bmi5
