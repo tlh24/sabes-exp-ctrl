@@ -114,7 +114,8 @@ Matrix44Serialize	*g_quadratic44;
 PolhemusSerialize 	*g_polhemus;
 OptoSerialize 		*g_opto; //the optotrak.
 MouseSerialize		*g_mouse; //mouse control.
-LabjackSerialize	*g_labjack; //USB analog input.
+LabjackSerializeAIN	*g_labjack_AIN; //USB analog input.
+LabjackSerializeDOUT	 *g_labjack_DOUT; //USB digital output
 vector<Serialize *> 	g_objs; //container for each of these, and more!
 
 pthread_mutex_t		mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
@@ -312,7 +313,6 @@ static int realize1(GtkWidget *w, gpointer p)
 
 static gboolean refresh (gpointer )
 {
-
 	if (g_die)
 		return false;
 
@@ -786,7 +786,7 @@ void *mmap_thread(void *)
 						}
 					}
 				} else if (*beg == string("labjack")) {
-					// make labjack <name> <number of analog inputs>
+					// make labjack <name> <number of analog inputs> <number of digital outputs>
 					if (g_labjackConnected) {
 						typ = string("labjack");
 						beg++;
@@ -796,16 +796,27 @@ void *mmap_thread(void *)
 							beg++;
 						}
 						int nsensors = 1;
+						int nchannels = 1;
 						if (beg != tokens.end()) {
 							nsensors = atoi(beg->c_str());
 							beg++;
 						}
-						g_objsRm(g_labjack);
-						if (g_labjack)
-							delete g_labjack;
+						if (beg != tokens.end()) {
+							nchannels = atoi(beg->c_str());
+							beg++;
+						}
+						g_objsRm(g_labjack_AIN);
+						g_objsRm(g_labjack_DOUT);
+						if (g_labjack_AIN)
+							delete g_labjack_AIN;
+						if (g_labjack_DOUT)
+							delete g_labjack_DOUT;
 						nsensors = nsensors < 1 ? 1 : (nsensors > 8 ? 8 : nsensors);
-						g_labjack = new LabjackSerialize(nsensors);
-						makeConf(g_labjack, name);
+						nchannels = nchannels < 1 ? 1 : (nchannels > 8 ? 8 : nchannels);
+						g_labjack_AIN = new LabjackSerializeAIN(nsensors);
+						g_labjack_DOUT = new LabjackSerializeDOUT(nchannels);
+						makeConf(g_labjack_AIN, name + string("AIN"));
+						makeConf(g_labjack_DOUT, name + string("DOUT"));
 					} else {
 						resp = string("could not initialize labjack object ");
 						resp += string(" -- not connected.\n");
@@ -825,7 +836,8 @@ void *mmap_thread(void *)
 				if (g_polhemus) g_polhemus = 0;
 				if (g_mouse) g_mouse = 0;
 				if (g_opto) g_opto = 0;
-				if (g_labjack) g_labjack = 0;
+				if (g_labjack_AIN) g_labjack_AIN = 0;
+				if (g_labjack_DOUT) g_labjack_DOUT = 0;
 				for (unsigned int i=0; i<g_objs.size(); i++) {
 					delete g_objs[i];
 				}
@@ -1234,7 +1246,8 @@ void *labjack_thread(void * )
 	/// init the USB device.
 	HANDLE hDevice = 0;
 	u6CalibrationInfo caliInfo;
-	int numChannels = 0;
+	int numAINChannels = 0;
+	int numDOUTChannels = 0;
 	uint8 *sendBuff=0, *recBuff=0;
 	//Opening first found U6 over USB
 	if ( (hDevice = openUSBConnection(-1)) == NULL )
@@ -1247,22 +1260,27 @@ void *labjack_thread(void * )
 	g_labjackConnected = true;
 	g_labjackLabelStr = string("connected, unconfigured");
 	/// wait for configuration through matlab.
-	while (!g_die && numChannels == 0) {
-		if (g_labjack) {
-			numChannels = g_labjack->m_nsensors;
+	while (!g_die && numAINChannels == 0 && numDOUTChannels == 0) {
+		if (g_labjack_AIN && g_labjack_DOUT) {
+			numAINChannels = g_labjack_AIN->m_nsensors;
+			numDOUTChannels = g_labjack_DOUT->m_nchannels;
 		}
-		if (!numChannels) sleep(1);
+		if (!numAINChannels && !numDOUTChannels) sleep(1);
 	}
-	if (numChannels > 0) {
+	if (numAINChannels > 0 && numDOUTChannels > 0) {
 		/// setup the feedback command.
 		uint16 checksumTotal, bits16;
 		uint32 bits32;
 
 		int sendChars, recChars, i, j, sendSize, recSize;
 		float valueAIN[14];
+		float valueDOUT[14];
 
 		for ( i = 0; i < 14; i++ )
 			valueAIN[i] = 9999;
+		
+		for ( i = 0; i < 14; i++)
+			valueDOUT[i] = 0;
 
 		//Setting up a Feedback command that will set CIO0-3 as input, and
 		//set DAC0 voltage
@@ -1337,11 +1355,11 @@ void *labjack_thread(void * )
 		free(recBuff);
 
 		//Setting up Feedback command that will run infinity times.
-		if ( ((sendSize = 7+numChannels*4) % 2) != 0 )
+		if ( ((sendSize = 7+numAINChannels*4) % 2) != 0 )
 			sendSize++;
 		sendBuff = (uint8 *)malloc(sendSize*sizeof(uint8)); //Creating an array of size sendSize
 
-		if ( ((recSize = 9+numChannels*3) % 2) != 0 )
+		if ( ((recSize = 9+numAINChannels*3) % 2) != 0 )
 			recSize++;
 		recBuff = (uint8 *)malloc(recSize*sizeof(uint8));  //Creating an array of size recSize
 
@@ -1352,7 +1370,7 @@ void *labjack_thread(void * )
 		sendBuff[6] = 0;     //Echo
 
 		//Setting AIN read commands
-		for ( j = 0; j < numChannels; j++ ) {
+		for ( j = 0; j < numAINChannels; j++ ) {
 			sendBuff[7 + j*4] = 2;     //IOType is AIN24
 
 			//Positive Channel (bits 0 - 4), LongSettling (bit 6) and QuickSample (bit 7)
@@ -1364,7 +1382,7 @@ void *labjack_thread(void * )
 		}
 		extendedChecksum(sendBuff, sendSize);
 		ostringstream oss;
-		oss << "connected, " << g_labjack->m_nsensors << " channels\n";
+		oss << "connected, " << g_labjack_AIN->m_nsensors << " AIN, " << g_labjack_DOUT->m_nchannels << " DOUT\n";
 		oss << "green status light should be blinking.";
 		g_labjackLabelStr = oss.str();
 
@@ -1412,16 +1430,27 @@ void *labjack_thread(void * )
 			}
 
 			//Getting AIN voltages
-			for (j = 0; j < numChannels; j++) {
-				double d = 0.0;
-				bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
-				getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
-				valueAIN[j] = d;
-				j = j + differential;
+			for(j = 0; j < numAINChannels; j++){
+                double d = 0.0;
+                bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
+                getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
+                valueAIN[j] = d;
+                j = j + differential;     
 			}
 			// copy over the data!
-			if (g_labjack) {
-				g_labjack->store(valueAIN);
+			if (g_labjack_AIN) {
+				g_labjack_AIN->store(valueAIN);
+			}
+			
+			//Setting DOUT values
+			if (g_labjack_DOUT) {
+				for( j = 0; j < numDOUTChannels; j++) {
+					valueDOUT[j] = g_labjack_DOUT->m_stor[j];
+				}
+			}
+			for ( j = 0; j < numDOUTChannels; j++) {
+				if(eDO(hDevice, long(j), long(valueDOUT[j])))
+					printf("Error writing DOUT (iteration %d)",i);
 			}
 			usleep(200); // could be longer, really.
 			i++;
@@ -1689,7 +1718,8 @@ int main(int argn, char **argc)
 
 	g_polhemus = 0;
 	g_opto = 0;
-	g_labjack = 0;
+	g_labjack_AIN = 0;
+	g_labjack_DOUT = 0;
 	g_mouse = 0;
 	pthread_mutex_lock(&mutex_gobjs);
 	gobjsInit();

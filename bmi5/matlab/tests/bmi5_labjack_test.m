@@ -1,15 +1,15 @@
 %% connect to bmi5
 global bmi5_in bmi5_out;
 
-cd('/home/motorlab/sw/sabes-exp-ctrl/bmi5/matlab');
+cd('/home/motorlab/sabes-exp-ctrl/bmi5/matlab');
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
-bmi5_cmd('make labjack isometric 4'); 
+bmi5_cmd('make labjack isometric 4 4'); 
 eval(bmi5_cmd('mmap'));
 %%
 b5 = bmi5_mmap(b5); 
-b5.isometric_sensors_o
+b5.isometricAIN_sensors_o
 
 %% define sampling parameters
 
@@ -21,7 +21,7 @@ nMean = 250; %number of samples for averaging to remove noise
 tic
 for ii = 1:nMean
     b5 = bmi5_mmap(b5); 
-    initSample = b5.isometric_sensors_o;
+    initSample = b5.isometricAIN_sensors_o;
 end
 samplingTime = toc
 
@@ -88,7 +88,7 @@ while ~closeStream
 %         tic
         for ii = 1:nMean
             b5 = bmi5_mmap(b5); 
-            itmp(:,ii) = -b5.isometric_sensors_o;
+            itmp(:,ii) = -b5.isometricAIN_sensors_o;
         end
         
 %         rawSignal = [rawSignal, itmp];

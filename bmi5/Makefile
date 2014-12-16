@@ -11,6 +11,10 @@ ifeq ($(shell hostname),chupacabra)
 	LABJACK = true
 endif
 
+ifeq	($(shell hostname),task2go)
+	LABJACK = true
+endif
+
 CPP = g++
 CC  = gcc
 TARGET = /usr/local/bin
