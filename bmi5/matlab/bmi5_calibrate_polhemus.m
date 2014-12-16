@@ -2,7 +2,7 @@ function [] = bmi5_calibrate_polhemus()
 
 global bmi5_in bmi5_out;
 
-BASEPATH = '/home/joeyo/';
+BASEPATH = '/home/motorlab/';
 CalibrationFile = fullfile(BASEPATH,'sw/sabes-exp-ctrl/bmi5/matlab/calibration_polhemus.mat');
 
 

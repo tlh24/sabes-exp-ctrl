@@ -63,8 +63,8 @@ bmi5_cmd('delete_all')
 % ----
 
 bmi5_cmd('make polhemus finger')
-bmi5_cmd('make optotrak finger 3')
-bmi5_cmd('make mouse finger')
+%bmi5_cmd('make optotrak finger 3')
+bmi5_cmd('make mouse mouse')
 bmi5_cmd('make circle cursor');
 bmi5_cmd('make ring ring 0.5');
 eval(bmi5_cmd('mmap'));
