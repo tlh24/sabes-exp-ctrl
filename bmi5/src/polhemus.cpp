@@ -165,7 +165,7 @@ int polhemus::Write(void *data,int len)
 	else if (m_cnxType==RS232_CNX)
 		bw=WriteRs232Data(data,len);
 	else
-		fprintf(stderr,"No Connection\n");
+		//fprintf(stderr,"Polhemus: no connection\n");
 
 	pthread_mutex_unlock(&m_mutex);
 	return bw;
@@ -188,7 +188,7 @@ int polhemus::Read(void *buf,int maxLen)
 	else if (m_cnxType==RS232_CNX)
 		br=ReadRs232Data(buf,maxLen);
 	else
-		fprintf(stderr,"No Connection\n");
+		//fprintf(stderr,"Polhemus: no Connection\n");
 
 	pthread_mutex_unlock(&m_mutex);
 	return br;

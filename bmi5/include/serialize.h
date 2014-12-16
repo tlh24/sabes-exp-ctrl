@@ -221,12 +221,16 @@ public:
 	int			m_nsmooth; 	// over how many samples to average; max 8;
 
 	PolhemusPredict() {
-		for (int i=0; i<24; i++)
-			m_s[0][i] = 0.f;
+		for (int i=0; i<8; i++){
+			for (int j=0; j<3; j++)
+				m_s[i][j] = 0.0;
+		}
 		for (int i=0; i<32; i++)
 			m_t[i] = 0.0;
-		for (int i=0; i<6; i++)
-			m_fit[0][i] = 0.0;
+		for (int i=0; i<3; i++){
+			for (int j=0; j<2; j++)
+				m_fit[i][j] = 0.0;
+		}
 		m_avg = 0;
 		m_ptr = 0;
 		m_nsmooth = 6;

@@ -21,17 +21,20 @@ public:
 	array<float,4>	m_color;
 	array<float,2> m_scale;
 	array<float,2> m_trans;
+	float				m_rot; 
 	vector<double> v_time;
 	vector<char> v_draw;
 	vector<array<unsigned char,4>> v_color;
 	vector<array<float,2>> v_scale;
 	vector<array<float,2>> v_trans;
+	vector<float> v_rot; 
 	Shape(void) : Serialize() {
 		m_vao[0] = m_vao[1] = 0;
 		m_vbo[0] = m_vbo[1] = 0;
 		m_color[0] = m_color[1] = m_color[2] = m_color[3] = 1.f;
 		m_scale[0] = m_scale[1] = 1.f;
 		m_trans[0] = m_trans[1] = 0.f;
+		m_rot = 0.0; 
 		m_name = {"shape"};
 		m_needConfig[0] = m_needConfig[1] = false;
 		m_program[0] = m_program[1] = 0;
@@ -146,16 +149,21 @@ public:
 			m_needConfig[display] = false;
 		}
 	}
-	void setupDrawMatrices(int display, float ar) {
+	void setupDrawMatrices(int display, float) {
 		//first pre-multiply the local->world with the world->screen matrix.
 		float m[4][4]; //local->world matrix.
-		for (int i=0; i<16; i++) m[0][i] = 0.f;
-		float xar = ar < 1.f ? ar     : 1.f;
-		float yar = ar > 1.f ? 1.f/ar : 1.f;
+		for (int i=0; i<4; i++){
+			for (int j=0; j<4; j++)
+				m[i][j] = 0.f;
+		}
+		// joey has chosen to simply absorb the aspect ratio into the scale 
+		// parameters in the star fields -- will do the same here. 
 		m[0][3] = m_trans[0];
 		m[1][3] = m_trans[1];
-		m[0][0] = m_scale[0] * xar;
-		m[1][1] = m_scale[1] * yar;
+		m[0][0] = m_scale[0] * cos(m_rot);
+		m[0][1] = m_scale[0] * (-1) * sin(m_rot); 
+		m[1][0] = m_scale[1] * sin(m_rot);
+		m[1][1] = m_scale[1] * cos(m_rot); 
 		m[2][2] = m[3][3] = 1.f;
 		float n[4][4];
 		float *aff = g_affine44->data();
@@ -212,6 +220,7 @@ public:
 		v_color.clear();
 		v_scale.clear();
 		v_trans.clear();
+		v_rot.clear(); 
 	}
 	virtual bool store() {
 		array<unsigned char,4> color;
@@ -227,6 +236,7 @@ public:
 				same &= (m_scale[i] == (v_scale[n-1])[i]);
 				same &= (m_trans[i] == (v_trans[n-1])[i]);
 			}
+			same &= (m_rot == (v_rot[n-1])); 
 		} else same = false;
 		if (!same) {
 			v_time.push_back(m_time);
@@ -234,6 +244,7 @@ public:
 			v_color.push_back(color);
 			v_scale.push_back(m_scale);
 			v_trans.push_back(m_trans);
+			v_rot.push_back(m_rot); 
 		}
 		return !same;
 	}
@@ -252,6 +263,8 @@ public:
 			return m_name + string("scale");
 		case 4:
 			return m_name + string("pos");
+		case 5: 
+			return m_name + string("rot"); 
 		}
 		return string("none");
 	}
@@ -266,6 +279,8 @@ public:
 		case 3:
 			return MAT_C_SINGLE;
 		case 4:
+			return MAT_C_SINGLE;
+		case 5:
 			return MAT_C_SINGLE;
 		}
 		return 0;
@@ -292,6 +307,10 @@ public:
 			dims[0] = 2;
 			dims[1] = 1;
 			return;
+		case 5:
+			dims[0] = 1;
+			dims[1] = 1;
+			return;
 		default:
 			dims[0] = 0;
 			dims[1] = 0;
@@ -310,11 +329,13 @@ public:
 			return (void *)&((v_scale[i])[0]);
 		case 4:
 			return (void *)&((v_trans[i])[0]);
+		case 5:
+			return (void *)&((v_rot[i]));
 		}
 		return NULL;
 	}
 	virtual int numStores() {
-		return 5;
+		return 6;
 	}
 	virtual double *mmapRead(double *d) {
 		int i;
@@ -327,6 +348,7 @@ public:
 			m_scale[i] = *d++;
 		for (i=0; i<2; i++)
 			m_trans[i] = *d++;
+		m_rot = *d++; 
 		return d;
 	}
 };
@@ -444,9 +466,7 @@ public: //do something like the flow field common in the lab.
 		}
 	}
 	virtual void move(long double time) {
-
 		if (!m_v || !m_pvel || !m_phase) return;
-
 		unsigned int basecol = 0;
 		basecol += (unsigned int)(m_color[3] * 255) & 255;
 		basecol <<= 8;
@@ -478,12 +498,9 @@ public: //do something like the flow field common in the lab.
 				if (f > 0.5f) f -= 1.f;
 				m_v[i].position[j] = f;
 			}
-
 			m_v[i].color = basecol;
-
 			double d  = cos(2.0*PI*fq*time			+ m_phase[i]);
 			double dp = cos(2.0*PI*fq*m_lastTime	+ m_phase[i]); // previous
-
 			// update the position.
 			// if lifetime is negative, stars live forever
 			if (d > 0 && dp <= 0 && m_lifetime > 0.f) {

@@ -1,3 +1,4 @@
+
 # The following can be set at the command line
 # ie: make DBG=true JACK=false
 #
@@ -20,8 +21,8 @@ OBJS := src/main.o src/tdt_udp.o src/glInfo.o src/glFont.o src/polhemus.o \
 CFLAGS := -Iinclude -I/usr/local/include -I../../myopen/common_host
 CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
--Wextra -Werror -pedantic -std=c++11 
-LDFLAGS := -lrt -lGL -lGLU -lGLEW -lusb-1.0 
+-Wextra -Werror -pedantic -Wno-deprecated-declarations -std=c++11 
+LDFLAGS := -lrt -lGL -lGLU -lGLEW -lusb-1.0 -lX11 -lpthread
 
 ifeq ($(strip $(DBG)),true)
 	CFLAGS  += -O0 -g -rdynamic -DDEBUG
@@ -55,13 +56,13 @@ src/%.o: ../../myopen/common_host/%.cpp
 	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
 
 bmi5: $(OBJS)
-	$(CPP) -o $@ $(GTKLD) $(LDFLAGS) -lmatio -lhdf5 -lpcap $(OBJS)
+	$(CPP) -o $@ $(GTKLD) $(LDFLAGS) -lmatio -lhdf5_serial -lpcap $(OBJS)
 	
 opto: bmi5 # enables packet-capture privelages on bmi5. 
 	sudo setcap cap_net_raw,cap_net_admin=eip bmi5
 	
 glxgears: src/glxgears.c
-	$(CPP) -O3 -o $@ -lrt -lGL $<
+	$(CPP) -O3 -o $@ -lrt -lGL -lX11 $<
 	
 clean:
 	rm -rf src/*.o bmi5 glxgears

@@ -132,7 +132,7 @@ void errorDialog(char *msg)
 	dialog = gtk_dialog_new_with_buttons ("Error",
 	                                      g_mainWindow,
 	                                      GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                      GTK_STOCK_OK,
+	                                      "_OK",
 	                                      GTK_RESPONSE_NONE,
 	                                      NULL);
 	content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
@@ -1444,8 +1444,8 @@ static void saveMatlabData(gpointer, gpointer parent_window)
 	dialog = gtk_file_chooser_dialog_new ("Save Data File",
 	                                      (GtkWindow *)parent_window,
 	                                      GTK_FILE_CHOOSER_ACTION_SAVE,
-	                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	                                      GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+	                                      "_Cancel", GTK_RESPONSE_CANCEL,
+	                                      "_Save", GTK_RESPONSE_ACCEPT,
 	                                      NULL);
 	gtk_file_chooser_set_do_overwrite_confirmation(
 	        GTK_FILE_CHOOSER (dialog), TRUE);
@@ -1575,7 +1575,7 @@ int main(int argn, char **argc)
 		gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 		gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
 		GtkWidget *tlbl = gtk_label_new(dflt);
-		gtk_misc_set_alignment (GTK_MISC (tlbl), 0, 0);
+		//gtk_misc_set_alignment (GTK_MISC (tlbl), 0, 0);
 		gtk_label_set_justify( GTK_LABEL(tlbl), GTK_JUSTIFY_LEFT);
 		gtk_container_add (GTK_CONTAINER (frame), tlbl );
 		return tlbl;
@@ -1714,7 +1714,7 @@ int main(int argn, char **argc)
 #ifdef JACK
 	jackInit("bmi5", JACKPROCESS_TONES);
 	jackConnectFront();
-	//jackConnectCenterSub();
+	//jackConnectCenterSub();	
 	jackTest();
 #endif
 
