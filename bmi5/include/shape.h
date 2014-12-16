@@ -569,6 +569,7 @@ public: //do something like the flow field common in the lab.
 				same &= (m_scale[i] == (v_scale[n-1])[i]);
 				same &= (m_trans[i] == (v_trans[n-1])[i]);
 			}
+			same &= (m_rot == (v_rot[n-1]));
 			for (int i=0; i<2; i++)
 				same &= (m_vel[i] == (v_vel[n-1])[i]);
 			same &= (m_coherence == v_coherence[n-1]);
@@ -581,6 +582,7 @@ public: //do something like the flow field common in the lab.
 			v_color.push_back(color);
 			v_scale.push_back(m_scale);
 			v_trans.push_back(m_trans);
+			v_rot.push_back(m_rot);
 			v_vel.push_back(m_vel);
 			v_coherence.push_back(m_coherence);
 			v_lifetime.push_back(m_lifetime);
