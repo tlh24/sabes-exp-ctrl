@@ -1278,7 +1278,7 @@ void *labjack_thread(void * )
 
 		for ( i = 0; i < 14; i++ )
 			valueAIN[i] = 9999;
-		
+
 		for ( i = 0; i < 14; i++)
 			valueDOUT[i] = 0;
 
@@ -1430,26 +1430,26 @@ void *labjack_thread(void * )
 			}
 
 			//Getting AIN voltages
-			for(j = 0; j < numAINChannels; j++){
-                double d = 0.0;
-                bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
-                getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
-                valueAIN[j] = d;
-                j = j + differential;     
+			for (j = 0; j < numAINChannels; j++) {
+				double d = 0.0;
+				bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
+				getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
+				valueAIN[j] = d;
+				j = j + differential;
 			}
 			// copy over the data!
 			if (g_labjack_AIN) {
 				g_labjack_AIN->store(valueAIN);
 			}
-			
+
 			//Setting DOUT values
 			if (g_labjack_DOUT) {
-				for( j = 0; j < numDOUTChannels; j++) {
+				for ( j = 0; j < numDOUTChannels; j++) {
 					valueDOUT[j] = g_labjack_DOUT->m_stor[j];
 				}
 			}
 			for ( j = 0; j < numDOUTChannels; j++) {
-				if(eDO(hDevice, long(j), long(valueDOUT[j])))
+				if (eDO(hDevice, long(j), long(valueDOUT[j])))
 					printf("Error writing DOUT (iteration %d)",i);
 			}
 			usleep(200); // could be longer, really.
@@ -1744,7 +1744,7 @@ int main(int argn, char **argc)
 #ifdef JACK
 	jackInit("bmi5", JACKPROCESS_TONES);
 	jackConnectFront();
-	//jackConnectCenterSub();	
+	//jackConnectCenterSub();
 	jackTest();
 #endif
 

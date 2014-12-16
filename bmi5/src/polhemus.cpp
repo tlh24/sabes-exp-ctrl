@@ -167,7 +167,7 @@ int polhemus::Write(void *data,int len)
 	else
 		//fprintf(stderr,"Polhemus: no connection\n");
 
-	pthread_mutex_unlock(&m_mutex);
+		pthread_mutex_unlock(&m_mutex);
 	return bw;
 }
 
@@ -190,7 +190,7 @@ int polhemus::Read(void *buf,int maxLen)
 	else
 		//fprintf(stderr,"Polhemus: no Connection\n");
 
-	pthread_mutex_unlock(&m_mutex);
+		pthread_mutex_unlock(&m_mutex);
 	return br;
 }
 
