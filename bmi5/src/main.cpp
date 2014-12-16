@@ -996,7 +996,6 @@ void *polhemus_thread(void * )
 		rxbytes += len > 0 ? len : 0;
 		count++;
 		//if (len > 0) printf("%.*s\n", len, buf); else printf("NO DATA!\n");
-
 	} while (count < 10);
 
 	if (rxbytes <= 0) {
@@ -1464,7 +1463,6 @@ cleanmem:
 	g_labjackLabelStr = string("Error!  Disconnected.\nTry unplugging the labjack\nand restarting bmi5.");
 	return 0;
 }
-
 #endif
 
 static void saveMatlabData(gpointer, gpointer parent_window)
@@ -1729,13 +1727,14 @@ int main(int argn, char **argc)
 	pthread_mutex_init(&mutex_fwrite, NULL);
 	pthread_mutex_init(&mutex_gobjs, NULL);
 
-	pthread_t pthread, mthread, bthread, othread;
+	pthread_t pthread, othread, mthread, bthread;
 	pthread_create(&pthread, NULL, polhemus_thread, NULL);
 	pthread_create(&othread, NULL, opto_thread, NULL);
 	pthread_create(&mthread, NULL, mmap_thread, NULL);
 	pthread_create(&bthread, NULL, backup_thread, NULL);
 #ifdef LABJACK
-	pthread_create(&bthread, NULL, labjack_thread, NULL);
+	pthread_t lthread;
+	pthread_create(&lthread, NULL, labjack_thread, NULL);
 #endif
 
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
@@ -1752,17 +1751,25 @@ int main(int argn, char **argc)
 	gtk_widget_show_all (window);
 
 	g_record = true;
-	gtk_main();
 
-	pthread_join(pthread,NULL);  // wait for the read thread to complete
-	pthread_join(othread,NULL);
-	//pthread_join(mthread,NULL);
-	pthread_join(bthread,NULL);
+	gtk_main();	// where everything happens
+
+	// now unwind everything in reverse order
+
+	//save data!!
+	writeMatlab(g_objs, (char *)"backup.mat", false); //the whole enchilada.
+
 #ifdef JACK
 	jackClose(0);
 #endif
-	//save data!!
-	writeMatlab(g_objs, (char *)"backup.mat", false); //the whole enchilada.
+#ifdef LABJACK
+	pthread_join(lthread,NULL);
+#endif
+	// can't join mthread easily since the read on the pipe is blocking
+	//pthread_join(mthread,NULL);
+	pthread_join(othread,NULL);
+	pthread_join(pthread,NULL);  // wait for the read thread to complete
+
 	pthread_mutex_destroy(&mutex_fwrite);
 	pthread_mutex_destroy(&mutex_gobjs);
 
