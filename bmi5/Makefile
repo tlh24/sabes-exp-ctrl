@@ -26,6 +26,7 @@ CFLAGS := -Iinclude -I/usr/local/include -I../../myopen/common_host
 CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
 -Wextra -Werror -pedantic -Wno-deprecated-declarations -std=c++11 
+CFLAGS += -march=native
 LDFLAGS := -lrt -lGL -lGLU -lGLEW -lusb-1.0 -lX11 -lpthread
 
 ifeq ($(strip $(DBG)),true)
