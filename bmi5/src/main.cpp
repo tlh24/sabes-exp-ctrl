@@ -57,7 +57,6 @@
 #include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
-#include "../optotrak_sniff/etherstruct.h"
 #include "glFont.h"
 
 #include "fenv.h" // for debugging nan problems
@@ -66,6 +65,11 @@
 #ifdef LABJACK
 #include "u6.h"
 #endif
+
+#ifdef OPTO
+#include "../optotrak_sniff/etherstruct.h"
+#endif
+
 
 using namespace std;
 using namespace boost;
@@ -369,11 +373,15 @@ static gboolean refresh (gpointer )
 	}
 	gtk_label_set_text(GTK_LABEL(g_polhemusLabel), con.c_str());
 
+#ifdef OPTO
 	if (g_opto)
 		g_opto->getLoc(gettime(), loc);
 	con  = g_optoConnected ? string("connected\n") : string("disconnected\n");
 	con += g_optoLabelStr;
 	gtk_label_set_text(GTK_LABEL(g_optoLabel), con.c_str());
+#else
+	gtk_label_set_text(GTK_LABEL(g_optoLabel), "disabled in build.");
+#endif
 
 #ifdef LABJACK
 	gtk_label_set_text(GTK_LABEL(g_labjackLabel), g_labjackLabelStr.c_str());
@@ -1104,6 +1112,7 @@ void *polhemus_thread(void * )
 	return NULL;
 }
 
+#ifdef OPTO
 void *opto_thread(void * )
 {
 	pcap_t *handle;			/* Session handle */
@@ -1233,6 +1242,7 @@ void *opto_thread(void * )
 	pcap_close(handle);
 	return (void *)0;
 }
+#endif
 
 #ifdef LABJACK
 void *labjack_thread(void * )
@@ -1727,11 +1737,14 @@ int main(int argn, char **argc)
 	pthread_mutex_init(&mutex_fwrite, NULL);
 	pthread_mutex_init(&mutex_gobjs, NULL);
 
-	pthread_t pthread, othread, mthread, bthread;
+	pthread_t pthread, mthread, bthread;
 	pthread_create(&pthread, NULL, polhemus_thread, NULL);
-	pthread_create(&othread, NULL, opto_thread, NULL);
 	pthread_create(&mthread, NULL, mmap_thread, NULL);
 	pthread_create(&bthread, NULL, backup_thread, NULL);
+#ifdef OPTO
+	pthread_t othread;
+	pthread_create(&othread, NULL, opto_thread, NULL);
+#endif
 #ifdef LABJACK
 	pthread_t lthread;
 	pthread_create(&lthread, NULL, labjack_thread, NULL);
@@ -1765,9 +1778,11 @@ int main(int argn, char **argc)
 #ifdef LABJACK
 	pthread_join(lthread,NULL);
 #endif
+#ifdef OPTO
+	pthread_join(othread,NULL);
+#endif
 	// can't join mthread easily since the read on the pipe is blocking
 	//pthread_join(mthread,NULL);
-	pthread_join(othread,NULL);
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
 
 	pthread_mutex_destroy(&mutex_fwrite);

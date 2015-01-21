@@ -6,6 +6,7 @@
 DBG = false
 JACK = true
 LABJACK = false
+OPTO = false
 
 ifeq ($(shell hostname),chupacabra)
 	LABJACK = true
@@ -32,6 +33,7 @@ LDFLAGS := -lrt -lGL -lGLU -lGLEW -lusb-1.0 -lX11 -lpthread
 ifeq ($(strip $(DBG)),true)
 	CFLAGS  += -O0 -g -rdynamic -DDEBUG
 	LDFLAGS += -rdynamic
+	JACK = false
 else
 	CFLAGS += -O3
 endif
@@ -46,6 +48,10 @@ ifeq ($(strip $(LABJACK)),true)
 	CFLAGS += -DLABJACK
 	LDFLAGS += -llabjackusb
 	OBJS += src/u6.o
+endif
+
+ifeq ($(strip $(OPTO)),true)
+	CFLAGS += -DOPTO
 endif
 	
 ifeq ($(shell lsb_release -sc), wheezy)
