@@ -1,7 +1,7 @@
 clear;
 global bmi5_out bmi5_in b5
 
-BASEPATH = '/home/motorlab/';
+BASEPATH = '/home/joeyo/';
 
 CalibrationFile = fullfile(BASEPATH,'sw/sabes-exp-ctrl/bmi5/matlab/calibration_polhemus.mat');
 
@@ -28,27 +28,28 @@ b5.affine_m44 = q2;
 b5 = bmi5_mmap(b5);
 
 pos     = [20 90];
-scale 	= [7 7];
+scale 	= 5.*[7 7];
 
 b5.dots_pos         = pos;
 b5.dots_scale       = scale;
 b5.dots_starsize    = 2;
 b5.dots_vel         = [0 0];
 b5.dots_coherence   = 1;
-b5.dots_color       = [1 0 0 1]; % cyan
+b5.dots_color       = [1 0 0 1]; % RED
 b5.dots_lifetime    = 0.1;
 b5.dots_draw        = 1;
 
 b5.circle_pos       = pos;
 b5.circle_scale     = scale;
 b5.circle_color     = [1 1 1 0.1]; % white
-b5.circle_draw      = 0;
+b5.circle_draw      = 1;
 
 b5 = bmi5_mmap(b5);
 
 while(1)
-    pos = c.pm * [b5.finger_sensors_o(1:3)];
-    b5.dots_pos = pos(1:2);
+    tmp = c.pm * [b5.finger_sensors_o(1:3)];
+    b5.dots_pos = tmp(1:2);
+    b5.circle_pos = tmp(1:2);
     b5 = bmi5_mmap(b5);
 end
 
