@@ -19,6 +19,10 @@
 #include <pcap.h>
 #include "matio.h"
 
+// XDG
+#include <basedir.h>
+#include <basedir_fs.h>
+
 //opengl headers.
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
@@ -51,7 +55,7 @@
 #include "perftimer.h"
 #include "fifohelp.h"
 
-//local.
+//local
 #include "tdt_udp.h"
 #include "jacksnd.h"
 #include "serialize.h"
@@ -70,15 +74,21 @@
 #include "../optotrak_sniff/etherstruct.h"
 #endif
 
+// conf files
+#include "lualib.h"
+#include "lauxlib.h"
+#include "lconf.h"
 
 using namespace std;
 using namespace boost;
 
-#define BMI5_CTRL_MMAP	"/tmp/bmi5_control.mmap"
-#define BMI5_IN_FIFO	"/tmp/bmi5_in.fifo"
-#define BMI5_OUT_FIFO	"/tmp/bmi5_out.fifo"
+string 		g_mmap = "/tmp/bmi5_control.mmap";
+string 		g_in_fifo = "/tmp/bmi5_in.fifo";
+string 		g_out_fifo = "/tmp/bmi5_out.fifo";
+string 		g_polhemus_serial = "/dev/ttyS0";
 
-#define SERIAL_PORT "/dev/ttyS0"
+bool 		g_do_backup = true;
+string 		g_backup_dir = "/tmp";
 
 double 		g_frameRate = 0.0;
 long double	g_lastFrame = 0.0;
@@ -125,6 +135,8 @@ vector<Serialize *> 	g_objs; //container for each of these, and more!
 pthread_mutex_t		mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
 pthread_mutex_t		mutex_gobjs;
 long double			g_nextVsyncTime = -1;
+
+luaConf 			g_lc;
 
 string 				g_basedirname;
 
@@ -458,13 +470,14 @@ void flush_pipe(int fid)
 void *mmap_thread(void *)
 {
 	size_t length = 8*1024*8; //mmapFileSize(g_objs);
-	mmapHelp mmh(length, BMI5_CTRL_MMAP);
+
+	mmapHelp mmh(length, g_mmap.c_str());
 	mmh.prinfo();
 
-	fifoHelp pipe_in(BMI5_IN_FIFO);
+	fifoHelp pipe_in(g_in_fifo.c_str());
 	pipe_in.prinfo();
 
-	fifoHelp pipe_out(BMI5_OUT_FIFO);
+	fifoHelp pipe_out(g_out_fifo.c_str());
 	pipe_out.prinfo();
 
 	char buf[256];
@@ -926,21 +939,23 @@ void *backup_thread(void *)
 	char dirname[256];
 	int i = 1;
 	while (found) {
-		snprintf(dirname, 256, "/tmp/%04d-%02d-%02d_%04d", tm.tm_year+1900,
-		         tm.tm_mon+1, tm.tm_mday, i); //maybe should have a prefix here?
+		snprintf(dirname, 256, "%s/%04d-%02d-%02d_%04d",
+		         g_backup_dir.c_str(), tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday, i);
 		struct stat st;
 		int err = stat(dirname, &st);
 		if (!S_ISDIR(st.st_mode) || err < 0) {
 			found = false;
-			if (mkdir(dirname, 0777))
+			if (mkdir(dirname, 0777)) {
 				printf("could not mkdir %s\n", dirname);
+				g_do_backup = false;
+			}
 		} else i++;
 	}
 	int k=1;
 	while (!g_die) {
 		for (int j=0; j<10 && !g_die; j++)
 			sleep(1); //so it closes somewhat quickly.
-		if (!g_die && matlabHasNewData(g_objs)) {
+		if (!g_die && g_do_backup && matlabHasNewData(g_objs)) {
 			char fname[256];
 			snprintf(fname, 256, "%s/backup_%04d.mat", dirname, k);
 			pthread_mutex_lock(&mutex_fwrite);
@@ -970,7 +985,6 @@ void *polhemus_thread(void * )
 {
 	unsigned char buf[BUF_SIZE];
 	int count, len, i;
-	string deviceName = {SERIAL_PORT};
 
 	//init the communication obj.
 	polhemus *pol = new polhemus();
@@ -980,14 +994,14 @@ void *polhemus_thread(void * )
 	}
 	int fail;
 	//fail = pol->UsbConnect(TRKR_LIB); //see polhemus.h
-	fail = pol->Rs232Connect(deviceName.c_str(), 115200);
+	fail = pol->Rs232Connect(g_polhemus_serial.c_str(), 115200);
 	if (fail) {
-		printf("could not open via rs232 to Polhemus on %s\n", deviceName.c_str());
+		printf("could not open via rs232 to Polhemus on %s\n", g_polhemus_serial.c_str());
 		printf("> try sudo usermod -a -G dialout <username>");
 		printf("> then logout and log back in.");
 		g_polhemusConnected = false;
 	} else {
-		printf("connecting to polhemus via rs232 on %s\n", deviceName.c_str());
+		printf("connecting to polhemus via rs232 on %s\n", g_polhemus_serial.c_str());
 		g_polhemusConnected = true;
 	}
 	//flush the buffer, sync things up.
@@ -1578,6 +1592,27 @@ int main(int argn, char **argc)
 	dname = dirname(linkname);
 	g_basedirname = dname;
 
+	xdgHandle xdg;
+	xdgInitHandle(&xdg);
+	char *confpath = xdgConfigFind("bmi5/bmi5.rc", &xdg);
+	char *tmp = confpath;
+	// confpath is "string1\0string2\0string3\0\0"
+
+	while (*tmp) {
+		g_lc.loadConf(tmp);
+		tmp += strlen(tmp) + 1;
+	}
+	if (confpath)
+		free(confpath);
+
+	// these happen here for threadsafety
+	g_lc.getString("bmi5.mmap", g_mmap);
+	g_lc.getString("bmi5.fifoIn", g_in_fifo);
+	g_lc.getString("bmi5.fifoOut", g_out_fifo);
+	g_lc.getString("polhemus.serialPort", g_polhemus_serial);
+	g_do_backup = g_lc.getBool("backup.enable");
+	g_lc.getString("backup.dir", g_backup_dir);
+
 	//setup a window with openGL.
 	GtkWidget *window;
 	GtkWidget *da1, *da2, *paned, *v1, *frame;
@@ -1755,8 +1790,12 @@ int main(int argn, char **argc)
 	//jack audio.
 #ifdef JACK
 	jackInit("bmi5", JACKPROCESS_TONES);
-	jackConnectFront();
-	jackConnectCenterSub();
+	if (g_lc.getBool("jack.connectFront")) {
+		jackConnectFront();
+	}
+	if (g_lc.getBool("jack.connectCenterSub")) {
+		jackConnectCenterSub();
+	}
 	jackTest();
 #endif
 

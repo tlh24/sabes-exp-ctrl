@@ -1,0 +1,23 @@
+-- This configuration file is written in the lua language
+-- More details about lua here: http://www.lua.org/manual/5.1/
+
+-- comments are prefixed by double dashes
+
+bmi5 = {
+  mmap = "/tmp/bmi5_control.mmap",
+  fifoIn = "/tmp/bmi5_in.fifo",
+  fifoOut = "/tmp/bmi5_out.fifo",
+}
+
+backup = {
+  enable = true,
+  dir = "/tmp",
+}
+
+polhemus = {}
+polhemus.serialPort = "/dev/ttyS0"
+
+jack = {
+  connectFront = true,
+  connectCenterSub = false,
+}

@@ -21,7 +21,7 @@ CC  = gcc
 TARGET = /usr/local/bin
 
 OBJS := src/main.o src/tdt_udp.o src/glInfo.o src/glFont.o src/polhemus.o \
-	src/writematlab.o src/gettime.o 
+	src/writematlab.o src/gettime.o src/lconf.o
 
 CFLAGS := -Iinclude -I/usr/local/include -I../../myopen/common_host
 CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
@@ -62,20 +62,20 @@ else
 	endif
 endif
 
-GLIBS = gtk+-3.0 gsl
-GTKFLAGS = `pkg-config --cflags $(GLIBS) `
-GTKLD = `pkg-config --libs $(GLIBS) `
+LIBS=gtk+-3.0 gsl libxdg-basedir lua5.1
+CFLAGS += $(shell pkg-config --cflags $(LIBS))
+LDFLAGS += $(shell pkg-config --libs $(LIBS))
 
 all: bmi5 glxgears
 
 src/%.o: src/%.cpp 
-	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
+	$(CPP) -c $(CFLAGS) $< -o $@
 	
 src/%.o: ../../myopen/common_host/%.cpp
-	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
+	$(CPP) -c $(CFLAGS) $< -o $@
 
 bmi5: $(OBJS)
-	$(CPP) -o $@ $(GTKLD) $(LDFLAGS) $(HDFLIB) -lmatio -lpcap $(OBJS)
+	$(CPP) -o $@ $(LDFLAGS) $(HDFLIB) -lmatio -lpcap $(OBJS)
 	
 opto: bmi5 # enables packet-capture privelages on bmi5. 
 	sudo setcap cap_net_raw,cap_net_admin=eip bmi5
@@ -91,7 +91,8 @@ deps:
 	libgtkglext1-dev freeglut3-dev libusb-1.0-0-dev libglew-dev \
 	libblas-dev liblapack-dev libfftw3-dev qjackctl \
 	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck \
-	libhdf5-7 libhdf5-dev libhdf5-serial-dev zlib1g zlib1g-dev
+	libhdf5-7 libhdf5-dev libhdf5-serial-dev zlib1g zlib1g-dev \
+	libxdg-basedir-dev liblua5.1-0-dev
 	@echo ""
 	@echo "  Note: please download and install libmatio version >= 1.50"
 
@@ -111,6 +112,10 @@ install:
 	install matlab/bmi5_mmap.cpp -t $(TARGET)/matlab
 	install -d /usr/local/include
 	install ../../myopen/common_host/mmaphelp.h -t /usr/local/include
+
+conf:
+	install -d $(HOME)/.config/bmi5
+	install rc/bmi5.rc -t $(HOME)/.config/bmi5
 
 pretty:
 	# "-rm" means that make ignores errors, if any
