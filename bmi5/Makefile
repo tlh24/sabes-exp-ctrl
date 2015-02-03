@@ -62,7 +62,7 @@ else
 	endif
 endif
 
-LIBS=gtk+-3.0 gsl libxdg-basedir lua5.1
+LIBS=gtk+-3.0 gsl libxdg-basedir lua5.1 libprocps
 CFLAGS += $(shell pkg-config --cflags $(LIBS))
 LDFLAGS += $(shell pkg-config --libs $(LIBS))
 
@@ -92,7 +92,7 @@ deps:
 	libblas-dev liblapack-dev libfftw3-dev qjackctl \
 	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck \
 	libhdf5-7 libhdf5-dev libhdf5-serial-dev zlib1g zlib1g-dev \
-	libxdg-basedir-dev liblua5.1-0-dev
+	libxdg-basedir-dev liblua5.1-0-dev libprocps0-dev
 	@echo ""
 	@echo "  Note: please download and install libmatio version >= 1.50"
 

@@ -4,6 +4,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <proc/readproc.h>
 #include <math.h>
 #include <time.h>
 #include <arpa/inet.h>
@@ -48,7 +49,6 @@
 #include <functional>
 
 // myopen common
-#include "lockfile.h"
 #include "mmaphelp.h"
 #include "gettime.h"
 #include "timesync.h"
@@ -1567,12 +1567,19 @@ int main(int argn, char **argc)
 {
 	(void) signal(SIGINT, destroy);
 
-	srand(time(NULL)); // seed rng
+	pid_t mypid = getpid();
 
-	lockfile lf = lockfile("/tmp/bmi5.lock");
-	if (lf.lock()) {
-		return 1;
+	PROCTAB *pr = openproc(PROC_FILLSTAT);
+	proc_t pr_info;
+	memset(&pr_info, 0, sizeof(pr_info));
+	while (readproc(pr, &pr_info) != NULL) {
+		if (!strcmp(pr_info.cmd, "bmi5") && pr_info.tgid != mypid) {
+			printf("already running with pid: %d\n", pr_info.tgid);
+			return 1;
+		}
 	}
+
+	srand(time(NULL)); // seed rng
 
 #ifdef DEBUG
 	//feenableexcept(FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW);  // Enable (some) floating point exceptions
@@ -1833,8 +1840,6 @@ int main(int argn, char **argc)
 	delete g_daglx[0];
 	delete g_daglx[1];
 	delete g_tsc;
-
-	lf.unlock();
 
 	return 0;
 }
