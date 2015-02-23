@@ -2,7 +2,6 @@ function [] = bmi5_calibrate_polhemus()
 
 global bmi5_in bmi5_out;
 
-
 BASEPATH = '/home/motorlab/';
 CalibrationFile = fullfile(BASEPATH,'sw/sabes-exp-ctrl/bmi5/matlab/calibration_polhemus.mat');
 
@@ -28,8 +27,8 @@ eval(bmi5_cmd('mmap structure'));
 wx = linspace(-0.6, 0.6, snt);
 wy = linspace(-0.8, 0.3, snt);
 
-screen = zeros(num_targets, 4); 
-world = zeros(num_targets, 4); 
+screen = zeros(num_targets, 5);
+world = zeros(num_targets, 5);
 screen(:,4) = 1; 
 world(:,4) = 1;   
 % In addition to permuting from the native polhemus

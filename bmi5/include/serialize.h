@@ -102,8 +102,8 @@ public:
 		clear();
 	}
 	virtual bool store() {
-		long double time = 0.0; 
-		double ticks; 
+		long double time = 0.0;
+		double ticks;
 		g_tsc->getTicks(time, ticks);
 		v_time.push_back((double)time);
 		v_ticks.push_back(ticks);
@@ -192,7 +192,7 @@ public:
 	virtual bool store(int frame) {
 		long double time = 0.0;
 		g_tsc->getTicks(time, m_ticks);
-		m_time = (double)time; 
+		m_time = (double)time;
 		m_frame = frame;
 		v_time.push_back(m_time);
 		v_ticks.push_back(m_ticks);
@@ -221,13 +221,13 @@ public:
 	int			m_nsmooth; 	// over how many samples to average; max 8;
 
 	PolhemusPredict() {
-		for (int i=0; i<8; i++){
+		for (int i=0; i<8; i++) {
 			for (int j=0; j<3; j++)
 				m_s[i][j] = 0.0;
 		}
 		for (int i=0; i<32; i++)
 			m_t[i] = 0.0;
-		for (int i=0; i<3; i++){
+		for (int i=0; i<3; i++) {
 			for (int j=0; j<2; j++)
 				m_fit[i][j] = 0.0;
 		}

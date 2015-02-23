@@ -771,8 +771,8 @@ long eDI(HANDLE Handle, long Channel, long *State)
 	sendDataBuff[2] = 10;       //IOType is BitStateRead
 	sendDataBuff[3] = Channel;  //IONumber
 
-    recDataBuff[0] = 0;
-    
+	recDataBuff[0] = 0;
+
 	if ( ehFeedback(Handle, sendDataBuff, 4, &Errorcode, &ErrorFrame, recDataBuff, 1) < 0 )
 		return -1;
 	if ( Errorcode )

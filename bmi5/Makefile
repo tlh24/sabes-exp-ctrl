@@ -6,8 +6,9 @@
 DBG = false
 JACK = true
 LABJACK = false
+OPTO = false
 
-ifeq	($(shell hostname),chupacabra)
+ifeq ($(shell hostname),chupacabra)
 	LABJACK = true
 endif
 
@@ -24,17 +25,19 @@ CC  = gcc
 TARGET = /usr/local/bin
 
 OBJS := src/main.o src/tdt_udp.o src/glInfo.o src/glFont.o src/polhemus.o \
-	src/writematlab.o src/gettime.o 
+	src/writematlab.o src/gettime.o src/lconf.o
 
 CFLAGS := -Iinclude -I/usr/local/include -I../../myopen/common_host
 CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
 -Wextra -Werror -pedantic -Wno-deprecated-declarations -std=c++11 
+CFLAGS += -march=native
 LDFLAGS := -lrt -lGL -lGLU -lGLEW -lusb-1.0 -lX11 -lpthread
 
 ifeq ($(strip $(DBG)),true)
 	CFLAGS  += -O0 -g -rdynamic -DDEBUG
 	LDFLAGS += -rdynamic
+	JACK = false
 else
 	CFLAGS += -O3
 endif
@@ -50,21 +53,33 @@ ifeq ($(strip $(LABJACK)),true)
 	LDFLAGS += -llabjackusb
 	OBJS += src/u6.o
 endif
+
+ifeq ($(strip $(OPTO)),true)
+	CFLAGS += -DOPTO
+endif
 	
-GLIBS = gtk+-3.0 gsl
-GTKFLAGS = `pkg-config --cflags $(GLIBS) `
-GTKLD = `pkg-config --libs $(GLIBS) `
+ifeq ($(shell lsb_release -sc), wheezy)
+	HDFLIB = -lhdf5
+else 
+	ifeq ($(shell lsb_release -sc), jessie)
+		HDFLIB = -lhdf5_serial
+	endif
+endif
+
+LIBS=gtk+-3.0 gsl libxdg-basedir lua5.1 libprocps
+CFLAGS += $(shell pkg-config --cflags $(LIBS))
+LDFLAGS += $(shell pkg-config --libs $(LIBS))
 
 all: bmi5 glxgears
 
 src/%.o: src/%.cpp 
-	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
+	$(CPP) -c $(CFLAGS) $< -o $@
 	
 src/%.o: ../../myopen/common_host/%.cpp
-	$(CPP) -c $(CFLAGS) $(GTKFLAGS) $< -o $@
+	$(CPP) -c $(CFLAGS) $< -o $@
 
 bmi5: $(OBJS)
-	$(CPP) -o $@ $(GTKLD) $(LDFLAGS) -lmatio -lhdf5_serial -lpcap $(OBJS)
+	$(CPP) -o $@ $(LDFLAGS) $(HDFLIB) -lmatio -lpcap $(OBJS)
 	
 opto: bmi5 # enables packet-capture privelages on bmi5. 
 	sudo setcap cap_net_raw,cap_net_admin=eip bmi5
@@ -78,8 +93,10 @@ clean:
 deps:
 	sudo apt-get install gcc g++ gdb libboost-dev libgtk-3-dev \
 	libgtkglext1-dev freeglut3-dev libusb-1.0-0-dev libglew-dev \
-	libblas-dev liblapack-dev libfftw3-dev libhdf5-serial-dev qjackctl \
-	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck
+	libblas-dev liblapack-dev libfftw3-dev qjackctl \
+	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck \
+	libhdf5-7 libhdf5-dev libhdf5-serial-dev zlib1g zlib1g-dev \
+	libxdg-basedir-dev liblua5.1-0-dev libprocps0-dev
 	@echo ""
 	@echo "  Note: please download and install libmatio version >= 1.50"
 
@@ -99,6 +116,10 @@ install:
 	install matlab/bmi5_mmap.cpp -t $(TARGET)/matlab
 	install -d /usr/local/include
 	install ../../myopen/common_host/mmaphelp.h -t /usr/local/include
+
+conf:
+	install -d $(HOME)/.config/bmi5
+	install rc/bmi5.rc -t $(HOME)/.config/bmi5
 
 pretty:
 	# "-rm" means that make ignores errors, if any

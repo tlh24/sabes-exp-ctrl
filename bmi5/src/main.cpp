@@ -4,6 +4,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <proc/readproc.h>
 #include <math.h>
 #include <time.h>
 #include <arpa/inet.h>
@@ -18,6 +19,10 @@
 #include <fcntl.h>
 #include <pcap.h>
 #include "matio.h"
+
+// XDG
+#include <basedir.h>
+#include <basedir_fs.h>
 
 //opengl headers.
 #include <gtk/gtk.h>
@@ -44,20 +49,18 @@
 #include <functional>
 
 // myopen common
-#include "lockfile.h"
 #include "mmaphelp.h"
 #include "gettime.h"
 #include "timesync.h"
 #include "perftimer.h"
 #include "fifohelp.h"
 
-//local.
+//local
 #include "tdt_udp.h"
 #include "jacksnd.h"
 #include "serialize.h"
 #include "shape.h"
 #include "polhemus.h"
-#include "../optotrak_sniff/etherstruct.h"
 #include "glFont.h"
 
 #include "fenv.h" // for debugging nan problems
@@ -67,14 +70,25 @@
 #include "u6.h"
 #endif
 
+#ifdef OPTO
+#include "../optotrak_sniff/etherstruct.h"
+#endif
+
+// conf files
+#include "lualib.h"
+#include "lauxlib.h"
+#include "lconf.h"
+
 using namespace std;
 using namespace boost;
 
-#define BMI5_CTRL_MMAP	"/tmp/bmi5_control.mmap"
-#define BMI5_IN_FIFO	"/tmp/bmi5_in.fifo"
-#define BMI5_OUT_FIFO	"/tmp/bmi5_out.fifo"
+string 		g_mmap = "/tmp/bmi5_control.mmap";
+string 		g_in_fifo = "/tmp/bmi5_in.fifo";
+string 		g_out_fifo = "/tmp/bmi5_out.fifo";
+string 		g_polhemus_serial = "/dev/ttyS0";
 
-#define SERIAL_PORT "/dev/ttyS0"
+bool 		g_do_backup = true;
+string 		g_backup_dir = "/tmp";
 
 double 		g_frameRate = 0.0;
 long double	g_lastFrame = 0.0;
@@ -121,6 +135,8 @@ vector<Serialize *> 	g_objs; //container for each of these, and more!
 pthread_mutex_t		mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
 pthread_mutex_t		mutex_gobjs;
 long double			g_nextVsyncTime = -1;
+
+luaConf 			g_lc;
 
 string 				g_basedirname;
 
@@ -320,8 +336,8 @@ static gboolean refresh (gpointer )
 	gtk_widget_queue_draw (g_da[0]);
 	gtk_widget_queue_draw (g_da[1]);
 	//can do other pre-frame GUI update stuff here.
-	long double time; 
-	double ticks; 
+	long double time;
+	double ticks;
 	g_tsc->getTicks(time, ticks); //force mmap update.
 	string s = g_tsc->getInfo();
 	gtk_label_set_text(GTK_LABEL(g_timeLabel), s.c_str());
@@ -369,11 +385,15 @@ static gboolean refresh (gpointer )
 	}
 	gtk_label_set_text(GTK_LABEL(g_polhemusLabel), con.c_str());
 
+#ifdef OPTO
 	if (g_opto)
 		g_opto->getLoc(gettime(), loc);
 	con  = g_optoConnected ? string("connected\n") : string("disconnected\n");
 	con += g_optoLabelStr;
 	gtk_label_set_text(GTK_LABEL(g_optoLabel), con.c_str());
+#else
+	gtk_label_set_text(GTK_LABEL(g_optoLabel), "disabled in build.");
+#endif
 
 #ifdef LABJACK
 	gtk_label_set_text(GTK_LABEL(g_labjackLabel), g_labjackLabelStr.c_str());
@@ -450,13 +470,14 @@ void flush_pipe(int fid)
 void *mmap_thread(void *)
 {
 	size_t length = 8*1024*8; //mmapFileSize(g_objs);
-	mmapHelp mmh(length, BMI5_CTRL_MMAP);
+
+	mmapHelp mmh(length, g_mmap.c_str());
 	mmh.prinfo();
 
-	fifoHelp pipe_in(BMI5_IN_FIFO);
+	fifoHelp pipe_in(g_in_fifo.c_str());
 	pipe_in.prinfo();
 
-	fifoHelp pipe_out(BMI5_OUT_FIFO);
+	fifoHelp pipe_out(g_out_fifo.c_str());
 	pipe_out.prinfo();
 
 	char buf[256];
@@ -918,21 +939,23 @@ void *backup_thread(void *)
 	char dirname[256];
 	int i = 1;
 	while (found) {
-		snprintf(dirname, 256, "/tmp/%04d-%02d-%02d_%04d", tm.tm_year+1900,
-		         tm.tm_mon+1, tm.tm_mday, i); //maybe should have a prefix here?
+		snprintf(dirname, 256, "%s/%04d-%02d-%02d_%04d",
+		         g_backup_dir.c_str(), tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday, i);
 		struct stat st;
 		int err = stat(dirname, &st);
 		if (!S_ISDIR(st.st_mode) || err < 0) {
 			found = false;
-			if (mkdir(dirname, 0777))
+			if (mkdir(dirname, 0777)) {
 				printf("could not mkdir %s\n", dirname);
+				g_do_backup = false;
+			}
 		} else i++;
 	}
 	int k=1;
 	while (!g_die) {
 		for (int j=0; j<10 && !g_die; j++)
 			sleep(1); //so it closes somewhat quickly.
-		if (!g_die && matlabHasNewData(g_objs)) {
+		if (!g_die && g_do_backup && matlabHasNewData(g_objs)) {
 			char fname[256];
 			snprintf(fname, 256, "%s/backup_%04d.mat", dirname, k);
 			pthread_mutex_lock(&mutex_fwrite);
@@ -962,7 +985,6 @@ void *polhemus_thread(void * )
 {
 	unsigned char buf[BUF_SIZE];
 	int count, len, i;
-	string deviceName = {SERIAL_PORT};
 
 	//init the communication obj.
 	polhemus *pol = new polhemus();
@@ -972,14 +994,14 @@ void *polhemus_thread(void * )
 	}
 	int fail;
 	//fail = pol->UsbConnect(TRKR_LIB); //see polhemus.h
-	fail = pol->Rs232Connect(deviceName.c_str(), 115200);
+	fail = pol->Rs232Connect(g_polhemus_serial.c_str(), 115200);
 	if (fail) {
-		printf("could not open via rs232 to Polhemus on %s\n", deviceName.c_str());
+		printf("could not open via rs232 to Polhemus on %s\n", g_polhemus_serial.c_str());
 		printf("> try sudo usermod -a -G dialout <username>");
 		printf("> then logout and log back in.");
 		g_polhemusConnected = false;
 	} else {
-		printf("connecting to polhemus via rs232 on %s\n", deviceName.c_str());
+		printf("connecting to polhemus via rs232 on %s\n", g_polhemus_serial.c_str());
 		g_polhemusConnected = true;
 	}
 	//flush the buffer, sync things up.
@@ -996,7 +1018,6 @@ void *polhemus_thread(void * )
 		rxbytes += len > 0 ? len : 0;
 		count++;
 		//if (len > 0) printf("%.*s\n", len, buf); else printf("NO DATA!\n");
-
 	} while (count < 10);
 
 	if (rxbytes <= 0) {
@@ -1105,6 +1126,7 @@ void *polhemus_thread(void * )
 	return NULL;
 }
 
+#ifdef OPTO
 void *opto_thread(void * )
 {
 	pcap_t *handle;			/* Session handle */
@@ -1234,6 +1256,7 @@ void *opto_thread(void * )
 	pcap_close(handle);
 	return (void *)0;
 }
+#endif
 
 #ifdef LABJACK
 void *labjack_thread(void * )
@@ -1242,7 +1265,7 @@ void *labjack_thread(void * )
 	const uint8 gainIndex = 2; //0 = +-10V, 1 = +-1V, 2 = +-100mV, 3 = +-10mV, 15=autorange.  Default 0.
 	const uint8 resolution = 1; //1=default, 1-8 for high-speed ADC, 9-13 for high-res ADC on U6-Pro. Default 1.
 	const uint8 differential = 1; //Indicates whether to do differential readings.  Default 0 (false).
-	g_labjackLabelStr = string("disconnected"); 
+	g_labjackLabelStr = string("disconnected");
 	/// init the USB device.
 	HANDLE hDevice = 0;
 	u6CalibrationInfo caliInfo;
@@ -1278,7 +1301,7 @@ void *labjack_thread(void * )
 
 		for ( i = 0; i < 14; i++ )
 			valueAIN[i] = 9999;
-		
+
 		for ( i = 0; i < 14; i++)
 			valueDOUT[i] = 0;
 
@@ -1430,26 +1453,26 @@ void *labjack_thread(void * )
 			}
 
 			//Getting AIN voltages
-			for(j = 0; j < numAINChannels; j++){
-                double d = 0.0;
-                bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
-                getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
-                valueAIN[j] = d;
-                j = j + differential;     
+			for (j = 0; j < numAINChannels; j++) {
+				double d = 0.0;
+				bits32 = recBuff[9+j*3] + recBuff[10+j*3]*256 + recBuff[11+j*3]*65536;
+				getAinVoltCalibrated(&caliInfo, resolution, gainIndex, 1, bits32, &d);
+				valueAIN[j] = d;
+				j = j + differential;
 			}
 			// copy over the data!
 			if (g_labjack_AIN) {
 				g_labjack_AIN->store(valueAIN);
 			}
-			
+
 			//Setting DOUT values
 			if (g_labjack_DOUT) {
-				for( j = 0; j < numDOUTChannels; j++) {
+				for ( j = 0; j < numDOUTChannels; j++) {
 					valueDOUT[j] = g_labjack_DOUT->m_stor[j];
 				}
 			}
 			for ( j = 0; j < numDOUTChannels; j++) {
-				if(eDO(hDevice, long(j), long(valueDOUT[j])))
+				if (eDO(hDevice, long(j), long(valueDOUT[j])))
 					printf("Error writing DOUT (iteration %d)",i);
 			}
 			usleep(200); // could be longer, really.
@@ -1464,7 +1487,6 @@ cleanmem:
 	g_labjackLabelStr = string("Error!  Disconnected.\nTry unplugging the labjack\nand restarting bmi5.");
 	return 0;
 }
-
 #endif
 
 static void saveMatlabData(gpointer, gpointer parent_window)
@@ -1545,12 +1567,19 @@ int main(int argn, char **argc)
 {
 	(void) signal(SIGINT, destroy);
 
-	srand(time(NULL)); // seed rng
+	pid_t mypid = getpid();
 
-	lockfile lf = lockfile("/tmp/bmi5.lock");
-	if (lf.lock()) {
-		return 1;
+	PROCTAB *pr = openproc(PROC_FILLSTAT);
+	proc_t pr_info;
+	memset(&pr_info, 0, sizeof(pr_info));
+	while (readproc(pr, &pr_info) != NULL) {
+		if (!strcmp(pr_info.cmd, "bmi5") && pr_info.tgid != mypid) {
+			printf("already running with pid: %d\n", pr_info.tgid);
+			return 1;
+		}
 	}
+
+	srand(time(NULL)); // seed rng
 
 #ifdef DEBUG
 	//feenableexcept(FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW);  // Enable (some) floating point exceptions
@@ -1569,6 +1598,27 @@ int main(int argn, char **argc)
 
 	dname = dirname(linkname);
 	g_basedirname = dname;
+
+	xdgHandle xdg;
+	xdgInitHandle(&xdg);
+	char *confpath = xdgConfigFind("bmi5/bmi5.rc", &xdg);
+	char *tmp = confpath;
+	// confpath is "string1\0string2\0string3\0\0"
+
+	while (*tmp) {
+		g_lc.loadConf(tmp);
+		tmp += strlen(tmp) + 1;
+	}
+	if (confpath)
+		free(confpath);
+
+	// these happen here for threadsafety
+	g_lc.getString("bmi5.mmap", g_mmap);
+	g_lc.getString("bmi5.fifoIn", g_in_fifo);
+	g_lc.getString("bmi5.fifoOut", g_out_fifo);
+	g_lc.getString("polhemus.serialPort", g_polhemus_serial);
+	g_do_backup = g_lc.getBool("backup.enable");
+	g_lc.getString("backup.dir", g_backup_dir);
 
 	//setup a window with openGL.
 	GtkWidget *window;
@@ -1729,13 +1779,17 @@ int main(int argn, char **argc)
 	pthread_mutex_init(&mutex_fwrite, NULL);
 	pthread_mutex_init(&mutex_gobjs, NULL);
 
-	pthread_t pthread, mthread, bthread, othread;
+	pthread_t pthread, mthread, bthread;
 	pthread_create(&pthread, NULL, polhemus_thread, NULL);
-	pthread_create(&othread, NULL, opto_thread, NULL);
 	pthread_create(&mthread, NULL, mmap_thread, NULL);
 	pthread_create(&bthread, NULL, backup_thread, NULL);
+#ifdef OPTO
+	pthread_t othread;
+	pthread_create(&othread, NULL, opto_thread, NULL);
+#endif
 #ifdef LABJACK
-	pthread_create(&bthread, NULL, labjack_thread, NULL);
+	pthread_t lthread;
+	pthread_create(&lthread, NULL, labjack_thread, NULL);
 #endif
 
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
@@ -1743,8 +1797,12 @@ int main(int argn, char **argc)
 	//jack audio.
 #ifdef JACK
 	jackInit("bmi5", JACKPROCESS_TONES);
-	jackConnectFront();
-	//jackConnectCenterSub();	
+	if (g_lc.getBool("jack.connectFront")) {
+		jackConnectFront();
+	}
+	if (g_lc.getBool("jack.connectCenterSub")) {
+		jackConnectCenterSub();
+	}
 	jackTest();
 #endif
 
@@ -1752,17 +1810,27 @@ int main(int argn, char **argc)
 	gtk_widget_show_all (window);
 
 	g_record = true;
-	gtk_main();
 
-	pthread_join(pthread,NULL);  // wait for the read thread to complete
-	pthread_join(othread,NULL);
-	//pthread_join(mthread,NULL);
-	pthread_join(bthread,NULL);
+	gtk_main();	// where everything happens
+
+	// now unwind everything in reverse order
+
+	//save data!!
+	writeMatlab(g_objs, (char *)"backup.mat", false); //the whole enchilada.
+
 #ifdef JACK
 	jackClose(0);
 #endif
-	//save data!!
-	writeMatlab(g_objs, (char *)"backup.mat", false); //the whole enchilada.
+#ifdef LABJACK
+	pthread_join(lthread,NULL);
+#endif
+#ifdef OPTO
+	pthread_join(othread,NULL);
+#endif
+	// can't join mthread easily since the read on the pipe is blocking
+	//pthread_join(mthread,NULL);
+	pthread_join(pthread,NULL);  // wait for the read thread to complete
+
 	pthread_mutex_destroy(&mutex_fwrite);
 	pthread_mutex_destroy(&mutex_gobjs);
 
@@ -1772,8 +1840,6 @@ int main(int argn, char **argc)
 	delete g_daglx[0];
 	delete g_daglx[1];
 	delete g_tsc;
-
-	lf.unlock();
 
 	return 0;
 }
