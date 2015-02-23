@@ -11,6 +11,20 @@ eval(bmi5_cmd('mmap'));
 b5 = bmi5_mmap(b5); 
 b5.isometricAIN_sensors_o
 
+%%
+b5.isometricDOUT_channels = [0 0 1 1];
+b5 = bmi5_mmap(b5);
+%%
+b5.isometricDOUT_channels = [1 0 1 1];
+b5 = bmi5_mmap(b5);
+juiceStart = b5.isometricDOUT_time_o;
+
+while (b5.time_o - juiceStart) < 100
+    b5 = bmi5_mmap(b5);
+end
+
+b5.isometricDOUT_channels = [0 0 1 1];
+b5 = bmi5_mmap(b5);
 %% define sampling parameters
 
 n = 50000; %number of samples read from labjack
