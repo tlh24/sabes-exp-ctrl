@@ -95,8 +95,8 @@ deps:
 	libgtkglext1-dev freeglut3-dev libusb-1.0-0-dev libglew-dev \
 	libblas-dev liblapack-dev libfftw3-dev qjackctl \
 	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck \
-	libhdf5-7 libhdf5-dev libhdf5-serial-dev zlib1g zlib1g-dev \
-	libxdg-basedir-dev liblua5.1-0-dev libprocps0-dev
+	libhdf5-8 libhdf5-dev libhdf5-serial-dev zlib1g zlib1g-dev \
+	libxdg-basedir-dev liblua5.1-0-dev libprocps3-dev
 	@echo ""
 	@echo "  Note: please download and install libmatio version >= 1.50"
 
