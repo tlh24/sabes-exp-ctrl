@@ -1,8 +1,21 @@
 
 KERNEL = $(shell uname -r)
 PLX_SDK_DIR = PO8e_v2/Linux/PlxSdk
+DEBIAN_VERSION = $(shell lsb_release -sc)
+
 MODULE_DIR = /lib/modules/$(KERNEL)/extra
 TARGET = /usr/local/lib
+
+ifeq ($(DEBIAN_VERSION), jessie) 
+	# eglibc 2.14
+	STREAMING_LIB = PO8e_v2/Linux/libPO8eStreaming.so
+else
+	ifeq ($(DEBIAN_VERSION), wheezy)
+		# eglibc 2.13
+		STREAMING_LIB = old/PO8e-for-3.2.0-3-amd64/libPO8eStreaming.so
+	endif
+endif
+
 
 all: driver
 
@@ -18,7 +31,7 @@ clean:
 
 install:
 	install -d $(TARGET)
-	install PO8e_v2/Linux/libPO8eStreaming.so $(TARGET)
+	install $(STREAMING_LIB) $(TARGET)
 	install -d $(MODULE_DIR)
 	install PO8e_v2/Linux/drivers/$(KERNEL)/Plx9054.ko $(MODULE_DIR)
 	install etc/Plx9054.rules /etc/udev/rules.d
