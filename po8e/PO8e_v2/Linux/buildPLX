@@ -1,0 +1,15 @@
+#!/bin/bash
+
+tar -xf PlxSdk-7.11.tar
+patch -p0 < patches/PLX-pci-ids-new.patch
+patch -p0 < patches/PLX-fpic.patch
+patch -p0 < patches/PLX-comma-warning.patch
+cd PlxSdk/Driver
+PLX_SDK_DIR=`pwd`/.. ./builddriver 9054
+cd -
+
+mkdir -p drivers/`uname -r`
+cp PlxSdk/Driver/Plx9054/Plx9054.ko drivers/`uname -r`
+
+# cleanup
+rm -rf PlxSdk
