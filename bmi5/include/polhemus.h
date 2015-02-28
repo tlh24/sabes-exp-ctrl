@@ -30,12 +30,14 @@ Licensed under the GNU Lesser General Public License version 2.1 or later.
 #ifndef PITRACKER_H_
 #define PITRACKER_H_
 
-#define BYTE unsigned char
 #include <libusb-1.0/libusb.h>
 #include <termios.h>
 
 enum {NO_CNX=-1,USB_CNX,RS232_CNX};
 
+#ifndef BYTE
+#define BYTE uint8
+#endif
 
 class polhemus
 {

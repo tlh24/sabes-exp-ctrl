@@ -1,4 +1,5 @@
-#version 330
+#version 300 es
+precision highp float;
 uniform mat4 affine_matrix; // linear: x y z 1
 uniform mat4 quadratic_matrix; // quadratic: x^2 y^2 xy 0
 uniform vec4 uniform_color; 

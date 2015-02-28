@@ -19,7 +19,7 @@ b5.isometricDOUT_channels = [1 0 1 1];
 b5 = bmi5_mmap(b5);
 juiceStart = b5.isometricDOUT_time_o;
 
-while (b5.time_o - juiceStart) < 100
+while (b5.time_o - juiceStart) < 0.1
     b5 = bmi5_mmap(b5);
 end
 

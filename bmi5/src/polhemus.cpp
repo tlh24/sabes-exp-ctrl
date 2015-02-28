@@ -40,6 +40,9 @@ Licensed under the GNU Lesser General Public License version 2.1 or later.
 #define FT_INT   0x84
 #define FT_PID   0x0002
 
+#ifndef uint8
+#define uint8 unsigned char
+#endif
 
 typedef struct _USB_PARAMS {
 	int vid;
