@@ -731,10 +731,14 @@ public:
 				m_last[i] = d[i];
 				m_stor[i] = (float)d[i];
 			}
-			sendDataRZ(m_sock, &(m_stor[0]), m_size); //thread-synchronous is ok?
-			double time = gettime(); //save the time of TX.
-			v_time.push_back(time);
-			v_stor.push_back(m_stor);
+			if (sendDataRZ(m_sock, &(m_stor[0]), m_size)) { //thread-synchronous is ok?
+				double time = gettime(); //save the time of TX.
+				v_time.push_back(time);
+				v_stor.push_back(m_stor);
+			} else {
+				printf("sendRZ failed!\n");
+			}
+			
 		}
 		d += m_size;
 		return d;
