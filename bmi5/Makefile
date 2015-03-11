@@ -16,8 +16,8 @@ ifeq	($(shell hostname),task2go)
 	LABJACK = true
 endif
 
-CPP = g++
-CC  = gcc
+CPP = g++-4.8
+CC  = gcc-4.8
 TARGET = /usr/local/bin
 
 OBJS := src/main.o src/tdt_udp.o src/glInfo.o src/glFont.o src/polhemus.o \
@@ -87,12 +87,12 @@ clean:
 	rm -rf src/*.o bmi5 glxgears
 	
 deps:
-	sudo apt-get install gcc g++ gdb libboost-dev libgtk-3-dev \
+	sudo apt-get install gcc g++-4.7 gdb libboost-dev libgtk-3-dev \
 	libgtkglext1-dev freeglut3-dev libusb-1.0-0-dev libglew-dev \
 	libblas-dev liblapack-dev libfftw3-dev qjackctl \
 	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck \
 	libhdf5-7 libhdf5-dev libhdf5-serial-dev zlib1g zlib1g-dev \
-	libxdg-basedir-dev liblua5.1-0-dev libprocps0-dev
+	libxdg-basedir-dev liblua5.1-0-dev libprocps0-dev libgsl0-dev
 	@echo ""
 	@echo "  Note: please download and install libmatio version >= 1.50"
 

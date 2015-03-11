@@ -56,6 +56,7 @@
 #include "fifohelp.h"
 
 //local
+#include "common.h"
 #include "tdt_udp.h"
 #include "jacksnd.h"
 #include "serialize.h"
@@ -1093,10 +1094,14 @@ void *polhemus_thread(void * )
 					buf[i] = 0; // not sure why we need to do this? xxx
 					// this data is used, move the pointer forward one frame
 					g_cbRN += 20;
-					float *pData=(float *)(buf+8);			// header is first 8 bytes
 					if (g_polhemus && g_record) {
-						for (int j=0; j<3; j++)
-							markerData[(markerid-1)*3 + j] = pData[j];
+						for (int j=0; j<3; j++) {
+							union floatbytes data;
+							for (size_t k=0; k<sizeof(float); k++) {
+								data.b[k] = buf[8 + j*sizeof(float) + k]; // header is 8 bytes
+							}
+							markerData[(markerid-1)*3 + j] = data.f;
+						}
 						if (markerid ==  g_polhemus->m_nsensors)
 							g_polhemus->store(markerData);
 					}
@@ -1532,18 +1537,18 @@ static void clearDataCB(gpointer, gpointer parent_window)
 
 void longDoubleTest()
 {
-	printf("sizeof long double %ld\n", sizeof(long double));
-	printf("sizeof double %ld\n", sizeof(double));
+	printf("sizeof long double %u\n", sizeof(long double));
+	printf("sizeof double %u\n", sizeof(double));
 
-	long double ld = 0.0;
+	long double Ld = 0.0;
 	double d = 0.0;
 	for (unsigned int i=0; i<100000000; i++) { //one billion!
-		ld += 0.001234567;
+		Ld += 0.001234567;
 		d += 0.001234567;
 	}
-	long double ld2 = (long double)d;
-	ld2 -= ld;
-	printf("sum ld: %Lf, d: %f difference %Lf\n", ld, d, ld2);
+	long double Ld2 = (long double)d;
+	Ld2 -= Ld;
+	printf("sum Ld: %Lf, d: %f difference %Lf\n", Ld, d, Ld2);
 }
 
 void gobjsInit()

@@ -11,62 +11,66 @@
 #include <netdb.h>
 #include <fcntl.h>
 
+#include "common.h"
+
 //#define CP_printf printf
 #define INVALID_SOCKET 0
 
 int openSocket(char *strIPAddr, int port)
 {
-	sockaddr_in sin;
+	int sockfd = INVALID_SOCKET;
 
-	int sock= INVALID_SOCKET;
+	struct addrinfo hints, *servinfo, *p;
+	int rv;
 
-	//do name resolution
-	hostent *targethost;
-	char *ipaddr;
-	targethost = gethostbyname(strIPAddr);
-	if (targethost) {
-		ipaddr=inet_ntoa(*(struct in_addr *)*targethost->h_addr_list);
-	} else {
-		printf("hahahahha!\n");
-		ipaddr=strIPAddr;  //failed resolution...
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
+
+	char strPort[128];
+	sprintf(strPort, "%d", port);
+
+	if ((rv = getaddrinfo(strIPAddr, strPort, &hints, &servinfo)) != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+		return INVALID_SOCKET;
 	}
 
-	// prepare the SIN to send to
-	memset(&sin, 0, sizeof(sockaddr_in));
+	// connect to the first we can
+	printf("UDP: Attempting to open UDP %s : %s\n", strIPAddr, strPort);
+	for (p = servinfo; p != NULL; p = p->ai_next) {
+		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+			perror("socket");
+			continue;
+		}
+		int optval = 1; // turn on address reuse.
+		setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = inet_addr(ipaddr);
-	sin.sin_port = htons(port);
+		// set timeout on these so if there is no RZ2, the rx does not block forever.
+		struct timeval timeout;
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
+		setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO,(char *)&timeout,sizeof(timeout));
+		setsockopt(sockfd,SOL_SOCKET,SO_SNDTIMEO,(char *)&timeout,sizeof(timeout));
 
-	printf("UDP: Attempting to open UDP %s\n", strIPAddr);
+		if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+			close(sockfd);
+			perror("connect");
+			continue;
+		}
 
-	sock = socket(AF_INET, SOCK_DGRAM, 0);
-	printf("... socket created\n");
-	if (sock == INVALID_SOCKET) {
-		fprintf(stderr, "Failed to create the UDP socket: \n");
-		perror(":");
+		break; // if we get here, we must have connected successfully
 	}
-	int optval = 1; // turn on address reuse.
-	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-	//set timeout on these so if there is no RZ2, they rx does not block forever.
-	struct timeval timeout;
-	timeout.tv_sec = 1;
-	timeout.tv_usec = 0;
-	if (setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
-		fprintf(stderr,"setsockopt failed\n");
-	if (setsockopt (sock, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
-		fprintf(stderr,"setsockopt failed\n");
 
-	// Flip uses connect rather than bind here -- so outgoing packets have a default endpoint.
-	if (connect(sock, (struct sockaddr *)&sin, sizeof(sockaddr_in)) != 0) {
-		close(sock);
-		sock = INVALID_SOCKET;
-		fprintf(stderr,"Failed to connect the UDP socket:\n");
-		perror(":");
+	if (p == NULL) {
+		// looped off the end of the list w/o connection
+		fprintf(stderr, "failed to connect\n");
+		return INVALID_SOCKET;
 	}
 	printf("... done\n");
 
-	return sock;
+	freeaddrinfo(servinfo);
+
+	return sockfd;
 }
 
 bool checkRZ(int sock)
@@ -93,28 +97,30 @@ bool checkRZ(int sock)
 
 bool sendDataRZ(int sock, float *data, int count)
 {
-	char *packet;
 	bool retval = false;
-	int i;
+
+	int n = HEADER_BYTES+sizeof(float)*count;
+
 	// Allocate packet
-	packet = new char[4+4*count];
+	char *packet = new char[n];
 
 	// Get header and load into packet
-	char header[4] = DATA_HEADER((char)count);
-	for (i=0; i<4; i++)
+	char header[HEADER_BYTES] = DATA_HEADER((char)count);
+	for (int i=0; i<HEADER_BYTES; i++)
 		packet[i]=header[i];
 
 	// Load data (as floats)
-	float *f = (float *)(packet + HEADER_BYTES);
-	for (i=0; i<count; i++)
-		f[i] = (float)(data[i]);
+	union floatbytes fb;
+	for (int i=0; i<count; i++) {
+		fb.f = data[i]; // load float
+		fb.u = htonl(fb.u); // convert byte order
+		for (size_t j=0; j<sizeof(float); j++) {
+			packet[HEADER_BYTES+i*count+j] = fb.b[j];
+		}
+	}
 
-	// match the byte ordering of the RZ communication
-	uint32_t *udata = (uint32_t *)f;
-	for (i=0; i<count; i++)
-		udata[i] = htonl(udata[i]);
 	// send the data over the UDP connection
-	if (send(sock, packet, 4 + count * 4, 0) == 4 + count * 4)
+	if (send(sock, packet, n, 0) == n)
 		retval = true;
 	// Close
 	free(packet);
