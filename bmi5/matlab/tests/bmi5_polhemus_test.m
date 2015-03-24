@@ -1,6 +1,6 @@
 global bmi5_in bmi5_out;
 
-cd('/home/motorlab/sabes-exp-ctrl/bmi5/matlab');
+cd('/home/joeyo/sw/sabes-exp-ctrl/bmi5/matlab');
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
