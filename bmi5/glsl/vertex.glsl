@@ -1,4 +1,4 @@
-#version 330
+#version 300 es
 uniform mat4 affine_matrix; // linear: x y z 1
 uniform mat4 quadratic_matrix; // quadratic: x^2 y^2 xy 0
 

@@ -1,4 +1,6 @@
-#version 330
+#version 300 es
+
+precision mediump float;
 
 smooth in vec4 theColor;
 
