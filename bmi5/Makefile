@@ -16,8 +16,8 @@ ifeq	($(shell hostname),task2go)
 	LABJACK = true
 endif
 
-CPP = g++
 CC  = gcc
+CPP = g++
 TARGET = /usr/local/bin
 
 OBJS := src/main.o src/tdt_udp.o src/glInfo.o src/glFont.o src/polhemus.o \
@@ -53,7 +53,16 @@ endif
 ifeq ($(strip $(OPTO)),true)
 	CFLAGS += -DOPTO
 endif
-	
+
+# DEPENDENCIES: NOTE WE REQUIRE JESSIE NOW
+DEPS = gcc g++ gdb astyle cppcheck libboost-dev libgtk-3-dev \
+libgtkglext1-dev freeglut3-dev libglew-dev libusb-1.0-0-dev \
+libmatio-dev libhdf5-8 libhdf5-dev libhdf5-serial-dev \
+libblas-dev liblapack-dev libfftw3-dev libgsl0-dev \
+libxdg-basedir-dev liblua5.1-0-dev libprocps3-dev \
+libpcap-dev winbind zlib1g-dev \
+qjackctl libjack-jackd2-dev
+
 ifeq ($(shell lsb_release -sc), wheezy)
 	HDFLIB = -lhdf5
 else 
@@ -87,14 +96,7 @@ clean:
 	rm -rf src/*.o bmi5 glxgears
 	
 deps:
-	sudo apt-get install gcc g++ gdb libboost-dev libgtk-3-dev \
-	libgtkglext1-dev freeglut3-dev libusb-1.0-0-dev libglew-dev \
-	libblas-dev liblapack-dev libfftw3-dev qjackctl \
-	libjack-jackd2-dev libpcap-dev winbind astyle cppcheck \
-	libhdf5-7 libhdf5-dev libhdf5-serial-dev zlib1g zlib1g-dev \
-	libxdg-basedir-dev liblua5.1-0-dev libprocps0-dev
-	@echo ""
-	@echo "  Note: please download and install libmatio version >= 1.50"
+	sudo apt-get install $(DEPS)
 
 check:
 	cppcheck -Iinclude -I/usr/local/include -I../../myopen/common_host \
