@@ -25,7 +25,8 @@ class gtkglx
 public:
 	float				m_size[2];
 
-	gtkglx(GtkWidget *) {
+	gtkglx(GtkWidget *)
+	{
 		//GdkScreen 		*screen;
 		int 				xscreen;
 		Window 			root;
@@ -45,13 +46,15 @@ public:
 		m_context = glXCreateContext (m_display, m_xvisual, NULL, TRUE);
 		m_size[0] = m_size[1] = 1.f;
 	}
-	~gtkglx() {
+	~gtkglx()
+	{
 		glXDestroyContext (m_display, m_context);
 		XFreeColormap (m_display, m_xcolormap);
 		//g_object_unref (G_OBJECT(m_visual));
 		XFree (m_xvisual);
 	}
-	int configure(GtkWidget *widget) {
+	int configure(GtkWidget *widget)
+	{
 		GtkAllocation allocation;
 		GdkWindow *window;
 		Display *display;
@@ -69,7 +72,8 @@ public:
 		}
 		return TRUE;
 	}
-	int realize(GtkWidget *w) { //extra parameter so it can be a cb.
+	int realize(GtkWidget *w)   //extra parameter so it can be a cb.
+	{
 		GdkWindow *window;
 		Display *display;
 		int id;
@@ -92,7 +96,8 @@ public:
 
 		return TRUE;
 	}
-	int expose(GtkWidget *widget) {
+	int expose(GtkWidget *widget)
+	{
 		GdkWindow *window;
 		Display *display;
 
@@ -104,11 +109,13 @@ public:
 			return TRUE; //success!
 		return FALSE;
 	}
-	void swap() {
+	void swap()
+	{
 		glFlush();
 		glXSwapBuffers (m_display, m_xid);
 	}
-	float getAR() {
+	float getAR()
+	{
 		return m_size[0] / m_size[1];
 	}
 };

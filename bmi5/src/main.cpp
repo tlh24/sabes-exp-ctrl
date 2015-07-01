@@ -683,24 +683,24 @@ void *mmap_thread(void *)
 								name = (*beg++);
 								//good, we have all the parameters
 								if (type == string("char")) {
-									VectorSerialize<char>* obj =
-									        new VectorSerialize<char>(size, MAT_C_INT8);
+									VectorSerialize<char> *obj =
+									    new VectorSerialize<char>(size, MAT_C_INT8);
 									makeStoreConf(obj, type, name);
 								} else if (type == string("uchar")) {
-									VectorSerialize<unsigned char>* obj =
-									        new VectorSerialize<unsigned char>(size, MAT_C_UINT8);
+									VectorSerialize<unsigned char> *obj =
+									    new VectorSerialize<unsigned char>(size, MAT_C_UINT8);
 									makeStoreConf(obj, type, name);
 								} else if (type == string("int")) {
-									VectorSerialize<int>* obj =
-									        new VectorSerialize<int>(size, MAT_C_INT32);
+									VectorSerialize<int> *obj =
+									    new VectorSerialize<int>(size, MAT_C_INT32);
 									makeStoreConf(obj, type, name);
 								} else if (type == string("float")) {
-									VectorSerialize<float>* obj =
-									        new VectorSerialize<float>(size, MAT_C_SINGLE);
+									VectorSerialize<float> *obj =
+									    new VectorSerialize<float>(size, MAT_C_SINGLE);
 									makeStoreConf(obj, type, name);
 								} else if (type == string("double")) {
-									VectorSerialize<double>* obj =
-									        new VectorSerialize<double>(size, MAT_C_DOUBLE);
+									VectorSerialize<double> *obj =
+									    new VectorSerialize<double>(size, MAT_C_DOUBLE);
 									makeStoreConf(obj, type, name);
 								} else {
 									resp = {"could not generate a store --\n"};
@@ -981,7 +981,7 @@ char g_circBuff[1024];
 unsigned int g_cbPtr = 0;	// write pointer
 unsigned int g_cbRN = 0; 	// pointer to the last carrige return (read pointer).
 
-void *polhemus_thread(void * )
+void *polhemus_thread(void *)
 {
 	unsigned char buf[BUF_SIZE];
 	int count, len, i;
@@ -1127,7 +1127,7 @@ void *polhemus_thread(void * )
 }
 
 #ifdef OPTO
-void *opto_thread(void * )
+void *opto_thread(void *)
 {
 	pcap_t *handle;			/* Session handle */
 	char dev[PCAP_ERRBUF_SIZE];			/* The device to sniff on */
@@ -1259,7 +1259,7 @@ void *opto_thread(void * )
 #endif
 
 #ifdef LABJACK
-void *labjack_thread(void * )
+void *labjack_thread(void *)
 {
 	const uint8 settlingFactor = 0; //0=5us, 1=10us, 2=100us, 3=1ms, 4=10ms.  Default 0.
 	const uint8 gainIndex = 2; //0 = +-10V, 1 = +-1V, 2 = +-100mV, 3 = +-10mV, 15=autorange.  Default 0.
@@ -1499,7 +1499,7 @@ static void saveMatlabData(gpointer, gpointer parent_window)
 	                                      "_Save", GTK_RESPONSE_ACCEPT,
 	                                      NULL);
 	gtk_file_chooser_set_do_overwrite_confirmation(
-	        GTK_FILE_CHOOSER (dialog), TRUE);
+	    GTK_FILE_CHOOSER (dialog), TRUE);
 	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (dialog),"data.mat");
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
 		char *filename;
@@ -1649,7 +1649,7 @@ int main(int argn, char **argc)
 	g_timeLabel = gtk_label_new("time: ");
 	gtk_container_add (GTK_CONTAINER (v1), g_timeLabel );
 
-	auto makeLabel = [&](const char* frameLbl, const char* dflt) {
+	auto makeLabel = [&](const char *frameLbl, const char *dflt) {
 		frame = gtk_frame_new(frameLbl);
 		gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 		gtk_box_pack_start (GTK_BOX (v1), frame, TRUE, TRUE, 0);
@@ -1739,7 +1739,7 @@ int main(int argn, char **argc)
 
 	gtk_widget_show (da2);
 
-	auto makeCheckbox = [&](const char* lbl, bool ic, GCallback cb) {
+	auto makeCheckbox = [&](const char *lbl, bool ic, GCallback cb) {
 		button = gtk_check_button_new_with_label(lbl);
 		gtk_box_pack_start (GTK_BOX (v1), button, TRUE, TRUE, 0);
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON (button), ic ? TRUE:FALSE);

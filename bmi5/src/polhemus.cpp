@@ -74,10 +74,10 @@ polhemus::~polhemus()
 int polhemus::UsbConnect(int trackerType)
 {
 	return UsbConnect2(
-	               usbTrkParams[trackerType].vid,
-	               usbTrkParams[trackerType].pid,
-	               usbTrkParams[trackerType].writeEp,
-	               usbTrkParams[trackerType].readEp);
+	           usbTrkParams[trackerType].vid,
+	           usbTrkParams[trackerType].pid,
+	           usbTrkParams[trackerType].writeEp,
+	           usbTrkParams[trackerType].readEp);
 }
 
 int polhemus::UsbConnect2(int Vid,int Pid,int writeEp, int readEp)

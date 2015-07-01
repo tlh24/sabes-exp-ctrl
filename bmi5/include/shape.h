@@ -28,7 +28,8 @@ public:
 	vector<array<float,2>> v_scale;
 	vector<array<float,2>> v_trans;
 	vector<float> v_rot;
-	Shape(void) : Serialize() {
+	Shape(void) : Serialize()
+	{
 		m_vao[0] = m_vao[1] = 0;
 		m_vbo[0] = m_vbo[1] = 0;
 		m_color[0] = m_color[1] = m_color[2] = m_color[3] = 1.f;
@@ -43,7 +44,8 @@ public:
 		m_draw = 3; //default to 'on'
 #endif
 	}
-	void deleteBuffers() {
+	void deleteBuffers()
+	{
 		for (int i=0; i<2; i++) {
 			if (m_vbo[i]) glDeleteBuffers(1, &(m_vbo[i]));
 			m_vbo[i] = 0;
@@ -51,7 +53,8 @@ public:
 			m_vao[i] = 0;
 		}
 	}
-	~Shape() {
+	~Shape()
+	{
 		//if(m_program[0]) glDeleteProgram(m_program[0]); m_program[0] = 0;
 		//if(m_program[1]) glDeleteProgram(m_program[1]); m_program[1] = 0;
 		//deleteBuffers(); -- must be called within the OpenGL context in which they were created.
@@ -59,7 +62,8 @@ public:
 		v_scale.clear();
 		v_trans.clear();
 	}
-	virtual void makeVAO(float *vertices, bool del, int display) {
+	virtual void makeVAO(float *vertices, bool del, int display)
+	{
 		if (m_n > 0) {
 			glGenVertexArrays(1, &(m_vao[display])); // Create our Vertex Array Object
 			glBindVertexArray(m_vao[display]); // Bind our Vertex Array Object so we can use it
@@ -77,7 +81,8 @@ public:
 			printf("error: makeVAO: m_n < 0\n");
 		}
 	}
-	void makeShader(int index, GLenum type, std::string source) {
+	void makeShader(int index, GLenum type, std::string source)
+	{
 		GLuint shader = glCreateShader(type);
 		int length = source.size();
 		const char *str = source.c_str();
@@ -99,7 +104,8 @@ public:
 		glDeleteShader(shader); //will not be destroyed until the referencing program is destroyed.
 		return;
 	}
-	std::string fileToString(const char *fname) {
+	std::string fileToString(const char *fname)
+	{
 		std::ifstream t(fname); //yay stackoverflow!!
 		std::string str;
 		t.seekg(0, std::ios::end);
@@ -109,7 +115,8 @@ public:
 		           std::istreambuf_iterator<char>());
 		return str;
 	}
-	void makeShadersNamed(int index, const char *vertexName, const char *fragmentName) {
+	void makeShadersNamed(int index, const char *vertexName, const char *fragmentName)
+	{
 		m_program[index] = glCreateProgram();
 		makeShader(index, GL_VERTEX_SHADER, fileToString(vertexName));
 		makeShader(index, GL_FRAGMENT_SHADER, fileToString(fragmentName));
@@ -128,18 +135,21 @@ public:
 			m_program[index] = 0;
 		}
 	}
-	virtual void makeShaders(int index) {
+	virtual void makeShaders(int index)
+	{
 		string vertex   = g_basedirname + "/glsl/" + "vertex_flatcolor.glsl";
 		string fragment = g_basedirname + "/glsl/" + "fragment.glsl";
 		makeShadersNamed(index, vertex.c_str(), fragment.c_str());
 	}
-	virtual void fill(float *v) {
+	virtual void fill(float *v)
+	{
 		for (int i=0; i<m_n; i++) {
 			v[i*2+0] = i&1;
 			v[i*2+1] = (i>>1)&1;
 		}
 	}
-	virtual void configure(int display) {
+	virtual void configure(int display)
+	{
 		if (m_needConfig[display]) {
 			printf("Shape: configuring display [%d]\n", display);
 			float *v = (float *)malloc((m_n)*sizeof(float)*2);
@@ -149,7 +159,8 @@ public:
 			m_needConfig[display] = false;
 		}
 	}
-	void setupDrawMatrices(int display, float) {
+	void setupDrawMatrices(int display, float)
+	{
 		//first pre-multiply the local->world with the world->screen matrix.
 		float m[4][4]; //local->world matrix.
 		for (int i=0; i<4; i++) {
@@ -184,7 +195,8 @@ public:
 		int quadloc = glGetUniformLocation(m_program[display], "quadratic_matrix");
 		if (quadloc >= 0)glUniformMatrix4fv(quadloc, 1, GL_FALSE, g_quadratic44->data());
 	}
-	virtual void draw(int display, float ar) {
+	virtual void draw(int display, float ar)
+	{
 		configure(display); //if we need it.
 		if (m_draw & (1<<display)) {
 			setupDrawMatrices(display, ar);
@@ -209,20 +221,23 @@ public:
 	}
 	virtual void move(long double) {} //no velocity here.
 	///serialization.
-	unsigned char floatToU8(float in) {
+	unsigned char floatToU8(float in)
+	{
 		in *= 255;
 		in = in > 255.f ? 255.f : in;
 		in = in < 0.f ? 0.f : in;
 		return (unsigned char)in;
 	}
-	virtual void clear() {
+	virtual void clear()
+	{
 		v_time.clear();
 		v_color.clear();
 		v_scale.clear();
 		v_trans.clear();
 		v_rot.clear();
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		array<unsigned char,4> color;
 		for (int i=0; i<4; i++)
 			color[i] = floatToU8(m_color[i]);
@@ -248,10 +263,12 @@ public:
 		}
 		return !same;
 	}
-	virtual int nstored() {
+	virtual int nstored()
+	{
 		return v_time.size();
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("time_o");
@@ -268,7 +285,8 @@ public:
 		}
 		return string("none");
 	}
-	virtual int getStoreClass(int indx) {
+	virtual int getStoreClass(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return MAT_C_DOUBLE;
@@ -285,7 +303,8 @@ public:
 		}
 		return 0;
 	}
-	virtual void getStoreDims(int indx, size_t *dims) {
+	virtual void getStoreDims(int indx, size_t *dims)
+	{
 		switch (indx) {
 		case 0:
 			dims[0] = 1;
@@ -317,7 +336,8 @@ public:
 			return;
 		}
 	}
-	virtual void *getStore(int indx, int i) {
+	virtual void *getStore(int indx, int i)
+	{
 		switch (indx) {
 		case 0:
 			return (void *)&((v_time[i]));
@@ -334,10 +354,12 @@ public:
 		}
 		return NULL;
 	}
-	virtual int numStores() {
+	virtual int numStores()
+	{
 		return 6;
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		int i;
 		m_time = gettime();
 		*d++ = m_time;
@@ -375,7 +397,8 @@ public: //do something like the flow field common in the lab.
 	vector <float> v_starsize;
 	// we can assume that the other parts don't change during the experiment.
 
-	StarField() : Shape() {
+	StarField() : Shape()
+	{
 		m_vel[0] = 0.2f;
 		m_vel[1] = 0.1f;
 		m_v = NULL;
@@ -388,7 +411,8 @@ public: //do something like the flow field common in the lab.
 		m_startTime = gettime();
 		m_name = string {"stars"};
 	}
-	~StarField() {
+	~StarField()
+	{
 		if (m_v) free(m_v);
 		m_v = NULL;
 		if (m_pvel) free(m_pvel);
@@ -401,7 +425,8 @@ public: //do something like the flow field common in the lab.
 		v_lifetime.clear();
 		v_starsize.clear();
 	}
-	virtual void makeVAO(starStruct *vertices, bool del, int display) {
+	virtual void makeVAO(starStruct *vertices, bool del, int display)
+	{
 		//this method differs from Shape::makeVAO in that each vertex has a color.
 		if (m_n > 0) {
 			glGenVertexArrays(1, &(m_vao[display])); // Create our Vertex Array Object
@@ -424,13 +449,16 @@ public: //do something like the flow field common in the lab.
 			printf("error: makeVAO: m_n < 0\n");
 		}
 	}
-	float uniform() {
+	float uniform()
+	{
 		return ((float)rand() / (float)RAND_MAX);
 	}
-	float norm(float a, float b) {
+	float norm(float a, float b)
+	{
 		return sqrtf(a*a + b*b);
 	}
-	virtual void makeStars(int nstars) {
+	virtual void makeStars(int nstars)
+	{
 		//distribute the stars uniformly over w, h.
 		//this just requires scaling some rand() s.
 		if (m_v) free(m_v);
@@ -453,19 +481,22 @@ public: //do something like the flow field common in the lab.
 		m_needConfig[0] = m_needConfig[1] = true;
 		m_drawmode = GL_POINTS;
 	}
-	virtual void makeShaders(int index) {
+	virtual void makeShaders(int index)
+	{
 		string vertex   = g_basedirname + "/glsl/" + "vertex.glsl";
 		string fragment = g_basedirname + "/glsl/" + "fragment.glsl";
 		makeShadersNamed(index, vertex.c_str(), fragment.c_str());
 	}
-	virtual void configure(int display) {
+	virtual void configure(int display)
+	{
 		if (m_needConfig[display]) {
 			makeVAO(m_v, false, display); //keep around the b.s.
 			makeShaders(display);
 			m_needConfig[display] = false;
 		}
 	}
-	virtual void move(long double time) {
+	virtual void move(long double time)
+	{
 		if (!m_v || !m_pvel || !m_phase) return;
 		unsigned int basecol = 0;
 		basecol += (unsigned int)(m_color[3] * 255) & 255;
@@ -512,7 +543,8 @@ public: //do something like the flow field common in the lab.
 		}
 		m_lastTime = time;
 	}
-	virtual void draw(int display, float ar) {
+	virtual void draw(int display, float ar)
+	{
 		configure(display);
 		//this is a little more complicated, as we need to do a memcpy and user shaders.
 		if ((m_draw & (1<<display)) && m_v && m_pvel && m_phase) {
@@ -534,28 +566,34 @@ public: //do something like the flow field common in the lab.
 			glUseProgram(0);
 		}
 	}
-	void setVel(double x, double y) {
+	void setVel(double x, double y)
+	{
 		m_vel[0] = x;
 		m_vel[1] = y;
 	}
-	void setCoherence(double c) {
+	void setCoherence(double c)
+	{
 		m_coherence = c;
 	}
-	void setLifetime(double x) {
+	void setLifetime(double x)
+	{
 		m_lifetime = x;
 	}
-	void setStarSize(double ss) {
+	void setStarSize(double ss)
+	{
 		m_starsize = ss;
 	}
 	// serialization
-	virtual void clear() {
+	virtual void clear()
+	{
 		Shape::clear();
 		v_vel.clear();
 		v_coherence.clear();
 		v_lifetime.clear();
 		v_starsize.clear();
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		array<unsigned char,4> color;
 		for (int i=0; i<4; i++)
 			color[i] = floatToU8(m_color[i]);
@@ -590,7 +628,8 @@ public: //do something like the flow field common in the lab.
 		}
 		return !same;
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("vel");
@@ -603,7 +642,8 @@ public: //do something like the flow field common in the lab.
 		}
 		return Shape::storeName(indx - 4);
 	}
-	virtual int getStoreClass(int indx) {
+	virtual int getStoreClass(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return MAT_C_SINGLE;
@@ -616,7 +656,8 @@ public: //do something like the flow field common in the lab.
 		}
 		return Shape::getStoreClass(indx - 4);
 	}
-	virtual void getStoreDims(int indx, size_t *dims) {
+	virtual void getStoreDims(int indx, size_t *dims)
+	{
 		switch (indx) {
 		case 0:
 			dims[0] = 2;
@@ -637,7 +678,8 @@ public: //do something like the flow field common in the lab.
 		}
 		return Shape::getStoreDims(indx-4, dims);
 	}
-	virtual void *getStore(int indx, int i) {
+	virtual void *getStore(int indx, int i)
+	{
 		switch (indx) {
 		case 0:
 			return (void *)&((v_vel[i])[0]);
@@ -650,10 +692,12 @@ public: //do something like the flow field common in the lab.
 		}
 		return Shape::getStore(indx-4, i);
 	}
-	virtual int numStores() {
+	virtual int numStores()
+	{
 		return Shape::numStores() + 4;
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		for (int i=0; i<2; i++)
 			m_vel[i] = *d++;
 		m_coherence = *d++;
@@ -668,7 +712,8 @@ class StarFieldCircle : public StarField
 public:
 	StarFieldCircle() {}
 	~StarFieldCircle() {}
-	void makeStars(int nstars) {
+	void makeStars(int nstars)
+	{
 		//distribute the stars uniformly over w, h.
 		//this just requires scaling some rand() s.
 		if (m_v) free(m_v);
@@ -697,7 +742,8 @@ public:
 		m_needConfig[0] = m_needConfig[1] = true;
 		m_drawmode = GL_POINTS;
 	}
-	virtual void move(long double time) {
+	virtual void move(long double time)
+	{
 
 		if (!m_v || !m_pvel || !m_phase) return;
 
@@ -769,14 +815,16 @@ class Circle : public Shape
 {
 	float 	m_radius; // fixed!
 public:
-	Circle(float radius, int ns) : Shape() {
+	Circle(float radius, int ns) : Shape()
+	{
 		m_radius = radius;
 		m_n = ns+1;
 		m_needConfig[0] = m_needConfig[1] = true;
 		m_drawmode = GL_TRIANGLE_FAN;
 	}
 	~Circle() {}
-	virtual void fill(float *v) {
+	virtual void fill(float *v)
+	{
 		v[0] = 0.f;
 		v[1] = 0.f;
 		for (int i=0; i<m_n-1; i++) {
@@ -793,7 +841,8 @@ class Ring : public Shape
 	float	m_or;
 	int	m_ns;
 public:
-	Ring(float innerRadius, float outerRadius, int ns) : Shape() {
+	Ring(float innerRadius, float outerRadius, int ns) : Shape()
+	{
 		m_ir = innerRadius;
 		m_or = outerRadius;
 		m_n = (ns+1)*2; //number of 2-element vertices.
@@ -802,7 +851,8 @@ public:
 		m_drawmode = GL_TRIANGLE_STRIP;
 	}
 	~Ring() {}
-	virtual void fill(float *v) {
+	virtual void fill(float *v)
+	{
 		for (int i=0; i<m_ns+1; i++) {
 			float t = (float)i * PI * 2 / (m_ns);
 			v[i*4+0] = m_ir*sinf(t);
@@ -818,14 +868,16 @@ class Square : public Shape
 public:
 	float m_w;
 	float m_sign[10] = {-1,-1,-1,1,1,1,1,-1,-1,-1};
-	Square(float width) {
+	Square(float width)
+	{
 		m_w = width * 0.5f;
 		m_n = 5;
 		m_needConfig[0] = m_needConfig[1] = true;
 		m_drawmode = GL_TRIANGLE_FAN;
 	}
 	~Square() {}
-	virtual void fill(float *v) {
+	virtual void fill(float *v)
+	{
 		for (int i=0; i<5; i++) {
 			v[i*2+0] = m_sign[i*2+0]*m_w;
 			v[i*2+1] = m_sign[i*2+1]*m_w;
@@ -837,14 +889,16 @@ class OpenSquare : public Square
 {
 	float m_iw;
 public:
-	OpenSquare(float innerWidth, float outerWidth) : Square(outerWidth) {
+	OpenSquare(float innerWidth, float outerWidth) : Square(outerWidth)
+	{
 		m_iw = innerWidth*0.5f;
 		m_n = 10;
 		m_needConfig[0] = m_needConfig[1] = true;
 		m_drawmode = GL_TRIANGLE_STRIP;
 	}
 	~OpenSquare() {}
-	virtual void fill(float *v) {
+	virtual void fill(float *v)
+	{
 		for (int i=0; i<5; i++) {
 			v[i*4+0] = m_sign[i*2+0]*m_iw;
 			v[i*4+1] = m_sign[i*2+1]*m_iw;
@@ -865,7 +919,8 @@ public:
 	vector<array<float,2>> v_pos;
 	vector<array<unsigned char,4>> v_color;
 
-	DisplayText(int size) : VectorSerialize(size, MAT_C_INT8) {
+	DisplayText(int size) : VectorSerialize(size, MAT_C_INT8)
+	{
 		m_draw = 0;
 #ifdef DEBUG
 		m_draw = 3;
@@ -876,10 +931,12 @@ public:
 		for (int i=0; i<4; i++)
 			m_color[i] = 1.f;
 	}
-	~DisplayText() {
+	~DisplayText()
+	{
 		clear();
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		int n = nstored();
 		bool same = true;
 		if (n > 0) {
@@ -899,13 +956,15 @@ public:
 		}
 		return !same;
 	}
-	virtual void clear() {
+	virtual void clear()
+	{
 		VectorSerialize::clear();
 		v_draw.clear();
 		v_pos.clear();
 		v_color.clear();
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("draw");
@@ -917,7 +976,8 @@ public:
 		return VectorSerialize::storeName(indx - 3);
 
 	}
-	virtual int getStoreClass(int indx) {
+	virtual int getStoreClass(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return MAT_C_INT8;
@@ -928,7 +988,8 @@ public:
 		}
 		return VectorSerialize::getStoreClass(indx - 3);
 	}
-	virtual void getStoreDims(int indx, size_t *dims) {
+	virtual void getStoreDims(int indx, size_t *dims)
+	{
 		switch (indx) {
 		case 0:
 			dims[0] = 1;
@@ -945,7 +1006,8 @@ public:
 		}
 		return VectorSerialize::getStoreDims(indx - 3, dims);
 	}
-	virtual void *getStore(int indx, int i) {
+	virtual void *getStore(int indx, int i)
+	{
 		switch (indx) {
 		case 0:
 			return (void *)&(v_draw[i]);
@@ -956,10 +1018,12 @@ public:
 		}
 		return VectorSerialize::getStore(indx - 3, i);
 	}
-	virtual int numStores() {
+	virtual int numStores()
+	{
 		return VectorSerialize::numStores() + 3;
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		m_draw = (char)floor(*d++);
 		for (int i=0; i<2; i++)
 			m_pos[i] = *d++;
@@ -973,7 +1037,8 @@ public:
 			s[i] = m_stor[i];
 		return d;
 	}
-	virtual void draw(int display, float ar) {
+	virtual void draw(int display, float ar)
+	{
 		if (m_draw & (1<<display)) {
 			//need to convert world coords to screen.
 			float xar = ar < 1.f ? ar : 1.f;

@@ -14,45 +14,56 @@ public:
 	string	m_name;
 	int		m_lastBackup; //index+1 of last record saved to backup.
 	Serialize() {}
-	virtual ~Serialize() {
+	virtual ~Serialize()
+	{
 		m_lastBackup = 0;
 	}
-	void perr(const char *method) {
+	void perr(const char *method)
+	{
 		fprintf(stderr, "\"%s\":%s must be implemented in derived classes.\n",
 		        m_name.c_str(), method);
 	}
-	virtual bool 	store() {
+	virtual bool 	store()
+	{
 		perr("store");
 		return false;
 	}
-	virtual void	clear() {
+	virtual void	clear()
+	{
 		perr("clear");
 	}
-	virtual int 	nstored() {
+	virtual int 	nstored()
+	{
 		return 0;       //number of timeslices.
 	}
-	virtual string storeName(int ) {
+	virtual string storeName(int )
+	{
 		perr("storeName");
 		return string("none");
 	}
-	virtual int 	getStoreClass(int ) {
+	virtual int 	getStoreClass(int )
+	{
 		perr("getStoreClass");
 		return 0;
 	}
-	virtual void	getStoreDims(int , size_t *dims) {
+	virtual void	getStoreDims(int , size_t *dims)
+	{
 		perr("getStoreDims");
 		dims[0] = 0;
 		dims[1] = 0;
 	}
-	virtual void	*getStore(int , int) {
+	virtual void	*getStore(int , int)
+	{
 		perr("getStore");
 		return NULL;
 	}
-	virtual int 	numStores() {
+	virtual int 	numStores()
+	{
 		perr("numStores");
 		return 0;
 	}
-	virtual double 	*mmapRead(double * ) {
+	virtual double 	*mmapRead(double *)
+	{
 		perr("mmapRead");
 		return NULL;
 	}
@@ -61,7 +72,8 @@ public:
 	virtual void	move(long double) {}
 	// reads/writes parameters from a mmaped file (address).
 	// all mmap variables are doubles, for convenience.
-	virtual string getMmapInfo() {
+	virtual string getMmapInfo()
+	{
 		std::stringstream oss;
 		size_t dims[2];
 		for (int indx = 0; indx < numStores(); indx++) {
@@ -71,7 +83,8 @@ public:
 		}
 		return oss.str();
 	}
-	virtual string getStructInfo() {
+	virtual string getStructInfo()
+	{
 		std::stringstream oss;
 		size_t dims[2];
 		for (int indx = 0; indx < numStores(); indx++) {
@@ -98,10 +111,12 @@ public:
 	vector<int> v_frame;
 
 	TimeSerialize() : Serialize() {}
-	~TimeSerialize() {
+	~TimeSerialize()
+	{
 		clear();
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		long double time = 0.0;
 		double ticks;
 		g_tsc->getTicks(time, ticks);
@@ -110,15 +125,18 @@ public:
 		v_frame.push_back(g_frame);
 		return true; //stored!
 	}
-	virtual void clear() {
+	virtual void clear()
+	{
 		v_time.clear();
 		v_ticks.clear();
 		v_frame.clear();
 	}
-	virtual int nstored() {
+	virtual int nstored()
+	{
 		return v_time.size();
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("time_o");
@@ -129,7 +147,8 @@ public:
 		}
 		return string("none");
 	}
-	virtual int getStoreClass(int indx) {
+	virtual int getStoreClass(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return MAT_C_DOUBLE;
@@ -140,11 +159,13 @@ public:
 		}
 		return 0;
 	}
-	virtual void getStoreDims(int , size_t *dims) {
+	virtual void getStoreDims(int , size_t *dims)
+	{
 		dims[0] = 1;
 		dims[1] = 1;
 	}
-	virtual void *getStore(int indx, int i) {
+	virtual void *getStore(int indx, int i)
+	{
 		switch (indx) {
 		case 0:
 			return (void *)&(v_time[i]);
@@ -155,10 +176,12 @@ public:
 		}
 		return NULL;
 	}
-	virtual int numStores() {
+	virtual int numStores()
+	{
 		return 3;
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		//this is actually a write (all variables output)
 		long double time = 0.0;
 		double ticks = 0.0;
@@ -179,17 +202,21 @@ public:
 	double m_ticks;
 	int m_frame;
 
-	FrameSerialize() : TimeSerialize() {
+	FrameSerialize() : TimeSerialize()
+	{
 		m_name = {"frame_"};
 	}
-	~FrameSerialize() {
+	~FrameSerialize()
+	{
 		clear();
 	}
 	// you must call store() within the opengl display thread.
-	virtual bool store() {
+	virtual bool store()
+	{
 		return false;       //dummy.
 	}
-	virtual bool store(int frame) {
+	virtual bool store(int frame)
+	{
 		long double time = 0.0;
 		g_tsc->getTicks(time, m_ticks);
 		m_time = (double)time;
@@ -199,7 +226,8 @@ public:
 		v_frame.push_back(m_frame);
 		return true;
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		//this is a write, and returns the time & ticks of the last recorded frame.
 		*d++ = m_time;
 		*d++ = m_ticks;
@@ -220,7 +248,8 @@ public:
 	int			m_ptr; 		// circluar, obvi.
 	int			m_nsmooth; 	// over how many samples to average; max 8;
 
-	PolhemusPredict() {
+	PolhemusPredict()
+	{
 		for (int i=0; i<8; i++) {
 			for (int j=0; j<3; j++)
 				m_s[i][j] = 0.0;
@@ -236,14 +265,16 @@ public:
 		m_nsmooth = 6;
 	}
 	~PolhemusPredict() {}
-	void add(long double time, float *s) {
+	void add(long double time, float *s)
+	{
 		m_t[m_ptr & 31] = time;
 		for (int i=0; i<3; i++)
 			m_s[m_ptr & 7][i] = s[i];
 		m_ptr++;
 		update();
 	}
-	void update() {
+	void update()
+	{
 		//update the linear model used to predict position.
 		//critical assumptions: stream is actually sampled at a constant rate,
 		//even if it does not come in at a constant rate.
@@ -268,13 +299,15 @@ public:
 			               &cov00, &cov01, &cov11, &sumsq);
 		}
 	}
-	void predict(long double time, float *s) {
+	void predict(long double time, float *s)
+	{
 		time -= m_avg;
 		for (int i=0; i<3; i++) {
 			s[i] = m_fit[i][0] + m_fit[i][1] * time;
 		}
 	}
-	void test() {
+	void test()
+	{
 		float x[3];
 		for (int i=0; i<64; i++) {
 			x[0] = x[1] = x[2] = (float)i;
@@ -299,15 +332,19 @@ class ToneSerialize : public Serialize
 	vector<char> v_play;
 public:
 	double m_time;
-	ToneSerialize() : Serialize() {
+	ToneSerialize() : Serialize()
+	{
 		m_name = "tone_";
 	}
-	~ToneSerialize() {
+	~ToneSerialize()
+	{
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		return false;       //done in mmapread().
 	}
-	virtual void clear() {
+	virtual void clear()
+	{
 		v_time.clear();
 		v_freq.clear();
 		v_pan.clear();
@@ -315,10 +352,12 @@ public:
 		v_duration.clear();
 		v_play.clear();
 	}
-	virtual int nstored() {
+	virtual int nstored()
+	{
 		return v_time.size();
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("time_o"); // these are not output--
@@ -335,7 +374,8 @@ public:
 		}
 		return string("none");
 	}
-	virtual int getStoreClass(int indx) {
+	virtual int getStoreClass(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return MAT_C_DOUBLE;
@@ -352,10 +392,12 @@ public:
 		}
 		return 0;
 	}
-	virtual void getStoreDims(int , size_t *dims) {
+	virtual void getStoreDims(int , size_t *dims)
+	{
 		dims[0] = dims[1] = 1;
 	}
-	virtual void *getStore(int indx, int i) {
+	virtual void *getStore(int indx, int i)
+	{
 		switch (indx) {
 		case 0:
 			return (void *)&(v_time[i]);
@@ -372,10 +414,12 @@ public:
 		}
 		return NULL;
 	}
-	virtual int numStores() {
+	virtual int numStores()
+	{
 		return 6;
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		float freq = d[1];
 		float pan = d[2];
 		float scale = d[3];
@@ -414,7 +458,8 @@ public:
 	vector<vector<T> > v_stor;
 	T		*m_bs;
 
-	VectorSerialize(int size, int matiotype) : Serialize() {
+	VectorSerialize(int size, int matiotype) : Serialize()
+	{
 		m_size = size;
 		m_type = matiotype;
 		for (int i=0; i<size; i++) {
@@ -422,11 +467,13 @@ public:
 		}
 		m_bs = NULL;
 	}
-	~VectorSerialize() {
+	~VectorSerialize()
+	{
 		clear();
 		free(m_bs);
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		bool same = true; //delta compression.
 		int n = nstored();
 		if (n > 0) {
@@ -440,14 +487,17 @@ public:
 		}
 		return !same;
 	}
-	virtual void clear() {
+	virtual void clear()
+	{
 		v_time.clear();
 		v_stor.clear();
 	}
-	virtual int nstored() {
+	virtual int nstored()
+	{
 		return v_stor.size();
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("time_o");
@@ -456,7 +506,8 @@ public:
 		}
 		return string("none");
 	}
-	virtual int getStoreClass(int indx) {
+	virtual int getStoreClass(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return MAT_C_DOUBLE;
@@ -465,7 +516,8 @@ public:
 		}
 		return 0;
 	}
-	virtual void getStoreDims(int indx, size_t *dims) {
+	virtual void getStoreDims(int indx, size_t *dims)
+	{
 		switch (indx) {
 		case 0:
 			dims[0] = 1;
@@ -477,7 +529,8 @@ public:
 			return;
 		}
 	}
-	virtual void *getStore(int indx, int k) {
+	virtual void *getStore(int indx, int k)
+	{
 		//coalesce the memory -- <vector<vector>> is non-continuous in memory.
 		if (indx == 0) {
 			return (void *)&(v_time[k]);
@@ -493,10 +546,12 @@ public:
 			return (void *)(m_bs);
 		} else return NULL;
 	}
-	virtual int numStores() {
+	virtual int numStores()
+	{
 		return 2;
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		*d++ = m_time; //when the vector was updated.
 		for (int i=0; i<m_size; i++) {
 			m_stor[i] = (T)(*d++); //default input.
@@ -521,7 +576,8 @@ public:
 	vector<vector<T> > v_stor2;
 	T		*m_bs;
 
-	VectorSerialize2(int size, int matiotype) : Serialize() {
+	VectorSerialize2(int size, int matiotype) : Serialize()
+	{
 		m_size = size;
 		m_type = matiotype;
 		for (int i=0; i<size; i++) {
@@ -530,11 +586,13 @@ public:
 		}
 		m_bs = NULL;
 	}
-	~VectorSerialize2() {
+	~VectorSerialize2()
+	{
 		clear();
 		free(m_bs);
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		bool same = true; //delta compression.
 		int n = nstored();
 		if (n > 0) {
@@ -551,15 +609,18 @@ public:
 		}
 		return !same;
 	}
-	virtual void clear() {
+	virtual void clear()
+	{
 		v_time.clear();
 		v_stor.clear();
 		v_stor2.clear();
 	}
-	virtual int nstored() {
+	virtual int nstored()
+	{
 		return v_stor.size();
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("time_o");
@@ -570,7 +631,8 @@ public:
 		}
 		return string("none");
 	}
-	virtual int getStoreClass(int indx) {
+	virtual int getStoreClass(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return MAT_C_DOUBLE;
@@ -580,7 +642,8 @@ public:
 		}
 		return 0;
 	}
-	virtual void getStoreDims(int indx, size_t *dims) {
+	virtual void getStoreDims(int indx, size_t *dims)
+	{
 		switch (indx) {
 		case 0:
 			dims[0] = 1;
@@ -593,7 +656,8 @@ public:
 			return;
 		}
 	}
-	virtual void *getStore(int indx, int k) {
+	virtual void *getStore(int indx, int k)
+	{
 		//coalesce the memory -- <vector<vector>> is non-continuous in memory.
 		if (indx == 0) {
 			return (void *)&(v_time[k]);
@@ -614,10 +678,12 @@ public:
 			return (void *)(m_bs);
 		} else return NULL;
 	}
-	virtual int numStores() {
+	virtual int numStores()
+	{
 		return 3;
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		*d++ = m_time; //when the vector was updated.
 		for (int i=0; i<m_size; i++) {
 			m_stor[i] = (T)(*d++);
@@ -644,7 +710,8 @@ public:
 	vector<vector<float> > v_stor;
 	float				*m_bs; // for coalescing memory
 
-	TdtUdpSerialize(int sock, int size) : Serialize() {
+	TdtUdpSerialize(int sock, int size) : Serialize()
+	{
 		//the sock should be created elsewhere -- so we can get error strings out.
 		m_sock = sock;
 		m_size = size;
@@ -655,22 +722,27 @@ public:
 		m_bs = 0;
 		m_name = "tdtudp_";
 	}
-	~TdtUdpSerialize() {
+	~TdtUdpSerialize()
+	{
 		disconnectRZ(m_sock);
 		clear();
 		if (m_bs) free(m_bs);
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		return false;        //do it in mmapRead()
 	}
-	virtual void clear() {
+	virtual void clear()
+	{
 		v_time.clear();
 		v_stor.clear();
 	}
-	virtual int nstored() {
+	virtual int nstored()
+	{
 		return v_stor.size();
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("time"); //only saved in file.
@@ -679,7 +751,8 @@ public:
 		}
 		return string {"none"};
 	}
-	virtual int getStoreClass(int indx) {
+	virtual int getStoreClass(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return MAT_C_DOUBLE;
@@ -688,7 +761,8 @@ public:
 		}
 		return 0;
 	}
-	virtual void getStoreDims(int indx, size_t *dims) {
+	virtual void getStoreDims(int indx, size_t *dims)
+	{
 		switch (indx) {
 		case 0:
 			dims[0] = dims[1] = 1;
@@ -699,7 +773,8 @@ public:
 			return;
 		}
 	}
-	virtual void *getStore(int indx, int k) {
+	virtual void *getStore(int indx, int k)
+	{
 		switch (indx) {
 		case 0:
 			return (void *)&(v_time[k]);
@@ -718,10 +793,12 @@ public:
 		}
 		return NULL;
 	}
-	virtual int numStores() {
+	virtual int numStores()
+	{
 		return 2;
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		d += 1; //skip time -- this is only saved in the file.
 		bool sames = true;
 		for (int i=0; i<m_size; i++)
@@ -749,7 +826,8 @@ public:
 	array<float,16>				m_x;
 	vector<array<float,16> >	v_x;
 
-	Matrix44Serialize(string name) : Serialize() {
+	Matrix44Serialize(string name) : Serialize()
+	{
 		m_name = name;
 		for (int i=0; i<16; i++) {
 			m_x[i] = 0; // Matlab ordering (column major -- same in openGL).
@@ -760,36 +838,46 @@ public:
 			m_cmp[i+i*4] = 1.f;
 		}
 	}
-	~Matrix44Serialize() {
+	~Matrix44Serialize()
+	{
 		clear();
 	}
-	virtual void clear() {
+	virtual void clear()
+	{
 		v_x.clear();
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		return false; /* in mmap. */
 	}
-	virtual int nstored() {
+	virtual int nstored()
+	{
 		return v_x.size();
 	}
-	virtual string storeName(int ) {
+	virtual string storeName(int )
+	{
 		return m_name + string("_m44");
 	}
-	virtual int getStoreClass(int ) {
+	virtual int getStoreClass(int )
+	{
 		return MAT_C_SINGLE;
 	}
-	virtual void getStoreDims(int, size_t *dims) {
+	virtual void getStoreDims(int, size_t *dims)
+	{
 		dims[0] = 4;
 		dims[1] = 4;
 		return;
 	}
-	virtual void *getStore(int , int k) {
+	virtual void *getStore(int , int k)
+	{
 		return (void *)&(v_x[k]);
 	}
-	virtual int numStores() {
+	virtual int numStores()
+	{
 		return 1;
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		//don't store the time here, as an incentive to not change it during the exp!
 		bool sames = true;
 		for (int i=0; i<16; i++)
@@ -804,7 +892,8 @@ public:
 		d += 16;
 		return d;
 	}
-	float *data() {
+	float *data()
+	{
 		return m_x.data();
 	};
 };
@@ -819,7 +908,8 @@ public:
 	int 						m_nsensors; // number of sensors
 	vector<PolhemusPredict *>	m_pp;
 
-	PolhemusSerialize(int nsensors) : VectorSerialize2(nsensors * 3, MAT_C_SINGLE) {
+	PolhemusSerialize(int nsensors) : VectorSerialize2(nsensors * 3, MAT_C_SINGLE)
+	{
 		m_name = "polhemus_";
 		m_nsensors = nsensors;
 		for (int i=0; i<m_nsensors; i++) {
@@ -827,16 +917,19 @@ public:
 			m_pp[i]->m_nsmooth = 8;
 		}
 	}
-	~PolhemusSerialize() {
+	~PolhemusSerialize()
+	{
 		clear();
 		for (int i=0; i<m_nsensors; i++) {
 			delete m_pp[i];
 		}
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		return false;        // override -- called below.
 	}
-	bool store(float *data) { //called after serial data reception; always store.
+	bool store(float *data)   //called after serial data reception; always store.
+	{
 		m_time = gettime();
 		// assumes that there is m_nsensors * 3 floats in *data
 		for (int i=0; i<m_nsensors; i++) {
@@ -852,12 +945,14 @@ public:
 		VectorSerialize2::store();
 		return true;
 	}
-	void getLoc(double now, float *out) {
+	void getLoc(double now, float *out)
+	{
 		for (int i=0; i<m_nsensors; i++) {
 			m_pp[i]->predict(now, &(out[i*3]));
 		}
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("time_o");
@@ -868,7 +963,8 @@ public:
 		}
 		return string {"none"};
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		*d++ = m_time; // last time the sensors were read.
 		getLoc(gettime(), m_stor.data()); // sample position now.
 		for (int i=0; i<3*m_nsensors; i++) {
@@ -888,24 +984,28 @@ public:
 	int m_nsensors; //number of sensors.
 	vector<PolhemusPredict *> m_pp;
 
-	OptoSerialize(int nsensors) : VectorSerialize2(nsensors * 3, MAT_C_SINGLE) {
+	OptoSerialize(int nsensors) : VectorSerialize2(nsensors * 3, MAT_C_SINGLE)
+	{
 		m_name = "optotrak_";
 		m_nsensors = nsensors;
 		for (int i=0; i<m_nsensors; i++) {
 			m_pp.push_back(new PolhemusPredict());
 		}
 	}
-	~OptoSerialize() {
+	~OptoSerialize()
+	{
 		clear();
 		for (int i=0; i<m_nsensors; i++) {
 			delete m_pp[i];
 		}
 		m_pp.clear();
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		return false;        //override -- called below.
 	}
-	bool store(float *data) {
+	bool store(float *data)
+	{
 		//assumes there is m_nsensors * 3 floats in *data.
 		m_time = gettime();
 		for (int i=0; i<m_nsensors; i++) {
@@ -921,12 +1021,14 @@ public:
 		VectorSerialize2::store();
 		return true;
 	}
-	void getLoc(double now, float *out) {
+	void getLoc(double now, float *out)
+	{
 		for (int i=0; i<m_nsensors; i++) {
 			m_pp[i]->predict(now, &(out[i*3]));
 		}
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("time_o");
@@ -937,7 +1039,8 @@ public:
 		}
 		return string("none");
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		*d++ = m_time; //last time the sensors were read.
 		getLoc(gettime(), m_stor.data()); //sample position now.
 		for (int i=0; i<3*m_nsensors; i++) {
@@ -956,17 +1059,21 @@ class LabjackSerializeAIN : public VectorSerialize<float>
 public:
 	int m_nsensors; //number of sensors (analog inputs)
 
-	LabjackSerializeAIN(int nsensors) : VectorSerialize(nsensors, MAT_C_SINGLE) {
+	LabjackSerializeAIN(int nsensors) : VectorSerialize(nsensors, MAT_C_SINGLE)
+	{
 		m_name = "labjackAIN_";
 		m_nsensors = nsensors;
 	}
-	~LabjackSerializeAIN() {
+	~LabjackSerializeAIN()
+	{
 		clear();
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		return false;      //override -- called with argument below.
 	}
-	bool store(float *data) {
+	bool store(float *data)
+	{
 		m_time = gettime();
 		for (int i=0; i<m_nsensors; i++) {
 			m_stor[i] = data[i];
@@ -974,7 +1081,8 @@ public:
 		VectorSerialize::store();
 		return true;
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("time_o");
@@ -983,7 +1091,8 @@ public:
 		}
 		return string("none");
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		*d++ = m_time; //last time the sensors were read.
 		for (int i=0; i<m_nsensors; i++) {
 			*d++ = m_stor[i]; //float->double, output.
@@ -997,17 +1106,21 @@ class LabjackSerializeDOUT : public VectorSerialize<float>
 public:
 	int m_nchannels; //number of sensors (analog inputs)
 
-	LabjackSerializeDOUT(int nchannels) : VectorSerialize(nchannels, MAT_C_SINGLE) {
+	LabjackSerializeDOUT(int nchannels) : VectorSerialize(nchannels, MAT_C_SINGLE)
+	{
 		m_name = "labjackDOUT_";
 		m_nchannels = nchannels;
 	}
-	~LabjackSerializeDOUT() {
+	~LabjackSerializeDOUT()
+	{
 		clear();
 	}
-	virtual bool store() {
+	virtual bool store()
+	{
 		return false;      //override -- called with argument below.
 	}
-	virtual string storeName(int indx) {
+	virtual string storeName(int indx)
+	{
 		switch (indx) {
 		case 0:
 			return m_name + string("time_o");
@@ -1016,7 +1129,8 @@ public:
 		}
 		return string("none");
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		m_time = gettime(); //time bmi5 retreives DOUT values.
 		*d = m_time;
 		for (int i=0; i<m_nchannels; i++) {
@@ -1031,20 +1145,24 @@ class MouseSerialize : public VectorSerialize<float>
 {
 public:
 	//timing via VectorSerialize.
-	MouseSerialize() : VectorSerialize(3, MAT_C_SINGLE) {
+	MouseSerialize() : VectorSerialize(3, MAT_C_SINGLE)
+	{
 		m_name = "mouse_";
 	}
 	~MouseSerialize() {}
-	virtual bool store() {
+	virtual bool store()
+	{
 		m_stor[0] = g_mousePos[0];
 		m_stor[1] = g_mousePos[1];
 		m_stor[2] = 0.f;
 		return VectorSerialize::store();
 	}
-	virtual string storeName(int ) {
+	virtual string storeName(int )
+	{
 		return m_name + string("sensors_o");        //output.
 	}
-	virtual double *mmapRead(double *d) {
+	virtual double *mmapRead(double *d)
+	{
 		*d++ = g_mousePos[0];
 		*d++ = g_mousePos[1];
 		*d++ = 0.f;
