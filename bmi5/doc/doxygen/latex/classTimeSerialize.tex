@@ -1,0 +1,194 @@
+\hypertarget{classTimeSerialize}{\section{Time\-Serialize Class Reference}
+\label{classTimeSerialize}\index{Time\-Serialize@{Time\-Serialize}}
+}
+
+
+{\ttfamily \#include $<$time\-Serialize.\-h$>$}
+
+Inheritance diagram for Time\-Serialize\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classTimeSerialize}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTimeSerialize_ae7880f4e7d36aebd66c5efa14622439c}{Time\-Serialize} ()
+\item 
+\hyperlink{classTimeSerialize_a8134ab931baed7946fe9b8a63e696361}{$\sim$\-Time\-Serialize} ()
+\item 
+virtual bool \hyperlink{classTimeSerialize_a5fa3f8491cf69cafb608ed06d16b744b}{store} ()
+\item 
+virtual void \hyperlink{classTimeSerialize_a2dc0323aaec9735cec278fce2ab70779}{clear} ()
+\item 
+virtual int \hyperlink{classTimeSerialize_a8decf0dd155f7c185d5ed4a96ad8df6e}{nstored} ()
+\item 
+virtual string \hyperlink{classTimeSerialize_aee9a422ba150037d03eaac84f98bb74a}{store\-Name} (int indx)
+\item 
+virtual int \hyperlink{classTimeSerialize_aabe62de35575d2e543c1b6a60adee905}{get\-Store\-Class} (int indx)
+\item 
+virtual void \hyperlink{classTimeSerialize_a012cef4eb5d7766296987d57dcd7b6d1}{get\-Store\-Dims} (int, size\-\_\-t $\ast$dims)
+\item 
+virtual void $\ast$ \hyperlink{classTimeSerialize_aca830871918f9acf615366df5e1eeb11}{get\-Store} (int indx, int i)
+\item 
+virtual int \hyperlink{classTimeSerialize_af36ff5a97baec0656b91373b72796a5f}{num\-Stores} ()
+\item 
+virtual double $\ast$ \hyperlink{classTimeSerialize_ac7a17bf484eb4e7970532b6a1ed65325}{mmap\-Read} (double $\ast$d)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+vector$<$ double $>$ \hyperlink{classTimeSerialize_acc179754062d5bee1d77a19ecbc948d6}{v\-\_\-time}
+\item 
+vector$<$ double $>$ \hyperlink{classTimeSerialize_affc36f2cdf92fd934e8c77fe15954ec9}{v\-\_\-ticks}
+\item 
+vector$<$ int $>$ \hyperlink{classTimeSerialize_ae215c04e400b72cc80d3e91552335dee}{v\-\_\-frame}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classTimeSerialize_ae7880f4e7d36aebd66c5efa14622439c}{\index{Time\-Serialize@{Time\-Serialize}!Time\-Serialize@{Time\-Serialize}}
+\index{Time\-Serialize@{Time\-Serialize}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{Time\-Serialize}]{\setlength{\rightskip}{0pt plus 5cm}Time\-Serialize\-::\-Time\-Serialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classTimeSerialize_ae7880f4e7d36aebd66c5efa14622439c}
+\hypertarget{classTimeSerialize_a8134ab931baed7946fe9b8a63e696361}{\index{Time\-Serialize@{Time\-Serialize}!$\sim$\-Time\-Serialize@{$\sim$\-Time\-Serialize}}
+\index{$\sim$\-Time\-Serialize@{$\sim$\-Time\-Serialize}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{$\sim$\-Time\-Serialize}]{\setlength{\rightskip}{0pt plus 5cm}Time\-Serialize\-::$\sim$\-Time\-Serialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classTimeSerialize_a8134ab931baed7946fe9b8a63e696361}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classTimeSerialize_a2dc0323aaec9735cec278fce2ab70779}{\index{Time\-Serialize@{Time\-Serialize}!clear@{clear}}
+\index{clear@{clear}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{clear}]{\setlength{\rightskip}{0pt plus 5cm}void Time\-Serialize\-::clear (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classTimeSerialize_a2dc0323aaec9735cec278fce2ab70779}
+
+
+Reimplemented from \hyperlink{classSerialize_a11cbf006415c08d1891ab42e39a2aa1a}{Serialize}.
+
+\hypertarget{classTimeSerialize_aca830871918f9acf615366df5e1eeb11}{\index{Time\-Serialize@{Time\-Serialize}!get\-Store@{get\-Store}}
+\index{get\-Store@{get\-Store}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{get\-Store}]{\setlength{\rightskip}{0pt plus 5cm}void $\ast$ Time\-Serialize\-::get\-Store (
+\begin{DoxyParamCaption}
+\item[{int}]{indx, }
+\item[{int}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classTimeSerialize_aca830871918f9acf615366df5e1eeb11}
+
+
+Reimplemented from \hyperlink{classSerialize_a6e589d263cfdc0eb72e41687c58831f2}{Serialize}.
+
+\hypertarget{classTimeSerialize_aabe62de35575d2e543c1b6a60adee905}{\index{Time\-Serialize@{Time\-Serialize}!get\-Store\-Class@{get\-Store\-Class}}
+\index{get\-Store\-Class@{get\-Store\-Class}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{get\-Store\-Class}]{\setlength{\rightskip}{0pt plus 5cm}int Time\-Serialize\-::get\-Store\-Class (
+\begin{DoxyParamCaption}
+\item[{int}]{indx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classTimeSerialize_aabe62de35575d2e543c1b6a60adee905}
+
+
+Reimplemented from \hyperlink{classSerialize_a69954cc86d03b75b6b27511aec4aba43}{Serialize}.
+
+\hypertarget{classTimeSerialize_a012cef4eb5d7766296987d57dcd7b6d1}{\index{Time\-Serialize@{Time\-Serialize}!get\-Store\-Dims@{get\-Store\-Dims}}
+\index{get\-Store\-Dims@{get\-Store\-Dims}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{get\-Store\-Dims}]{\setlength{\rightskip}{0pt plus 5cm}void Time\-Serialize\-::get\-Store\-Dims (
+\begin{DoxyParamCaption}
+\item[{int}]{, }
+\item[{size\-\_\-t $\ast$}]{dims}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classTimeSerialize_a012cef4eb5d7766296987d57dcd7b6d1}
+
+
+Reimplemented from \hyperlink{classSerialize_a52034c5c17bc5e7e6c728b4e6c620c05}{Serialize}.
+
+\hypertarget{classTimeSerialize_ac7a17bf484eb4e7970532b6a1ed65325}{\index{Time\-Serialize@{Time\-Serialize}!mmap\-Read@{mmap\-Read}}
+\index{mmap\-Read@{mmap\-Read}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{mmap\-Read}]{\setlength{\rightskip}{0pt plus 5cm}double $\ast$ Time\-Serialize\-::mmap\-Read (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classTimeSerialize_ac7a17bf484eb4e7970532b6a1ed65325}
+
+
+Reimplemented from \hyperlink{classSerialize_a28b939242880e565a8906b30acd0f84c}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classFrameSerialize_a9d775f9c379f0444a82cd309bba9e9b1}{Frame\-Serialize}.
+
+\hypertarget{classTimeSerialize_a8decf0dd155f7c185d5ed4a96ad8df6e}{\index{Time\-Serialize@{Time\-Serialize}!nstored@{nstored}}
+\index{nstored@{nstored}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{nstored}]{\setlength{\rightskip}{0pt plus 5cm}int Time\-Serialize\-::nstored (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classTimeSerialize_a8decf0dd155f7c185d5ed4a96ad8df6e}
+
+
+Reimplemented from \hyperlink{classSerialize_a590b7308112b07581c03ba826ace50b4}{Serialize}.
+
+\hypertarget{classTimeSerialize_af36ff5a97baec0656b91373b72796a5f}{\index{Time\-Serialize@{Time\-Serialize}!num\-Stores@{num\-Stores}}
+\index{num\-Stores@{num\-Stores}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{num\-Stores}]{\setlength{\rightskip}{0pt plus 5cm}int Time\-Serialize\-::num\-Stores (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classTimeSerialize_af36ff5a97baec0656b91373b72796a5f}
+
+
+Reimplemented from \hyperlink{classSerialize_a71bf2a906fd71477308a942d01490ab3}{Serialize}.
+
+\hypertarget{classTimeSerialize_a5fa3f8491cf69cafb608ed06d16b744b}{\index{Time\-Serialize@{Time\-Serialize}!store@{store}}
+\index{store@{store}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{store}]{\setlength{\rightskip}{0pt plus 5cm}bool Time\-Serialize\-::store (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classTimeSerialize_a5fa3f8491cf69cafb608ed06d16b744b}
+
+
+Reimplemented from \hyperlink{classSerialize_a3cda20e84a530870a6115eaaf589f168}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classFrameSerialize_a5c2bbf78b071f73554611b82ad395573}{Frame\-Serialize}.
+
+\hypertarget{classTimeSerialize_aee9a422ba150037d03eaac84f98bb74a}{\index{Time\-Serialize@{Time\-Serialize}!store\-Name@{store\-Name}}
+\index{store\-Name@{store\-Name}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{store\-Name}]{\setlength{\rightskip}{0pt plus 5cm}string Time\-Serialize\-::store\-Name (
+\begin{DoxyParamCaption}
+\item[{int}]{indx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classTimeSerialize_aee9a422ba150037d03eaac84f98bb74a}
+
+
+Reimplemented from \hyperlink{classSerialize_ac94a76de6c9376e33b4c195d50ff0568}{Serialize}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classTimeSerialize_ae215c04e400b72cc80d3e91552335dee}{\index{Time\-Serialize@{Time\-Serialize}!v\-\_\-frame@{v\-\_\-frame}}
+\index{v\-\_\-frame@{v\-\_\-frame}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{v\-\_\-frame}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$int$>$ Time\-Serialize\-::v\-\_\-frame}}\label{classTimeSerialize_ae215c04e400b72cc80d3e91552335dee}
+\hypertarget{classTimeSerialize_affc36f2cdf92fd934e8c77fe15954ec9}{\index{Time\-Serialize@{Time\-Serialize}!v\-\_\-ticks@{v\-\_\-ticks}}
+\index{v\-\_\-ticks@{v\-\_\-ticks}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{v\-\_\-ticks}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$double$>$ Time\-Serialize\-::v\-\_\-ticks}}\label{classTimeSerialize_affc36f2cdf92fd934e8c77fe15954ec9}
+\hypertarget{classTimeSerialize_acc179754062d5bee1d77a19ecbc948d6}{\index{Time\-Serialize@{Time\-Serialize}!v\-\_\-time@{v\-\_\-time}}
+\index{v\-\_\-time@{v\-\_\-time}!TimeSerialize@{Time\-Serialize}}
+\subsubsection[{v\-\_\-time}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$double$>$ Time\-Serialize\-::v\-\_\-time}}\label{classTimeSerialize_acc179754062d5bee1d77a19ecbc948d6}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/home/ruijan/sw/bmi5/bmi5/include/\-Serialize/\hyperlink{timeSerialize_8h}{time\-Serialize.\-h}\item 
+/home/ruijan/sw/bmi5/bmi5/src/\-Serialize/\hyperlink{timeSerialize_8cpp}{time\-Serialize.\-cpp}\end{DoxyCompactItemize}

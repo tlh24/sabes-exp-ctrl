@@ -1,0 +1,80 @@
+\hypertarget{writematlab_8cpp}{\section{/home/ruijan/sw/bmi5/bmi5/src/writematlab.cpp File Reference}
+\label{writematlab_8cpp}\index{/home/ruijan/sw/bmi5/bmi5/src/writematlab.\-cpp@{/home/ruijan/sw/bmi5/bmi5/src/writematlab.\-cpp}}
+}
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$matio.\-h$>$}\\*
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include $<$array$>$}\\*
+{\ttfamily \#include $<$iostream$>$}\\*
+{\ttfamily \#include $<$math.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$string$>$}\\*
+{\ttfamily \#include $<$sstream$>$}\\*
+{\ttfamily \#include \char`\"{}mmaphelp.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}gettime.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}timesync.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}jacksnd.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}tdt\-\_\-udp.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Serialize/serialize.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{writematlab_8cpp_a484c8caa4e634359b5e078135dee5956}{matlab\-Class\-To\-Type} (int cls)
+\item 
+int \hyperlink{writematlab_8cpp_a16bc741c68d6b46388b224101bc497c8}{matlab\-Class\-To\-Bytes} (int cls)
+\item 
+void \hyperlink{writematlab_8cpp_a885699ea354c63ba0e1230584374c5e2}{write\-Matlab} (vector$<$ \hyperlink{classSerialize}{Serialize} $\ast$ $>$ tosave, char $\ast$filename, bool backup)
+\item 
+size\-\_\-t \hyperlink{writematlab_8cpp_ada20a7f3486117ec825d8d6e5b23bbc8}{matlab\-File\-Size} (vector$<$ \hyperlink{classSerialize}{Serialize} $\ast$ $>$ tosave)
+\item 
+size\-\_\-t \hyperlink{writematlab_8cpp_a6a04494c2d873936c0c6af8aa5727bf4}{mmap\-File\-Size} (vector$<$ \hyperlink{classSerialize}{Serialize} $\ast$ $>$ tosave)
+\item 
+bool \hyperlink{writematlab_8cpp_ad5892570856360cb1c1d049c3f2895e9}{matlab\-Has\-New\-Data} (vector$<$ \hyperlink{classSerialize}{Serialize} $\ast$ $>$ tosave)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{writematlab_8cpp_a16bc741c68d6b46388b224101bc497c8}{\index{writematlab.\-cpp@{writematlab.\-cpp}!matlab\-Class\-To\-Bytes@{matlab\-Class\-To\-Bytes}}
+\index{matlab\-Class\-To\-Bytes@{matlab\-Class\-To\-Bytes}!writematlab.cpp@{writematlab.\-cpp}}
+\subsubsection[{matlab\-Class\-To\-Bytes}]{\setlength{\rightskip}{0pt plus 5cm}int matlab\-Class\-To\-Bytes (
+\begin{DoxyParamCaption}
+\item[{int}]{cls}
+\end{DoxyParamCaption}
+)}}\label{writematlab_8cpp_a16bc741c68d6b46388b224101bc497c8}
+\hypertarget{writematlab_8cpp_a484c8caa4e634359b5e078135dee5956}{\index{writematlab.\-cpp@{writematlab.\-cpp}!matlab\-Class\-To\-Type@{matlab\-Class\-To\-Type}}
+\index{matlab\-Class\-To\-Type@{matlab\-Class\-To\-Type}!writematlab.cpp@{writematlab.\-cpp}}
+\subsubsection[{matlab\-Class\-To\-Type}]{\setlength{\rightskip}{0pt plus 5cm}int matlab\-Class\-To\-Type (
+\begin{DoxyParamCaption}
+\item[{int}]{cls}
+\end{DoxyParamCaption}
+)}}\label{writematlab_8cpp_a484c8caa4e634359b5e078135dee5956}
+\hypertarget{writematlab_8cpp_ada20a7f3486117ec825d8d6e5b23bbc8}{\index{writematlab.\-cpp@{writematlab.\-cpp}!matlab\-File\-Size@{matlab\-File\-Size}}
+\index{matlab\-File\-Size@{matlab\-File\-Size}!writematlab.cpp@{writematlab.\-cpp}}
+\subsubsection[{matlab\-File\-Size}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t matlab\-File\-Size (
+\begin{DoxyParamCaption}
+\item[{vector$<$ {\bf Serialize} $\ast$ $>$}]{tosave}
+\end{DoxyParamCaption}
+)}}\label{writematlab_8cpp_ada20a7f3486117ec825d8d6e5b23bbc8}
+\hypertarget{writematlab_8cpp_ad5892570856360cb1c1d049c3f2895e9}{\index{writematlab.\-cpp@{writematlab.\-cpp}!matlab\-Has\-New\-Data@{matlab\-Has\-New\-Data}}
+\index{matlab\-Has\-New\-Data@{matlab\-Has\-New\-Data}!writematlab.cpp@{writematlab.\-cpp}}
+\subsubsection[{matlab\-Has\-New\-Data}]{\setlength{\rightskip}{0pt plus 5cm}bool matlab\-Has\-New\-Data (
+\begin{DoxyParamCaption}
+\item[{vector$<$ {\bf Serialize} $\ast$ $>$}]{tosave}
+\end{DoxyParamCaption}
+)}}\label{writematlab_8cpp_ad5892570856360cb1c1d049c3f2895e9}
+\hypertarget{writematlab_8cpp_a6a04494c2d873936c0c6af8aa5727bf4}{\index{writematlab.\-cpp@{writematlab.\-cpp}!mmap\-File\-Size@{mmap\-File\-Size}}
+\index{mmap\-File\-Size@{mmap\-File\-Size}!writematlab.cpp@{writematlab.\-cpp}}
+\subsubsection[{mmap\-File\-Size}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t mmap\-File\-Size (
+\begin{DoxyParamCaption}
+\item[{vector$<$ {\bf Serialize} $\ast$ $>$}]{tosave}
+\end{DoxyParamCaption}
+)}}\label{writematlab_8cpp_a6a04494c2d873936c0c6af8aa5727bf4}
+\hypertarget{writematlab_8cpp_a885699ea354c63ba0e1230584374c5e2}{\index{writematlab.\-cpp@{writematlab.\-cpp}!write\-Matlab@{write\-Matlab}}
+\index{write\-Matlab@{write\-Matlab}!writematlab.cpp@{writematlab.\-cpp}}
+\subsubsection[{write\-Matlab}]{\setlength{\rightskip}{0pt plus 5cm}void write\-Matlab (
+\begin{DoxyParamCaption}
+\item[{vector$<$ {\bf Serialize} $\ast$ $>$}]{tosave, }
+\item[{char $\ast$}]{filename, }
+\item[{bool}]{backup}
+\end{DoxyParamCaption}
+)}}\label{writematlab_8cpp_a885699ea354c63ba0e1230584374c5e2}

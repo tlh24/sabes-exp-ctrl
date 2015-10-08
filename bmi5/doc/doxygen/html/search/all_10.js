@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['read',['Read',['../classpolhemus.html#a2598172e33dece8f559a4d52e35129fd',1,'polhemus']]],
+  ['readep',['readEp',['../struct__USB__PARAMS.html#af7d02802b70f5545b083c2bff2ec4944',1,'_USB_PARAMS']]],
+  ['readrs232data',['ReadRs232Data',['../classpolhemus.html#a5f6ab4814578ac3fa7bc451bf05ac723',1,'polhemus']]],
+  ['readusbdata',['ReadUsbData',['../classpolhemus.html#a7b3888ca5972c98305d794a4c4bb0f46',1,'polhemus']]],
+  ['realize',['realize',['../classgtkglx.html#ae7920db72a5a58789c41e037a462cb0d',1,'gtkglx']]],
+  ['realize1',['realize1',['../main_8cpp.html#a434a4745eedc1d328be9eef04f55c31a',1,'main.cpp']]],
+  ['redbits',['redBits',['../structglInfo.html#a8ca02246f86e2c1872772e468fa7b510',1,'glInfo']]],
+  ['refresh',['refresh',['../main_8cpp.html#a93520519ff068b08a2dbf59de558939d',1,'main.cpp']]],
+  ['renderer',['renderer',['../structglInfo.html#ad6eee9cd07b1c1d39bce1294bbf4f025',1,'glInfo']]],
+  ['reset_5fto_5fdefaults',['RESET_TO_DEFAULTS',['../tdt__udp_8h.html#a99fb83031ce9923c84392b4e92f956b5aa376a8aa0a1b95dab0326b4989a48526',1,'tdt_udp.h']]],
+  ['reshape',['reshape',['../glxgears_8c.html#acff6d842734d260fb971afce0e3cc806',1,'glxgears.c']]],
+  ['ring',['Ring',['../classRing.html',1,'Ring'],['../classRing.html#a39d8bce00a532857c1f894355df655c1',1,'Ring::Ring()']]],
+  ['ring_2ecpp',['ring.cpp',['../ring_8cpp.html',1,'']]],
+  ['ring_2eh',['ring.h',['../ring_8h.html',1,'']]],
+  ['rs232_5fcnx',['RS232_CNX',['../polhemus_8h.html#a06fc87d81c62e9abb8790b6e5713c55ba8cf058ed1c1bac3102f203e3cadf0cd4',1,'polhemus.h']]],
+  ['rs232connect',['Rs232Connect',['../classpolhemus.html#a8e9f653dd086ea03c63466b21a57410d',1,'polhemus']]]
+];

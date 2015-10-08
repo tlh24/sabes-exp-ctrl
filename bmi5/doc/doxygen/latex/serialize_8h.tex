@@ -1,0 +1,90 @@
+\hypertarget{serialize_8h}{\section{/home/ruijan/sw/bmi5/bmi5/include/\-Serialize/serialize.h File Reference}
+\label{serialize_8h}\index{/home/ruijan/sw/bmi5/bmi5/include/\-Serialize/serialize.\-h@{/home/ruijan/sw/bmi5/bmi5/include/\-Serialize/serialize.\-h}}
+}
+{\ttfamily \#include $<$string$>$}\\*
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include $<$array$>$}\\*
+{\ttfamily \#include \char`\"{}matio.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$gsl/gsl\-\_\-fit.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}gettime.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}timesync.\-h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classSerialize}{Serialize}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+long double \hyperlink{serialize_8h_ae7338dc9853460cf73bbf6b5688e47f4}{gettime} ()
+\item 
+void \hyperlink{serialize_8h_a885699ea354c63ba0e1230584374c5e2}{write\-Matlab} (vector$<$ \hyperlink{classSerialize}{Serialize} $\ast$ $>$ tosave, char $\ast$filename, bool backup)
+\item 
+size\-\_\-t \hyperlink{serialize_8h_ada20a7f3486117ec825d8d6e5b23bbc8}{matlab\-File\-Size} (vector$<$ \hyperlink{classSerialize}{Serialize} $\ast$ $>$ tosave)
+\item 
+size\-\_\-t \hyperlink{serialize_8h_a6a04494c2d873936c0c6af8aa5727bf4}{mmap\-File\-Size} (vector$<$ \hyperlink{classSerialize}{Serialize} $\ast$ $>$ tosave)
+\item 
+bool \hyperlink{serialize_8h_ad5892570856360cb1c1d049c3f2895e9}{matlab\-Has\-New\-Data} (vector$<$ \hyperlink{classSerialize}{Serialize} $\ast$ $>$ tosave)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+Time\-Sync\-Client $\ast$ \hyperlink{serialize_8h_ae17b3579184c8071a510fad0af2921b4}{g\-\_\-tsc}
+\item 
+int \hyperlink{serialize_8h_a1141b691b2d9da0e106ed031dce903f5}{g\-\_\-frame}
+\item 
+float \hyperlink{serialize_8h_a9783d947c3be96401bdf2b73cec9b14a}{g\-\_\-mouse\-Pos} \mbox{[}2\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{serialize_8h_ae7338dc9853460cf73bbf6b5688e47f4}{\index{serialize.\-h@{serialize.\-h}!gettime@{gettime}}
+\index{gettime@{gettime}!serialize.h@{serialize.\-h}}
+\subsubsection[{gettime}]{\setlength{\rightskip}{0pt plus 5cm}long double gettime (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{serialize_8h_ae7338dc9853460cf73bbf6b5688e47f4}
+\hypertarget{serialize_8h_ada20a7f3486117ec825d8d6e5b23bbc8}{\index{serialize.\-h@{serialize.\-h}!matlab\-File\-Size@{matlab\-File\-Size}}
+\index{matlab\-File\-Size@{matlab\-File\-Size}!serialize.h@{serialize.\-h}}
+\subsubsection[{matlab\-File\-Size}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t matlab\-File\-Size (
+\begin{DoxyParamCaption}
+\item[{vector$<$ {\bf Serialize} $\ast$ $>$}]{tosave}
+\end{DoxyParamCaption}
+)}}\label{serialize_8h_ada20a7f3486117ec825d8d6e5b23bbc8}
+\hypertarget{serialize_8h_ad5892570856360cb1c1d049c3f2895e9}{\index{serialize.\-h@{serialize.\-h}!matlab\-Has\-New\-Data@{matlab\-Has\-New\-Data}}
+\index{matlab\-Has\-New\-Data@{matlab\-Has\-New\-Data}!serialize.h@{serialize.\-h}}
+\subsubsection[{matlab\-Has\-New\-Data}]{\setlength{\rightskip}{0pt plus 5cm}bool matlab\-Has\-New\-Data (
+\begin{DoxyParamCaption}
+\item[{vector$<$ {\bf Serialize} $\ast$ $>$}]{tosave}
+\end{DoxyParamCaption}
+)}}\label{serialize_8h_ad5892570856360cb1c1d049c3f2895e9}
+\hypertarget{serialize_8h_a6a04494c2d873936c0c6af8aa5727bf4}{\index{serialize.\-h@{serialize.\-h}!mmap\-File\-Size@{mmap\-File\-Size}}
+\index{mmap\-File\-Size@{mmap\-File\-Size}!serialize.h@{serialize.\-h}}
+\subsubsection[{mmap\-File\-Size}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t mmap\-File\-Size (
+\begin{DoxyParamCaption}
+\item[{vector$<$ {\bf Serialize} $\ast$ $>$}]{tosave}
+\end{DoxyParamCaption}
+)}}\label{serialize_8h_a6a04494c2d873936c0c6af8aa5727bf4}
+\hypertarget{serialize_8h_a885699ea354c63ba0e1230584374c5e2}{\index{serialize.\-h@{serialize.\-h}!write\-Matlab@{write\-Matlab}}
+\index{write\-Matlab@{write\-Matlab}!serialize.h@{serialize.\-h}}
+\subsubsection[{write\-Matlab}]{\setlength{\rightskip}{0pt plus 5cm}void write\-Matlab (
+\begin{DoxyParamCaption}
+\item[{vector$<$ {\bf Serialize} $\ast$ $>$}]{tosave, }
+\item[{char $\ast$}]{filename, }
+\item[{bool}]{backup}
+\end{DoxyParamCaption}
+)}}\label{serialize_8h_a885699ea354c63ba0e1230584374c5e2}
+
+
+\subsection{Variable Documentation}
+\hypertarget{serialize_8h_a1141b691b2d9da0e106ed031dce903f5}{\index{serialize.\-h@{serialize.\-h}!g\-\_\-frame@{g\-\_\-frame}}
+\index{g\-\_\-frame@{g\-\_\-frame}!serialize.h@{serialize.\-h}}
+\subsubsection[{g\-\_\-frame}]{\setlength{\rightskip}{0pt plus 5cm}int g\-\_\-frame}}\label{serialize_8h_a1141b691b2d9da0e106ed031dce903f5}
+\hypertarget{serialize_8h_a9783d947c3be96401bdf2b73cec9b14a}{\index{serialize.\-h@{serialize.\-h}!g\-\_\-mouse\-Pos@{g\-\_\-mouse\-Pos}}
+\index{g\-\_\-mouse\-Pos@{g\-\_\-mouse\-Pos}!serialize.h@{serialize.\-h}}
+\subsubsection[{g\-\_\-mouse\-Pos}]{\setlength{\rightskip}{0pt plus 5cm}float g\-\_\-mouse\-Pos\mbox{[}2\mbox{]}}}\label{serialize_8h_a9783d947c3be96401bdf2b73cec9b14a}
+\hypertarget{serialize_8h_ae17b3579184c8071a510fad0af2921b4}{\index{serialize.\-h@{serialize.\-h}!g\-\_\-tsc@{g\-\_\-tsc}}
+\index{g\-\_\-tsc@{g\-\_\-tsc}!serialize.h@{serialize.\-h}}
+\subsubsection[{g\-\_\-tsc}]{\setlength{\rightskip}{0pt plus 5cm}Time\-Sync\-Client$\ast$ g\-\_\-tsc}}\label{serialize_8h_ae17b3579184c8071a510fad0af2921b4}

@@ -1,0 +1,207 @@
+\hypertarget{classDisplayText}{\section{Display\-Text Class Reference}
+\label{classDisplayText}\index{Display\-Text@{Display\-Text}}
+}
+
+
+{\ttfamily \#include $<$display\-Text.\-h$>$}
+
+Inheritance diagram for Display\-Text\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classDisplayText}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDisplayText_a998e42cd6bab6ab04556b50f89b5209b}{Display\-Text} (int size)
+\item 
+\hyperlink{classDisplayText_a67c96d3dc8538032470131d4988b42bb}{$\sim$\-Display\-Text} ()
+\item 
+virtual bool \hyperlink{classDisplayText_a16d096c25b729eabfce141eb7dcf9012}{store} ()
+\item 
+virtual void \hyperlink{classDisplayText_a0c7a7a5200482ea4817f6c550dc7dea9}{clear} ()
+\item 
+virtual string \hyperlink{classDisplayText_af663118f6d5010d2d1d45f2bf3680dfc}{store\-Name} (int indx)
+\item 
+virtual int \hyperlink{classDisplayText_aaa8ccb67b152d79505e5acc8448770ed}{get\-Store\-Class} (int indx)
+\item 
+virtual void \hyperlink{classDisplayText_a81a37dd4e0fa54265843db620c371d02}{get\-Store\-Dims} (int indx, size\-\_\-t $\ast$dims)
+\item 
+virtual void $\ast$ \hyperlink{classDisplayText_aea5003c9c461955ec3c9a3a4b4fc2c25}{get\-Store} (int indx, int i)
+\item 
+virtual int \hyperlink{classDisplayText_a06b49281616900153577f7c731e4bd62}{num\-Stores} ()
+\item 
+virtual double $\ast$ \hyperlink{classDisplayText_ae5f08045997631736d8400ad3662fe5b}{mmap\-Read} (double $\ast$d)
+\item 
+virtual void \hyperlink{classDisplayText_a1eddd0c9f33244eb10540c51aa1dbfda}{draw} (int display, float ar)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+string \hyperlink{classDisplayText_a932a5d5bfd33d578faddb55ff098f180}{m\-\_\-text}
+\item 
+char \hyperlink{classDisplayText_a886201e135220482b8507be2b671544b}{m\-\_\-draw}
+\item 
+array$<$ float, 2 $>$ \hyperlink{classDisplayText_ae67cf19d70a36dac532b1a57daac904b}{m\-\_\-pos}
+\item 
+vector$<$ char $>$ \hyperlink{classDisplayText_a0f43c42a360464b92fbc9a1b5a2405d4}{v\-\_\-draw}
+\item 
+array$<$ unsigned char, 4 $>$ \hyperlink{classDisplayText_a680e8fb0a1dbd15c0fc9b60106f8a377}{m\-\_\-color}
+\item 
+vector$<$ array$<$ float, 2 $>$ $>$ \hyperlink{classDisplayText_a61592bbfe955f9bbe59390ba7f6581bc}{v\-\_\-pos}
+\item 
+vector$<$ array$<$ unsigned char, 4 $>$ $>$ \hyperlink{classDisplayText_af6d153a33c304bb21445e62ca402f72f}{v\-\_\-color}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classDisplayText_a998e42cd6bab6ab04556b50f89b5209b}{\index{Display\-Text@{Display\-Text}!Display\-Text@{Display\-Text}}
+\index{Display\-Text@{Display\-Text}!DisplayText@{Display\-Text}}
+\subsubsection[{Display\-Text}]{\setlength{\rightskip}{0pt plus 5cm}Display\-Text\-::\-Display\-Text (
+\begin{DoxyParamCaption}
+\item[{int}]{size}
+\end{DoxyParamCaption}
+)}}\label{classDisplayText_a998e42cd6bab6ab04556b50f89b5209b}
+\hypertarget{classDisplayText_a67c96d3dc8538032470131d4988b42bb}{\index{Display\-Text@{Display\-Text}!$\sim$\-Display\-Text@{$\sim$\-Display\-Text}}
+\index{$\sim$\-Display\-Text@{$\sim$\-Display\-Text}!DisplayText@{Display\-Text}}
+\subsubsection[{$\sim$\-Display\-Text}]{\setlength{\rightskip}{0pt plus 5cm}Display\-Text\-::$\sim$\-Display\-Text (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classDisplayText_a67c96d3dc8538032470131d4988b42bb}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classDisplayText_a0c7a7a5200482ea4817f6c550dc7dea9}{\index{Display\-Text@{Display\-Text}!clear@{clear}}
+\index{clear@{clear}!DisplayText@{Display\-Text}}
+\subsubsection[{clear}]{\setlength{\rightskip}{0pt plus 5cm}void Display\-Text\-::clear (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classDisplayText_a0c7a7a5200482ea4817f6c550dc7dea9}
+
+
+Reimplemented from \hyperlink{classVectorSerialize_ae94606fef7aec9ade8142d3cd56449ab}{Vector\-Serialize$<$ char $>$}.
+
+\hypertarget{classDisplayText_a1eddd0c9f33244eb10540c51aa1dbfda}{\index{Display\-Text@{Display\-Text}!draw@{draw}}
+\index{draw@{draw}!DisplayText@{Display\-Text}}
+\subsubsection[{draw}]{\setlength{\rightskip}{0pt plus 5cm}void Display\-Text\-::draw (
+\begin{DoxyParamCaption}
+\item[{int}]{display, }
+\item[{float}]{ar}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classDisplayText_a1eddd0c9f33244eb10540c51aa1dbfda}
+
+
+Reimplemented from \hyperlink{classSerialize_a0cf1d14e41052c6eabe53c90a37c227b}{Serialize}.
+
+\hypertarget{classDisplayText_aea5003c9c461955ec3c9a3a4b4fc2c25}{\index{Display\-Text@{Display\-Text}!get\-Store@{get\-Store}}
+\index{get\-Store@{get\-Store}!DisplayText@{Display\-Text}}
+\subsubsection[{get\-Store}]{\setlength{\rightskip}{0pt plus 5cm}void $\ast$ Display\-Text\-::get\-Store (
+\begin{DoxyParamCaption}
+\item[{int}]{indx, }
+\item[{int}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classDisplayText_aea5003c9c461955ec3c9a3a4b4fc2c25}
+
+
+Reimplemented from \hyperlink{classVectorSerialize_a08f1412b11fb7b034da21c5ec131489b}{Vector\-Serialize$<$ char $>$}.
+
+\hypertarget{classDisplayText_aaa8ccb67b152d79505e5acc8448770ed}{\index{Display\-Text@{Display\-Text}!get\-Store\-Class@{get\-Store\-Class}}
+\index{get\-Store\-Class@{get\-Store\-Class}!DisplayText@{Display\-Text}}
+\subsubsection[{get\-Store\-Class}]{\setlength{\rightskip}{0pt plus 5cm}int Display\-Text\-::get\-Store\-Class (
+\begin{DoxyParamCaption}
+\item[{int}]{indx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classDisplayText_aaa8ccb67b152d79505e5acc8448770ed}
+
+
+Reimplemented from \hyperlink{classVectorSerialize_a03d8454fff77942e63cd1764f1013f2d}{Vector\-Serialize$<$ char $>$}.
+
+\hypertarget{classDisplayText_a81a37dd4e0fa54265843db620c371d02}{\index{Display\-Text@{Display\-Text}!get\-Store\-Dims@{get\-Store\-Dims}}
+\index{get\-Store\-Dims@{get\-Store\-Dims}!DisplayText@{Display\-Text}}
+\subsubsection[{get\-Store\-Dims}]{\setlength{\rightskip}{0pt plus 5cm}void Display\-Text\-::get\-Store\-Dims (
+\begin{DoxyParamCaption}
+\item[{int}]{indx, }
+\item[{size\-\_\-t $\ast$}]{dims}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classDisplayText_a81a37dd4e0fa54265843db620c371d02}
+
+
+Reimplemented from \hyperlink{classVectorSerialize_aa22f90d57d8802670716f4b859d6b069}{Vector\-Serialize$<$ char $>$}.
+
+\hypertarget{classDisplayText_ae5f08045997631736d8400ad3662fe5b}{\index{Display\-Text@{Display\-Text}!mmap\-Read@{mmap\-Read}}
+\index{mmap\-Read@{mmap\-Read}!DisplayText@{Display\-Text}}
+\subsubsection[{mmap\-Read}]{\setlength{\rightskip}{0pt plus 5cm}double $\ast$ Display\-Text\-::mmap\-Read (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classDisplayText_ae5f08045997631736d8400ad3662fe5b}
+
+
+Reimplemented from \hyperlink{classVectorSerialize_a087c30b15095d1b230705e42123eb3db}{Vector\-Serialize$<$ char $>$}.
+
+\hypertarget{classDisplayText_a06b49281616900153577f7c731e4bd62}{\index{Display\-Text@{Display\-Text}!num\-Stores@{num\-Stores}}
+\index{num\-Stores@{num\-Stores}!DisplayText@{Display\-Text}}
+\subsubsection[{num\-Stores}]{\setlength{\rightskip}{0pt plus 5cm}int Display\-Text\-::num\-Stores (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classDisplayText_a06b49281616900153577f7c731e4bd62}
+
+
+Reimplemented from \hyperlink{classVectorSerialize_a15226c69bda0fff870f20026f8681d80}{Vector\-Serialize$<$ char $>$}.
+
+\hypertarget{classDisplayText_a16d096c25b729eabfce141eb7dcf9012}{\index{Display\-Text@{Display\-Text}!store@{store}}
+\index{store@{store}!DisplayText@{Display\-Text}}
+\subsubsection[{store}]{\setlength{\rightskip}{0pt plus 5cm}bool Display\-Text\-::store (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classDisplayText_a16d096c25b729eabfce141eb7dcf9012}
+
+
+Reimplemented from \hyperlink{classVectorSerialize_afd6b6dc8768969dae5f27f46eeab83e6}{Vector\-Serialize$<$ char $>$}.
+
+\hypertarget{classDisplayText_af663118f6d5010d2d1d45f2bf3680dfc}{\index{Display\-Text@{Display\-Text}!store\-Name@{store\-Name}}
+\index{store\-Name@{store\-Name}!DisplayText@{Display\-Text}}
+\subsubsection[{store\-Name}]{\setlength{\rightskip}{0pt plus 5cm}string Display\-Text\-::store\-Name (
+\begin{DoxyParamCaption}
+\item[{int}]{indx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classDisplayText_af663118f6d5010d2d1d45f2bf3680dfc}
+
+
+Reimplemented from \hyperlink{classVectorSerialize_a929f94f68d0a99c61308520a679ae1a2}{Vector\-Serialize$<$ char $>$}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classDisplayText_a680e8fb0a1dbd15c0fc9b60106f8a377}{\index{Display\-Text@{Display\-Text}!m\-\_\-color@{m\-\_\-color}}
+\index{m\-\_\-color@{m\-\_\-color}!DisplayText@{Display\-Text}}
+\subsubsection[{m\-\_\-color}]{\setlength{\rightskip}{0pt plus 5cm}array$<$unsigned char,4$>$ Display\-Text\-::m\-\_\-color}}\label{classDisplayText_a680e8fb0a1dbd15c0fc9b60106f8a377}
+\hypertarget{classDisplayText_a886201e135220482b8507be2b671544b}{\index{Display\-Text@{Display\-Text}!m\-\_\-draw@{m\-\_\-draw}}
+\index{m\-\_\-draw@{m\-\_\-draw}!DisplayText@{Display\-Text}}
+\subsubsection[{m\-\_\-draw}]{\setlength{\rightskip}{0pt plus 5cm}char Display\-Text\-::m\-\_\-draw}}\label{classDisplayText_a886201e135220482b8507be2b671544b}
+\hypertarget{classDisplayText_ae67cf19d70a36dac532b1a57daac904b}{\index{Display\-Text@{Display\-Text}!m\-\_\-pos@{m\-\_\-pos}}
+\index{m\-\_\-pos@{m\-\_\-pos}!DisplayText@{Display\-Text}}
+\subsubsection[{m\-\_\-pos}]{\setlength{\rightskip}{0pt plus 5cm}array$<$float,2$>$ Display\-Text\-::m\-\_\-pos}}\label{classDisplayText_ae67cf19d70a36dac532b1a57daac904b}
+\hypertarget{classDisplayText_a932a5d5bfd33d578faddb55ff098f180}{\index{Display\-Text@{Display\-Text}!m\-\_\-text@{m\-\_\-text}}
+\index{m\-\_\-text@{m\-\_\-text}!DisplayText@{Display\-Text}}
+\subsubsection[{m\-\_\-text}]{\setlength{\rightskip}{0pt plus 5cm}string Display\-Text\-::m\-\_\-text}}\label{classDisplayText_a932a5d5bfd33d578faddb55ff098f180}
+\hypertarget{classDisplayText_af6d153a33c304bb21445e62ca402f72f}{\index{Display\-Text@{Display\-Text}!v\-\_\-color@{v\-\_\-color}}
+\index{v\-\_\-color@{v\-\_\-color}!DisplayText@{Display\-Text}}
+\subsubsection[{v\-\_\-color}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$array$<$unsigned char,4$>$ $>$ Display\-Text\-::v\-\_\-color}}\label{classDisplayText_af6d153a33c304bb21445e62ca402f72f}
+\hypertarget{classDisplayText_a0f43c42a360464b92fbc9a1b5a2405d4}{\index{Display\-Text@{Display\-Text}!v\-\_\-draw@{v\-\_\-draw}}
+\index{v\-\_\-draw@{v\-\_\-draw}!DisplayText@{Display\-Text}}
+\subsubsection[{v\-\_\-draw}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$char$>$ Display\-Text\-::v\-\_\-draw}}\label{classDisplayText_a0f43c42a360464b92fbc9a1b5a2405d4}
+\hypertarget{classDisplayText_a61592bbfe955f9bbe59390ba7f6581bc}{\index{Display\-Text@{Display\-Text}!v\-\_\-pos@{v\-\_\-pos}}
+\index{v\-\_\-pos@{v\-\_\-pos}!DisplayText@{Display\-Text}}
+\subsubsection[{v\-\_\-pos}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$array$<$float,2$>$ $>$ Display\-Text\-::v\-\_\-pos}}\label{classDisplayText_a61592bbfe955f9bbe59390ba7f6581bc}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/home/ruijan/sw/bmi5/bmi5/include/\-Shape/\hyperlink{displayText_8h}{display\-Text.\-h}\item 
+/home/ruijan/sw/bmi5/bmi5/src/\-Shape/\hyperlink{displayText_8cpp}{display\-Text.\-cpp}\end{DoxyCompactItemize}

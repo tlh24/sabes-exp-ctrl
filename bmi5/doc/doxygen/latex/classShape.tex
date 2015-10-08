@@ -1,0 +1,441 @@
+\hypertarget{classShape}{\section{Shape Class Reference}
+\label{classShape}\index{Shape@{Shape}}
+}
+
+
+{\ttfamily \#include $<$shape.\-h$>$}
+
+Inheritance diagram for Shape\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classShape}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classShape_a2c81e227edd2803a084c65c75e4ffd5b}{Shape} (void)
+\item 
+void \hyperlink{classShape_aa1d6e083d4bfe3793e53f30d092e6849}{delete\-Buffers} ()
+\item 
+virtual \hyperlink{classShape_a935afc9e576015f967d90de56977167d}{$\sim$\-Shape} ()
+\item 
+virtual void \hyperlink{classShape_afd5e29777ce90db927874c3a788fa7c1}{make\-V\-A\-O} (float $\ast$vertices, bool del, int display)
+\item 
+void \hyperlink{classShape_a7523425d407dd5087d8a036579560861}{make\-Shader} (int index, G\-Lenum type, std\-::string source)
+\item 
+std\-::string \hyperlink{classShape_a2ba56820a00ef275ce4e961fb633de5f}{file\-To\-String} (const char $\ast$fname)
+\item 
+void \hyperlink{classShape_a420de7854d2172951554999af84eb251}{make\-Shaders\-Named} (int index, const char $\ast$vertex\-Name, const char $\ast$fragment\-Name)
+\item 
+virtual void \hyperlink{classShape_a5503cd8cdc38875bcbe2e886f1609d7b}{make\-Shaders} (int index)
+\item 
+virtual void \hyperlink{classShape_a33be64d8e24518084b1c8f974f808387}{fill} (float $\ast$v)
+\item 
+virtual void \hyperlink{classShape_a5de43e4fb0921bac5f8a4a95e771e354}{configure} (int display)
+\item 
+void \hyperlink{classShape_a7d1f29c73622a3f32301ea59bfd89d32}{setup\-Draw\-Matrices} (int display, float)
+\item 
+virtual void \hyperlink{classShape_a892243993a2207807ab5069ce90bbef4}{draw} (int display, float ar)
+\item 
+virtual void \hyperlink{classShape_ac39d8d75d7498e3cd5395b8485fbf39f}{move} (long double)
+\item 
+unsigned char \hyperlink{classShape_ab001ba78956680cff154e302826f909d}{float\-To\-U8} (float in)
+\begin{DoxyCompactList}\small\item\em serialization. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classShape_afc0a792fc9c31a0ae947f721c146f68b}{clear} ()
+\item 
+virtual bool \hyperlink{classShape_a9dea3f39fe203b2f4288dc7cda6295a7}{store} ()
+\item 
+virtual int \hyperlink{classShape_a92f5bc7b0179d1c47c2ae916727bf73d}{nstored} ()
+\item 
+virtual string \hyperlink{classShape_aaf3b0b140fcaf0bb11c28493ef745bfd}{store\-Name} (int indx)
+\item 
+virtual int \hyperlink{classShape_acf135c0569e45aa0fab16f748bee639e}{get\-Store\-Class} (int indx)
+\item 
+virtual void \hyperlink{classShape_afc3fbc26459718484ae4efe885f0fe37}{get\-Store\-Dims} (int indx, size\-\_\-t $\ast$dims)
+\item 
+virtual void $\ast$ \hyperlink{classShape_ae89da51d3c54b7b7139b8223103633e3}{get\-Store} (int indx, int i)
+\item 
+virtual int \hyperlink{classShape_a53bac379f3ad1537e56625015afd5c95}{num\-Stores} ()
+\item 
+virtual double $\ast$ \hyperlink{classShape_ae212539c5d1468805c155f4aed8367ea}{mmap\-Read} (double $\ast$d)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classShape_ac96ad62fd8b979f9a1e92b211922bb25}{m\-\_\-need\-Config} \mbox{[}2\mbox{]}
+\item 
+int \hyperlink{classShape_a14a1994dd7d7fc412b18d3ad2563556d}{m\-\_\-n}
+\item 
+unsigned int \hyperlink{classShape_a9a515d946d14526fe6d3cc566c4acf77}{m\-\_\-vao} \mbox{[}2\mbox{]}
+\item 
+unsigned int \hyperlink{classShape_af252a08a695affa2637645dcd4cdf4e9}{m\-\_\-vbo} \mbox{[}2\mbox{]}
+\item 
+unsigned int \hyperlink{classShape_a3cf20a9158443fa941b4e85a7b817816}{m\-\_\-drawmode}
+\item 
+double \hyperlink{classShape_aa8c2dca5ffd2e7f66cc4713e57ab029c}{m\-\_\-time}
+\item 
+char \hyperlink{classShape_a35589131828091da1fe3717f48e9c664}{m\-\_\-draw}
+\item 
+G\-Luint \hyperlink{classShape_a3689b5d3e0ab51e8e739699193ce9290}{m\-\_\-program} \mbox{[}2\mbox{]}
+\item 
+array$<$ float, 4 $>$ \hyperlink{classShape_a41389fbe5746a93b075acc98e485582c}{m\-\_\-color}
+\item 
+array$<$ float, 2 $>$ \hyperlink{classShape_a9af8ff3b5a90a8e42ea931969ec9428e}{m\-\_\-scale}
+\item 
+array$<$ float, 2 $>$ \hyperlink{classShape_ad2a5e6ad0362873a88ffcc69e5cb9b12}{m\-\_\-trans}
+\item 
+float \hyperlink{classShape_a43a38e552b2f2fc423dde3dd81dab0ce}{m\-\_\-rot}
+\item 
+vector$<$ double $>$ \hyperlink{classShape_af13b493550d418a20604baf5e1c8a0bd}{v\-\_\-time}
+\item 
+vector$<$ char $>$ \hyperlink{classShape_a6f426725f07e290ee150aab7be5b2587}{v\-\_\-draw}
+\item 
+vector$<$ array$<$ unsigned char, 4 $>$ $>$ \hyperlink{classShape_af3088673fcd7c8b642df4ecb157e53ff}{v\-\_\-color}
+\item 
+vector$<$ array$<$ float, 2 $>$ $>$ \hyperlink{classShape_ae2549de1dc4697ef18d2fa01d3e241b9}{v\-\_\-scale}
+\item 
+vector$<$ array$<$ float, 2 $>$ $>$ \hyperlink{classShape_a5fb4760689b0acae7a6088da0cba7d7b}{v\-\_\-trans}
+\item 
+vector$<$ float $>$ \hyperlink{classShape_a24f60964f7e4dc1b876a232f94948296}{v\-\_\-rot}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classShape_a2c81e227edd2803a084c65c75e4ffd5b}{\index{Shape@{Shape}!Shape@{Shape}}
+\index{Shape@{Shape}!Shape@{Shape}}
+\subsubsection[{Shape}]{\setlength{\rightskip}{0pt plus 5cm}Shape\-::\-Shape (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{classShape_a2c81e227edd2803a084c65c75e4ffd5b}
+\hypertarget{classShape_a935afc9e576015f967d90de56977167d}{\index{Shape@{Shape}!$\sim$\-Shape@{$\sim$\-Shape}}
+\index{$\sim$\-Shape@{$\sim$\-Shape}!Shape@{Shape}}
+\subsubsection[{$\sim$\-Shape}]{\setlength{\rightskip}{0pt plus 5cm}Shape\-::$\sim$\-Shape (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_a935afc9e576015f967d90de56977167d}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classShape_afc0a792fc9c31a0ae947f721c146f68b}{\index{Shape@{Shape}!clear@{clear}}
+\index{clear@{clear}!Shape@{Shape}}
+\subsubsection[{clear}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::clear (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_afc0a792fc9c31a0ae947f721c146f68b}
+
+
+Reimplemented from \hyperlink{classSerialize_a11cbf006415c08d1891ab42e39a2aa1a}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classStarField_a1a97b6133ae0177f6eb8028470c28765}{Star\-Field}.
+
+\hypertarget{classShape_a5de43e4fb0921bac5f8a4a95e771e354}{\index{Shape@{Shape}!configure@{configure}}
+\index{configure@{configure}!Shape@{Shape}}
+\subsubsection[{configure}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::configure (
+\begin{DoxyParamCaption}
+\item[{int}]{display}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_a5de43e4fb0921bac5f8a4a95e771e354}
+
+
+Reimplemented in \hyperlink{classStarField_a0d5f438a2628b90e0d7ccc5a8683225b}{Star\-Field}.
+
+\hypertarget{classShape_aa1d6e083d4bfe3793e53f30d092e6849}{\index{Shape@{Shape}!delete\-Buffers@{delete\-Buffers}}
+\index{delete\-Buffers@{delete\-Buffers}!Shape@{Shape}}
+\subsubsection[{delete\-Buffers}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::delete\-Buffers (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classShape_aa1d6e083d4bfe3793e53f30d092e6849}
+\hypertarget{classShape_a892243993a2207807ab5069ce90bbef4}{\index{Shape@{Shape}!draw@{draw}}
+\index{draw@{draw}!Shape@{Shape}}
+\subsubsection[{draw}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::draw (
+\begin{DoxyParamCaption}
+\item[{int}]{display, }
+\item[{float}]{ar}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_a892243993a2207807ab5069ce90bbef4}
+
+
+Reimplemented from \hyperlink{classSerialize_a0cf1d14e41052c6eabe53c90a37c227b}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classStarField_aeaf743e6d1d4a8a6918152c40bd618c0}{Star\-Field}.
+
+\hypertarget{classShape_a2ba56820a00ef275ce4e961fb633de5f}{\index{Shape@{Shape}!file\-To\-String@{file\-To\-String}}
+\index{file\-To\-String@{file\-To\-String}!Shape@{Shape}}
+\subsubsection[{file\-To\-String}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string Shape\-::file\-To\-String (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{fname}
+\end{DoxyParamCaption}
+)}}\label{classShape_a2ba56820a00ef275ce4e961fb633de5f}
+\hypertarget{classShape_a33be64d8e24518084b1c8f974f808387}{\index{Shape@{Shape}!fill@{fill}}
+\index{fill@{fill}!Shape@{Shape}}
+\subsubsection[{fill}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::fill (
+\begin{DoxyParamCaption}
+\item[{float $\ast$}]{v}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_a33be64d8e24518084b1c8f974f808387}
+
+
+Reimplemented in \hyperlink{classRing_ad5dd2b058f6690108fe62da9d6e88d53}{Ring}, \hyperlink{classLine_a3f357683e8a9700cfc4d6f65f7f9493f}{Line}, \hyperlink{classSquare_aedaf26740b0f71c086886d5519cf44a6}{Square}, \hyperlink{classCircle_a59dab91c7a95f18e8b888a874c17826f}{Circle}, and \hyperlink{classOpenSquare_aa75c880448b327596b0b5fbde69e561c}{Open\-Square}.
+
+\hypertarget{classShape_ab001ba78956680cff154e302826f909d}{\index{Shape@{Shape}!float\-To\-U8@{float\-To\-U8}}
+\index{float\-To\-U8@{float\-To\-U8}!Shape@{Shape}}
+\subsubsection[{float\-To\-U8}]{\setlength{\rightskip}{0pt plus 5cm}unsigned char Shape\-::float\-To\-U8 (
+\begin{DoxyParamCaption}
+\item[{float}]{in}
+\end{DoxyParamCaption}
+)}}\label{classShape_ab001ba78956680cff154e302826f909d}
+
+
+serialization. 
+
+\hypertarget{classShape_ae89da51d3c54b7b7139b8223103633e3}{\index{Shape@{Shape}!get\-Store@{get\-Store}}
+\index{get\-Store@{get\-Store}!Shape@{Shape}}
+\subsubsection[{get\-Store}]{\setlength{\rightskip}{0pt plus 5cm}void $\ast$ Shape\-::get\-Store (
+\begin{DoxyParamCaption}
+\item[{int}]{indx, }
+\item[{int}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_ae89da51d3c54b7b7139b8223103633e3}
+
+
+Reimplemented from \hyperlink{classSerialize_a6e589d263cfdc0eb72e41687c58831f2}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classStarField_a3d33db9d5e4c05a11cbe0c11a3bae5ba}{Star\-Field}.
+
+\hypertarget{classShape_acf135c0569e45aa0fab16f748bee639e}{\index{Shape@{Shape}!get\-Store\-Class@{get\-Store\-Class}}
+\index{get\-Store\-Class@{get\-Store\-Class}!Shape@{Shape}}
+\subsubsection[{get\-Store\-Class}]{\setlength{\rightskip}{0pt plus 5cm}int Shape\-::get\-Store\-Class (
+\begin{DoxyParamCaption}
+\item[{int}]{indx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_acf135c0569e45aa0fab16f748bee639e}
+
+
+Reimplemented from \hyperlink{classSerialize_a69954cc86d03b75b6b27511aec4aba43}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classStarField_a42fa7234a0bb1e7b2e1d734fb9ed2dae}{Star\-Field}.
+
+\hypertarget{classShape_afc3fbc26459718484ae4efe885f0fe37}{\index{Shape@{Shape}!get\-Store\-Dims@{get\-Store\-Dims}}
+\index{get\-Store\-Dims@{get\-Store\-Dims}!Shape@{Shape}}
+\subsubsection[{get\-Store\-Dims}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::get\-Store\-Dims (
+\begin{DoxyParamCaption}
+\item[{int}]{indx, }
+\item[{size\-\_\-t $\ast$}]{dims}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_afc3fbc26459718484ae4efe885f0fe37}
+
+
+Reimplemented from \hyperlink{classSerialize_a52034c5c17bc5e7e6c728b4e6c620c05}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classStarField_a1cf58acb059f13adcb4b989120f99db5}{Star\-Field}.
+
+\hypertarget{classShape_a7523425d407dd5087d8a036579560861}{\index{Shape@{Shape}!make\-Shader@{make\-Shader}}
+\index{make\-Shader@{make\-Shader}!Shape@{Shape}}
+\subsubsection[{make\-Shader}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::make\-Shader (
+\begin{DoxyParamCaption}
+\item[{int}]{index, }
+\item[{G\-Lenum}]{type, }
+\item[{std\-::string}]{source}
+\end{DoxyParamCaption}
+)}}\label{classShape_a7523425d407dd5087d8a036579560861}
+\hypertarget{classShape_a5503cd8cdc38875bcbe2e886f1609d7b}{\index{Shape@{Shape}!make\-Shaders@{make\-Shaders}}
+\index{make\-Shaders@{make\-Shaders}!Shape@{Shape}}
+\subsubsection[{make\-Shaders}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::make\-Shaders (
+\begin{DoxyParamCaption}
+\item[{int}]{index}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_a5503cd8cdc38875bcbe2e886f1609d7b}
+
+
+Reimplemented in \hyperlink{classStarField_a72ab192923ffe6939fceb2166e05c82d}{Star\-Field}.
+
+\hypertarget{classShape_a420de7854d2172951554999af84eb251}{\index{Shape@{Shape}!make\-Shaders\-Named@{make\-Shaders\-Named}}
+\index{make\-Shaders\-Named@{make\-Shaders\-Named}!Shape@{Shape}}
+\subsubsection[{make\-Shaders\-Named}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::make\-Shaders\-Named (
+\begin{DoxyParamCaption}
+\item[{int}]{index, }
+\item[{const char $\ast$}]{vertex\-Name, }
+\item[{const char $\ast$}]{fragment\-Name}
+\end{DoxyParamCaption}
+)}}\label{classShape_a420de7854d2172951554999af84eb251}
+\hypertarget{classShape_afd5e29777ce90db927874c3a788fa7c1}{\index{Shape@{Shape}!make\-V\-A\-O@{make\-V\-A\-O}}
+\index{make\-V\-A\-O@{make\-V\-A\-O}!Shape@{Shape}}
+\subsubsection[{make\-V\-A\-O}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::make\-V\-A\-O (
+\begin{DoxyParamCaption}
+\item[{float $\ast$}]{vertices, }
+\item[{bool}]{del, }
+\item[{int}]{display}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_afd5e29777ce90db927874c3a788fa7c1}
+\hypertarget{classShape_ae212539c5d1468805c155f4aed8367ea}{\index{Shape@{Shape}!mmap\-Read@{mmap\-Read}}
+\index{mmap\-Read@{mmap\-Read}!Shape@{Shape}}
+\subsubsection[{mmap\-Read}]{\setlength{\rightskip}{0pt plus 5cm}double $\ast$ Shape\-::mmap\-Read (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_ae212539c5d1468805c155f4aed8367ea}
+
+
+Reimplemented from \hyperlink{classSerialize_a28b939242880e565a8906b30acd0f84c}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classStarField_a6937d614690f774772920ae9faee9bab}{Star\-Field}.
+
+\hypertarget{classShape_ac39d8d75d7498e3cd5395b8485fbf39f}{\index{Shape@{Shape}!move@{move}}
+\index{move@{move}!Shape@{Shape}}
+\subsubsection[{move}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::move (
+\begin{DoxyParamCaption}
+\item[{long double}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_ac39d8d75d7498e3cd5395b8485fbf39f}
+
+
+Reimplemented from \hyperlink{classSerialize_a06cf228664e659c8490c63ee36f34e28}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classStarField_ac3e35d838577ed7610bdaf933ef5b99d}{Star\-Field}, and \hyperlink{classStarFieldCircle_af54e17032bb1ee195137b3585e7caea5}{Star\-Field\-Circle}.
+
+\hypertarget{classShape_a92f5bc7b0179d1c47c2ae916727bf73d}{\index{Shape@{Shape}!nstored@{nstored}}
+\index{nstored@{nstored}!Shape@{Shape}}
+\subsubsection[{nstored}]{\setlength{\rightskip}{0pt plus 5cm}int Shape\-::nstored (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_a92f5bc7b0179d1c47c2ae916727bf73d}
+
+
+Reimplemented from \hyperlink{classSerialize_a590b7308112b07581c03ba826ace50b4}{Serialize}.
+
+\hypertarget{classShape_a53bac379f3ad1537e56625015afd5c95}{\index{Shape@{Shape}!num\-Stores@{num\-Stores}}
+\index{num\-Stores@{num\-Stores}!Shape@{Shape}}
+\subsubsection[{num\-Stores}]{\setlength{\rightskip}{0pt plus 5cm}int Shape\-::num\-Stores (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_a53bac379f3ad1537e56625015afd5c95}
+
+
+Reimplemented from \hyperlink{classSerialize_a71bf2a906fd71477308a942d01490ab3}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classStarField_a1289224a6763a69ac041eb32d685b657}{Star\-Field}.
+
+\hypertarget{classShape_a7d1f29c73622a3f32301ea59bfd89d32}{\index{Shape@{Shape}!setup\-Draw\-Matrices@{setup\-Draw\-Matrices}}
+\index{setup\-Draw\-Matrices@{setup\-Draw\-Matrices}!Shape@{Shape}}
+\subsubsection[{setup\-Draw\-Matrices}]{\setlength{\rightskip}{0pt plus 5cm}void Shape\-::setup\-Draw\-Matrices (
+\begin{DoxyParamCaption}
+\item[{int}]{display, }
+\item[{float}]{}
+\end{DoxyParamCaption}
+)}}\label{classShape_a7d1f29c73622a3f32301ea59bfd89d32}
+\hypertarget{classShape_a9dea3f39fe203b2f4288dc7cda6295a7}{\index{Shape@{Shape}!store@{store}}
+\index{store@{store}!Shape@{Shape}}
+\subsubsection[{store}]{\setlength{\rightskip}{0pt plus 5cm}bool Shape\-::store (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_a9dea3f39fe203b2f4288dc7cda6295a7}
+
+
+Reimplemented from \hyperlink{classSerialize_a3cda20e84a530870a6115eaaf589f168}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classStarField_aa8411004d05d05ac3e0f8d10bfa1949e}{Star\-Field}.
+
+\hypertarget{classShape_aaf3b0b140fcaf0bb11c28493ef745bfd}{\index{Shape@{Shape}!store\-Name@{store\-Name}}
+\index{store\-Name@{store\-Name}!Shape@{Shape}}
+\subsubsection[{store\-Name}]{\setlength{\rightskip}{0pt plus 5cm}string Shape\-::store\-Name (
+\begin{DoxyParamCaption}
+\item[{int}]{indx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classShape_aaf3b0b140fcaf0bb11c28493ef745bfd}
+
+
+Reimplemented from \hyperlink{classSerialize_ac94a76de6c9376e33b4c195d50ff0568}{Serialize}.
+
+
+
+Reimplemented in \hyperlink{classStarField_a047f987e052fc14fd8041658c153e0f1}{Star\-Field}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classShape_a41389fbe5746a93b075acc98e485582c}{\index{Shape@{Shape}!m\-\_\-color@{m\-\_\-color}}
+\index{m\-\_\-color@{m\-\_\-color}!Shape@{Shape}}
+\subsubsection[{m\-\_\-color}]{\setlength{\rightskip}{0pt plus 5cm}array$<$float,4$>$ Shape\-::m\-\_\-color}}\label{classShape_a41389fbe5746a93b075acc98e485582c}
+\hypertarget{classShape_a35589131828091da1fe3717f48e9c664}{\index{Shape@{Shape}!m\-\_\-draw@{m\-\_\-draw}}
+\index{m\-\_\-draw@{m\-\_\-draw}!Shape@{Shape}}
+\subsubsection[{m\-\_\-draw}]{\setlength{\rightskip}{0pt plus 5cm}char Shape\-::m\-\_\-draw}}\label{classShape_a35589131828091da1fe3717f48e9c664}
+\hypertarget{classShape_a3cf20a9158443fa941b4e85a7b817816}{\index{Shape@{Shape}!m\-\_\-drawmode@{m\-\_\-drawmode}}
+\index{m\-\_\-drawmode@{m\-\_\-drawmode}!Shape@{Shape}}
+\subsubsection[{m\-\_\-drawmode}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int Shape\-::m\-\_\-drawmode}}\label{classShape_a3cf20a9158443fa941b4e85a7b817816}
+\hypertarget{classShape_a14a1994dd7d7fc412b18d3ad2563556d}{\index{Shape@{Shape}!m\-\_\-n@{m\-\_\-n}}
+\index{m\-\_\-n@{m\-\_\-n}!Shape@{Shape}}
+\subsubsection[{m\-\_\-n}]{\setlength{\rightskip}{0pt plus 5cm}int Shape\-::m\-\_\-n}}\label{classShape_a14a1994dd7d7fc412b18d3ad2563556d}
+\hypertarget{classShape_ac96ad62fd8b979f9a1e92b211922bb25}{\index{Shape@{Shape}!m\-\_\-need\-Config@{m\-\_\-need\-Config}}
+\index{m\-\_\-need\-Config@{m\-\_\-need\-Config}!Shape@{Shape}}
+\subsubsection[{m\-\_\-need\-Config}]{\setlength{\rightskip}{0pt plus 5cm}bool Shape\-::m\-\_\-need\-Config\mbox{[}2\mbox{]}}}\label{classShape_ac96ad62fd8b979f9a1e92b211922bb25}
+\hypertarget{classShape_a3689b5d3e0ab51e8e739699193ce9290}{\index{Shape@{Shape}!m\-\_\-program@{m\-\_\-program}}
+\index{m\-\_\-program@{m\-\_\-program}!Shape@{Shape}}
+\subsubsection[{m\-\_\-program}]{\setlength{\rightskip}{0pt plus 5cm}G\-Luint Shape\-::m\-\_\-program\mbox{[}2\mbox{]}}}\label{classShape_a3689b5d3e0ab51e8e739699193ce9290}
+\hypertarget{classShape_a43a38e552b2f2fc423dde3dd81dab0ce}{\index{Shape@{Shape}!m\-\_\-rot@{m\-\_\-rot}}
+\index{m\-\_\-rot@{m\-\_\-rot}!Shape@{Shape}}
+\subsubsection[{m\-\_\-rot}]{\setlength{\rightskip}{0pt plus 5cm}float Shape\-::m\-\_\-rot}}\label{classShape_a43a38e552b2f2fc423dde3dd81dab0ce}
+\hypertarget{classShape_a9af8ff3b5a90a8e42ea931969ec9428e}{\index{Shape@{Shape}!m\-\_\-scale@{m\-\_\-scale}}
+\index{m\-\_\-scale@{m\-\_\-scale}!Shape@{Shape}}
+\subsubsection[{m\-\_\-scale}]{\setlength{\rightskip}{0pt plus 5cm}array$<$float,2$>$ Shape\-::m\-\_\-scale}}\label{classShape_a9af8ff3b5a90a8e42ea931969ec9428e}
+\hypertarget{classShape_aa8c2dca5ffd2e7f66cc4713e57ab029c}{\index{Shape@{Shape}!m\-\_\-time@{m\-\_\-time}}
+\index{m\-\_\-time@{m\-\_\-time}!Shape@{Shape}}
+\subsubsection[{m\-\_\-time}]{\setlength{\rightskip}{0pt plus 5cm}double Shape\-::m\-\_\-time}}\label{classShape_aa8c2dca5ffd2e7f66cc4713e57ab029c}
+\hypertarget{classShape_ad2a5e6ad0362873a88ffcc69e5cb9b12}{\index{Shape@{Shape}!m\-\_\-trans@{m\-\_\-trans}}
+\index{m\-\_\-trans@{m\-\_\-trans}!Shape@{Shape}}
+\subsubsection[{m\-\_\-trans}]{\setlength{\rightskip}{0pt plus 5cm}array$<$float,2$>$ Shape\-::m\-\_\-trans}}\label{classShape_ad2a5e6ad0362873a88ffcc69e5cb9b12}
+\hypertarget{classShape_a9a515d946d14526fe6d3cc566c4acf77}{\index{Shape@{Shape}!m\-\_\-vao@{m\-\_\-vao}}
+\index{m\-\_\-vao@{m\-\_\-vao}!Shape@{Shape}}
+\subsubsection[{m\-\_\-vao}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int Shape\-::m\-\_\-vao\mbox{[}2\mbox{]}}}\label{classShape_a9a515d946d14526fe6d3cc566c4acf77}
+\hypertarget{classShape_af252a08a695affa2637645dcd4cdf4e9}{\index{Shape@{Shape}!m\-\_\-vbo@{m\-\_\-vbo}}
+\index{m\-\_\-vbo@{m\-\_\-vbo}!Shape@{Shape}}
+\subsubsection[{m\-\_\-vbo}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int Shape\-::m\-\_\-vbo\mbox{[}2\mbox{]}}}\label{classShape_af252a08a695affa2637645dcd4cdf4e9}
+\hypertarget{classShape_af3088673fcd7c8b642df4ecb157e53ff}{\index{Shape@{Shape}!v\-\_\-color@{v\-\_\-color}}
+\index{v\-\_\-color@{v\-\_\-color}!Shape@{Shape}}
+\subsubsection[{v\-\_\-color}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$array$<$unsigned char,4$>$ $>$ Shape\-::v\-\_\-color}}\label{classShape_af3088673fcd7c8b642df4ecb157e53ff}
+\hypertarget{classShape_a6f426725f07e290ee150aab7be5b2587}{\index{Shape@{Shape}!v\-\_\-draw@{v\-\_\-draw}}
+\index{v\-\_\-draw@{v\-\_\-draw}!Shape@{Shape}}
+\subsubsection[{v\-\_\-draw}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$char$>$ Shape\-::v\-\_\-draw}}\label{classShape_a6f426725f07e290ee150aab7be5b2587}
+\hypertarget{classShape_a24f60964f7e4dc1b876a232f94948296}{\index{Shape@{Shape}!v\-\_\-rot@{v\-\_\-rot}}
+\index{v\-\_\-rot@{v\-\_\-rot}!Shape@{Shape}}
+\subsubsection[{v\-\_\-rot}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$float$>$ Shape\-::v\-\_\-rot}}\label{classShape_a24f60964f7e4dc1b876a232f94948296}
+\hypertarget{classShape_ae2549de1dc4697ef18d2fa01d3e241b9}{\index{Shape@{Shape}!v\-\_\-scale@{v\-\_\-scale}}
+\index{v\-\_\-scale@{v\-\_\-scale}!Shape@{Shape}}
+\subsubsection[{v\-\_\-scale}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$array$<$float,2$>$ $>$ Shape\-::v\-\_\-scale}}\label{classShape_ae2549de1dc4697ef18d2fa01d3e241b9}
+\hypertarget{classShape_af13b493550d418a20604baf5e1c8a0bd}{\index{Shape@{Shape}!v\-\_\-time@{v\-\_\-time}}
+\index{v\-\_\-time@{v\-\_\-time}!Shape@{Shape}}
+\subsubsection[{v\-\_\-time}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$double$>$ Shape\-::v\-\_\-time}}\label{classShape_af13b493550d418a20604baf5e1c8a0bd}
+\hypertarget{classShape_a5fb4760689b0acae7a6088da0cba7d7b}{\index{Shape@{Shape}!v\-\_\-trans@{v\-\_\-trans}}
+\index{v\-\_\-trans@{v\-\_\-trans}!Shape@{Shape}}
+\subsubsection[{v\-\_\-trans}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$array$<$float,2$>$ $>$ Shape\-::v\-\_\-trans}}\label{classShape_a5fb4760689b0acae7a6088da0cba7d7b}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/home/ruijan/sw/bmi5/bmi5/include/\-Shape/\hyperlink{shape_8h}{shape.\-h}\item 
+/home/ruijan/sw/bmi5/bmi5/src/\-Shape/\hyperlink{shape_8cpp}{shape.\-cpp}\end{DoxyCompactItemize}

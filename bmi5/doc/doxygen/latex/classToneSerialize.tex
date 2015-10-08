@@ -1,0 +1,209 @@
+\hypertarget{classToneSerialize}{\section{Tone\-Serialize Class Reference}
+\label{classToneSerialize}\index{Tone\-Serialize@{Tone\-Serialize}}
+}
+
+
+{\ttfamily \#include $<$tone\-Serialize.\-h$>$}
+
+Inheritance diagram for Tone\-Serialize\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classToneSerialize}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classToneSerialize_aa7a4f5168cfa0f247718c26be93a29b8}{Tone\-Serialize} ()
+\item 
+\hyperlink{classToneSerialize_a05907704997b3c3456cef49dc5d68ad8}{$\sim$\-Tone\-Serialize} ()
+\item 
+virtual bool \hyperlink{classToneSerialize_ab67181fa3c51dded04a2d8b4fc55edb4}{store} ()
+\item 
+virtual void \hyperlink{classToneSerialize_a1670e9459e05b63f1b6fff4d6ff13099}{clear} ()
+\item 
+virtual int \hyperlink{classToneSerialize_a6a5a872eb9e1a282c0de2221c777c144}{nstored} ()
+\item 
+virtual string \hyperlink{classToneSerialize_a4ae952e04b0a89ba3d5a8cb82460b064}{store\-Name} (int indx)
+\item 
+virtual int \hyperlink{classToneSerialize_a651a5292dabf70de6f562695ca034d8d}{get\-Store\-Class} (int indx)
+\item 
+virtual void \hyperlink{classToneSerialize_a3756f8357f284843aeaa5c56f98ff5db}{get\-Store\-Dims} (int, size\-\_\-t $\ast$dims)
+\item 
+virtual void $\ast$ \hyperlink{classToneSerialize_a6999157d41af65a3b7e8ea101972fd4e}{get\-Store} (int indx, int i)
+\item 
+virtual int \hyperlink{classToneSerialize_a85f4bff56b0f43466079c2ff289aa03a}{num\-Stores} ()
+\item 
+virtual double $\ast$ \hyperlink{classToneSerialize_adaf612569b11204b02fc3393b780f75e}{mmap\-Read} (double $\ast$d)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+double \hyperlink{classToneSerialize_aa17b08f9fbad9ad86eb39f6b87843948}{m\-\_\-time}
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+vector$<$ double $>$ \hyperlink{classToneSerialize_a2b10ad240255d0094337d0c3078e5e10}{v\-\_\-time}
+\item 
+vector$<$ float $>$ \hyperlink{classToneSerialize_a5888cb2c1c082334173c99c5cb4cbbc0}{v\-\_\-freq}
+\item 
+vector$<$ float $>$ \hyperlink{classToneSerialize_acab1f55a7935a7a20358ef96785d9576}{v\-\_\-pan}
+\item 
+vector$<$ float $>$ \hyperlink{classToneSerialize_ab6e8afad24a81b6dcfc3c6970fe289eb}{v\-\_\-scale}
+\item 
+vector$<$ float $>$ \hyperlink{classToneSerialize_a01cf609e28a438fc1effb03c656b33d6}{v\-\_\-duration}
+\item 
+vector$<$ char $>$ \hyperlink{classToneSerialize_a9313ff97557d382476944defa90f6a8e}{v\-\_\-play}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classToneSerialize_aa7a4f5168cfa0f247718c26be93a29b8}{\index{Tone\-Serialize@{Tone\-Serialize}!Tone\-Serialize@{Tone\-Serialize}}
+\index{Tone\-Serialize@{Tone\-Serialize}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{Tone\-Serialize}]{\setlength{\rightskip}{0pt plus 5cm}Tone\-Serialize\-::\-Tone\-Serialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classToneSerialize_aa7a4f5168cfa0f247718c26be93a29b8}
+\hypertarget{classToneSerialize_a05907704997b3c3456cef49dc5d68ad8}{\index{Tone\-Serialize@{Tone\-Serialize}!$\sim$\-Tone\-Serialize@{$\sim$\-Tone\-Serialize}}
+\index{$\sim$\-Tone\-Serialize@{$\sim$\-Tone\-Serialize}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{$\sim$\-Tone\-Serialize}]{\setlength{\rightskip}{0pt plus 5cm}Tone\-Serialize\-::$\sim$\-Tone\-Serialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classToneSerialize_a05907704997b3c3456cef49dc5d68ad8}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classToneSerialize_a1670e9459e05b63f1b6fff4d6ff13099}{\index{Tone\-Serialize@{Tone\-Serialize}!clear@{clear}}
+\index{clear@{clear}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{clear}]{\setlength{\rightskip}{0pt plus 5cm}void Tone\-Serialize\-::clear (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classToneSerialize_a1670e9459e05b63f1b6fff4d6ff13099}
+
+
+Reimplemented from \hyperlink{classSerialize_a11cbf006415c08d1891ab42e39a2aa1a}{Serialize}.
+
+\hypertarget{classToneSerialize_a6999157d41af65a3b7e8ea101972fd4e}{\index{Tone\-Serialize@{Tone\-Serialize}!get\-Store@{get\-Store}}
+\index{get\-Store@{get\-Store}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{get\-Store}]{\setlength{\rightskip}{0pt plus 5cm}void $\ast$ Tone\-Serialize\-::get\-Store (
+\begin{DoxyParamCaption}
+\item[{int}]{indx, }
+\item[{int}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classToneSerialize_a6999157d41af65a3b7e8ea101972fd4e}
+
+
+Reimplemented from \hyperlink{classSerialize_a6e589d263cfdc0eb72e41687c58831f2}{Serialize}.
+
+\hypertarget{classToneSerialize_a651a5292dabf70de6f562695ca034d8d}{\index{Tone\-Serialize@{Tone\-Serialize}!get\-Store\-Class@{get\-Store\-Class}}
+\index{get\-Store\-Class@{get\-Store\-Class}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{get\-Store\-Class}]{\setlength{\rightskip}{0pt plus 5cm}int Tone\-Serialize\-::get\-Store\-Class (
+\begin{DoxyParamCaption}
+\item[{int}]{indx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classToneSerialize_a651a5292dabf70de6f562695ca034d8d}
+
+
+Reimplemented from \hyperlink{classSerialize_a69954cc86d03b75b6b27511aec4aba43}{Serialize}.
+
+\hypertarget{classToneSerialize_a3756f8357f284843aeaa5c56f98ff5db}{\index{Tone\-Serialize@{Tone\-Serialize}!get\-Store\-Dims@{get\-Store\-Dims}}
+\index{get\-Store\-Dims@{get\-Store\-Dims}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{get\-Store\-Dims}]{\setlength{\rightskip}{0pt plus 5cm}void Tone\-Serialize\-::get\-Store\-Dims (
+\begin{DoxyParamCaption}
+\item[{int}]{, }
+\item[{size\-\_\-t $\ast$}]{dims}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classToneSerialize_a3756f8357f284843aeaa5c56f98ff5db}
+
+
+Reimplemented from \hyperlink{classSerialize_a52034c5c17bc5e7e6c728b4e6c620c05}{Serialize}.
+
+\hypertarget{classToneSerialize_adaf612569b11204b02fc3393b780f75e}{\index{Tone\-Serialize@{Tone\-Serialize}!mmap\-Read@{mmap\-Read}}
+\index{mmap\-Read@{mmap\-Read}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{mmap\-Read}]{\setlength{\rightskip}{0pt plus 5cm}double $\ast$ Tone\-Serialize\-::mmap\-Read (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classToneSerialize_adaf612569b11204b02fc3393b780f75e}
+
+
+Reimplemented from \hyperlink{classSerialize_a28b939242880e565a8906b30acd0f84c}{Serialize}.
+
+\hypertarget{classToneSerialize_a6a5a872eb9e1a282c0de2221c777c144}{\index{Tone\-Serialize@{Tone\-Serialize}!nstored@{nstored}}
+\index{nstored@{nstored}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{nstored}]{\setlength{\rightskip}{0pt plus 5cm}int Tone\-Serialize\-::nstored (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classToneSerialize_a6a5a872eb9e1a282c0de2221c777c144}
+
+
+Reimplemented from \hyperlink{classSerialize_a590b7308112b07581c03ba826ace50b4}{Serialize}.
+
+\hypertarget{classToneSerialize_a85f4bff56b0f43466079c2ff289aa03a}{\index{Tone\-Serialize@{Tone\-Serialize}!num\-Stores@{num\-Stores}}
+\index{num\-Stores@{num\-Stores}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{num\-Stores}]{\setlength{\rightskip}{0pt plus 5cm}int Tone\-Serialize\-::num\-Stores (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classToneSerialize_a85f4bff56b0f43466079c2ff289aa03a}
+
+
+Reimplemented from \hyperlink{classSerialize_a71bf2a906fd71477308a942d01490ab3}{Serialize}.
+
+\hypertarget{classToneSerialize_ab67181fa3c51dded04a2d8b4fc55edb4}{\index{Tone\-Serialize@{Tone\-Serialize}!store@{store}}
+\index{store@{store}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{store}]{\setlength{\rightskip}{0pt plus 5cm}bool Tone\-Serialize\-::store (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classToneSerialize_ab67181fa3c51dded04a2d8b4fc55edb4}
+
+
+Reimplemented from \hyperlink{classSerialize_a3cda20e84a530870a6115eaaf589f168}{Serialize}.
+
+\hypertarget{classToneSerialize_a4ae952e04b0a89ba3d5a8cb82460b064}{\index{Tone\-Serialize@{Tone\-Serialize}!store\-Name@{store\-Name}}
+\index{store\-Name@{store\-Name}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{store\-Name}]{\setlength{\rightskip}{0pt plus 5cm}string Tone\-Serialize\-::store\-Name (
+\begin{DoxyParamCaption}
+\item[{int}]{indx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classToneSerialize_a4ae952e04b0a89ba3d5a8cb82460b064}
+
+
+Reimplemented from \hyperlink{classSerialize_ac94a76de6c9376e33b4c195d50ff0568}{Serialize}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classToneSerialize_aa17b08f9fbad9ad86eb39f6b87843948}{\index{Tone\-Serialize@{Tone\-Serialize}!m\-\_\-time@{m\-\_\-time}}
+\index{m\-\_\-time@{m\-\_\-time}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{m\-\_\-time}]{\setlength{\rightskip}{0pt plus 5cm}double Tone\-Serialize\-::m\-\_\-time}}\label{classToneSerialize_aa17b08f9fbad9ad86eb39f6b87843948}
+\hypertarget{classToneSerialize_a01cf609e28a438fc1effb03c656b33d6}{\index{Tone\-Serialize@{Tone\-Serialize}!v\-\_\-duration@{v\-\_\-duration}}
+\index{v\-\_\-duration@{v\-\_\-duration}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{v\-\_\-duration}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$float$>$ Tone\-Serialize\-::v\-\_\-duration\hspace{0.3cm}{\ttfamily [private]}}}\label{classToneSerialize_a01cf609e28a438fc1effb03c656b33d6}
+\hypertarget{classToneSerialize_a5888cb2c1c082334173c99c5cb4cbbc0}{\index{Tone\-Serialize@{Tone\-Serialize}!v\-\_\-freq@{v\-\_\-freq}}
+\index{v\-\_\-freq@{v\-\_\-freq}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{v\-\_\-freq}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$float$>$ Tone\-Serialize\-::v\-\_\-freq\hspace{0.3cm}{\ttfamily [private]}}}\label{classToneSerialize_a5888cb2c1c082334173c99c5cb4cbbc0}
+\hypertarget{classToneSerialize_acab1f55a7935a7a20358ef96785d9576}{\index{Tone\-Serialize@{Tone\-Serialize}!v\-\_\-pan@{v\-\_\-pan}}
+\index{v\-\_\-pan@{v\-\_\-pan}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{v\-\_\-pan}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$float$>$ Tone\-Serialize\-::v\-\_\-pan\hspace{0.3cm}{\ttfamily [private]}}}\label{classToneSerialize_acab1f55a7935a7a20358ef96785d9576}
+\hypertarget{classToneSerialize_a9313ff97557d382476944defa90f6a8e}{\index{Tone\-Serialize@{Tone\-Serialize}!v\-\_\-play@{v\-\_\-play}}
+\index{v\-\_\-play@{v\-\_\-play}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{v\-\_\-play}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$char$>$ Tone\-Serialize\-::v\-\_\-play\hspace{0.3cm}{\ttfamily [private]}}}\label{classToneSerialize_a9313ff97557d382476944defa90f6a8e}
+\hypertarget{classToneSerialize_ab6e8afad24a81b6dcfc3c6970fe289eb}{\index{Tone\-Serialize@{Tone\-Serialize}!v\-\_\-scale@{v\-\_\-scale}}
+\index{v\-\_\-scale@{v\-\_\-scale}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{v\-\_\-scale}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$float$>$ Tone\-Serialize\-::v\-\_\-scale\hspace{0.3cm}{\ttfamily [private]}}}\label{classToneSerialize_ab6e8afad24a81b6dcfc3c6970fe289eb}
+\hypertarget{classToneSerialize_a2b10ad240255d0094337d0c3078e5e10}{\index{Tone\-Serialize@{Tone\-Serialize}!v\-\_\-time@{v\-\_\-time}}
+\index{v\-\_\-time@{v\-\_\-time}!ToneSerialize@{Tone\-Serialize}}
+\subsubsection[{v\-\_\-time}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$double$>$ Tone\-Serialize\-::v\-\_\-time\hspace{0.3cm}{\ttfamily [private]}}}\label{classToneSerialize_a2b10ad240255d0094337d0c3078e5e10}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/home/ruijan/sw/bmi5/bmi5/include/\-Serialize/\hyperlink{toneSerialize_8h}{tone\-Serialize.\-h}\item 
+/home/ruijan/sw/bmi5/bmi5/src/\-Serialize/\hyperlink{toneSerialize_8cpp}{tone\-Serialize.\-cpp}\end{DoxyCompactItemize}

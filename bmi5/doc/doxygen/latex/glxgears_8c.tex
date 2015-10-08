@@ -1,0 +1,193 @@
+\hypertarget{glxgears_8c}{\section{/home/ruijan/sw/bmi5/bmi5/src/glxgears.c File Reference}
+\label{glxgears_8c}\index{/home/ruijan/sw/bmi5/bmi5/src/glxgears.\-c@{/home/ruijan/sw/bmi5/bmi5/src/glxgears.\-c}}
+}
+{\ttfamily \#include $<$math.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$X11/\-Xlib.\-h$>$}\\*
+{\ttfamily \#include $<$X11/keysym.\-h$>$}\\*
+{\ttfamily \#include $<$G\-L/gl.\-h$>$}\\*
+{\ttfamily \#include $<$G\-L/glx.\-h$>$}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$time.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$signal.\-h$>$}\\*
+{\ttfamily \#include $<$sys/socket.\-h$>$}\\*
+{\ttfamily \#include $<$sys/mman.\-h$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$vector$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{glxgears_8c_ae71449b1cc6e6250b91f539153a7a0d3}{M\-\_\-\-P\-I}~3.\-14159265
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+long double \hyperlink{glxgears_8c_ae7338dc9853460cf73bbf6b5688e47f4}{gettime} ()
+\item 
+static void \hyperlink{glxgears_8c_ac883c34a8dcebc2923184cc364a46b7a}{gear} (G\-Lfloat inner\-\_\-radius, G\-Lfloat outer\-\_\-radius, G\-Lfloat width, G\-Lint teeth, G\-Lfloat tooth\-\_\-depth)
+\item 
+static void \hyperlink{glxgears_8c_a96a68ee53ffcf494ca60f94ac05d94bb}{draw} (void)
+\item 
+static void \hyperlink{glxgears_8c_acff6d842734d260fb971afce0e3cc806}{reshape} (int width, int height)
+\item 
+static void \hyperlink{glxgears_8c_a17fb021b480a1f220d2579807fa2e398}{init} (void)
+\item 
+static void \hyperlink{glxgears_8c_a76cf40b4402dcb0cb106acc67a6dd48f}{make\-\_\-window} (Display $\ast$\hyperlink{glxgears_8c_a7d43b3edf58f8d85a89852ab95b740f6}{dpy}, const char $\ast$name, int x, int y, int width, int height, Window $\ast$win\-Ret, G\-L\-X\-Context $\ast$ctx\-Ret)
+\item 
+static void \hyperlink{glxgears_8c_a50df6ba7823bf94b8664133ef73821d9}{event\-\_\-loop} (Display $\ast$\hyperlink{glxgears_8c_a7d43b3edf58f8d85a89852ab95b740f6}{dpy}, Window \hyperlink{glxgears_8c_af5e9cbaf11bc8c0c330917f546d0045f}{win})
+\item 
+int \hyperlink{glxgears_8c_a0ddf1224851353fc92bfbff6f499fa97}{main} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static G\-Lfloat \hyperlink{glxgears_8c_aee797e55cb04e849098251cfda9fe7b4}{view\-\_\-rotx} = 20.\-0
+\item 
+static G\-Lfloat \hyperlink{glxgears_8c_a4fb132ad4a67e10213ad0a2c3f3889fa}{view\-\_\-roty} = 30.\-0
+\item 
+static G\-Lfloat \hyperlink{glxgears_8c_a5afeeacf12f82eca8a99481a76798568}{view\-\_\-rotz} = 0.\-0
+\item 
+static G\-Lint \hyperlink{glxgears_8c_ae50ee03b9719bbf318fec5af6c4db05b}{gear1}
+\item 
+static G\-Lint \hyperlink{glxgears_8c_a12776b884f4454a8195d64d63676b031}{gear2}
+\item 
+static G\-Lint \hyperlink{glxgears_8c_ab68693e29e351c447c38ced8aeadef12}{gear3}
+\item 
+static G\-Lfloat \hyperlink{glxgears_8c_ab47b818590551b1663a0cd5c060d92b6}{angle} = 0.\-0
+\item 
+long double \hyperlink{glxgears_8c_a92def4cf73ab98e434a75007cb13251a}{g\-\_\-start\-Time} = 0.\-0
+\item 
+vector$<$ double $>$ \hyperlink{glxgears_8c_a39ff786365968ffbd9986e4797e69182}{g\-\_\-times}
+\item 
+vector$<$ double $>$ \hyperlink{glxgears_8c_a8484df5ccdcf5e8ca56c32b7e5ff56e6}{g\-\_\-times\-\_\-pre}
+\item 
+Display $\ast$ \hyperlink{glxgears_8c_a7d43b3edf58f8d85a89852ab95b740f6}{dpy}
+\item 
+Window \hyperlink{glxgears_8c_af5e9cbaf11bc8c0c330917f546d0045f}{win}
+\item 
+G\-L\-X\-Context \hyperlink{glxgears_8c_a8117cd28e414b9543443990d312580b8}{ctx}
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{glxgears_8c_ae71449b1cc6e6250b91f539153a7a0d3}{\index{glxgears.\-c@{glxgears.\-c}!M\-\_\-\-P\-I@{M\-\_\-\-P\-I}}
+\index{M\-\_\-\-P\-I@{M\-\_\-\-P\-I}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{M\-\_\-\-P\-I}]{\setlength{\rightskip}{0pt plus 5cm}\#define M\-\_\-\-P\-I~3.\-14159265}}\label{glxgears_8c_ae71449b1cc6e6250b91f539153a7a0d3}
+
+
+\subsection{Function Documentation}
+\hypertarget{glxgears_8c_a96a68ee53ffcf494ca60f94ac05d94bb}{\index{glxgears.\-c@{glxgears.\-c}!draw@{draw}}
+\index{draw@{draw}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{draw}]{\setlength{\rightskip}{0pt plus 5cm}static void draw (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_a96a68ee53ffcf494ca60f94ac05d94bb}
+\hypertarget{glxgears_8c_a50df6ba7823bf94b8664133ef73821d9}{\index{glxgears.\-c@{glxgears.\-c}!event\-\_\-loop@{event\-\_\-loop}}
+\index{event\-\_\-loop@{event\-\_\-loop}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{event\-\_\-loop}]{\setlength{\rightskip}{0pt plus 5cm}static void event\-\_\-loop (
+\begin{DoxyParamCaption}
+\item[{Display $\ast$}]{dpy, }
+\item[{Window}]{win}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_a50df6ba7823bf94b8664133ef73821d9}
+\hypertarget{glxgears_8c_ac883c34a8dcebc2923184cc364a46b7a}{\index{glxgears.\-c@{glxgears.\-c}!gear@{gear}}
+\index{gear@{gear}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{gear}]{\setlength{\rightskip}{0pt plus 5cm}static void gear (
+\begin{DoxyParamCaption}
+\item[{G\-Lfloat}]{inner\-\_\-radius, }
+\item[{G\-Lfloat}]{outer\-\_\-radius, }
+\item[{G\-Lfloat}]{width, }
+\item[{G\-Lint}]{teeth, }
+\item[{G\-Lfloat}]{tooth\-\_\-depth}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_ac883c34a8dcebc2923184cc364a46b7a}
+\hypertarget{glxgears_8c_ae7338dc9853460cf73bbf6b5688e47f4}{\index{glxgears.\-c@{glxgears.\-c}!gettime@{gettime}}
+\index{gettime@{gettime}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{gettime}]{\setlength{\rightskip}{0pt plus 5cm}long double gettime (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{glxgears_8c_ae7338dc9853460cf73bbf6b5688e47f4}
+\hypertarget{glxgears_8c_a17fb021b480a1f220d2579807fa2e398}{\index{glxgears.\-c@{glxgears.\-c}!init@{init}}
+\index{init@{init}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}static void init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_a17fb021b480a1f220d2579807fa2e398}
+\hypertarget{glxgears_8c_a0ddf1224851353fc92bfbff6f499fa97}{\index{glxgears.\-c@{glxgears.\-c}!main@{main}}
+\index{main@{main}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]}}
+\end{DoxyParamCaption}
+)}}\label{glxgears_8c_a0ddf1224851353fc92bfbff6f499fa97}
+\hypertarget{glxgears_8c_a76cf40b4402dcb0cb106acc67a6dd48f}{\index{glxgears.\-c@{glxgears.\-c}!make\-\_\-window@{make\-\_\-window}}
+\index{make\-\_\-window@{make\-\_\-window}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{make\-\_\-window}]{\setlength{\rightskip}{0pt plus 5cm}static void make\-\_\-window (
+\begin{DoxyParamCaption}
+\item[{Display $\ast$}]{dpy, }
+\item[{const char $\ast$}]{name, }
+\item[{int}]{x, }
+\item[{int}]{y, }
+\item[{int}]{width, }
+\item[{int}]{height, }
+\item[{Window $\ast$}]{win\-Ret, }
+\item[{G\-L\-X\-Context $\ast$}]{ctx\-Ret}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_a76cf40b4402dcb0cb106acc67a6dd48f}
+\hypertarget{glxgears_8c_acff6d842734d260fb971afce0e3cc806}{\index{glxgears.\-c@{glxgears.\-c}!reshape@{reshape}}
+\index{reshape@{reshape}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{reshape}]{\setlength{\rightskip}{0pt plus 5cm}static void reshape (
+\begin{DoxyParamCaption}
+\item[{int}]{width, }
+\item[{int}]{height}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_acff6d842734d260fb971afce0e3cc806}
+
+
+\subsection{Variable Documentation}
+\hypertarget{glxgears_8c_ab47b818590551b1663a0cd5c060d92b6}{\index{glxgears.\-c@{glxgears.\-c}!angle@{angle}}
+\index{angle@{angle}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{angle}]{\setlength{\rightskip}{0pt plus 5cm}G\-Lfloat angle = 0.\-0\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_ab47b818590551b1663a0cd5c060d92b6}
+\hypertarget{glxgears_8c_a8117cd28e414b9543443990d312580b8}{\index{glxgears.\-c@{glxgears.\-c}!ctx@{ctx}}
+\index{ctx@{ctx}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{ctx}]{\setlength{\rightskip}{0pt plus 5cm}G\-L\-X\-Context ctx}}\label{glxgears_8c_a8117cd28e414b9543443990d312580b8}
+\hypertarget{glxgears_8c_a7d43b3edf58f8d85a89852ab95b740f6}{\index{glxgears.\-c@{glxgears.\-c}!dpy@{dpy}}
+\index{dpy@{dpy}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{dpy}]{\setlength{\rightskip}{0pt plus 5cm}Display$\ast$ dpy}}\label{glxgears_8c_a7d43b3edf58f8d85a89852ab95b740f6}
+\hypertarget{glxgears_8c_a92def4cf73ab98e434a75007cb13251a}{\index{glxgears.\-c@{glxgears.\-c}!g\-\_\-start\-Time@{g\-\_\-start\-Time}}
+\index{g\-\_\-start\-Time@{g\-\_\-start\-Time}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{g\-\_\-start\-Time}]{\setlength{\rightskip}{0pt plus 5cm}long double g\-\_\-start\-Time = 0.\-0}}\label{glxgears_8c_a92def4cf73ab98e434a75007cb13251a}
+\hypertarget{glxgears_8c_a39ff786365968ffbd9986e4797e69182}{\index{glxgears.\-c@{glxgears.\-c}!g\-\_\-times@{g\-\_\-times}}
+\index{g\-\_\-times@{g\-\_\-times}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{g\-\_\-times}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$double$>$ g\-\_\-times}}\label{glxgears_8c_a39ff786365968ffbd9986e4797e69182}
+\hypertarget{glxgears_8c_a8484df5ccdcf5e8ca56c32b7e5ff56e6}{\index{glxgears.\-c@{glxgears.\-c}!g\-\_\-times\-\_\-pre@{g\-\_\-times\-\_\-pre}}
+\index{g\-\_\-times\-\_\-pre@{g\-\_\-times\-\_\-pre}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{g\-\_\-times\-\_\-pre}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$double$>$ g\-\_\-times\-\_\-pre}}\label{glxgears_8c_a8484df5ccdcf5e8ca56c32b7e5ff56e6}
+\hypertarget{glxgears_8c_ae50ee03b9719bbf318fec5af6c4db05b}{\index{glxgears.\-c@{glxgears.\-c}!gear1@{gear1}}
+\index{gear1@{gear1}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{gear1}]{\setlength{\rightskip}{0pt plus 5cm}G\-Lint gear1\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_ae50ee03b9719bbf318fec5af6c4db05b}
+\hypertarget{glxgears_8c_a12776b884f4454a8195d64d63676b031}{\index{glxgears.\-c@{glxgears.\-c}!gear2@{gear2}}
+\index{gear2@{gear2}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{gear2}]{\setlength{\rightskip}{0pt plus 5cm}G\-Lint gear2\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_a12776b884f4454a8195d64d63676b031}
+\hypertarget{glxgears_8c_ab68693e29e351c447c38ced8aeadef12}{\index{glxgears.\-c@{glxgears.\-c}!gear3@{gear3}}
+\index{gear3@{gear3}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{gear3}]{\setlength{\rightskip}{0pt plus 5cm}G\-Lint gear3\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_ab68693e29e351c447c38ced8aeadef12}
+\hypertarget{glxgears_8c_aee797e55cb04e849098251cfda9fe7b4}{\index{glxgears.\-c@{glxgears.\-c}!view\-\_\-rotx@{view\-\_\-rotx}}
+\index{view\-\_\-rotx@{view\-\_\-rotx}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{view\-\_\-rotx}]{\setlength{\rightskip}{0pt plus 5cm}G\-Lfloat view\-\_\-rotx = 20.\-0\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_aee797e55cb04e849098251cfda9fe7b4}
+\hypertarget{glxgears_8c_a4fb132ad4a67e10213ad0a2c3f3889fa}{\index{glxgears.\-c@{glxgears.\-c}!view\-\_\-roty@{view\-\_\-roty}}
+\index{view\-\_\-roty@{view\-\_\-roty}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{view\-\_\-roty}]{\setlength{\rightskip}{0pt plus 5cm}G\-Lfloat view\-\_\-roty = 30.\-0\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_a4fb132ad4a67e10213ad0a2c3f3889fa}
+\hypertarget{glxgears_8c_a5afeeacf12f82eca8a99481a76798568}{\index{glxgears.\-c@{glxgears.\-c}!view\-\_\-rotz@{view\-\_\-rotz}}
+\index{view\-\_\-rotz@{view\-\_\-rotz}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{view\-\_\-rotz}]{\setlength{\rightskip}{0pt plus 5cm}G\-Lfloat view\-\_\-rotz = 0.\-0\hspace{0.3cm}{\ttfamily [static]}}}\label{glxgears_8c_a5afeeacf12f82eca8a99481a76798568}
+\hypertarget{glxgears_8c_af5e9cbaf11bc8c0c330917f546d0045f}{\index{glxgears.\-c@{glxgears.\-c}!win@{win}}
+\index{win@{win}!glxgears.c@{glxgears.\-c}}
+\subsubsection[{win}]{\setlength{\rightskip}{0pt plus 5cm}Window win}}\label{glxgears_8c_af5e9cbaf11bc8c0c330917f546d0045f}

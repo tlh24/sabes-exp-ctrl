@@ -1,0 +1,195 @@
+\hypertarget{classMatrix44Serialize}{\section{Matrix44\-Serialize Class Reference}
+\label{classMatrix44Serialize}\index{Matrix44\-Serialize@{Matrix44\-Serialize}}
+}
+
+
+{\ttfamily \#include $<$matrix44\-Serialize.\-h$>$}
+
+Inheritance diagram for Matrix44\-Serialize\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classMatrix44Serialize}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classMatrix44Serialize_a0bcff20c12377cecee29099007ab5fc7}{Matrix44\-Serialize} (string name)
+\item 
+\hyperlink{classMatrix44Serialize_a9d0a79d7f215cbcc763e777cf0379fb8}{$\sim$\-Matrix44\-Serialize} ()
+\item 
+virtual void \hyperlink{classMatrix44Serialize_aaea63fa835d82cc7d039323e678ec58a}{clear} ()
+\item 
+virtual bool \hyperlink{classMatrix44Serialize_a96da5f524e0e2522085f82b20f6e3de0}{store} ()
+\item 
+virtual int \hyperlink{classMatrix44Serialize_ab1531b0cb71530688376e3b5f9e05076}{nstored} ()
+\item 
+virtual string \hyperlink{classMatrix44Serialize_a1262b03de3cf08dab616bdb44b354d3d}{store\-Name} (int)
+\item 
+virtual int \hyperlink{classMatrix44Serialize_a543c479bc5f47c7045988f14dc398cfa}{get\-Store\-Class} (int)
+\item 
+virtual void \hyperlink{classMatrix44Serialize_ad2a049be2ae27daad403c7e1d7ca4de0}{get\-Store\-Dims} (int, size\-\_\-t $\ast$dims)
+\item 
+virtual void $\ast$ \hyperlink{classMatrix44Serialize_a4690b73080db8812c3ca0970f05c699d}{get\-Store} (int, int k)
+\item 
+virtual int \hyperlink{classMatrix44Serialize_aa87157b168588ba1e29d6dee6529e906}{num\-Stores} ()
+\item 
+virtual double $\ast$ \hyperlink{classMatrix44Serialize_a9882ee2bdc032d63cc2daf6eb25a7464}{mmap\-Read} (double $\ast$d)
+\item 
+float $\ast$ \hyperlink{classMatrix44Serialize_aec8417e383b9da42858da90c26144f8b}{data} ()
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+array$<$ double, 16 $>$ \hyperlink{classMatrix44Serialize_a887ffc59342dfab5667c068ece0bc9e4}{m\-\_\-cmp}
+\item 
+array$<$ float, 16 $>$ \hyperlink{classMatrix44Serialize_a71fe9d20c4d708809ffdea76e6e4e14b}{m\-\_\-x}
+\item 
+vector$<$ array$<$ float, 16 $>$ $>$ \hyperlink{classMatrix44Serialize_abc347705129a270f25ec5d07cc5f0846}{v\-\_\-x}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classMatrix44Serialize_a0bcff20c12377cecee29099007ab5fc7}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!Matrix44\-Serialize@{Matrix44\-Serialize}}
+\index{Matrix44\-Serialize@{Matrix44\-Serialize}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{Matrix44\-Serialize}]{\setlength{\rightskip}{0pt plus 5cm}Matrix44\-Serialize\-::\-Matrix44\-Serialize (
+\begin{DoxyParamCaption}
+\item[{string}]{name}
+\end{DoxyParamCaption}
+)}}\label{classMatrix44Serialize_a0bcff20c12377cecee29099007ab5fc7}
+\hypertarget{classMatrix44Serialize_a9d0a79d7f215cbcc763e777cf0379fb8}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!$\sim$\-Matrix44\-Serialize@{$\sim$\-Matrix44\-Serialize}}
+\index{$\sim$\-Matrix44\-Serialize@{$\sim$\-Matrix44\-Serialize}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{$\sim$\-Matrix44\-Serialize}]{\setlength{\rightskip}{0pt plus 5cm}Matrix44\-Serialize\-::$\sim$\-Matrix44\-Serialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classMatrix44Serialize_a9d0a79d7f215cbcc763e777cf0379fb8}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classMatrix44Serialize_aaea63fa835d82cc7d039323e678ec58a}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!clear@{clear}}
+\index{clear@{clear}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{clear}]{\setlength{\rightskip}{0pt plus 5cm}void Matrix44\-Serialize\-::clear (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classMatrix44Serialize_aaea63fa835d82cc7d039323e678ec58a}
+
+
+Reimplemented from \hyperlink{classSerialize_a11cbf006415c08d1891ab42e39a2aa1a}{Serialize}.
+
+\hypertarget{classMatrix44Serialize_aec8417e383b9da42858da90c26144f8b}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!data@{data}}
+\index{data@{data}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{data}]{\setlength{\rightskip}{0pt plus 5cm}float $\ast$ Matrix44\-Serialize\-::data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classMatrix44Serialize_aec8417e383b9da42858da90c26144f8b}
+\hypertarget{classMatrix44Serialize_a4690b73080db8812c3ca0970f05c699d}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!get\-Store@{get\-Store}}
+\index{get\-Store@{get\-Store}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{get\-Store}]{\setlength{\rightskip}{0pt plus 5cm}void $\ast$ Matrix44\-Serialize\-::get\-Store (
+\begin{DoxyParamCaption}
+\item[{int}]{, }
+\item[{int}]{k}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classMatrix44Serialize_a4690b73080db8812c3ca0970f05c699d}
+
+
+Reimplemented from \hyperlink{classSerialize_a6e589d263cfdc0eb72e41687c58831f2}{Serialize}.
+
+\hypertarget{classMatrix44Serialize_a543c479bc5f47c7045988f14dc398cfa}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!get\-Store\-Class@{get\-Store\-Class}}
+\index{get\-Store\-Class@{get\-Store\-Class}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{get\-Store\-Class}]{\setlength{\rightskip}{0pt plus 5cm}int Matrix44\-Serialize\-::get\-Store\-Class (
+\begin{DoxyParamCaption}
+\item[{int}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classMatrix44Serialize_a543c479bc5f47c7045988f14dc398cfa}
+
+
+Reimplemented from \hyperlink{classSerialize_a69954cc86d03b75b6b27511aec4aba43}{Serialize}.
+
+\hypertarget{classMatrix44Serialize_ad2a049be2ae27daad403c7e1d7ca4de0}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!get\-Store\-Dims@{get\-Store\-Dims}}
+\index{get\-Store\-Dims@{get\-Store\-Dims}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{get\-Store\-Dims}]{\setlength{\rightskip}{0pt plus 5cm}void Matrix44\-Serialize\-::get\-Store\-Dims (
+\begin{DoxyParamCaption}
+\item[{int}]{, }
+\item[{size\-\_\-t $\ast$}]{dims}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classMatrix44Serialize_ad2a049be2ae27daad403c7e1d7ca4de0}
+
+
+Reimplemented from \hyperlink{classSerialize_a52034c5c17bc5e7e6c728b4e6c620c05}{Serialize}.
+
+\hypertarget{classMatrix44Serialize_a9882ee2bdc032d63cc2daf6eb25a7464}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!mmap\-Read@{mmap\-Read}}
+\index{mmap\-Read@{mmap\-Read}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{mmap\-Read}]{\setlength{\rightskip}{0pt plus 5cm}double $\ast$ Matrix44\-Serialize\-::mmap\-Read (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classMatrix44Serialize_a9882ee2bdc032d63cc2daf6eb25a7464}
+
+
+Reimplemented from \hyperlink{classSerialize_a28b939242880e565a8906b30acd0f84c}{Serialize}.
+
+\hypertarget{classMatrix44Serialize_ab1531b0cb71530688376e3b5f9e05076}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!nstored@{nstored}}
+\index{nstored@{nstored}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{nstored}]{\setlength{\rightskip}{0pt plus 5cm}int Matrix44\-Serialize\-::nstored (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classMatrix44Serialize_ab1531b0cb71530688376e3b5f9e05076}
+
+
+Reimplemented from \hyperlink{classSerialize_a590b7308112b07581c03ba826ace50b4}{Serialize}.
+
+\hypertarget{classMatrix44Serialize_aa87157b168588ba1e29d6dee6529e906}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!num\-Stores@{num\-Stores}}
+\index{num\-Stores@{num\-Stores}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{num\-Stores}]{\setlength{\rightskip}{0pt plus 5cm}int Matrix44\-Serialize\-::num\-Stores (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classMatrix44Serialize_aa87157b168588ba1e29d6dee6529e906}
+
+
+Reimplemented from \hyperlink{classSerialize_a71bf2a906fd71477308a942d01490ab3}{Serialize}.
+
+\hypertarget{classMatrix44Serialize_a96da5f524e0e2522085f82b20f6e3de0}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!store@{store}}
+\index{store@{store}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{store}]{\setlength{\rightskip}{0pt plus 5cm}bool Matrix44\-Serialize\-::store (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classMatrix44Serialize_a96da5f524e0e2522085f82b20f6e3de0}
+
+
+Reimplemented from \hyperlink{classSerialize_a3cda20e84a530870a6115eaaf589f168}{Serialize}.
+
+\hypertarget{classMatrix44Serialize_a1262b03de3cf08dab616bdb44b354d3d}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!store\-Name@{store\-Name}}
+\index{store\-Name@{store\-Name}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{store\-Name}]{\setlength{\rightskip}{0pt plus 5cm}string Matrix44\-Serialize\-::store\-Name (
+\begin{DoxyParamCaption}
+\item[{int}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classMatrix44Serialize_a1262b03de3cf08dab616bdb44b354d3d}
+
+
+Reimplemented from \hyperlink{classSerialize_ac94a76de6c9376e33b4c195d50ff0568}{Serialize}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classMatrix44Serialize_a887ffc59342dfab5667c068ece0bc9e4}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!m\-\_\-cmp@{m\-\_\-cmp}}
+\index{m\-\_\-cmp@{m\-\_\-cmp}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{m\-\_\-cmp}]{\setlength{\rightskip}{0pt plus 5cm}array$<$double,16$>$ Matrix44\-Serialize\-::m\-\_\-cmp}}\label{classMatrix44Serialize_a887ffc59342dfab5667c068ece0bc9e4}
+\hypertarget{classMatrix44Serialize_a71fe9d20c4d708809ffdea76e6e4e14b}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!m\-\_\-x@{m\-\_\-x}}
+\index{m\-\_\-x@{m\-\_\-x}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{m\-\_\-x}]{\setlength{\rightskip}{0pt plus 5cm}array$<$float,16$>$ Matrix44\-Serialize\-::m\-\_\-x}}\label{classMatrix44Serialize_a71fe9d20c4d708809ffdea76e6e4e14b}
+\hypertarget{classMatrix44Serialize_abc347705129a270f25ec5d07cc5f0846}{\index{Matrix44\-Serialize@{Matrix44\-Serialize}!v\-\_\-x@{v\-\_\-x}}
+\index{v\-\_\-x@{v\-\_\-x}!Matrix44Serialize@{Matrix44\-Serialize}}
+\subsubsection[{v\-\_\-x}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$array$<$float,16$>$ $>$ Matrix44\-Serialize\-::v\-\_\-x}}\label{classMatrix44Serialize_abc347705129a270f25ec5d07cc5f0846}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/home/ruijan/sw/bmi5/bmi5/include/\-Serialize/\hyperlink{matrix44Serialize_8h}{matrix44\-Serialize.\-h}\item 
+/home/ruijan/sw/bmi5/bmi5/src/\-Serialize/\hyperlink{matrix44Serialize_8cpp}{matrix44\-Serialize.\-cpp}\end{DoxyCompactItemize}

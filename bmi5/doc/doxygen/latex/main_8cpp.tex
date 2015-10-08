@@ -1,0 +1,595 @@
+\hypertarget{main_8cpp}{\section{/home/ruijan/sw/bmi5/bmi5/src/main.cpp File Reference}
+\label{main_8cpp}\index{/home/ruijan/sw/bmi5/bmi5/src/main.\-cpp@{/home/ruijan/sw/bmi5/bmi5/src/main.\-cpp}}
+}
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$sys/socket.\-h$>$}\\*
+{\ttfamily \#include $<$sys/mman.\-h$>$}\\*
+{\ttfamily \#include $<$sys/stat.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$proc/readproc.\-h$>$}\\*
+{\ttfamily \#include $<$math.\-h$>$}\\*
+{\ttfamily \#include $<$time.\-h$>$}\\*
+{\ttfamily \#include $<$arpa/inet.\-h$>$}\\*
+{\ttfamily \#include $<$netdb.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$stack$>$}\\*
+{\ttfamily \#include $<$string$>$}\\*
+{\ttfamily \#include $<$iomanip$>$}\\*
+{\ttfamily \#include $<$limits$>$}\\*
+{\ttfamily \#include $<$boost/tokenizer.\-hpp$>$}\\*
+{\ttfamily \#include $<$boost/lexical\-\_\-cast.\-hpp$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$pcap.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}matio.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$basedir.\-h$>$}\\*
+{\ttfamily \#include $<$basedir\-\_\-fs.\-h$>$}\\*
+{\ttfamily \#include $<$gtk/gtk.\-h$>$}\\*
+{\ttfamily \#include $<$gdk/gdk.\-h$>$}\\*
+{\ttfamily \#include $<$gdk/gdkx.\-h$>$}\\*
+{\ttfamily \#include $<$G\-L/glew.\-h$>$}\\*
+{\ttfamily \#include $<$G\-L/glut.\-h$>$}\\*
+{\ttfamily \#include $<$G\-L/gl.\-h$>$}\\*
+{\ttfamily \#include $<$G\-L/glu.\-h$>$}\\*
+{\ttfamily \#include $<$G\-L/glx.\-h$>$}\\*
+{\ttfamily \#include $<$G\-L/glext.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}gl\-Info.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}gl\-Font.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}gtkglx.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$iostream$>$}\\*
+{\ttfamily \#include $<$fstream$>$}\\*
+{\ttfamily \#include $<$streambuf$>$}\\*
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include $<$sstream$>$}\\*
+{\ttfamily \#include $<$algorithm$>$}\\*
+{\ttfamily \#include $<$functional$>$}\\*
+{\ttfamily \#include \char`\"{}mmaphelp.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}gettime.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}timesync.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}perftimer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}fifohelp.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}tdt\-\_\-udp.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}jacksnd.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Serialize/serialize.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}include\-Serialize.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}include\-Shape.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Shape/shape.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}polhemus.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}fenv.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}libgen.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lualib.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lauxlib.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}lconf.\-h\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{main_8cpp_a6821bafc3c88dfb2e433a095df9940c6}{B\-U\-F\-\_\-\-S\-I\-Z\-E}~1000
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef G\-Lvoid($\ast$ \hyperlink{main_8cpp_ac574c6b31399914a351996447151c1bf}{gl\-X\-Swap\-Interval\-S\-G\-I\-Func} )(G\-Lint)
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{main_8cpp_aba7f0314711d3ef6706ba9755851b406}{gobjs\-Init} ()
+\item 
+void \hyperlink{main_8cpp_a9c78d3fc2f5c69fd8948ea04d342fd8a}{error\-Dialog} (char $\ast$msg)
+\item 
+void \hyperlink{main_8cpp_a9e2ab67d9c052d2e2468c680d1f274b1}{destroy} (int)
+\item 
+void \hyperlink{main_8cpp_acd93b5b02bc279b70bf2589dbefacede}{destroy\-G\-U\-I} (Gtk\-Widget $\ast$, gpointer)
+\item 
+void \hyperlink{main_8cpp_ae5bae7b43ce6362d7d7ff53ab81323fb}{update\-Curs\-Pos} (float x, float y)
+\item 
+static gint \hyperlink{main_8cpp_a93c2700c745bf7bce13a7eaa6da9d7d5}{motion\-\_\-notify\-\_\-event} (Gtk\-Widget $\ast$w, Gdk\-Event\-Motion $\ast$)
+\item 
+static gboolean \hyperlink{main_8cpp_a6e3b08eb231495f9e3a9fb6442f4f249}{configure1} (Gtk\-Widget $\ast$da, Gdk\-Event\-Configure $\ast$, gpointer p)
+\item 
+static gboolean \hyperlink{main_8cpp_a9cd2cc3af906544ce69ff11ba8034d31}{draw1} (Gtk\-Widget $\ast$da, cairo\-\_\-t $\ast$, gpointer p)
+\item 
+static int \hyperlink{main_8cpp_a434a4745eedc1d328be9eef04f55c31a}{realize1} (Gtk\-Widget $\ast$w, gpointer p)
+\item 
+static gboolean \hyperlink{main_8cpp_a93520519ff068b08a2dbf59de558939d}{refresh} (gpointer)
+\item 
+string \hyperlink{main_8cpp_af39f5cbf8f835813e12814c580f1ba88}{get\-Mmap\-Structure} ()
+\item 
+static void \hyperlink{main_8cpp_a2d7a36645a949be6213be946d36b6207}{print\-Mmap\-Structure} (Gtk\-Widget $\ast$, gpointer)
+\item 
+static void \hyperlink{main_8cpp_afa9e9fe87445060c11ec9c44df8ab300}{fullscreen\-C\-B} (Gtk\-Widget $\ast$w, gpointer p)
+\item 
+static void \hyperlink{main_8cpp_a7a705fc901058496351eb53c9b93feaf}{sticky\-C\-B} (Gtk\-Widget $\ast$w, gpointer p)
+\item 
+static void \hyperlink{main_8cpp_abcfcb2b4fe8f2df1ab3ba5efa3686517}{vsync\-C\-B} (Gtk\-Widget $\ast$w, gpointer)
+\item 
+static void \hyperlink{main_8cpp_a07d64bdc28dd9bfef55d32703745b3e1}{op\-View\-C\-B} (Gtk\-Widget $\ast$w, gpointer)
+\item 
+void \hyperlink{main_8cpp_a6dbf9f65c305f5d20ac517d32b75022b}{flush\-\_\-pipe} (int fid)
+\item 
+void $\ast$ \hyperlink{main_8cpp_a668a3ef61f7620debfb2c1b6749f3713}{mmap\-\_\-thread} (void $\ast$)
+\item 
+void $\ast$ \hyperlink{main_8cpp_abda3cfed36f534e3767a3295e73b5cec}{backup\-\_\-thread} (void $\ast$)
+\item 
+void $\ast$ \hyperlink{main_8cpp_afa5688af8901451c66c107b288166e5b}{polhemus\-\_\-thread} (void $\ast$)
+\item 
+static void \hyperlink{main_8cpp_af2a6219a50aeb7302132082f0d64f3f3}{save\-Matlab\-Data} (gpointer, gpointer parent\-\_\-window)
+\item 
+static void \hyperlink{main_8cpp_abec53a5330acb617c5e2f2180ba220dc}{clear\-Data\-C\-B} (gpointer, gpointer parent\-\_\-window)
+\item 
+void \hyperlink{main_8cpp_a6f721d53c2584c6b3c6e685c7fcd037f}{long\-Double\-Test} ()
+\item 
+int \hyperlink{main_8cpp_a6d6b841d00afea11d5056811a58699a1}{main} (int argn, char $\ast$$\ast$argc)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+string \hyperlink{main_8cpp_a10626d2728a4dad59dc22c92ee6342ac}{g\-\_\-mmap} = \char`\"{}/tmp/bmi5\-\_\-control.\-mmap\char`\"{}
+\item 
+string \hyperlink{main_8cpp_a0e1d25b97cf34c8a32ac0e9f2816baba}{g\-\_\-in\-\_\-fifo} = \char`\"{}/tmp/bmi5\-\_\-in.\-fifo\char`\"{}
+\item 
+string \hyperlink{main_8cpp_ae9c313bdb390e37d2363b81dbc7938be}{g\-\_\-out\-\_\-fifo} = \char`\"{}/tmp/bmi5\-\_\-out.\-fifo\char`\"{}
+\item 
+string \hyperlink{main_8cpp_a1f9e78f176ca842f733cf8c47556ee4d}{g\-\_\-polhemus\-\_\-serial} = \char`\"{}/dev/tty\-S0\char`\"{}
+\item 
+bool \hyperlink{main_8cpp_a6028d61d3b2a9f91a5900238a86c1d06}{g\-\_\-do\-\_\-backup} = false
+\item 
+string \hyperlink{main_8cpp_af4309c6aa71c6b92a6d866265a6a33a5}{g\-\_\-backup\-\_\-dir} = \char`\"{}/tmp\char`\"{}
+\item 
+double \hyperlink{main_8cpp_a5ee66eb128e3829dbc27eb6d85720607}{g\-\_\-frame\-Rate} = 0.\-0
+\item 
+long double \hyperlink{main_8cpp_aaf44854a32929424f043031aa0f215d5}{g\-\_\-last\-Frame} = 0.\-0
+\item 
+int \hyperlink{main_8cpp_a1141b691b2d9da0e106ed031dce903f5}{g\-\_\-frame} = 0
+\item 
+int \hyperlink{main_8cpp_a40072b9a4da85453c54748e8d8b0df8f}{g\-\_\-n\-Command} = 0
+\item 
+bool \hyperlink{main_8cpp_abbc3bd4c7cdb5be7dad1751a317d2e14}{g\-\_\-gl\-Initialized} \mbox{[}2\mbox{]} = \{false\}
+\item 
+bool \hyperlink{main_8cpp_acd141d08ca2cee0a2ee4515283aad364}{g\-\_\-glvsync} = false
+\item 
+bool \hyperlink{main_8cpp_a6cd8cbc56ba83376708788a1279d6d4d}{g\-\_\-render\-Op\-View} = false
+\item 
+float \hyperlink{main_8cpp_a9783d947c3be96401bdf2b73cec9b14a}{g\-\_\-mouse\-Pos} \mbox{[}2\mbox{]}
+\item 
+bool \hyperlink{main_8cpp_ae306674a0d0e68f84cd83f90e722133d}{g\-\_\-die} = false
+\item 
+bool \hyperlink{main_8cpp_a48cb5f6281b8bc424d3b19578de15282}{g\-\_\-record} = false
+\item 
+bool \hyperlink{main_8cpp_aa64e50b3437c072d66535b3c1825d65b}{g\-\_\-polhemus\-Connected} = false
+\item 
+bool \hyperlink{main_8cpp_a9423bd5e8a1e510841aaf4e8320b2f10}{g\-\_\-opto\-Connected} = false
+\item 
+bool \hyperlink{main_8cpp_a9658ad899e08d8a49a9f66dc606e075b}{g\-\_\-labjack\-Connected} = false
+\item 
+Gtk\-Window $\ast$ \hyperlink{main_8cpp_a2b4db1b35bcfabc8118edeed8d38ba52}{g\-\_\-main\-Window}
+\item 
+\hyperlink{classgtkglx}{gtkglx} $\ast$ \hyperlink{main_8cpp_ad8852823c724ec3a6f96090431dfbb6e}{g\-\_\-daglx} \mbox{[}2\mbox{]}
+\item 
+Gtk\-Widget $\ast$ \hyperlink{main_8cpp_aa52c75784f3d6e72b4e46315ac2f6081}{g\-\_\-da} \mbox{[}2\mbox{]}
+\item 
+Gtk\-Widget $\ast$ \hyperlink{main_8cpp_ad03c856a4aaf44766c2de3c91d4f03e6}{g\-\_\-time\-Label}
+\item 
+Gtk\-Widget $\ast$ \hyperlink{main_8cpp_ab5bbfcb8642ce61657bd6bc8772dca8a}{g\-\_\-matlab\-Time\-Label}
+\item 
+Gtk\-Widget $\ast$ \hyperlink{main_8cpp_a5257adc3ef4dc3bfca208a75b4247853}{g\-\_\-opengl\-Time\-Label}
+\item 
+Gtk\-Widget $\ast$ \hyperlink{main_8cpp_adc38203b3419e7a1b538d45699c8ea33}{g\-\_\-polhemus\-Label}
+\item 
+Gtk\-Widget $\ast$ \hyperlink{main_8cpp_ae67c8762ea346bb615664362fac05cf9}{g\-\_\-opto\-Label}
+\item 
+string \hyperlink{main_8cpp_a4b10915da4182056469187de0653b3e6}{g\-\_\-opto\-Label\-Str}
+\item 
+Gtk\-Widget $\ast$ \hyperlink{main_8cpp_afbec3fc912557faf0eb8e3510400872c}{g\-\_\-labjack\-Label}
+\item 
+string \hyperlink{main_8cpp_a752a1a12c5fa760b20e607c302e2da18}{g\-\_\-labjack\-Label\-Str}
+\item 
+Time\-Sync\-Client $\ast$ \hyperlink{main_8cpp_ae17b3579184c8071a510fad0af2921b4}{g\-\_\-tsc}
+\item 
+unsigned char \hyperlink{main_8cpp_aa2b5616d6284edba3c74bbe6007145f1}{g\-\_\-write\-Buffer} \mbox{[}1024 $\ast$1024\mbox{]}
+\item 
+Perf\-Timer \hyperlink{main_8cpp_a0ec3b6d7b341d249140302cee6e8167e}{g\-\_\-matlab\-Timer}
+\item 
+Perf\-Timer \hyperlink{main_8cpp_a7f128b2456d9f59c45675acc546e51aa}{g\-\_\-open\-G\-L\-Timer}
+\item 
+Vsync\-Timer \hyperlink{main_8cpp_aff8656d1db807078905be044c5d3c3ff}{g\-\_\-vsync\-Timer}
+\item 
+\hyperlink{classTimeSerialize}{Time\-Serialize} $\ast$ \hyperlink{main_8cpp_ab62c7bbeb4d2b16719553222cc9d37b4}{g\-\_\-time\-Serialize}
+\item 
+\hyperlink{classFrameSerialize}{Frame\-Serialize} $\ast$ \hyperlink{main_8cpp_ac6301884204d3fc3b56ee0d722c35a74}{g\-\_\-frame\-Serialize}
+\item 
+\hyperlink{classMatrix44Serialize}{Matrix44\-Serialize} $\ast$ \hyperlink{main_8cpp_ad50ab51ad954072a1a4653ff4528ca4d}{g\-\_\-affine44}
+\item 
+\hyperlink{classMatrix44Serialize}{Matrix44\-Serialize} $\ast$ \hyperlink{main_8cpp_adf036ec0b6c47003dedcf47c768e4d07}{g\-\_\-quadratic44}
+\item 
+\hyperlink{classPolhemusSerialize}{Polhemus\-Serialize} $\ast$ \hyperlink{main_8cpp_af074caaab50ca7238d03e56a519e1602}{g\-\_\-polhemus}
+\item 
+\hyperlink{classOptoSerialize}{Opto\-Serialize} $\ast$ \hyperlink{main_8cpp_ae6514bbd7d279edd985e4492b710677d}{g\-\_\-opto}
+\item 
+\hyperlink{classMouseSerialize}{Mouse\-Serialize} $\ast$ \hyperlink{main_8cpp_a201ff6cd27ce60c2fc698c3090b69bfe}{g\-\_\-mouse}
+\item 
+\hyperlink{classLabjackSerializeAIN}{Labjack\-Serialize\-A\-I\-N} $\ast$ \hyperlink{main_8cpp_adbac368d3387ff44c6ea0cc61081f7fd}{g\-\_\-labjack\-\_\-\-A\-I\-N}
+\item 
+\hyperlink{classLabjackSerializeDOUT}{Labjack\-Serialize\-D\-O\-U\-T} $\ast$ \hyperlink{main_8cpp_a02fd07ad12b1ff109d079db2ac329918}{g\-\_\-labjack\-\_\-\-D\-O\-U\-T}
+\item 
+vector$<$ \hyperlink{classSerialize}{Serialize} $\ast$ $>$ \hyperlink{main_8cpp_a63f7be291649581f9761ed5d2bdf3dc2}{g\-\_\-objs}
+\item 
+pthread\-\_\-mutex\-\_\-t \hyperlink{main_8cpp_ad640084123d7b113b17aa52da56022b9}{mutex\-\_\-fwrite}
+\item 
+pthread\-\_\-mutex\-\_\-t \hyperlink{main_8cpp_a654a4d1770a537900efd2e562bce70c2}{mutex\-\_\-gobjs}
+\item 
+long double \hyperlink{main_8cpp_aae2bd529d4579492151b63620f0d9b71}{g\-\_\-next\-Vsync\-Time} = -\/1
+\item 
+lua\-Conf \hyperlink{main_8cpp_a88be10389ac566b545af1803a45dc8cf}{g\-\_\-lc}
+\item 
+string \hyperlink{main_8cpp_ad4a3140e31ae07f9b34587dfb48c693a}{g\-\_\-basedirname}
+\item 
+char \hyperlink{main_8cpp_a713db1d72fb81d5fe13240246804803a}{g\-\_\-circ\-Buff} \mbox{[}1024\mbox{]}
+\item 
+unsigned int \hyperlink{main_8cpp_a9afec461e551cc49070130d2635d824e}{g\-\_\-cb\-Ptr} = 0
+\item 
+unsigned int \hyperlink{main_8cpp_a16a75ac7f9d04f0d66209eb95ce3c043}{g\-\_\-cb\-R\-N} = 0
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{main_8cpp_a6821bafc3c88dfb2e433a095df9940c6}{\index{main.\-cpp@{main.\-cpp}!B\-U\-F\-\_\-\-S\-I\-Z\-E@{B\-U\-F\-\_\-\-S\-I\-Z\-E}}
+\index{B\-U\-F\-\_\-\-S\-I\-Z\-E@{B\-U\-F\-\_\-\-S\-I\-Z\-E}!main.cpp@{main.\-cpp}}
+\subsubsection[{B\-U\-F\-\_\-\-S\-I\-Z\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define B\-U\-F\-\_\-\-S\-I\-Z\-E~1000}}\label{main_8cpp_a6821bafc3c88dfb2e433a095df9940c6}
+
+
+\subsection{Typedef Documentation}
+\hypertarget{main_8cpp_ac574c6b31399914a351996447151c1bf}{\index{main.\-cpp@{main.\-cpp}!gl\-X\-Swap\-Interval\-S\-G\-I\-Func@{gl\-X\-Swap\-Interval\-S\-G\-I\-Func}}
+\index{gl\-X\-Swap\-Interval\-S\-G\-I\-Func@{gl\-X\-Swap\-Interval\-S\-G\-I\-Func}!main.cpp@{main.\-cpp}}
+\subsubsection[{gl\-X\-Swap\-Interval\-S\-G\-I\-Func}]{\setlength{\rightskip}{0pt plus 5cm}typedef G\-Lvoid($\ast$ gl\-X\-Swap\-Interval\-S\-G\-I\-Func)(G\-Lint)}}\label{main_8cpp_ac574c6b31399914a351996447151c1bf}
+
+
+\subsection{Function Documentation}
+\hypertarget{main_8cpp_abda3cfed36f534e3767a3295e73b5cec}{\index{main.\-cpp@{main.\-cpp}!backup\-\_\-thread@{backup\-\_\-thread}}
+\index{backup\-\_\-thread@{backup\-\_\-thread}!main.cpp@{main.\-cpp}}
+\subsubsection[{backup\-\_\-thread}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ backup\-\_\-thread (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_abda3cfed36f534e3767a3295e73b5cec}
+\hypertarget{main_8cpp_abec53a5330acb617c5e2f2180ba220dc}{\index{main.\-cpp@{main.\-cpp}!clear\-Data\-C\-B@{clear\-Data\-C\-B}}
+\index{clear\-Data\-C\-B@{clear\-Data\-C\-B}!main.cpp@{main.\-cpp}}
+\subsubsection[{clear\-Data\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}static void clear\-Data\-C\-B (
+\begin{DoxyParamCaption}
+\item[{gpointer}]{, }
+\item[{gpointer}]{parent\-\_\-window}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_abec53a5330acb617c5e2f2180ba220dc}
+\hypertarget{main_8cpp_a6e3b08eb231495f9e3a9fb6442f4f249}{\index{main.\-cpp@{main.\-cpp}!configure1@{configure1}}
+\index{configure1@{configure1}!main.cpp@{main.\-cpp}}
+\subsubsection[{configure1}]{\setlength{\rightskip}{0pt plus 5cm}static gboolean configure1 (
+\begin{DoxyParamCaption}
+\item[{Gtk\-Widget $\ast$}]{da, }
+\item[{Gdk\-Event\-Configure $\ast$}]{, }
+\item[{gpointer}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_a6e3b08eb231495f9e3a9fb6442f4f249}
+\hypertarget{main_8cpp_a9e2ab67d9c052d2e2468c680d1f274b1}{\index{main.\-cpp@{main.\-cpp}!destroy@{destroy}}
+\index{destroy@{destroy}!main.cpp@{main.\-cpp}}
+\subsubsection[{destroy}]{\setlength{\rightskip}{0pt plus 5cm}void destroy (
+\begin{DoxyParamCaption}
+\item[{int}]{}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_a9e2ab67d9c052d2e2468c680d1f274b1}
+\hypertarget{main_8cpp_acd93b5b02bc279b70bf2589dbefacede}{\index{main.\-cpp@{main.\-cpp}!destroy\-G\-U\-I@{destroy\-G\-U\-I}}
+\index{destroy\-G\-U\-I@{destroy\-G\-U\-I}!main.cpp@{main.\-cpp}}
+\subsubsection[{destroy\-G\-U\-I}]{\setlength{\rightskip}{0pt plus 5cm}void destroy\-G\-U\-I (
+\begin{DoxyParamCaption}
+\item[{Gtk\-Widget $\ast$}]{, }
+\item[{gpointer}]{}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_acd93b5b02bc279b70bf2589dbefacede}
+\hypertarget{main_8cpp_a9cd2cc3af906544ce69ff11ba8034d31}{\index{main.\-cpp@{main.\-cpp}!draw1@{draw1}}
+\index{draw1@{draw1}!main.cpp@{main.\-cpp}}
+\subsubsection[{draw1}]{\setlength{\rightskip}{0pt plus 5cm}static gboolean draw1 (
+\begin{DoxyParamCaption}
+\item[{Gtk\-Widget $\ast$}]{da, }
+\item[{cairo\-\_\-t $\ast$}]{, }
+\item[{gpointer}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_a9cd2cc3af906544ce69ff11ba8034d31}
+draw objects
+
+end \hypertarget{main_8cpp_a9c78d3fc2f5c69fd8948ea04d342fd8a}{\index{main.\-cpp@{main.\-cpp}!error\-Dialog@{error\-Dialog}}
+\index{error\-Dialog@{error\-Dialog}!main.cpp@{main.\-cpp}}
+\subsubsection[{error\-Dialog}]{\setlength{\rightskip}{0pt plus 5cm}void error\-Dialog (
+\begin{DoxyParamCaption}
+\item[{char $\ast$}]{msg}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_a9c78d3fc2f5c69fd8948ea04d342fd8a}
+\hypertarget{main_8cpp_a6dbf9f65c305f5d20ac517d32b75022b}{\index{main.\-cpp@{main.\-cpp}!flush\-\_\-pipe@{flush\-\_\-pipe}}
+\index{flush\-\_\-pipe@{flush\-\_\-pipe}!main.cpp@{main.\-cpp}}
+\subsubsection[{flush\-\_\-pipe}]{\setlength{\rightskip}{0pt plus 5cm}void flush\-\_\-pipe (
+\begin{DoxyParamCaption}
+\item[{int}]{fid}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_a6dbf9f65c305f5d20ac517d32b75022b}
+\hypertarget{main_8cpp_afa9e9fe87445060c11ec9c44df8ab300}{\index{main.\-cpp@{main.\-cpp}!fullscreen\-C\-B@{fullscreen\-C\-B}}
+\index{fullscreen\-C\-B@{fullscreen\-C\-B}!main.cpp@{main.\-cpp}}
+\subsubsection[{fullscreen\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}static void fullscreen\-C\-B (
+\begin{DoxyParamCaption}
+\item[{Gtk\-Widget $\ast$}]{w, }
+\item[{gpointer}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_afa9e9fe87445060c11ec9c44df8ab300}
+\hypertarget{main_8cpp_af39f5cbf8f835813e12814c580f1ba88}{\index{main.\-cpp@{main.\-cpp}!get\-Mmap\-Structure@{get\-Mmap\-Structure}}
+\index{get\-Mmap\-Structure@{get\-Mmap\-Structure}!main.cpp@{main.\-cpp}}
+\subsubsection[{get\-Mmap\-Structure}]{\setlength{\rightskip}{0pt plus 5cm}string get\-Mmap\-Structure (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_af39f5cbf8f835813e12814c580f1ba88}
+\hypertarget{main_8cpp_aba7f0314711d3ef6706ba9755851b406}{\index{main.\-cpp@{main.\-cpp}!gobjs\-Init@{gobjs\-Init}}
+\index{gobjs\-Init@{gobjs\-Init}!main.cpp@{main.\-cpp}}
+\subsubsection[{gobjs\-Init}]{\setlength{\rightskip}{0pt plus 5cm}void gobjs\-Init (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_aba7f0314711d3ef6706ba9755851b406}
+\hypertarget{main_8cpp_a6f721d53c2584c6b3c6e685c7fcd037f}{\index{main.\-cpp@{main.\-cpp}!long\-Double\-Test@{long\-Double\-Test}}
+\index{long\-Double\-Test@{long\-Double\-Test}!main.cpp@{main.\-cpp}}
+\subsubsection[{long\-Double\-Test}]{\setlength{\rightskip}{0pt plus 5cm}void long\-Double\-Test (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_a6f721d53c2584c6b3c6e685c7fcd037f}
+\hypertarget{main_8cpp_a6d6b841d00afea11d5056811a58699a1}{\index{main.\-cpp@{main.\-cpp}!main@{main}}
+\index{main@{main}!main.cpp@{main.\-cpp}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{int}]{argn, }
+\item[{char $\ast$$\ast$}]{argc}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_a6d6b841d00afea11d5056811a58699a1}
+\hypertarget{main_8cpp_a668a3ef61f7620debfb2c1b6749f3713}{\index{main.\-cpp@{main.\-cpp}!mmap\-\_\-thread@{mmap\-\_\-thread}}
+\index{mmap\-\_\-thread@{mmap\-\_\-thread}!main.cpp@{main.\-cpp}}
+\subsubsection[{mmap\-\_\-thread}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ mmap\-\_\-thread (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_a668a3ef61f7620debfb2c1b6749f3713}
+\hypertarget{main_8cpp_a93c2700c745bf7bce13a7eaa6da9d7d5}{\index{main.\-cpp@{main.\-cpp}!motion\-\_\-notify\-\_\-event@{motion\-\_\-notify\-\_\-event}}
+\index{motion\-\_\-notify\-\_\-event@{motion\-\_\-notify\-\_\-event}!main.cpp@{main.\-cpp}}
+\subsubsection[{motion\-\_\-notify\-\_\-event}]{\setlength{\rightskip}{0pt plus 5cm}static gint motion\-\_\-notify\-\_\-event (
+\begin{DoxyParamCaption}
+\item[{Gtk\-Widget $\ast$}]{w, }
+\item[{Gdk\-Event\-Motion $\ast$}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_a93c2700c745bf7bce13a7eaa6da9d7d5}
+\hypertarget{main_8cpp_a07d64bdc28dd9bfef55d32703745b3e1}{\index{main.\-cpp@{main.\-cpp}!op\-View\-C\-B@{op\-View\-C\-B}}
+\index{op\-View\-C\-B@{op\-View\-C\-B}!main.cpp@{main.\-cpp}}
+\subsubsection[{op\-View\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}static void op\-View\-C\-B (
+\begin{DoxyParamCaption}
+\item[{Gtk\-Widget $\ast$}]{w, }
+\item[{gpointer}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_a07d64bdc28dd9bfef55d32703745b3e1}
+\hypertarget{main_8cpp_afa5688af8901451c66c107b288166e5b}{\index{main.\-cpp@{main.\-cpp}!polhemus\-\_\-thread@{polhemus\-\_\-thread}}
+\index{polhemus\-\_\-thread@{polhemus\-\_\-thread}!main.cpp@{main.\-cpp}}
+\subsubsection[{polhemus\-\_\-thread}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ polhemus\-\_\-thread (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_afa5688af8901451c66c107b288166e5b}
+\hypertarget{main_8cpp_a2d7a36645a949be6213be946d36b6207}{\index{main.\-cpp@{main.\-cpp}!print\-Mmap\-Structure@{print\-Mmap\-Structure}}
+\index{print\-Mmap\-Structure@{print\-Mmap\-Structure}!main.cpp@{main.\-cpp}}
+\subsubsection[{print\-Mmap\-Structure}]{\setlength{\rightskip}{0pt plus 5cm}static void print\-Mmap\-Structure (
+\begin{DoxyParamCaption}
+\item[{Gtk\-Widget $\ast$}]{, }
+\item[{gpointer}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_a2d7a36645a949be6213be946d36b6207}
+\hypertarget{main_8cpp_a434a4745eedc1d328be9eef04f55c31a}{\index{main.\-cpp@{main.\-cpp}!realize1@{realize1}}
+\index{realize1@{realize1}!main.cpp@{main.\-cpp}}
+\subsubsection[{realize1}]{\setlength{\rightskip}{0pt plus 5cm}static int realize1 (
+\begin{DoxyParamCaption}
+\item[{Gtk\-Widget $\ast$}]{w, }
+\item[{gpointer}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_a434a4745eedc1d328be9eef04f55c31a}
+\hypertarget{main_8cpp_a93520519ff068b08a2dbf59de558939d}{\index{main.\-cpp@{main.\-cpp}!refresh@{refresh}}
+\index{refresh@{refresh}!main.cpp@{main.\-cpp}}
+\subsubsection[{refresh}]{\setlength{\rightskip}{0pt plus 5cm}static gboolean refresh (
+\begin{DoxyParamCaption}
+\item[{gpointer}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_a93520519ff068b08a2dbf59de558939d}
+\hypertarget{main_8cpp_af2a6219a50aeb7302132082f0d64f3f3}{\index{main.\-cpp@{main.\-cpp}!save\-Matlab\-Data@{save\-Matlab\-Data}}
+\index{save\-Matlab\-Data@{save\-Matlab\-Data}!main.cpp@{main.\-cpp}}
+\subsubsection[{save\-Matlab\-Data}]{\setlength{\rightskip}{0pt plus 5cm}static void save\-Matlab\-Data (
+\begin{DoxyParamCaption}
+\item[{gpointer}]{, }
+\item[{gpointer}]{parent\-\_\-window}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_af2a6219a50aeb7302132082f0d64f3f3}
+\hypertarget{main_8cpp_a7a705fc901058496351eb53c9b93feaf}{\index{main.\-cpp@{main.\-cpp}!sticky\-C\-B@{sticky\-C\-B}}
+\index{sticky\-C\-B@{sticky\-C\-B}!main.cpp@{main.\-cpp}}
+\subsubsection[{sticky\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}static void sticky\-C\-B (
+\begin{DoxyParamCaption}
+\item[{Gtk\-Widget $\ast$}]{w, }
+\item[{gpointer}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_a7a705fc901058496351eb53c9b93feaf}
+\hypertarget{main_8cpp_ae5bae7b43ce6362d7d7ff53ab81323fb}{\index{main.\-cpp@{main.\-cpp}!update\-Curs\-Pos@{update\-Curs\-Pos}}
+\index{update\-Curs\-Pos@{update\-Curs\-Pos}!main.cpp@{main.\-cpp}}
+\subsubsection[{update\-Curs\-Pos}]{\setlength{\rightskip}{0pt plus 5cm}void update\-Curs\-Pos (
+\begin{DoxyParamCaption}
+\item[{float}]{x, }
+\item[{float}]{y}
+\end{DoxyParamCaption}
+)}}\label{main_8cpp_ae5bae7b43ce6362d7d7ff53ab81323fb}
+\hypertarget{main_8cpp_abcfcb2b4fe8f2df1ab3ba5efa3686517}{\index{main.\-cpp@{main.\-cpp}!vsync\-C\-B@{vsync\-C\-B}}
+\index{vsync\-C\-B@{vsync\-C\-B}!main.cpp@{main.\-cpp}}
+\subsubsection[{vsync\-C\-B}]{\setlength{\rightskip}{0pt plus 5cm}static void vsync\-C\-B (
+\begin{DoxyParamCaption}
+\item[{Gtk\-Widget $\ast$}]{w, }
+\item[{gpointer}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{main_8cpp_abcfcb2b4fe8f2df1ab3ba5efa3686517}
+
+
+\subsection{Variable Documentation}
+\hypertarget{main_8cpp_ad50ab51ad954072a1a4653ff4528ca4d}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-affine44@{g\-\_\-affine44}}
+\index{g\-\_\-affine44@{g\-\_\-affine44}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-affine44}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Matrix44\-Serialize}$\ast$ g\-\_\-affine44}}\label{main_8cpp_ad50ab51ad954072a1a4653ff4528ca4d}
+\hypertarget{main_8cpp_af4309c6aa71c6b92a6d866265a6a33a5}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-backup\-\_\-dir@{g\-\_\-backup\-\_\-dir}}
+\index{g\-\_\-backup\-\_\-dir@{g\-\_\-backup\-\_\-dir}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-backup\-\_\-dir}]{\setlength{\rightskip}{0pt plus 5cm}string g\-\_\-backup\-\_\-dir = \char`\"{}/tmp\char`\"{}}}\label{main_8cpp_af4309c6aa71c6b92a6d866265a6a33a5}
+\hypertarget{main_8cpp_ad4a3140e31ae07f9b34587dfb48c693a}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-basedirname@{g\-\_\-basedirname}}
+\index{g\-\_\-basedirname@{g\-\_\-basedirname}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-basedirname}]{\setlength{\rightskip}{0pt plus 5cm}string g\-\_\-basedirname}}\label{main_8cpp_ad4a3140e31ae07f9b34587dfb48c693a}
+\hypertarget{main_8cpp_a9afec461e551cc49070130d2635d824e}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-cb\-Ptr@{g\-\_\-cb\-Ptr}}
+\index{g\-\_\-cb\-Ptr@{g\-\_\-cb\-Ptr}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-cb\-Ptr}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int g\-\_\-cb\-Ptr = 0}}\label{main_8cpp_a9afec461e551cc49070130d2635d824e}
+\hypertarget{main_8cpp_a16a75ac7f9d04f0d66209eb95ce3c043}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-cb\-R\-N@{g\-\_\-cb\-R\-N}}
+\index{g\-\_\-cb\-R\-N@{g\-\_\-cb\-R\-N}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-cb\-R\-N}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int g\-\_\-cb\-R\-N = 0}}\label{main_8cpp_a16a75ac7f9d04f0d66209eb95ce3c043}
+\hypertarget{main_8cpp_a713db1d72fb81d5fe13240246804803a}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-circ\-Buff@{g\-\_\-circ\-Buff}}
+\index{g\-\_\-circ\-Buff@{g\-\_\-circ\-Buff}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-circ\-Buff}]{\setlength{\rightskip}{0pt plus 5cm}char g\-\_\-circ\-Buff\mbox{[}1024\mbox{]}}}\label{main_8cpp_a713db1d72fb81d5fe13240246804803a}
+\hypertarget{main_8cpp_aa52c75784f3d6e72b4e46315ac2f6081}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-da@{g\-\_\-da}}
+\index{g\-\_\-da@{g\-\_\-da}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-da}]{\setlength{\rightskip}{0pt plus 5cm}Gtk\-Widget$\ast$ g\-\_\-da\mbox{[}2\mbox{]}}}\label{main_8cpp_aa52c75784f3d6e72b4e46315ac2f6081}
+\hypertarget{main_8cpp_ad8852823c724ec3a6f96090431dfbb6e}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-daglx@{g\-\_\-daglx}}
+\index{g\-\_\-daglx@{g\-\_\-daglx}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-daglx}]{\setlength{\rightskip}{0pt plus 5cm}{\bf gtkglx}$\ast$ g\-\_\-daglx\mbox{[}2\mbox{]}}}\label{main_8cpp_ad8852823c724ec3a6f96090431dfbb6e}
+\hypertarget{main_8cpp_ae306674a0d0e68f84cd83f90e722133d}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-die@{g\-\_\-die}}
+\index{g\-\_\-die@{g\-\_\-die}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-die}]{\setlength{\rightskip}{0pt plus 5cm}bool g\-\_\-die = false}}\label{main_8cpp_ae306674a0d0e68f84cd83f90e722133d}
+\hypertarget{main_8cpp_a6028d61d3b2a9f91a5900238a86c1d06}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-do\-\_\-backup@{g\-\_\-do\-\_\-backup}}
+\index{g\-\_\-do\-\_\-backup@{g\-\_\-do\-\_\-backup}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-do\-\_\-backup}]{\setlength{\rightskip}{0pt plus 5cm}bool g\-\_\-do\-\_\-backup = false}}\label{main_8cpp_a6028d61d3b2a9f91a5900238a86c1d06}
+\hypertarget{main_8cpp_a1141b691b2d9da0e106ed031dce903f5}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-frame@{g\-\_\-frame}}
+\index{g\-\_\-frame@{g\-\_\-frame}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-frame}]{\setlength{\rightskip}{0pt plus 5cm}int g\-\_\-frame = 0}}\label{main_8cpp_a1141b691b2d9da0e106ed031dce903f5}
+\hypertarget{main_8cpp_a5ee66eb128e3829dbc27eb6d85720607}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-frame\-Rate@{g\-\_\-frame\-Rate}}
+\index{g\-\_\-frame\-Rate@{g\-\_\-frame\-Rate}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-frame\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}double g\-\_\-frame\-Rate = 0.\-0}}\label{main_8cpp_a5ee66eb128e3829dbc27eb6d85720607}
+\hypertarget{main_8cpp_ac6301884204d3fc3b56ee0d722c35a74}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-frame\-Serialize@{g\-\_\-frame\-Serialize}}
+\index{g\-\_\-frame\-Serialize@{g\-\_\-frame\-Serialize}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-frame\-Serialize}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Frame\-Serialize}$\ast$ g\-\_\-frame\-Serialize}}\label{main_8cpp_ac6301884204d3fc3b56ee0d722c35a74}
+\hypertarget{main_8cpp_abbc3bd4c7cdb5be7dad1751a317d2e14}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-gl\-Initialized@{g\-\_\-gl\-Initialized}}
+\index{g\-\_\-gl\-Initialized@{g\-\_\-gl\-Initialized}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-gl\-Initialized}]{\setlength{\rightskip}{0pt plus 5cm}bool g\-\_\-gl\-Initialized\mbox{[}2\mbox{]} = \{false\}}}\label{main_8cpp_abbc3bd4c7cdb5be7dad1751a317d2e14}
+\hypertarget{main_8cpp_acd141d08ca2cee0a2ee4515283aad364}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-glvsync@{g\-\_\-glvsync}}
+\index{g\-\_\-glvsync@{g\-\_\-glvsync}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-glvsync}]{\setlength{\rightskip}{0pt plus 5cm}bool g\-\_\-glvsync = false}}\label{main_8cpp_acd141d08ca2cee0a2ee4515283aad364}
+\hypertarget{main_8cpp_a0e1d25b97cf34c8a32ac0e9f2816baba}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-in\-\_\-fifo@{g\-\_\-in\-\_\-fifo}}
+\index{g\-\_\-in\-\_\-fifo@{g\-\_\-in\-\_\-fifo}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-in\-\_\-fifo}]{\setlength{\rightskip}{0pt plus 5cm}string g\-\_\-in\-\_\-fifo = \char`\"{}/tmp/bmi5\-\_\-in.\-fifo\char`\"{}}}\label{main_8cpp_a0e1d25b97cf34c8a32ac0e9f2816baba}
+\hypertarget{main_8cpp_adbac368d3387ff44c6ea0cc61081f7fd}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-labjack\-\_\-\-A\-I\-N@{g\-\_\-labjack\-\_\-\-A\-I\-N}}
+\index{g\-\_\-labjack\-\_\-\-A\-I\-N@{g\-\_\-labjack\-\_\-\-A\-I\-N}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-labjack\-\_\-\-A\-I\-N}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Labjack\-Serialize\-A\-I\-N}$\ast$ g\-\_\-labjack\-\_\-\-A\-I\-N}}\label{main_8cpp_adbac368d3387ff44c6ea0cc61081f7fd}
+\hypertarget{main_8cpp_a02fd07ad12b1ff109d079db2ac329918}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-labjack\-\_\-\-D\-O\-U\-T@{g\-\_\-labjack\-\_\-\-D\-O\-U\-T}}
+\index{g\-\_\-labjack\-\_\-\-D\-O\-U\-T@{g\-\_\-labjack\-\_\-\-D\-O\-U\-T}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-labjack\-\_\-\-D\-O\-U\-T}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Labjack\-Serialize\-D\-O\-U\-T}$\ast$ g\-\_\-labjack\-\_\-\-D\-O\-U\-T}}\label{main_8cpp_a02fd07ad12b1ff109d079db2ac329918}
+\hypertarget{main_8cpp_a9658ad899e08d8a49a9f66dc606e075b}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-labjack\-Connected@{g\-\_\-labjack\-Connected}}
+\index{g\-\_\-labjack\-Connected@{g\-\_\-labjack\-Connected}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-labjack\-Connected}]{\setlength{\rightskip}{0pt plus 5cm}bool g\-\_\-labjack\-Connected = false}}\label{main_8cpp_a9658ad899e08d8a49a9f66dc606e075b}
+\hypertarget{main_8cpp_afbec3fc912557faf0eb8e3510400872c}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-labjack\-Label@{g\-\_\-labjack\-Label}}
+\index{g\-\_\-labjack\-Label@{g\-\_\-labjack\-Label}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-labjack\-Label}]{\setlength{\rightskip}{0pt plus 5cm}Gtk\-Widget$\ast$ g\-\_\-labjack\-Label}}\label{main_8cpp_afbec3fc912557faf0eb8e3510400872c}
+\hypertarget{main_8cpp_a752a1a12c5fa760b20e607c302e2da18}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-labjack\-Label\-Str@{g\-\_\-labjack\-Label\-Str}}
+\index{g\-\_\-labjack\-Label\-Str@{g\-\_\-labjack\-Label\-Str}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-labjack\-Label\-Str}]{\setlength{\rightskip}{0pt plus 5cm}string g\-\_\-labjack\-Label\-Str}}\label{main_8cpp_a752a1a12c5fa760b20e607c302e2da18}
+\hypertarget{main_8cpp_aaf44854a32929424f043031aa0f215d5}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-last\-Frame@{g\-\_\-last\-Frame}}
+\index{g\-\_\-last\-Frame@{g\-\_\-last\-Frame}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-last\-Frame}]{\setlength{\rightskip}{0pt plus 5cm}long double g\-\_\-last\-Frame = 0.\-0}}\label{main_8cpp_aaf44854a32929424f043031aa0f215d5}
+\hypertarget{main_8cpp_a88be10389ac566b545af1803a45dc8cf}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-lc@{g\-\_\-lc}}
+\index{g\-\_\-lc@{g\-\_\-lc}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-lc}]{\setlength{\rightskip}{0pt plus 5cm}lua\-Conf g\-\_\-lc}}\label{main_8cpp_a88be10389ac566b545af1803a45dc8cf}
+\hypertarget{main_8cpp_a2b4db1b35bcfabc8118edeed8d38ba52}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-main\-Window@{g\-\_\-main\-Window}}
+\index{g\-\_\-main\-Window@{g\-\_\-main\-Window}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-main\-Window}]{\setlength{\rightskip}{0pt plus 5cm}Gtk\-Window$\ast$ g\-\_\-main\-Window}}\label{main_8cpp_a2b4db1b35bcfabc8118edeed8d38ba52}
+\hypertarget{main_8cpp_ab5bbfcb8642ce61657bd6bc8772dca8a}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-matlab\-Time\-Label@{g\-\_\-matlab\-Time\-Label}}
+\index{g\-\_\-matlab\-Time\-Label@{g\-\_\-matlab\-Time\-Label}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-matlab\-Time\-Label}]{\setlength{\rightskip}{0pt plus 5cm}Gtk\-Widget$\ast$ g\-\_\-matlab\-Time\-Label}}\label{main_8cpp_ab5bbfcb8642ce61657bd6bc8772dca8a}
+\hypertarget{main_8cpp_a0ec3b6d7b341d249140302cee6e8167e}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-matlab\-Timer@{g\-\_\-matlab\-Timer}}
+\index{g\-\_\-matlab\-Timer@{g\-\_\-matlab\-Timer}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-matlab\-Timer}]{\setlength{\rightskip}{0pt plus 5cm}Perf\-Timer g\-\_\-matlab\-Timer}}\label{main_8cpp_a0ec3b6d7b341d249140302cee6e8167e}
+\hypertarget{main_8cpp_a10626d2728a4dad59dc22c92ee6342ac}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-mmap@{g\-\_\-mmap}}
+\index{g\-\_\-mmap@{g\-\_\-mmap}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-mmap}]{\setlength{\rightskip}{0pt plus 5cm}string g\-\_\-mmap = \char`\"{}/tmp/bmi5\-\_\-control.\-mmap\char`\"{}}}\label{main_8cpp_a10626d2728a4dad59dc22c92ee6342ac}
+\hypertarget{main_8cpp_a201ff6cd27ce60c2fc698c3090b69bfe}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-mouse@{g\-\_\-mouse}}
+\index{g\-\_\-mouse@{g\-\_\-mouse}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-mouse}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Mouse\-Serialize}$\ast$ g\-\_\-mouse}}\label{main_8cpp_a201ff6cd27ce60c2fc698c3090b69bfe}
+\hypertarget{main_8cpp_a9783d947c3be96401bdf2b73cec9b14a}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-mouse\-Pos@{g\-\_\-mouse\-Pos}}
+\index{g\-\_\-mouse\-Pos@{g\-\_\-mouse\-Pos}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-mouse\-Pos}]{\setlength{\rightskip}{0pt plus 5cm}float g\-\_\-mouse\-Pos\mbox{[}2\mbox{]}}}\label{main_8cpp_a9783d947c3be96401bdf2b73cec9b14a}
+\hypertarget{main_8cpp_a40072b9a4da85453c54748e8d8b0df8f}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-n\-Command@{g\-\_\-n\-Command}}
+\index{g\-\_\-n\-Command@{g\-\_\-n\-Command}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-n\-Command}]{\setlength{\rightskip}{0pt plus 5cm}int g\-\_\-n\-Command = 0}}\label{main_8cpp_a40072b9a4da85453c54748e8d8b0df8f}
+\hypertarget{main_8cpp_aae2bd529d4579492151b63620f0d9b71}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-next\-Vsync\-Time@{g\-\_\-next\-Vsync\-Time}}
+\index{g\-\_\-next\-Vsync\-Time@{g\-\_\-next\-Vsync\-Time}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-next\-Vsync\-Time}]{\setlength{\rightskip}{0pt plus 5cm}long double g\-\_\-next\-Vsync\-Time = -\/1}}\label{main_8cpp_aae2bd529d4579492151b63620f0d9b71}
+\hypertarget{main_8cpp_a63f7be291649581f9761ed5d2bdf3dc2}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-objs@{g\-\_\-objs}}
+\index{g\-\_\-objs@{g\-\_\-objs}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-objs}]{\setlength{\rightskip}{0pt plus 5cm}vector$<${\bf Serialize} $\ast$$>$ g\-\_\-objs}}\label{main_8cpp_a63f7be291649581f9761ed5d2bdf3dc2}
+\hypertarget{main_8cpp_a5257adc3ef4dc3bfca208a75b4247853}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-opengl\-Time\-Label@{g\-\_\-opengl\-Time\-Label}}
+\index{g\-\_\-opengl\-Time\-Label@{g\-\_\-opengl\-Time\-Label}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-opengl\-Time\-Label}]{\setlength{\rightskip}{0pt plus 5cm}Gtk\-Widget$\ast$ g\-\_\-opengl\-Time\-Label}}\label{main_8cpp_a5257adc3ef4dc3bfca208a75b4247853}
+\hypertarget{main_8cpp_a7f128b2456d9f59c45675acc546e51aa}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-open\-G\-L\-Timer@{g\-\_\-open\-G\-L\-Timer}}
+\index{g\-\_\-open\-G\-L\-Timer@{g\-\_\-open\-G\-L\-Timer}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-open\-G\-L\-Timer}]{\setlength{\rightskip}{0pt plus 5cm}Perf\-Timer g\-\_\-open\-G\-L\-Timer}}\label{main_8cpp_a7f128b2456d9f59c45675acc546e51aa}
+\hypertarget{main_8cpp_ae6514bbd7d279edd985e4492b710677d}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-opto@{g\-\_\-opto}}
+\index{g\-\_\-opto@{g\-\_\-opto}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-opto}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Opto\-Serialize}$\ast$ g\-\_\-opto}}\label{main_8cpp_ae6514bbd7d279edd985e4492b710677d}
+\hypertarget{main_8cpp_a9423bd5e8a1e510841aaf4e8320b2f10}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-opto\-Connected@{g\-\_\-opto\-Connected}}
+\index{g\-\_\-opto\-Connected@{g\-\_\-opto\-Connected}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-opto\-Connected}]{\setlength{\rightskip}{0pt plus 5cm}bool g\-\_\-opto\-Connected = false}}\label{main_8cpp_a9423bd5e8a1e510841aaf4e8320b2f10}
+\hypertarget{main_8cpp_ae67c8762ea346bb615664362fac05cf9}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-opto\-Label@{g\-\_\-opto\-Label}}
+\index{g\-\_\-opto\-Label@{g\-\_\-opto\-Label}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-opto\-Label}]{\setlength{\rightskip}{0pt plus 5cm}Gtk\-Widget$\ast$ g\-\_\-opto\-Label}}\label{main_8cpp_ae67c8762ea346bb615664362fac05cf9}
+\hypertarget{main_8cpp_a4b10915da4182056469187de0653b3e6}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-opto\-Label\-Str@{g\-\_\-opto\-Label\-Str}}
+\index{g\-\_\-opto\-Label\-Str@{g\-\_\-opto\-Label\-Str}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-opto\-Label\-Str}]{\setlength{\rightskip}{0pt plus 5cm}string g\-\_\-opto\-Label\-Str}}\label{main_8cpp_a4b10915da4182056469187de0653b3e6}
+\hypertarget{main_8cpp_ae9c313bdb390e37d2363b81dbc7938be}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-out\-\_\-fifo@{g\-\_\-out\-\_\-fifo}}
+\index{g\-\_\-out\-\_\-fifo@{g\-\_\-out\-\_\-fifo}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-out\-\_\-fifo}]{\setlength{\rightskip}{0pt plus 5cm}string g\-\_\-out\-\_\-fifo = \char`\"{}/tmp/bmi5\-\_\-out.\-fifo\char`\"{}}}\label{main_8cpp_ae9c313bdb390e37d2363b81dbc7938be}
+\hypertarget{main_8cpp_af074caaab50ca7238d03e56a519e1602}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-polhemus@{g\-\_\-polhemus}}
+\index{g\-\_\-polhemus@{g\-\_\-polhemus}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-polhemus}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Polhemus\-Serialize}$\ast$ g\-\_\-polhemus}}\label{main_8cpp_af074caaab50ca7238d03e56a519e1602}
+\hypertarget{main_8cpp_a1f9e78f176ca842f733cf8c47556ee4d}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-polhemus\-\_\-serial@{g\-\_\-polhemus\-\_\-serial}}
+\index{g\-\_\-polhemus\-\_\-serial@{g\-\_\-polhemus\-\_\-serial}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-polhemus\-\_\-serial}]{\setlength{\rightskip}{0pt plus 5cm}string g\-\_\-polhemus\-\_\-serial = \char`\"{}/dev/tty\-S0\char`\"{}}}\label{main_8cpp_a1f9e78f176ca842f733cf8c47556ee4d}
+\hypertarget{main_8cpp_aa64e50b3437c072d66535b3c1825d65b}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-polhemus\-Connected@{g\-\_\-polhemus\-Connected}}
+\index{g\-\_\-polhemus\-Connected@{g\-\_\-polhemus\-Connected}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-polhemus\-Connected}]{\setlength{\rightskip}{0pt plus 5cm}bool g\-\_\-polhemus\-Connected = false}}\label{main_8cpp_aa64e50b3437c072d66535b3c1825d65b}
+\hypertarget{main_8cpp_adc38203b3419e7a1b538d45699c8ea33}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-polhemus\-Label@{g\-\_\-polhemus\-Label}}
+\index{g\-\_\-polhemus\-Label@{g\-\_\-polhemus\-Label}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-polhemus\-Label}]{\setlength{\rightskip}{0pt plus 5cm}Gtk\-Widget$\ast$ g\-\_\-polhemus\-Label}}\label{main_8cpp_adc38203b3419e7a1b538d45699c8ea33}
+\hypertarget{main_8cpp_adf036ec0b6c47003dedcf47c768e4d07}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-quadratic44@{g\-\_\-quadratic44}}
+\index{g\-\_\-quadratic44@{g\-\_\-quadratic44}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-quadratic44}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Matrix44\-Serialize}$\ast$ g\-\_\-quadratic44}}\label{main_8cpp_adf036ec0b6c47003dedcf47c768e4d07}
+\hypertarget{main_8cpp_a48cb5f6281b8bc424d3b19578de15282}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-record@{g\-\_\-record}}
+\index{g\-\_\-record@{g\-\_\-record}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-record}]{\setlength{\rightskip}{0pt plus 5cm}bool g\-\_\-record = false}}\label{main_8cpp_a48cb5f6281b8bc424d3b19578de15282}
+\hypertarget{main_8cpp_a6cd8cbc56ba83376708788a1279d6d4d}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-render\-Op\-View@{g\-\_\-render\-Op\-View}}
+\index{g\-\_\-render\-Op\-View@{g\-\_\-render\-Op\-View}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-render\-Op\-View}]{\setlength{\rightskip}{0pt plus 5cm}bool g\-\_\-render\-Op\-View = false}}\label{main_8cpp_a6cd8cbc56ba83376708788a1279d6d4d}
+\hypertarget{main_8cpp_ad03c856a4aaf44766c2de3c91d4f03e6}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-time\-Label@{g\-\_\-time\-Label}}
+\index{g\-\_\-time\-Label@{g\-\_\-time\-Label}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-time\-Label}]{\setlength{\rightskip}{0pt plus 5cm}Gtk\-Widget$\ast$ g\-\_\-time\-Label}}\label{main_8cpp_ad03c856a4aaf44766c2de3c91d4f03e6}
+\hypertarget{main_8cpp_ab62c7bbeb4d2b16719553222cc9d37b4}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-time\-Serialize@{g\-\_\-time\-Serialize}}
+\index{g\-\_\-time\-Serialize@{g\-\_\-time\-Serialize}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-time\-Serialize}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Time\-Serialize}$\ast$ g\-\_\-time\-Serialize}}\label{main_8cpp_ab62c7bbeb4d2b16719553222cc9d37b4}
+\hypertarget{main_8cpp_ae17b3579184c8071a510fad0af2921b4}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-tsc@{g\-\_\-tsc}}
+\index{g\-\_\-tsc@{g\-\_\-tsc}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-tsc}]{\setlength{\rightskip}{0pt plus 5cm}Time\-Sync\-Client$\ast$ g\-\_\-tsc}}\label{main_8cpp_ae17b3579184c8071a510fad0af2921b4}
+\hypertarget{main_8cpp_aff8656d1db807078905be044c5d3c3ff}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-vsync\-Timer@{g\-\_\-vsync\-Timer}}
+\index{g\-\_\-vsync\-Timer@{g\-\_\-vsync\-Timer}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-vsync\-Timer}]{\setlength{\rightskip}{0pt plus 5cm}Vsync\-Timer g\-\_\-vsync\-Timer}}\label{main_8cpp_aff8656d1db807078905be044c5d3c3ff}
+\hypertarget{main_8cpp_aa2b5616d6284edba3c74bbe6007145f1}{\index{main.\-cpp@{main.\-cpp}!g\-\_\-write\-Buffer@{g\-\_\-write\-Buffer}}
+\index{g\-\_\-write\-Buffer@{g\-\_\-write\-Buffer}!main.cpp@{main.\-cpp}}
+\subsubsection[{g\-\_\-write\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}unsigned char g\-\_\-write\-Buffer\mbox{[}1024 $\ast$1024\mbox{]}}}\label{main_8cpp_aa2b5616d6284edba3c74bbe6007145f1}
+\hypertarget{main_8cpp_ad640084123d7b113b17aa52da56022b9}{\index{main.\-cpp@{main.\-cpp}!mutex\-\_\-fwrite@{mutex\-\_\-fwrite}}
+\index{mutex\-\_\-fwrite@{mutex\-\_\-fwrite}!main.cpp@{main.\-cpp}}
+\subsubsection[{mutex\-\_\-fwrite}]{\setlength{\rightskip}{0pt plus 5cm}pthread\-\_\-mutex\-\_\-t mutex\-\_\-fwrite}}\label{main_8cpp_ad640084123d7b113b17aa52da56022b9}
+\hypertarget{main_8cpp_a654a4d1770a537900efd2e562bce70c2}{\index{main.\-cpp@{main.\-cpp}!mutex\-\_\-gobjs@{mutex\-\_\-gobjs}}
+\index{mutex\-\_\-gobjs@{mutex\-\_\-gobjs}!main.cpp@{main.\-cpp}}
+\subsubsection[{mutex\-\_\-gobjs}]{\setlength{\rightskip}{0pt plus 5cm}pthread\-\_\-mutex\-\_\-t mutex\-\_\-gobjs}}\label{main_8cpp_a654a4d1770a537900efd2e562bce70c2}

@@ -1,0 +1,365 @@
+\hypertarget{classStarField}{\section{Star\-Field Class Reference}
+\label{classStarField}\index{Star\-Field@{Star\-Field}}
+}
+
+
+{\ttfamily \#include $<$star\-Field.\-h$>$}
+
+Inheritance diagram for Star\-Field\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classStarField}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classStarField_ab2bd0288efac030b0f4dabe9f07f5e4e}{Star\-Field} ()
+\item 
+\hyperlink{classStarField_a01b259387dc4a83272901110c30d4cb2}{$\sim$\-Star\-Field} ()
+\item 
+virtual void \hyperlink{classStarField_afb99580b3907e4c271040f332262fb1c}{make\-V\-A\-O} (\hyperlink{structstarStruct}{star\-Struct} $\ast$vertices, bool del, int display)
+\item 
+float \hyperlink{classStarField_a69aeb2f24c09fbb2cccb79e5135d4bc8}{uniform} ()
+\item 
+float \hyperlink{classStarField_ad2e8a935f3c810330bfb61d7404b986e}{norm} (float a, float b)
+\item 
+virtual void \hyperlink{classStarField_ae6b25b3827440dedf5836070205d4c6d}{make\-Stars} (int nstars)
+\item 
+virtual void \hyperlink{classStarField_a72ab192923ffe6939fceb2166e05c82d}{make\-Shaders} (int index)
+\item 
+virtual void \hyperlink{classStarField_a0d5f438a2628b90e0d7ccc5a8683225b}{configure} (int display)
+\item 
+virtual void \hyperlink{classStarField_ac3e35d838577ed7610bdaf933ef5b99d}{move} (long double time)
+\item 
+virtual void \hyperlink{classStarField_aeaf743e6d1d4a8a6918152c40bd618c0}{draw} (int display, float ar)
+\item 
+void \hyperlink{classStarField_a01b9571dbc4f28f0a75b12790e11cd8e}{set\-Vel} (double x, double y)
+\item 
+void \hyperlink{classStarField_adc2425bc84abe280cbe53229f7b167b2}{set\-Coherence} (double c)
+\item 
+void \hyperlink{classStarField_a641c0759d85fbb2f8adbbf6e7a2e636b}{set\-Lifetime} (double x)
+\item 
+void \hyperlink{classStarField_acf8cd47946ce81cd7256d6f162c4b67e}{set\-Star\-Size} (double ss)
+\item 
+virtual void \hyperlink{classStarField_a1a97b6133ae0177f6eb8028470c28765}{clear} ()
+\item 
+virtual bool \hyperlink{classStarField_aa8411004d05d05ac3e0f8d10bfa1949e}{store} ()
+\item 
+virtual string \hyperlink{classStarField_a047f987e052fc14fd8041658c153e0f1}{store\-Name} (int indx)
+\item 
+virtual int \hyperlink{classStarField_a42fa7234a0bb1e7b2e1d734fb9ed2dae}{get\-Store\-Class} (int indx)
+\item 
+virtual void \hyperlink{classStarField_a1cf58acb059f13adcb4b989120f99db5}{get\-Store\-Dims} (int indx, size\-\_\-t $\ast$dims)
+\item 
+virtual void $\ast$ \hyperlink{classStarField_a3d33db9d5e4c05a11cbe0c11a3bae5ba}{get\-Store} (int indx, int i)
+\item 
+virtual int \hyperlink{classStarField_a1289224a6763a69ac041eb32d685b657}{num\-Stores} ()
+\item 
+virtual double $\ast$ \hyperlink{classStarField_a6937d614690f774772920ae9faee9bab}{mmap\-Read} (double $\ast$d)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+array$<$ float, 2 $>$ \hyperlink{classStarField_a21ba5382655395de9cce3328cf4be730}{m\-\_\-vel}
+\item 
+double $\ast$ \hyperlink{classStarField_a922034700e887585b42b80df399ddede}{m\-\_\-phase}
+\item 
+\hyperlink{structstarStruct}{star\-Struct} $\ast$ \hyperlink{classStarField_af6c1cf901231fd963efaa1c8ed1eca5d}{m\-\_\-v}
+\item 
+float $\ast$ \hyperlink{classStarField_a483be12bd49068c4f46a14dfc733a2ca}{m\-\_\-pvel}
+\item 
+float \hyperlink{classStarField_a65a4e5967dd2e328274d61cf8a5c50ba}{m\-\_\-coherence}
+\item 
+float \hyperlink{classStarField_adf36490fe3843a374b437b2fc1f482d6}{m\-\_\-starsize}
+\item 
+float \hyperlink{classStarField_a575970efe2365bb4dfa1b1b2eebafbd7}{m\-\_\-lifetime}
+\item 
+G\-Luint \hyperlink{classStarField_aa3e4c31177f3c5be4f11e629e4a1b5a6}{m\-\_\-colorbuffer}
+\item 
+long double \hyperlink{classStarField_a04bcafb900567a3b87f9c910614c8fa4}{m\-\_\-last\-Time}
+\item 
+long double \hyperlink{classStarField_a71f79afd2f64f68bae9edf978b579c5d}{m\-\_\-start\-Time}
+\item 
+vector$<$ array$<$ float, 2 $>$ $>$ \hyperlink{classStarField_a28482b3624fa5204a35faf1dbca6136c}{v\-\_\-vel}
+\item 
+vector$<$ float $>$ \hyperlink{classStarField_a9184ebba5f686d75ac8ee3c3da3b3f64}{v\-\_\-coherence}
+\item 
+vector$<$ float $>$ \hyperlink{classStarField_a3090733382397dd067da0f60d26085c0}{v\-\_\-lifetime}
+\item 
+vector$<$ float $>$ \hyperlink{classStarField_ac66cfbc7ac7d40cd1c7f0b7bf6b5dd1a}{v\-\_\-starsize}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classStarField_ab2bd0288efac030b0f4dabe9f07f5e4e}{\index{Star\-Field@{Star\-Field}!Star\-Field@{Star\-Field}}
+\index{Star\-Field@{Star\-Field}!StarField@{Star\-Field}}
+\subsubsection[{Star\-Field}]{\setlength{\rightskip}{0pt plus 5cm}Star\-Field\-::\-Star\-Field (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classStarField_ab2bd0288efac030b0f4dabe9f07f5e4e}
+\hypertarget{classStarField_a01b259387dc4a83272901110c30d4cb2}{\index{Star\-Field@{Star\-Field}!$\sim$\-Star\-Field@{$\sim$\-Star\-Field}}
+\index{$\sim$\-Star\-Field@{$\sim$\-Star\-Field}!StarField@{Star\-Field}}
+\subsubsection[{$\sim$\-Star\-Field}]{\setlength{\rightskip}{0pt plus 5cm}Star\-Field\-::$\sim$\-Star\-Field (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classStarField_a01b259387dc4a83272901110c30d4cb2}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classStarField_a1a97b6133ae0177f6eb8028470c28765}{\index{Star\-Field@{Star\-Field}!clear@{clear}}
+\index{clear@{clear}!StarField@{Star\-Field}}
+\subsubsection[{clear}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::clear (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_a1a97b6133ae0177f6eb8028470c28765}
+
+
+Reimplemented from \hyperlink{classShape_afc0a792fc9c31a0ae947f721c146f68b}{Shape}.
+
+\hypertarget{classStarField_a0d5f438a2628b90e0d7ccc5a8683225b}{\index{Star\-Field@{Star\-Field}!configure@{configure}}
+\index{configure@{configure}!StarField@{Star\-Field}}
+\subsubsection[{configure}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::configure (
+\begin{DoxyParamCaption}
+\item[{int}]{display}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_a0d5f438a2628b90e0d7ccc5a8683225b}
+
+
+Reimplemented from \hyperlink{classShape_a5de43e4fb0921bac5f8a4a95e771e354}{Shape}.
+
+\hypertarget{classStarField_aeaf743e6d1d4a8a6918152c40bd618c0}{\index{Star\-Field@{Star\-Field}!draw@{draw}}
+\index{draw@{draw}!StarField@{Star\-Field}}
+\subsubsection[{draw}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::draw (
+\begin{DoxyParamCaption}
+\item[{int}]{display, }
+\item[{float}]{ar}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_aeaf743e6d1d4a8a6918152c40bd618c0}
+
+
+Reimplemented from \hyperlink{classShape_a892243993a2207807ab5069ce90bbef4}{Shape}.
+
+\hypertarget{classStarField_a3d33db9d5e4c05a11cbe0c11a3bae5ba}{\index{Star\-Field@{Star\-Field}!get\-Store@{get\-Store}}
+\index{get\-Store@{get\-Store}!StarField@{Star\-Field}}
+\subsubsection[{get\-Store}]{\setlength{\rightskip}{0pt plus 5cm}void $\ast$ Star\-Field\-::get\-Store (
+\begin{DoxyParamCaption}
+\item[{int}]{indx, }
+\item[{int}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_a3d33db9d5e4c05a11cbe0c11a3bae5ba}
+
+
+Reimplemented from \hyperlink{classShape_ae89da51d3c54b7b7139b8223103633e3}{Shape}.
+
+\hypertarget{classStarField_a42fa7234a0bb1e7b2e1d734fb9ed2dae}{\index{Star\-Field@{Star\-Field}!get\-Store\-Class@{get\-Store\-Class}}
+\index{get\-Store\-Class@{get\-Store\-Class}!StarField@{Star\-Field}}
+\subsubsection[{get\-Store\-Class}]{\setlength{\rightskip}{0pt plus 5cm}int Star\-Field\-::get\-Store\-Class (
+\begin{DoxyParamCaption}
+\item[{int}]{indx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_a42fa7234a0bb1e7b2e1d734fb9ed2dae}
+
+
+Reimplemented from \hyperlink{classShape_acf135c0569e45aa0fab16f748bee639e}{Shape}.
+
+\hypertarget{classStarField_a1cf58acb059f13adcb4b989120f99db5}{\index{Star\-Field@{Star\-Field}!get\-Store\-Dims@{get\-Store\-Dims}}
+\index{get\-Store\-Dims@{get\-Store\-Dims}!StarField@{Star\-Field}}
+\subsubsection[{get\-Store\-Dims}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::get\-Store\-Dims (
+\begin{DoxyParamCaption}
+\item[{int}]{indx, }
+\item[{size\-\_\-t $\ast$}]{dims}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_a1cf58acb059f13adcb4b989120f99db5}
+
+
+Reimplemented from \hyperlink{classShape_afc3fbc26459718484ae4efe885f0fe37}{Shape}.
+
+\hypertarget{classStarField_a72ab192923ffe6939fceb2166e05c82d}{\index{Star\-Field@{Star\-Field}!make\-Shaders@{make\-Shaders}}
+\index{make\-Shaders@{make\-Shaders}!StarField@{Star\-Field}}
+\subsubsection[{make\-Shaders}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::make\-Shaders (
+\begin{DoxyParamCaption}
+\item[{int}]{index}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_a72ab192923ffe6939fceb2166e05c82d}
+
+
+Reimplemented from \hyperlink{classShape_a5503cd8cdc38875bcbe2e886f1609d7b}{Shape}.
+
+\hypertarget{classStarField_ae6b25b3827440dedf5836070205d4c6d}{\index{Star\-Field@{Star\-Field}!make\-Stars@{make\-Stars}}
+\index{make\-Stars@{make\-Stars}!StarField@{Star\-Field}}
+\subsubsection[{make\-Stars}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::make\-Stars (
+\begin{DoxyParamCaption}
+\item[{int}]{nstars}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_ae6b25b3827440dedf5836070205d4c6d}
+
+
+Reimplemented in \hyperlink{classStarFieldCircle_af5d514f70b06701697786a9d7b09607c}{Star\-Field\-Circle}.
+
+\hypertarget{classStarField_afb99580b3907e4c271040f332262fb1c}{\index{Star\-Field@{Star\-Field}!make\-V\-A\-O@{make\-V\-A\-O}}
+\index{make\-V\-A\-O@{make\-V\-A\-O}!StarField@{Star\-Field}}
+\subsubsection[{make\-V\-A\-O}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::make\-V\-A\-O (
+\begin{DoxyParamCaption}
+\item[{{\bf star\-Struct} $\ast$}]{vertices, }
+\item[{bool}]{del, }
+\item[{int}]{display}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_afb99580b3907e4c271040f332262fb1c}
+\hypertarget{classStarField_a6937d614690f774772920ae9faee9bab}{\index{Star\-Field@{Star\-Field}!mmap\-Read@{mmap\-Read}}
+\index{mmap\-Read@{mmap\-Read}!StarField@{Star\-Field}}
+\subsubsection[{mmap\-Read}]{\setlength{\rightskip}{0pt plus 5cm}double $\ast$ Star\-Field\-::mmap\-Read (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_a6937d614690f774772920ae9faee9bab}
+
+
+Reimplemented from \hyperlink{classShape_ae212539c5d1468805c155f4aed8367ea}{Shape}.
+
+\hypertarget{classStarField_ac3e35d838577ed7610bdaf933ef5b99d}{\index{Star\-Field@{Star\-Field}!move@{move}}
+\index{move@{move}!StarField@{Star\-Field}}
+\subsubsection[{move}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::move (
+\begin{DoxyParamCaption}
+\item[{long double}]{time}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_ac3e35d838577ed7610bdaf933ef5b99d}
+
+
+Reimplemented from \hyperlink{classShape_ac39d8d75d7498e3cd5395b8485fbf39f}{Shape}.
+
+
+
+Reimplemented in \hyperlink{classStarFieldCircle_af54e17032bb1ee195137b3585e7caea5}{Star\-Field\-Circle}.
+
+\hypertarget{classStarField_ad2e8a935f3c810330bfb61d7404b986e}{\index{Star\-Field@{Star\-Field}!norm@{norm}}
+\index{norm@{norm}!StarField@{Star\-Field}}
+\subsubsection[{norm}]{\setlength{\rightskip}{0pt plus 5cm}float Star\-Field\-::norm (
+\begin{DoxyParamCaption}
+\item[{float}]{a, }
+\item[{float}]{b}
+\end{DoxyParamCaption}
+)}}\label{classStarField_ad2e8a935f3c810330bfb61d7404b986e}
+\hypertarget{classStarField_a1289224a6763a69ac041eb32d685b657}{\index{Star\-Field@{Star\-Field}!num\-Stores@{num\-Stores}}
+\index{num\-Stores@{num\-Stores}!StarField@{Star\-Field}}
+\subsubsection[{num\-Stores}]{\setlength{\rightskip}{0pt plus 5cm}int Star\-Field\-::num\-Stores (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_a1289224a6763a69ac041eb32d685b657}
+
+
+Reimplemented from \hyperlink{classShape_a53bac379f3ad1537e56625015afd5c95}{Shape}.
+
+\hypertarget{classStarField_adc2425bc84abe280cbe53229f7b167b2}{\index{Star\-Field@{Star\-Field}!set\-Coherence@{set\-Coherence}}
+\index{set\-Coherence@{set\-Coherence}!StarField@{Star\-Field}}
+\subsubsection[{set\-Coherence}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::set\-Coherence (
+\begin{DoxyParamCaption}
+\item[{double}]{c}
+\end{DoxyParamCaption}
+)}}\label{classStarField_adc2425bc84abe280cbe53229f7b167b2}
+\hypertarget{classStarField_a641c0759d85fbb2f8adbbf6e7a2e636b}{\index{Star\-Field@{Star\-Field}!set\-Lifetime@{set\-Lifetime}}
+\index{set\-Lifetime@{set\-Lifetime}!StarField@{Star\-Field}}
+\subsubsection[{set\-Lifetime}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::set\-Lifetime (
+\begin{DoxyParamCaption}
+\item[{double}]{x}
+\end{DoxyParamCaption}
+)}}\label{classStarField_a641c0759d85fbb2f8adbbf6e7a2e636b}
+\hypertarget{classStarField_acf8cd47946ce81cd7256d6f162c4b67e}{\index{Star\-Field@{Star\-Field}!set\-Star\-Size@{set\-Star\-Size}}
+\index{set\-Star\-Size@{set\-Star\-Size}!StarField@{Star\-Field}}
+\subsubsection[{set\-Star\-Size}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::set\-Star\-Size (
+\begin{DoxyParamCaption}
+\item[{double}]{ss}
+\end{DoxyParamCaption}
+)}}\label{classStarField_acf8cd47946ce81cd7256d6f162c4b67e}
+\hypertarget{classStarField_a01b9571dbc4f28f0a75b12790e11cd8e}{\index{Star\-Field@{Star\-Field}!set\-Vel@{set\-Vel}}
+\index{set\-Vel@{set\-Vel}!StarField@{Star\-Field}}
+\subsubsection[{set\-Vel}]{\setlength{\rightskip}{0pt plus 5cm}void Star\-Field\-::set\-Vel (
+\begin{DoxyParamCaption}
+\item[{double}]{x, }
+\item[{double}]{y}
+\end{DoxyParamCaption}
+)}}\label{classStarField_a01b9571dbc4f28f0a75b12790e11cd8e}
+\hypertarget{classStarField_aa8411004d05d05ac3e0f8d10bfa1949e}{\index{Star\-Field@{Star\-Field}!store@{store}}
+\index{store@{store}!StarField@{Star\-Field}}
+\subsubsection[{store}]{\setlength{\rightskip}{0pt plus 5cm}bool Star\-Field\-::store (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_aa8411004d05d05ac3e0f8d10bfa1949e}
+
+
+Reimplemented from \hyperlink{classShape_a9dea3f39fe203b2f4288dc7cda6295a7}{Shape}.
+
+\hypertarget{classStarField_a047f987e052fc14fd8041658c153e0f1}{\index{Star\-Field@{Star\-Field}!store\-Name@{store\-Name}}
+\index{store\-Name@{store\-Name}!StarField@{Star\-Field}}
+\subsubsection[{store\-Name}]{\setlength{\rightskip}{0pt plus 5cm}string Star\-Field\-::store\-Name (
+\begin{DoxyParamCaption}
+\item[{int}]{indx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classStarField_a047f987e052fc14fd8041658c153e0f1}
+
+
+Reimplemented from \hyperlink{classShape_aaf3b0b140fcaf0bb11c28493ef745bfd}{Shape}.
+
+\hypertarget{classStarField_a69aeb2f24c09fbb2cccb79e5135d4bc8}{\index{Star\-Field@{Star\-Field}!uniform@{uniform}}
+\index{uniform@{uniform}!StarField@{Star\-Field}}
+\subsubsection[{uniform}]{\setlength{\rightskip}{0pt plus 5cm}float Star\-Field\-::uniform (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classStarField_a69aeb2f24c09fbb2cccb79e5135d4bc8}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classStarField_a65a4e5967dd2e328274d61cf8a5c50ba}{\index{Star\-Field@{Star\-Field}!m\-\_\-coherence@{m\-\_\-coherence}}
+\index{m\-\_\-coherence@{m\-\_\-coherence}!StarField@{Star\-Field}}
+\subsubsection[{m\-\_\-coherence}]{\setlength{\rightskip}{0pt plus 5cm}float Star\-Field\-::m\-\_\-coherence}}\label{classStarField_a65a4e5967dd2e328274d61cf8a5c50ba}
+\hypertarget{classStarField_aa3e4c31177f3c5be4f11e629e4a1b5a6}{\index{Star\-Field@{Star\-Field}!m\-\_\-colorbuffer@{m\-\_\-colorbuffer}}
+\index{m\-\_\-colorbuffer@{m\-\_\-colorbuffer}!StarField@{Star\-Field}}
+\subsubsection[{m\-\_\-colorbuffer}]{\setlength{\rightskip}{0pt plus 5cm}G\-Luint Star\-Field\-::m\-\_\-colorbuffer}}\label{classStarField_aa3e4c31177f3c5be4f11e629e4a1b5a6}
+\hypertarget{classStarField_a04bcafb900567a3b87f9c910614c8fa4}{\index{Star\-Field@{Star\-Field}!m\-\_\-last\-Time@{m\-\_\-last\-Time}}
+\index{m\-\_\-last\-Time@{m\-\_\-last\-Time}!StarField@{Star\-Field}}
+\subsubsection[{m\-\_\-last\-Time}]{\setlength{\rightskip}{0pt plus 5cm}long double Star\-Field\-::m\-\_\-last\-Time}}\label{classStarField_a04bcafb900567a3b87f9c910614c8fa4}
+\hypertarget{classStarField_a575970efe2365bb4dfa1b1b2eebafbd7}{\index{Star\-Field@{Star\-Field}!m\-\_\-lifetime@{m\-\_\-lifetime}}
+\index{m\-\_\-lifetime@{m\-\_\-lifetime}!StarField@{Star\-Field}}
+\subsubsection[{m\-\_\-lifetime}]{\setlength{\rightskip}{0pt plus 5cm}float Star\-Field\-::m\-\_\-lifetime}}\label{classStarField_a575970efe2365bb4dfa1b1b2eebafbd7}
+\hypertarget{classStarField_a922034700e887585b42b80df399ddede}{\index{Star\-Field@{Star\-Field}!m\-\_\-phase@{m\-\_\-phase}}
+\index{m\-\_\-phase@{m\-\_\-phase}!StarField@{Star\-Field}}
+\subsubsection[{m\-\_\-phase}]{\setlength{\rightskip}{0pt plus 5cm}double$\ast$ Star\-Field\-::m\-\_\-phase}}\label{classStarField_a922034700e887585b42b80df399ddede}
+\hypertarget{classStarField_a483be12bd49068c4f46a14dfc733a2ca}{\index{Star\-Field@{Star\-Field}!m\-\_\-pvel@{m\-\_\-pvel}}
+\index{m\-\_\-pvel@{m\-\_\-pvel}!StarField@{Star\-Field}}
+\subsubsection[{m\-\_\-pvel}]{\setlength{\rightskip}{0pt plus 5cm}float$\ast$ Star\-Field\-::m\-\_\-pvel}}\label{classStarField_a483be12bd49068c4f46a14dfc733a2ca}
+\hypertarget{classStarField_adf36490fe3843a374b437b2fc1f482d6}{\index{Star\-Field@{Star\-Field}!m\-\_\-starsize@{m\-\_\-starsize}}
+\index{m\-\_\-starsize@{m\-\_\-starsize}!StarField@{Star\-Field}}
+\subsubsection[{m\-\_\-starsize}]{\setlength{\rightskip}{0pt plus 5cm}float Star\-Field\-::m\-\_\-starsize}}\label{classStarField_adf36490fe3843a374b437b2fc1f482d6}
+\hypertarget{classStarField_a71f79afd2f64f68bae9edf978b579c5d}{\index{Star\-Field@{Star\-Field}!m\-\_\-start\-Time@{m\-\_\-start\-Time}}
+\index{m\-\_\-start\-Time@{m\-\_\-start\-Time}!StarField@{Star\-Field}}
+\subsubsection[{m\-\_\-start\-Time}]{\setlength{\rightskip}{0pt plus 5cm}long double Star\-Field\-::m\-\_\-start\-Time}}\label{classStarField_a71f79afd2f64f68bae9edf978b579c5d}
+\hypertarget{classStarField_af6c1cf901231fd963efaa1c8ed1eca5d}{\index{Star\-Field@{Star\-Field}!m\-\_\-v@{m\-\_\-v}}
+\index{m\-\_\-v@{m\-\_\-v}!StarField@{Star\-Field}}
+\subsubsection[{m\-\_\-v}]{\setlength{\rightskip}{0pt plus 5cm}{\bf star\-Struct}$\ast$ Star\-Field\-::m\-\_\-v}}\label{classStarField_af6c1cf901231fd963efaa1c8ed1eca5d}
+\hypertarget{classStarField_a21ba5382655395de9cce3328cf4be730}{\index{Star\-Field@{Star\-Field}!m\-\_\-vel@{m\-\_\-vel}}
+\index{m\-\_\-vel@{m\-\_\-vel}!StarField@{Star\-Field}}
+\subsubsection[{m\-\_\-vel}]{\setlength{\rightskip}{0pt plus 5cm}array$<$float,2$>$ Star\-Field\-::m\-\_\-vel}}\label{classStarField_a21ba5382655395de9cce3328cf4be730}
+\hypertarget{classStarField_a9184ebba5f686d75ac8ee3c3da3b3f64}{\index{Star\-Field@{Star\-Field}!v\-\_\-coherence@{v\-\_\-coherence}}
+\index{v\-\_\-coherence@{v\-\_\-coherence}!StarField@{Star\-Field}}
+\subsubsection[{v\-\_\-coherence}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$float$>$ Star\-Field\-::v\-\_\-coherence}}\label{classStarField_a9184ebba5f686d75ac8ee3c3da3b3f64}
+\hypertarget{classStarField_a3090733382397dd067da0f60d26085c0}{\index{Star\-Field@{Star\-Field}!v\-\_\-lifetime@{v\-\_\-lifetime}}
+\index{v\-\_\-lifetime@{v\-\_\-lifetime}!StarField@{Star\-Field}}
+\subsubsection[{v\-\_\-lifetime}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$float$>$ Star\-Field\-::v\-\_\-lifetime}}\label{classStarField_a3090733382397dd067da0f60d26085c0}
+\hypertarget{classStarField_ac66cfbc7ac7d40cd1c7f0b7bf6b5dd1a}{\index{Star\-Field@{Star\-Field}!v\-\_\-starsize@{v\-\_\-starsize}}
+\index{v\-\_\-starsize@{v\-\_\-starsize}!StarField@{Star\-Field}}
+\subsubsection[{v\-\_\-starsize}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$float$>$ Star\-Field\-::v\-\_\-starsize}}\label{classStarField_ac66cfbc7ac7d40cd1c7f0b7bf6b5dd1a}
+\hypertarget{classStarField_a28482b3624fa5204a35faf1dbca6136c}{\index{Star\-Field@{Star\-Field}!v\-\_\-vel@{v\-\_\-vel}}
+\index{v\-\_\-vel@{v\-\_\-vel}!StarField@{Star\-Field}}
+\subsubsection[{v\-\_\-vel}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$array$<$float,2$>$ $>$ Star\-Field\-::v\-\_\-vel}}\label{classStarField_a28482b3624fa5204a35faf1dbca6136c}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/home/ruijan/sw/bmi5/bmi5/include/\-Shape/\hyperlink{starField_8h}{star\-Field.\-h}\item 
+/home/ruijan/sw/bmi5/bmi5/src/\-Shape/\hyperlink{starField_8cpp}{star\-Field.\-cpp}\end{DoxyCompactItemize}
