@@ -83,7 +83,7 @@ LIBS=gtk+-3.0 gsl libxdg-basedir lua5.1 libprocps
 CFLAGS += $(shell pkg-config --cflags $(LIBS))
 LDFLAGS += $(shell pkg-config --libs $(LIBS))
 
-all: directories bmi5 glxgears
+all: directories bmi5 glxgears doc
 
 $(BUILDDIR)/%.o: src/%.cpp 
 	$(CPP) -c $(CFLAGS) $< -o $@
@@ -140,4 +140,10 @@ directories:
 	mkdir -p $(BUILDDIR)/Shape
 	mkdir -p $(BUILDDIR)/Serialize
 
+#Generate doxygen documentation
+doc : ; @echo "Generating program and doc."
+	doxygen doc/doxy_config
+
 print-%  : ; @echo $* = $($*)
+
+.PHONY: all clean doc

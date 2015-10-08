@@ -20,6 +20,8 @@ extern Matrix44Serialize	*g_quadratic44;
 extern string 				g_basedirname;
 
 #define PI 3.141592653589793
+
+/*! \class Shape */
 class Shape : public Serialize
 {
 public:
