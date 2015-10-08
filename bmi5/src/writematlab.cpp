@@ -13,7 +13,7 @@
 #include "timesync.h"
 #include "jacksnd.h"
 #include "tdt_udp.h"
-#include "serialize.h"
+#include "Serialize/serialize.h"
 
 int matlabClassToType(int cls)
 {

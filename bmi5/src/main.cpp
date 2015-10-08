@@ -58,10 +58,12 @@
 //local
 #include "tdt_udp.h"
 #include "jacksnd.h"
-#include "serialize.h"
-#include "shape.h"
+#include "Serialize/serialize.h"
+#include "includeSerialize.h"
+#include "includeShape.h"
+#include "Shape/shape.h"
 #include "polhemus.h"
-#include "glFont.h"
+//#include "glFont.h" // already included above
 
 #include "fenv.h" // for debugging nan problems
 #include "libgen.h"
@@ -87,7 +89,7 @@ string 		g_in_fifo = "/tmp/bmi5_in.fifo";
 string 		g_out_fifo = "/tmp/bmi5_out.fifo";
 string 		g_polhemus_serial = "/dev/ttyS0";
 
-bool 		g_do_backup = true;
+bool 		g_do_backup = false;
 string 		g_backup_dir = "/tmp";
 
 double 		g_frameRate = 0.0;
@@ -581,7 +583,19 @@ void *mmap_thread(void *)
 					}
 					Ring *shp = new Ring(0.5*(1-thick), 0.5, 64);
 					makeConf(shp, name);
-				} else if ((*beg) == string("square")) {
+				} 
+				else if((*beg) == string("line")){
+					typ = string("line");
+					beg++;
+					name = typ;
+					if (beg != tokens.end()) {
+						name = (*beg); // name of the line.
+						beg++;
+					}
+					Line *shp = new Line(0.5f);
+					makeConf(shp, name);
+					printf("line created \n");
+				}else if ((*beg) == string("square")) {
 					typ = string("square");
 					beg++;
 					name = typ;
@@ -888,6 +902,7 @@ void *mmap_thread(void *)
 				resp = {"Current command vocabulary:\n"};
 				resp += {"\tmake circle <name>\n"};
 				resp += {"\tmake ring <name> <frac thickness>\n"};
+				resp += {"\tmake line <name>\n"};
 				resp += {"\tmake square <name>\n"};
 				resp += {"\tmake open_square <name> <frac thickness>\n"};
 				resp += {"\tmake stars <name> <num stars>\n"};

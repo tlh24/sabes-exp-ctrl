@@ -4,7 +4,7 @@
 #
 # install dependencies with make deps
 DBG = false
-JACK = true
+JACK = false
 LABJACK = false
 OPTO = false
 
@@ -20,18 +20,22 @@ ifeq	($(shell hostname),inCage)
 	LABJACK = true
 endif
 
-CC  = gcc
-CPP = g++
+CC  = gcc 
+CPP = clang++-3.6
 TARGET = /usr/local/bin
+BUILDDIR = ./bin
+SRCDIR = ./src
 
-OBJS := src/main.o src/tdt_udp.o src/glInfo.o src/glFont.o src/polhemus.o \
-	src/writematlab.o src/gettime.o src/lconf.o
+SOURCES=$(shell find ./src/ -name *.cpp ! -name *u6.cpp)
+
+OBJS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:%.cpp=%.o))
+OBJS += $(BUILDDIR)/gettime.o $(BUILDDIR)/lconf.o
 
 CFLAGS := -Iinclude -I/usr/local/include -I../../myopen/common_host
 CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
--Wextra -Werror -pedantic -Wno-deprecated-declarations -std=c++11 
-CFLAGS += -march=native
+-Wextra -pedantic -Wno-deprecated-declarations -std=c++11 -stdlib=libstdc++
+CFLAGS += -march=native -Wno-unused-result
 LDFLAGS := -lrt -lGL -lGLU -lGLEW -lusb-1.0 -lX11 -lpthread
 
 ifeq ($(strip $(DBG)),true)
@@ -45,13 +49,13 @@ endif
 ifeq ($(strip $(JACK)),true)
 	CFLAGS += -DJACK
 	LDFLAGS += -ljack
-	OBJS += src/jacksnd.o
+	OBJS += $(BUILDDIR)/jacksnd.o
 endif
 
 ifeq ($(strip $(LABJACK)),true)
 	CFLAGS += -DLABJACK
 	LDFLAGS += -llabjackusb
-	OBJS += src/u6.o
+	OBJS += $(BUILDDIR)/u6.o
 endif
 
 ifeq ($(strip $(OPTO)),true)
@@ -61,7 +65,7 @@ endif
 # DEPENDENCIES: NOTE WE REQUIRE JESSIE NOW
 DEPS = gcc g++ gdb astyle cppcheck libboost-dev libgtk-3-dev \
 libgtkglext1-dev freeglut3-dev libglew-dev libusb-1.0-0-dev \
-libmatio-dev libhdf5-8 libhdf5-dev libhdf5-serial-dev \
+libmatio-dev libhdf5-7 libhdf5-dev libhdf5-serial-dev \
 libblas-dev liblapack-dev libfftw3-dev libgsl0-dev \
 libxdg-basedir-dev liblua5.1-0-dev libprocps3-dev \
 libpcap-dev winbind zlib1g-dev \
@@ -79,12 +83,12 @@ LIBS=gtk+-3.0 gsl libxdg-basedir lua5.1 libprocps
 CFLAGS += $(shell pkg-config --cflags $(LIBS))
 LDFLAGS += $(shell pkg-config --libs $(LIBS))
 
-all: bmi5 glxgears
+all: directories bmi5 glxgears
 
-src/%.o: src/%.cpp 
+$(BUILDDIR)/%.o: src/%.cpp 
 	$(CPP) -c $(CFLAGS) $< -o $@
 	
-src/%.o: ../../myopen/common_host/%.cpp
+$(BUILDDIR)/%.o: ../../myopen/common_host/%.cpp
 	$(CPP) -c $(CFLAGS) $< -o $@
 
 bmi5: $(OBJS)
@@ -97,7 +101,7 @@ glxgears: src/glxgears.c
 	$(CPP) -O3 -o $@ -lrt -lGL -lX11 $<
 	
 clean:
-	rm -rf src/*.o bmi5 glxgears
+	rm -rf src/*.o bmi5 glxgears src/Shape/*.o src/Serialize/*.o bin/*.o bin/Serialize/*.o bin/Shape/*.o 
 	
 deps:
 	sudo apt-get install $(DEPS)
@@ -129,3 +133,11 @@ pretty:
 	-rm include/*.h.orig
 	astyle -A8 --indent=tab -H -k3 src/*.cpp
 	-rm src/*.cpp.orig
+
+#Make the Directories
+directories:
+	mkdir -p $(BUILDDIR)
+	mkdir -p $(BUILDDIR)/Shape
+	mkdir -p $(BUILDDIR)/Serialize
+
+print-%  : ; @echo $* = $($*)
