@@ -3,7 +3,7 @@
 # ie: make DBG=true JACK=false
 #
 # install dependencies with make deps
-DBG = false
+DBG = true
 JACK = false
 LABJACK = false
 OPTO = false
@@ -19,6 +19,7 @@ endif
 ifeq	($(shell hostname),inCage)
 	LABJACK = true
 endif
+
 
 CC  = gcc 
 CPP = clang++-3.6
@@ -36,7 +37,7 @@ CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
 -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
 -Wextra -pedantic -Wno-deprecated-declarations -std=c++11 -stdlib=libstdc++
 CFLAGS += -march=native -Wno-unused-result
-LDFLAGS := -lrt -lGL -lGLU -lGLEW -lusb-1.0 -lX11 -lpthread
+LDFLAGS := -lrt -lGL -lglut -lGLU -lGLEW -lusb-1.0 -lX11 -lpthread
 
 ifeq ($(strip $(DBG)),true)
 	CFLAGS  += -O0 -g -rdynamic -DDEBUG
@@ -83,7 +84,7 @@ LIBS=gtk+-3.0 gsl libxdg-basedir lua5.1 libprocps
 CFLAGS += $(shell pkg-config --cflags $(LIBS))
 LDFLAGS += $(shell pkg-config --libs $(LIBS))
 
-all: directories bmi5 glxgears doc
+all: directories bmi5 glxgears
 
 $(BUILDDIR)/%.o: src/%.cpp 
 	$(CPP) -c $(CFLAGS) $< -o $@

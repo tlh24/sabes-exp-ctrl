@@ -106,6 +106,7 @@ bool		g_polhemusConnected = false;
 bool		g_optoConnected = false;
 bool		g_labjackConnected = false;
 GtkWindow 	*g_mainWindow; //used for dialogs, etc.
+GtkWindow 	*g_subjectWindow; //used for dialogs, etc.
 gtkglx  	*g_daglx[2]; //monkey, human.
 GtkWidget 	*g_da[2]; //draw areas, same order as above.
 GtkWidget 	*g_timeLabel;
@@ -504,8 +505,9 @@ void *mmap_thread(void *)
 			count /= 8;
 			*b = (double)count;
 			if (g_record) {
-				for (unsigned int i=0; i<g_objs.size(); i++)
+				for (unsigned int i=0; i<g_objs.size(); i++){
 					g_objs[i]->store(); //store when changes were commanded.
+				}
 			}
 			pthread_mutex_unlock(&mutex_gobjs);
 			// variables which are the other direction -- e.g. polhemus --
@@ -529,7 +531,7 @@ void *mmap_thread(void *)
 				write(pipe_out.m_fd, (void *)&code, 4); //this so we know how much to seek in matlab.
 				write(pipe_out.m_fd, q.c_str(), q.size());
 			};
-			auto makeConf = [&](Serialize* obj, string nam) {
+			auto makeConf = [&](Serialize* obj, const string& nam) {
 				obj->m_name = nam + string("_");
 				g_objs.push_back(obj);
 				resp = {"made a "};
@@ -538,7 +540,7 @@ void *mmap_thread(void *)
 				resp += nam;
 				resp += "\n";
 			};
-			auto makeStoreConf = [&](Serialize * obj, string type, string nam) {
+			auto makeStoreConf = [&](Serialize * obj, const string& type, const string& nam) {
 				obj->m_name = nam + string("_");
 				g_objs.push_back(obj);
 				resp  = {"made a store ("};
@@ -651,6 +653,22 @@ void *mmap_thread(void *)
 					}
 					StarFieldCircle *sf = new StarFieldCircle();
 					sf->makeStars(numstars);
+					makeConf(sf, name);
+				} else if ((*beg) == string("magnets")) {
+					typ = "magnets";
+					beg++;
+					name = typ;
+					int numlines = 9;
+					if (beg != tokens.end()) {
+						name = (*beg);
+						beg++;
+						if (beg != tokens.end()) {
+							numlines = abs(atoi(beg->c_str()));	// negatives not allowed
+							beg++;
+						}
+					}
+					MagneticField *sf = new MagneticField();
+					sf->makeCompasses(numlines);
 					makeConf(sf, name);
 				} else if ((*beg) == string("text")) {
 					typ = string("text");
@@ -907,6 +925,7 @@ void *mmap_thread(void *)
 				resp += {"\tmake open_square <name> <frac thickness>\n"};
 				resp += {"\tmake stars <name> <num stars>\n"};
 				resp += {"\tmake stars_circle <name> <num stars>\n"};
+				resp += {"\tmake magnets <name> <num stars>\n"};
 				resp += {"\tmake text <name> <nchars>\n"};
 				resp += {"\t\tDisplays text on the screen.\n"};
 				resp += {"\t\tnchars should be less than 256\n"};
@@ -1822,6 +1841,7 @@ int main(int argn, char **argc)
 #endif
 
 	g_mainWindow = (GtkWindow *)window;
+	g_subjectWindow = (GtkWindow *)top;
 	gtk_widget_show_all (window);
 
 	g_record = true;
@@ -1832,7 +1852,6 @@ int main(int argn, char **argc)
 
 	//save data!!
 	writeMatlab(g_objs, (char *)"backup.mat", false); //the whole enchilada.
-
 #ifdef JACK
 	jackClose(0);
 #endif
@@ -1843,7 +1862,7 @@ int main(int argn, char **argc)
 	pthread_join(othread,NULL);
 #endif
 	// can't join mthread easily since the read on the pipe is blocking
-	//pthread_join(mthread,NULL);
+	pthread_join(mthread,NULL);
 	pthread_join(pthread,NULL);  // wait for the read thread to complete
 
 	pthread_mutex_destroy(&mutex_fwrite);
@@ -1852,9 +1871,9 @@ int main(int argn, char **argc)
 	for (unsigned int i=0; i<g_objs.size(); i++) {
 		delete (g_objs[i]);
 	}
+
 	delete g_daglx[0];
 	delete g_daglx[1];
 	delete g_tsc;
-
 	return 0;
 }

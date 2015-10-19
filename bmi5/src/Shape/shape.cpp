@@ -8,7 +8,7 @@ Shape::Shape(void) : Serialize()
 	m_scale[0] = m_scale[1] = 1.f;
 	m_trans[0] = m_trans[1] = 0.f;
 	m_rot = 0.0;
-	m_name = {"shape"};
+	m_name = "shape";
 	m_needConfig[0] = m_needConfig[1] = false;
 	m_program[0] = m_program[1] = 0;
 	m_draw = 0;

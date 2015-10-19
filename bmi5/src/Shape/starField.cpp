@@ -184,7 +184,12 @@ void StarField::setLifetime(double x)
 }
 void StarField::setStarSize(double ss)
 {
-	m_starsize = ss;
+	if(ss < 0){
+		m_starsize = 0;
+	}
+	else{
+		m_starsize = ss;
+	}
 }
 // serialization
 void StarField::clear()
