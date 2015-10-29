@@ -4,8 +4,8 @@
 #
 # install dependencies with make deps
 DBG = true
-JACK = false
-LABJACK = false
+JACK = true
+LABJACK = true
 OPTO = false
 
 ifeq ($(shell hostname),chupacabra)

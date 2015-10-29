@@ -14,9 +14,11 @@ state       = 0;
 
 bmi5_cmd('clear_all');
 bmi5_cmd('delete_all');
+bmi5_cmd('make square background');
 bmi5_cmd('make magnets mag 1000');
 bmi5_cmd('make circle target');
 bmi5_cmd('make circle state');
+
 %bmi5_cmd('make polhemus finger'); 
 bmi5_cmd('make mouse finger'); 
 
@@ -26,8 +28,13 @@ b5 = bmi5_mmap(b5);
 b5.affine_m44 = eye(4);
 b5.quadratic_m44 = zeros(4);
 
+b5.background_draw = 1;
+b5.background_color = [1 1 1 1]; % white
+b5.background_pos = [0 0]; 
+b5.background_scale = [2 2];
+
 b5.mag_draw = 1;
-b5.mag_color = [1 1 1 1]; % white
+b5.mag_color = [0 0 0 1]; % white
 b5.mag_pos = [0 0]; 
 b5.mag_scale = [1 1];
 b5.mag_coherence = 1;
@@ -48,7 +55,7 @@ b5 = bmi5_mmap(b5);
 
 % Each loop decrease the coherence by 10% 
 for step = 0:0.1:1
-    coherence = 1 - step;
+    coherence = 0.5 - step;
     % for each
     for numberoftrials = 1:max_trials(round(step*10 + 1))
         b5.mag_coherence = 1;

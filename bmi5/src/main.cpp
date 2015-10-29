@@ -89,7 +89,7 @@ string 		g_in_fifo = "/tmp/bmi5_in.fifo";
 string 		g_out_fifo = "/tmp/bmi5_out.fifo";
 string 		g_polhemus_serial = "/dev/ttyS0";
 
-bool 		g_do_backup = false;
+bool 		g_do_backup = true;
 string 		g_backup_dir = "/tmp";
 
 double 		g_frameRate = 0.0;

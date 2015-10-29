@@ -122,6 +122,14 @@ void MagneticField::move(long double time)
 {
 	if (!m_v || !m_phase) return;
 	
+	unsigned int basecol = 0;
+	basecol += (unsigned int)(m_color[3] * 255) & 255;
+	basecol <<= 8;
+	basecol += (unsigned int)(m_color[2] * 255) & 255;
+	basecol <<= 8;
+	basecol += (unsigned int)(m_color[1] * 255) & 255;
+	basecol <<= 8;
+	basecol += (unsigned int)(m_color[0] * 255) & 255;
 	int width(1);
 	int height(1);
 	gtk_window_get_size ((GtkWindow *)g_subjectWindow, &width, &height);
@@ -142,6 +150,8 @@ void MagneticField::move(long double time)
 		m_v[i].y1 = 0.5 * (m_v[i].y1 + m_v[i+1].y1 - m_compass_l * sin(angle));
 		m_v[i+1].x1 = 0.5 * (m_v[i].x1 + m_v[i+1].x1 + m_compass_l / ratio * cos(angle));
 		m_v[i+1].y1 = 0.5 * (m_v[i].y1 + m_v[i+1].y1 + m_compass_l * sin(angle));
+		m_v[i].color1 = basecol;
+		m_v[i+1].color1 = basecol;
 	}
 }
 
