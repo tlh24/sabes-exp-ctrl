@@ -3,9 +3,9 @@
 # ie: make DBG=true JACK=false
 #
 # install dependencies with make deps
-DBG = true
+DBG = false
 JACK = true
-LABJACK = true
+LABJACK = false
 OPTO = false
 
 ifeq ($(shell hostname),chupacabra)
@@ -20,14 +20,20 @@ ifeq	($(shell hostname),inCage)
 	LABJACK = true
 endif
 
-
-CC  = gcc 
+CC  = clang-3.6
 CPP = clang++-3.6
+ifeq ($(shell lsb_release -sc), jessie)
+        CC = clang-3.5
+        CPP = clang++-3.5
+endif
+
 TARGET = /usr/local/bin
 BUILDDIR = ./bin
 SRCDIR = ./src
 
-SOURCES=$(shell find ./src/ -name *.cpp ! -name *u6.cpp)
+SOURCES=$(shell find ./src/ -name *.cpp \
+	! -name *u6.cpp \
+	! -name *glxgears.cpp)
 
 OBJS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:%.cpp=%.o))
 OBJS += $(BUILDDIR)/gettime.o $(BUILDDIR)/lconf.o
@@ -72,12 +78,12 @@ libxdg-basedir-dev liblua5.1-0-dev libprocps3-dev \
 libpcap-dev winbind zlib1g-dev \
 qjackctl libjack-jackd2-dev
 
+HDFLIB = -lhdf5
 ifeq ($(shell lsb_release -sc), wheezy)
 	HDFLIB = -lhdf5
-else 
-	ifeq ($(shell lsb_release -sc), jessie)
-		HDFLIB = -lhdf5_serial
-	endif
+endif
+ifeq ($(shell lsb_release -sc), jessie)
+	HDFLIB = -lhdf5_serial
 endif
 
 LIBS=gtk+-3.0 gsl libxdg-basedir lua5.1 libprocps
@@ -86,24 +92,24 @@ LDFLAGS += $(shell pkg-config --libs $(LIBS))
 
 all: directories bmi5 glxgears
 
-$(BUILDDIR)/%.o: src/%.cpp 
+$(BUILDDIR)/%.o: src/%.cpp
 	$(CPP) -c $(CFLAGS) $< -o $@
-	
+
 $(BUILDDIR)/%.o: ../../myopen/common_host/%.cpp
 	$(CPP) -c $(CFLAGS) $< -o $@
 
 bmi5: $(OBJS)
 	$(CPP) -o $@ $(LDFLAGS) $(HDFLIB) -lmatio -lpcap $(OBJS)
-	
-opto: bmi5 # enables packet-capture privelages on bmi5. 
+
+opto: bmi5 # enables packet-capture privelages on bmi5.
 	sudo setcap cap_net_raw,cap_net_admin=eip bmi5
-	
-glxgears: src/glxgears.c
-	$(CPP) -O3 -o $@ -lrt -lGL -lX11 $<
-	
+
+glxgears: $(BUILDDIR)/glxgears.o
+	$(CPP) -o $@ $(LDFLAGS) $(BUILDDIR)/glxgears.o
+
 clean:
-	rm -rf src/*.o bmi5 glxgears src/Shape/*.o src/Serialize/*.o bin/*.o bin/Serialize/*.o bin/Shape/*.o 
-	
+	rm -rf bmi5 glxgears bin/*.o bin/Serialize/*.o bin/Shape/*.o
+
 deps:
 	sudo apt-get install $(DEPS)
 
