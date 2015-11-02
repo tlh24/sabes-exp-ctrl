@@ -18,7 +18,6 @@
 #include <boost/lexical_cast.hpp>
 #include <fcntl.h>
 #include <pcap.h>
-#include <poll.h>
 #include "matio.h"
 
 // XDG
