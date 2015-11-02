@@ -18,6 +18,7 @@
 #include <boost/lexical_cast.hpp>
 #include <fcntl.h>
 #include <pcap.h>
+#include <poll.h>
 #include "matio.h"
 
 // XDG
@@ -45,6 +46,8 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <thread>
+#include <mutex>
 #include <algorithm>
 #include <functional>
 
@@ -135,13 +138,13 @@ LabjackSerializeAIN	*g_labjack_AIN; //USB analog input.
 LabjackSerializeDOUT	 *g_labjack_DOUT; //USB digital output
 vector<Serialize *> 	g_objs; //container for each of these, and more!
 
-pthread_mutex_t		mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
-pthread_mutex_t		mutex_gobjs;
-long double			g_nextVsyncTime = -1;
+std::mutex 	mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
+std::mutex 	mutex_gobjs;
+long double g_nextVsyncTime = -1;
 
-luaConf 			g_lc;
+luaConf 	g_lc;
 
-string 				g_basedirname;
+string 		g_basedirname;
 
 //forward decl.
 void gobjsInit();
@@ -294,7 +297,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p)
 
 		/// draw objects
 		//update before the swap for minimum display latency.
-		pthread_mutex_lock(&mutex_gobjs);
+		mutex_gobjs.lock();
 		float ar = 1.f;
 		if (da == g_da[0]) {
 			t = gettime();
@@ -304,9 +307,9 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p)
 			//convert between aspect-ratios.
 			ar = g_daglx[0]->getAR() / g_daglx[1]->getAR();
 		}
-		for (unsigned int i=0; i<g_objs.size(); i++)
-			g_objs[i]->draw(h, ar);
-		pthread_mutex_unlock(&mutex_gobjs);
+		for (auto &obj : g_objs)
+			obj->draw(h, ar);
+		mutex_gobjs.unlock();
 		/// end
 
 		g_daglx[h]->swap(); //always double buffered
@@ -346,9 +349,9 @@ static gboolean refresh (gpointer )
 	gtk_label_set_text(GTK_LABEL(g_timeLabel), s.c_str());
 	char str[256];
 	size_t n = 0;
-	if (pthread_mutex_trylock(&mutex_gobjs) == 0) {
+	if (mutex_gobjs.try_lock() == true) {
 		n = matlabFileSize(g_objs); //no problem if it's locked elsewhere; this is just GUI.
-		pthread_mutex_unlock(&mutex_gobjs);
+		mutex_gobjs.unlock();
 	}
 	snprintf(str, 256, "time:\t%.1f ms (mean)\n\t\t%.1f ms (last)\nfile size:\t%.2f MB",
 	         g_matlabTimer.meanTime()*1000.0,
@@ -470,7 +473,7 @@ void flush_pipe(int fid)
 	fcntl(fid, F_SETFL, opts);
 }
 /* matlab interaction -- through shared memory. */
-void *mmap_thread(void *)
+void mmap_thread()
 {
 	size_t length = 8*1024*8; //mmapFileSize(g_objs);
 
@@ -478,6 +481,7 @@ void *mmap_thread(void *)
 	mmh.prinfo();
 
 	fifoHelp pipe_in(g_in_fifo.c_str());
+	pipe_in.setR();
 	pipe_in.prinfo();
 
 	fifoHelp pipe_out(g_out_fifo.c_str());
@@ -487,484 +491,486 @@ void *mmap_thread(void *)
 	int bufn = 0;
 	flush_pipe(pipe_out.m_fd);
 	int code = 0;
+
 	while (!g_die) {
-		//printf("%d waiting for matlab...\n", frame);
-		int r = read(pipe_in.m_fd, &(buf[bufn]), 256);
-		if (r > 0) bufn += r;
-		buf[bufn] = 0;
-		//printf("%d read %d %s\n", frame, r, buf);
-		if (r >= 3 && buf[0] == 'g' && buf[1] == 'o') {
-			//react to changes requested.
-			g_matlabTimer.exit();
-			double *b = (double *)mmh.m_addr;
-			pthread_mutex_lock(&mutex_gobjs);
-			for (unsigned int i=0; i<g_objs.size(); i++)
-				b = g_objs[i]->mmapRead(b);
-			//add alignment check.
-			int count = (int)((long long)b - (long long)mmh.m_addr);
-			count /= 8;
-			*b = (double)count;
-			if (g_record) {
-				for (unsigned int i=0; i<g_objs.size(); i++){
-					g_objs[i]->store(); //store when changes were commanded.
+		//printf("waiting for matlab...\n");
+		if (pipe_in.Poll(1000)) {
+
+			int r = read(pipe_in.m_fd, &(buf[bufn]), 256);
+			if (r > 0) bufn += r;
+			buf[bufn] = 0;
+			//printf("%d read %d %s\n", frame, r, buf);
+			if (r >= 3 && buf[0] == 'g' && buf[1] == 'o') {
+				//react to changes requested.
+				g_matlabTimer.exit();
+				double *b = (double *)mmh.m_addr;
+				mutex_gobjs.lock();
+				for (auto &obj : g_objs)
+					b = obj->mmapRead(b);
+				//add alignment check.
+				int count = (int)((long long)b - (long long)mmh.m_addr);
+				count /= 8;
+				*b = (double)count;
+				if (g_record) {
+					for (unsigned int i=0; i<g_objs.size(); i++) {
+						g_objs[i]->store(); //store when changes were commanded.
+					}
 				}
-			}
-			pthread_mutex_unlock(&mutex_gobjs);
-			// variables which are the other direction -- e.g. polhemus --
-			// should be stored when *they* are recieved.
-			usleep(100); //let the kernel sync memory (required..)
-			g_matlabTimer.enter();
-			code = 0; // = OK -- matlab waits for this response.
-			write(pipe_out.m_fd, (void *)&code, 4);
-			bufn = 0;
-		} else {
-			//setup command?
-			pthread_mutex_lock(&mutex_gobjs);
-			string txt = string(buf);
-			char_separator<char> sep("\", ");
-			tokenizer<char_separator<char> > tokens(txt, sep);
-			string resp = {""};
-			string typ = {""};
-			string name = {"null"};
-			auto sendResponse = [&](string q) {
-				code = q.size();
-				write(pipe_out.m_fd, (void *)&code, 4); //this so we know how much to seek in matlab.
-				write(pipe_out.m_fd, q.c_str(), q.size());
-			};
-			auto makeConf = [&](Serialize* obj, const string& nam) {
-				obj->m_name = nam + string("_");
-				g_objs.push_back(obj);
-				resp = {"made a "};
-				resp += typ;
-				resp += " named ";
-				resp += nam;
-				resp += "\n";
-			};
-			auto makeStoreConf = [&](Serialize * obj, const string& type, const string& nam) {
-				obj->m_name = nam + string("_");
-				g_objs.push_back(obj);
-				resp  = {"made a store ("};
-				resp += type;
-				resp += ") named ";
-				resp += nam;
-				resp += "\n";
-			};
-			auto clamp01 = [&](float v) {
-				return (v > 1 ? 1 : (v < 0 ? 0 : v));
-			};
-			auto g_objsRm = [&](Serialize* sx) {
-				int j = -1;
-				for (unsigned int i=0; i<g_objs.size(); i++) {
-					if (g_objs[i] == sx) j = i;
-				}
-				if (j>=0) g_objs.erase(g_objs.begin()+j);
-			};
-			auto beg = tokens.begin();
-			if ((*beg) == string("make")) {
-				beg++;
-				if ((*beg) == string("circle")) {
-					typ = string("circle");
-					beg++;
-					name = typ;
-					Circle *shp = new Circle(0.5, 64);
-					if (beg != tokens.end())
-						name = (*beg); //name of the circle.
-					makeConf(shp, name);
-				} else if ((*beg) == string("ring")) {
-					typ = string("ring");
-					beg++;
-					float thick = 0.2;
-					name = typ;
-					if (beg != tokens.end()) {
-						name = (*beg);
-						beg++;
+				mutex_gobjs.unlock();
+				// variables which are the other direction -- e.g. polhemus --
+				// should be stored when *they* are recieved.
+				usleep(100); //let the kernel sync memory (required..)
+				g_matlabTimer.enter();
+				code = 0; // = OK -- matlab waits for this response.
+				write(pipe_out.m_fd, (void *)&code, 4);
+				bufn = 0;
+			} else {
+				//setup command?
+				mutex_gobjs.lock();
+				string txt = string(buf);
+				char_separator<char> sep("\", ");
+				tokenizer<char_separator<char> > tokens(txt, sep);
+				string resp = {""};
+				string typ = {""};
+				string name = {"null"};
+				auto sendResponse = [&](string q) {
+					code = q.size();
+					write(pipe_out.m_fd, (void *)&code, 4); //this so we know how much to seek in matlab.
+					write(pipe_out.m_fd, q.c_str(), q.size());
+				};
+				auto makeConf = [&](Serialize* obj, const string& nam) {
+					obj->m_name = nam + string("_");
+					g_objs.push_back(obj);
+					resp = {"made a "};
+					resp += typ;
+					resp += " named ";
+					resp += nam;
+					resp += "\n";
+				};
+				auto makeStoreConf = [&](Serialize * obj, const string& type, const string& nam) {
+					obj->m_name = nam + string("_");
+					g_objs.push_back(obj);
+					resp  = {"made a store ("};
+					resp += type;
+					resp += ") named ";
+					resp += nam;
+					resp += "\n";
+				};
+				auto clamp01 = [&](float v) {
+					return (v > 1 ? 1 : (v < 0 ? 0 : v));
+				};
+				auto g_objsRm = [&](Serialize* sx) {
+					int j = -1;
+					for (unsigned int i=0; i<g_objs.size(); i++) {
+						if (g_objs[i] == sx) j = i;
 					}
-					if (beg != tokens.end()) {
-						thick = clamp01(atof(beg->c_str()));
-						beg++;
-					}
-					Ring *shp = new Ring(0.5*(1-thick), 0.5, 64);
-					makeConf(shp, name);
-				} 
-				else if((*beg) == string("line")){
-					typ = string("line");
+					if (j>=0) g_objs.erase(g_objs.begin()+j);
+				};
+				auto beg = tokens.begin();
+				if ((*beg) == string("make")) {
 					beg++;
-					name = typ;
-					if (beg != tokens.end()) {
-						name = (*beg); // name of the line.
+					if ((*beg) == string("circle")) {
+						typ = string("circle");
 						beg++;
-					}
-					Line *shp = new Line(0.5f);
-					makeConf(shp, name);
-					printf("line created \n");
-				}else if ((*beg) == string("square")) {
-					typ = string("square");
-					beg++;
-					name = typ;
-					if (beg != tokens.end()) {
-						name = (*beg); // name of the square.
+						name = typ;
+						Circle *shp = new Circle(0.5, 64);
+						if (beg != tokens.end())
+							name = (*beg); //name of the circle.
+						makeConf(shp, name);
+					} else if ((*beg) == string("ring")) {
+						typ = string("ring");
 						beg++;
-					}
-					Square *shp = new Square(1.f);
-					makeConf(shp, name);
-				} else if ((*beg) == string("open_square")) {
-					typ = string("open_square");
-					beg++;
-					float thick = 0.2;
-					name = typ;
-					if (beg != tokens.end()) {
-						name = (*beg); // name of the open square
-						beg++;
-					}
-					if (beg != tokens.end()) {
-						thick = clamp01(atof(beg->c_str()));
-						beg++;
-					}
-					OpenSquare *shp = new OpenSquare(1.f-thick, 1.f);
-					makeConf(shp, name);
-				} else if ((*beg) == string("stars")) {
-					typ = string("stars");
-					beg++;
-					name = typ;
-					int numstars = 3000;
-					if (beg != tokens.end()) {
-						name = (*beg);
-						beg++;
+						float thick = 0.2;
+						name = typ;
 						if (beg != tokens.end()) {
-							numstars = abs(atoi(beg->c_str()));	// negatives not allowed
+							name = (*beg);
 							beg++;
 						}
-					}
-					StarField *sf = new StarField();
-					sf->makeStars(numstars);
-					makeConf(sf, name);
-				} else if ((*beg) == string("stars_circle")) {
-					typ = string("stars_circle");
-					beg++;
-					name = typ;
-					int numstars = 3000;
-					if (beg != tokens.end()) {
-						name = (*beg);
-						beg++;
 						if (beg != tokens.end()) {
-							numstars = abs(atoi(beg->c_str()));	// negatives not allowed
+							thick = clamp01(atof(beg->c_str()));
 							beg++;
 						}
-					}
-					StarFieldCircle *sf = new StarFieldCircle();
-					sf->makeStars(numstars);
-					makeConf(sf, name);
-				} else if ((*beg) == string("magnets")) {
-					typ = "magnets";
-					beg++;
-					name = typ;
-					int numlines = 9;
-					if (beg != tokens.end()) {
-						name = (*beg);
+						Ring *shp = new Ring(0.5*(1-thick), 0.5, 64);
+						makeConf(shp, name);
+					} else if ((*beg) == string("line")) {
+						typ = string("line");
 						beg++;
+						name = typ;
 						if (beg != tokens.end()) {
-							numlines = abs(atoi(beg->c_str()));	// negatives not allowed
+							name = (*beg); // name of the line.
 							beg++;
 						}
-					}
-					MagneticField *sf = new MagneticField();
-					sf->makeCompasses(numlines);
-					makeConf(sf, name);
-				} else if ((*beg) == string("text")) {
-					typ = string("text");
-					beg++;
-					name = typ;
-					int nchars = 256;
-					if (beg != tokens.end()) {
-						name = (*beg);
+						Line *shp = new Line(0.5f);
+						makeConf(shp, name);
+						printf("line created \n");
+					} else if ((*beg) == string("square")) {
+						typ = string("square");
 						beg++;
+						name = typ;
 						if (beg != tokens.end()) {
-							nchars = abs(atoi(beg->c_str()));	// negatives not allowed
+							name = (*beg); // name of the square.
 							beg++;
 						}
-					}
-					DisplayText *x = new DisplayText(nchars);
-					makeConf(x, name);
-				} else if ((*beg) == string("tone")) {
-					// make tone <name>
-					// add a tone-interpreter (can add multiple for polyphony)
-					typ = string("tone");
-					beg++;
-					name = typ;
-					if (beg != tokens.end()) {
-						name = (*beg);
+						Square *shp = new Square(1.f);
+						makeConf(shp, name);
+					} else if ((*beg) == string("open_square")) {
+						typ = string("open_square");
 						beg++;
-					}
-					ToneSerialize *tsz = new ToneSerialize();
-					makeConf(tsz, name);
-				} else if (*beg == string("store")) {
-					// make store <type> <size> <name>
-					typ = string("store");
-					beg++;
-					name = typ;
-					string error = {"could not interpret command --\n"};
-					error += {"format is: store <type> <size> <name>"};
-					string typedesc = {"type needs to be one of:\n"};
-					typedesc += {"char, uchar, int, float, double\n"};
-					if (beg != tokens.end()) {
-						string type = *beg++;
+						float thick = 0.2;
+						name = typ;
 						if (beg != tokens.end()) {
-							string ssize = *beg++;
-							int size = atoi(ssize.c_str());
-							if (beg != tokens.end() && size > 0 && size < 1024) {
-								name = (*beg++);
-								//good, we have all the parameters
-								if (type == string("char")) {
-									VectorSerialize<char> *obj =
-									    new VectorSerialize<char>(size, MAT_C_INT8);
-									makeStoreConf(obj, type, name);
-								} else if (type == string("uchar")) {
-									VectorSerialize<unsigned char> *obj =
-									    new VectorSerialize<unsigned char>(size, MAT_C_UINT8);
-									makeStoreConf(obj, type, name);
-								} else if (type == string("int")) {
-									VectorSerialize<int> *obj =
-									    new VectorSerialize<int>(size, MAT_C_INT32);
-									makeStoreConf(obj, type, name);
-								} else if (type == string("float")) {
-									VectorSerialize<float> *obj =
-									    new VectorSerialize<float>(size, MAT_C_SINGLE);
-									makeStoreConf(obj, type, name);
-								} else if (type == string("double")) {
-									VectorSerialize<double> *obj =
-									    new VectorSerialize<double>(size, MAT_C_DOUBLE);
-									makeStoreConf(obj, type, name);
-								} else {
-									resp = {"could not generate a store --\n"};
-									resp += typedesc;
-								}
-							} else resp = error + typedesc;
-						} else resp = error + typedesc;
-					} else resp = error + typedesc;
-				} else if (*beg == string("polhemus")) {
-					// make polhemus
-					// (or)
-					// make polhemus <name>
-					// (or)
-					// make polhemus <name> <nsensors>
-					if (g_polhemusConnected) {
-						typ = string("polhemus");
+							name = (*beg); // name of the open square
+							beg++;
+						}
+						if (beg != tokens.end()) {
+							thick = clamp01(atof(beg->c_str()));
+							beg++;
+						}
+						OpenSquare *shp = new OpenSquare(1.f-thick, 1.f);
+						makeConf(shp, name);
+					} else if ((*beg) == string("stars")) {
+						typ = string("stars");
+						beg++;
+						name = typ;
+						int numstars = 3000;
+						if (beg != tokens.end()) {
+							name = (*beg);
+							beg++;
+							if (beg != tokens.end()) {
+								numstars = abs(atoi(beg->c_str()));	// negatives not allowed
+								beg++;
+							}
+						}
+						StarField *sf = new StarField();
+						sf->makeStars(numstars);
+						makeConf(sf, name);
+					} else if ((*beg) == string("stars_circle")) {
+						typ = string("stars_circle");
+						beg++;
+						name = typ;
+						int numstars = 3000;
+						if (beg != tokens.end()) {
+							name = (*beg);
+							beg++;
+							if (beg != tokens.end()) {
+								numstars = abs(atoi(beg->c_str()));	// negatives not allowed
+								beg++;
+							}
+						}
+						StarFieldCircle *sf = new StarFieldCircle();
+						sf->makeStars(numstars);
+						makeConf(sf, name);
+					} else if ((*beg) == string("magnets")) {
+						typ = "magnets";
+						beg++;
+						name = typ;
+						int numlines = 9;
+						if (beg != tokens.end()) {
+							name = (*beg);
+							beg++;
+							if (beg != tokens.end()) {
+								numlines = abs(atoi(beg->c_str()));	// negatives not allowed
+								beg++;
+							}
+						}
+						MagneticField *sf = new MagneticField();
+						sf->makeCompasses(numlines);
+						makeConf(sf, name);
+					} else if ((*beg) == string("text")) {
+						typ = string("text");
+						beg++;
+						name = typ;
+						int nchars = 256;
+						if (beg != tokens.end()) {
+							name = (*beg);
+							beg++;
+							if (beg != tokens.end()) {
+								nchars = abs(atoi(beg->c_str()));	// negatives not allowed
+								beg++;
+							}
+						}
+						DisplayText *x = new DisplayText(nchars);
+						makeConf(x, name);
+					} else if ((*beg) == string("tone")) {
+						// make tone <name>
+						// add a tone-interpreter (can add multiple for polyphony)
+						typ = string("tone");
 						beg++;
 						name = typ;
 						if (beg != tokens.end()) {
 							name = (*beg);
 							beg++;
 						}
-						int nsensors = 1;
-						if (beg != tokens.end()) {
-							nsensors = atoi(beg->c_str());
-							beg++;
-						}
-						g_objsRm(g_polhemus);
-						if (g_polhemus)
-							delete g_polhemus;
-						nsensors = nsensors < 1 ? 1 : (nsensors > 8 ? 8 : nsensors);
-						g_polhemus = new PolhemusSerialize(nsensors);
-						makeConf(g_polhemus, name);
-					} else {
-						resp = string("could not initialize polhemus object ");
-						resp += string(" -- not connected.\n");
-					}
-				} else if (*beg == string("mouse")) {
-					// make mouse <name> -- simple mouse control.
-					typ = string("mouse");
-					beg++;
-					name = typ;
-					if (beg != tokens.end()) {
-						name = *beg;
+						ToneSerialize *tsz = new ToneSerialize();
+						makeConf(tsz, name);
+					} else if (*beg == string("store")) {
+						// make store <type> <size> <name>
+						typ = string("store");
 						beg++;
-					}
-					g_objsRm(g_mouse);
-					if (g_mouse) delete g_mouse;
-					g_mouse = new MouseSerialize();
-					makeConf(g_mouse, name);
-				} else if (*beg == string("optotrak")) {
-					// optotrak <name> <nsensors> -- definitely more options later!
-					if (g_optoConnected) {
-						typ = string("optotrak");
+						name = typ;
+						string error = {"could not interpret command --\n"};
+						error += {"format is: store <type> <size> <name>"};
+						string typedesc = {"type needs to be one of:\n"};
+						typedesc += {"char, uchar, int, float, double\n"};
+						if (beg != tokens.end()) {
+							string type = *beg++;
+							if (beg != tokens.end()) {
+								string ssize = *beg++;
+								int size = atoi(ssize.c_str());
+								if (beg != tokens.end() && size > 0 && size < 1024) {
+									name = (*beg++);
+									//good, we have all the parameters
+									if (type == string("char")) {
+										VectorSerialize<char> *obj =
+										    new VectorSerialize<char>(size, MAT_C_INT8);
+										makeStoreConf(obj, type, name);
+									} else if (type == string("uchar")) {
+										VectorSerialize<unsigned char> *obj =
+										    new VectorSerialize<unsigned char>(size, MAT_C_UINT8);
+										makeStoreConf(obj, type, name);
+									} else if (type == string("int")) {
+										VectorSerialize<int> *obj =
+										    new VectorSerialize<int>(size, MAT_C_INT32);
+										makeStoreConf(obj, type, name);
+									} else if (type == string("float")) {
+										VectorSerialize<float> *obj =
+										    new VectorSerialize<float>(size, MAT_C_SINGLE);
+										makeStoreConf(obj, type, name);
+									} else if (type == string("double")) {
+										VectorSerialize<double> *obj =
+										    new VectorSerialize<double>(size, MAT_C_DOUBLE);
+										makeStoreConf(obj, type, name);
+									} else {
+										resp = {"could not generate a store --\n"};
+										resp += typedesc;
+									}
+								} else resp = error + typedesc;
+							} else resp = error + typedesc;
+						} else resp = error + typedesc;
+					} else if (*beg == string("polhemus")) {
+						// make polhemus
+						// (or)
+						// make polhemus <name>
+						// (or)
+						// make polhemus <name> <nsensors>
+						if (g_polhemusConnected) {
+							typ = string("polhemus");
+							beg++;
+							name = typ;
+							if (beg != tokens.end()) {
+								name = (*beg);
+								beg++;
+							}
+							int nsensors = 1;
+							if (beg != tokens.end()) {
+								nsensors = atoi(beg->c_str());
+								beg++;
+							}
+							g_objsRm(g_polhemus);
+							if (g_polhemus)
+								delete g_polhemus;
+							nsensors = nsensors < 1 ? 1 : (nsensors > 8 ? 8 : nsensors);
+							g_polhemus = new PolhemusSerialize(nsensors);
+							makeConf(g_polhemus, name);
+						} else {
+							resp = string("could not initialize polhemus object ");
+							resp += string(" -- not connected.\n");
+						}
+					} else if (*beg == string("mouse")) {
+						// make mouse <name> -- simple mouse control.
+						typ = string("mouse");
 						beg++;
 						name = typ;
 						if (beg != tokens.end()) {
 							name = *beg;
 							beg++;
 						}
-						int nsensors = 1;
+						g_objsRm(g_mouse);
+						if (g_mouse) delete g_mouse;
+						g_mouse = new MouseSerialize();
+						makeConf(g_mouse, name);
+					} else if (*beg == string("optotrak")) {
+						// optotrak <name> <nsensors> -- definitely more options later!
+						if (g_optoConnected) {
+							typ = string("optotrak");
+							beg++;
+							name = typ;
+							if (beg != tokens.end()) {
+								name = *beg;
+								beg++;
+							}
+							int nsensors = 1;
+							if (beg != tokens.end()) {
+								nsensors = atoi(beg->c_str());
+								beg++;
+							}
+							g_objsRm(g_opto);
+							if (g_opto)
+								delete g_opto;
+							nsensors = nsensors < 1 ? 1 : (nsensors > 10 ? 10 : nsensors);
+							g_opto = new OptoSerialize(nsensors);
+							makeConf(g_opto, name);
+						} else {
+							resp = string("could not initialize optotrack object ");
+							resp += string(" -- not connected.\n");
+						}
+					} else if (*beg == string("tdtudp")) {
+						// make tdtudp <name> <size> <ipaddress>
+						typ = string("tdtudp");
+						beg++;
+						name = typ;
+						resp  = string("could not interpret command --\n");
+						resp += "format is tdtudp <name> <size> <ipaddress>\n";
 						if (beg != tokens.end()) {
-							nsensors = atoi(beg->c_str());
+							name = *beg;
 							beg++;
 						}
-						g_objsRm(g_opto);
-						if (g_opto)
-							delete g_opto;
-						nsensors = nsensors < 1 ? 1 : (nsensors > 10 ? 10 : nsensors);
-						g_opto = new OptoSerialize(nsensors);
-						makeConf(g_opto, name);
-					} else {
-						resp = string("could not initialize optotrack object ");
-						resp += string(" -- not connected.\n");
-					}
-				} else if (*beg == string("tdtudp")) {
-					// make tdtudp <name> <size> <ipaddress>
-					typ = string("tdtudp");
-					beg++;
-					name = typ;
-					resp  = string("could not interpret command --\n");
-					resp += "format is tdtudp <name> <size> <ipaddress>\n";
-					if (beg != tokens.end()) {
-						name = *beg;
-						beg++;
-					}
-					if (beg != tokens.end()) {
-						string ssize = *beg++;
-						int size = atoi(ssize.c_str());
-						if (beg != tokens.end() && size > 0 && size < 256) {
-							string ipaddr = *beg++;
-							int sock = openSocket((char *)ipaddr.c_str(), LISTEN_PORT);
-							if (sock == 0) {
-								resp = string("could not open socket to ") + ipaddr;
-							} else {
-								if (!checkRZ(sock)) {
-									resp = string("there does not seem to be an RZ2 at")+ipaddr;
+						if (beg != tokens.end()) {
+							string ssize = *beg++;
+							int size = atoi(ssize.c_str());
+							if (beg != tokens.end() && size > 0 && size < 256) {
+								string ipaddr = *beg++;
+								int sock = openSocket((char *)ipaddr.c_str(), LISTEN_PORT);
+								if (sock == 0) {
+									resp = string("could not open socket to ") + ipaddr;
 								} else {
-									TdtUdpSerialize *obj = new TdtUdpSerialize(sock, size);
-									makeConf(obj, name);
-									resp = string("successfully made a UDP connection object to")+ipaddr;
+									if (!checkRZ(sock)) {
+										resp = string("there does not seem to be an RZ2 at")+ipaddr;
+									} else {
+										TdtUdpSerialize *obj = new TdtUdpSerialize(sock, size);
+										makeConf(obj, name);
+										resp = string("successfully made a UDP connection object to")+ipaddr;
+									}
 								}
 							}
 						}
+					} else if (*beg == string("labjack")) {
+						// make labjack <name> <number of analog inputs> <number of digital outputs>
+						if (g_labjackConnected) {
+							typ = string("labjack");
+							beg++;
+							name = typ;
+							if (beg != tokens.end()) {
+								name = (*beg);
+								beg++;
+							}
+							int nsensors = 1;
+							int nchannels = 1;
+							if (beg != tokens.end()) {
+								nsensors = atoi(beg->c_str());
+								beg++;
+							}
+							if (beg != tokens.end()) {
+								nchannels = atoi(beg->c_str());
+								beg++;
+							}
+							g_objsRm(g_labjack_AIN);
+							g_objsRm(g_labjack_DOUT);
+							if (g_labjack_AIN)
+								delete g_labjack_AIN;
+							if (g_labjack_DOUT)
+								delete g_labjack_DOUT;
+							nsensors = nsensors < 1 ? 1 : (nsensors > 8 ? 8 : nsensors);
+							nchannels = nchannels < 1 ? 1 : (nchannels > 8 ? 8 : nchannels);
+							g_labjack_AIN = new LabjackSerializeAIN(nsensors);
+							g_labjack_DOUT = new LabjackSerializeDOUT(nchannels);
+							makeConf(g_labjack_AIN, name + string("AIN"));
+							makeConf(g_labjack_DOUT, name + string("DOUT"));
+						} else {
+							resp = string("could not initialize labjack object ");
+							resp += string(" -- not connected.\n");
+						}
 					}
-				} else if (*beg == string("labjack")) {
-					// make labjack <name> <number of analog inputs> <number of digital outputs>
-					if (g_labjackConnected) {
-						typ = string("labjack");
-						beg++;
-						name = typ;
-						if (beg != tokens.end()) {
-							name = (*beg);
-							beg++;
-						}
-						int nsensors = 1;
-						int nchannels = 1;
-						if (beg != tokens.end()) {
-							nsensors = atoi(beg->c_str());
-							beg++;
-						}
-						if (beg != tokens.end()) {
-							nchannels = atoi(beg->c_str());
-							beg++;
-						}
-						g_objsRm(g_labjack_AIN);
-						g_objsRm(g_labjack_DOUT);
-						if (g_labjack_AIN)
-							delete g_labjack_AIN;
-						if (g_labjack_DOUT)
-							delete g_labjack_DOUT;
-						nsensors = nsensors < 1 ? 1 : (nsensors > 8 ? 8 : nsensors);
-						nchannels = nchannels < 1 ? 1 : (nchannels > 8 ? 8 : nchannels);
-						g_labjack_AIN = new LabjackSerializeAIN(nsensors);
-						g_labjack_DOUT = new LabjackSerializeDOUT(nchannels);
-						makeConf(g_labjack_AIN, name + string("AIN"));
-						makeConf(g_labjack_DOUT, name + string("DOUT"));
-					} else {
-						resp = string("could not initialize labjack object ");
-						resp += string(" -- not connected.\n");
+				} else if (*beg == string("mmap")) {
+					// return the mmapinfo.
+					resp = getMmapStructure();
+				} else if (*beg == string("clear_all")) {
+					printf("clearing all data in memory\n");
+					for (unsigned int i=0; i<g_objs.size(); i++)
+						g_objs[i]->clear();
+					resp = {"cleared all stored data\n"};
+				} else if (*beg == string("delete_all")) {
+					printf("deleting all objects\n");
+					//prevent dangling pointers -- these all can be deleted through g_objs
+					if (g_polhemus) g_polhemus = 0;
+					if (g_mouse) g_mouse = 0;
+					if (g_opto) g_opto = 0;
+					if (g_labjack_AIN) g_labjack_AIN = 0;
+					if (g_labjack_DOUT) g_labjack_DOUT = 0;
+					for (unsigned int i=0; i<g_objs.size(); i++) {
+						delete g_objs[i];
 					}
+					resp = {"all objects deleted.\n"};
+					g_objs.clear();
+					gobjsInit(); //timing, etc.
+				} else if (*beg == string("save")) {
+					beg++;
+					if (beg != tokens.end()) {
+						string fname = *beg;
+						mutex_fwrite.lock();
+						writeMatlab(g_objs, (char *)fname.c_str(), false);
+						mutex_fwrite.unlock();
+						resp = string("saved file ");
+						resp += fname;
+						resp += {"\n"};
+					}
+				} else if (*beg == string("start_recording")) {
+					beg++;
+					g_record = true;
+					resp = string("started recording.");
+				} else if (*beg == string("stop_recording")) {
+					beg++;
+					g_record = false;
+					resp = string("stopped recording.");
+				} else {
+					resp = {"Current command vocabulary:\n"};
+					resp += {"\tmake circle <name>\n"};
+					resp += {"\tmake ring <name> <frac thickness>\n"};
+					resp += {"\tmake line <name>\n"};
+					resp += {"\tmake square <name>\n"};
+					resp += {"\tmake open_square <name> <frac thickness>\n"};
+					resp += {"\tmake stars <name> <num stars>\n"};
+					resp += {"\tmake stars_circle <name> <num stars>\n"};
+					resp += {"\tmake magnets <name> <num stars>\n"};
+					resp += {"\tmake text <name> <nchars>\n"};
+					resp += {"\t\tDisplays text on the screen.\n"};
+					resp += {"\t\tnchars should be less than 256\n"};
+					resp += {"\t\t<name>_v in b5 structure MUST NOT CHANGE SIZE.\n"};
+					resp += {"\t\te.g. you cannot only do b5.text_v = 'something';\n"};
+					resp += {"\t\tdo: b5.text_v = [double(msg) zeros(1,nchars-length(msg))]';"};
+					resp += {"\tmake tone <name>\n"};
+					resp += {"\t\tmake a tone generator\n"};
+					resp += {"\tmake store <type> <size> <name>\n"};
+					resp += {"\t\tmake a generic store for matlab data --\n"};
+					resp += {"\t\t<type> can be char, uchar, int, float, or double.\n"};
+					resp += {"\t\t<size> is the size of the vector\n"};
+					resp += {"\t\tNOTE: in b5, all vectors are type DOUBLE,\n"};
+					resp += {"\t\tindependent of disc storage type\n"};
+					resp += {"\tmake polhemus <name> [<nsensors>]-- for getting polhemus sensor loc\n"};
+					resp += {"\tmake mouse <name> -- for getting mouse location\n"};
+					resp += {"\tmake optotrak <name> [<nsensors>] -- for getting optotrak location\n"};
+					resp += {"\tmake labjack <name> [<nsensors>] -- for getting analog input\n"};
+					resp += {"\tmake tdtudp <name> <size> <ipaddress> -- for talking to TDT\n"};
+					resp += {"\tmmap\n"};
+					resp += {"\t\treturn mmap structure information, for eval() in matlab\n"};
+					resp += {"\tclear_all\n"};
+					resp += {"\t\tclear data stored in memory (e.g. when starting an experiment)\n"};
+					resp += {"\tdelete_all\n"};
+					resp += {"\t\tdelete all objects (shapes etc) & reinstate timing objects.\n"};
+					resp += {"\tstart_recording\n"};
+					resp += {"\tstop_recording\n"};
+					resp += {"\tsave <file name>\n"};
 				}
-			} else if (*beg == string("mmap")) {
-				// return the mmapinfo.
-				resp = getMmapStructure();
-			} else if (*beg == string("clear_all")) {
-				printf("clearing all data in memory\n");
-				for (unsigned int i=0; i<g_objs.size(); i++)
-					g_objs[i]->clear();
-				resp = {"cleared all stored data\n"};
-			} else if (*beg == string("delete_all")) {
-				printf("deleting all objects\n");
-				//prevent dangling pointers -- these all can be deleted through g_objs
-				if (g_polhemus) g_polhemus = 0;
-				if (g_mouse) g_mouse = 0;
-				if (g_opto) g_opto = 0;
-				if (g_labjack_AIN) g_labjack_AIN = 0;
-				if (g_labjack_DOUT) g_labjack_DOUT = 0;
-				for (unsigned int i=0; i<g_objs.size(); i++) {
-					delete g_objs[i];
-				}
-				resp = {"all objects deleted.\n"};
-				g_objs.clear();
-				gobjsInit(); //timing, etc.
-			} else if (*beg == string("save")) {
-				beg++;
-				if (beg != tokens.end()) {
-					string fname = *beg;
-					pthread_mutex_lock(&mutex_fwrite);
-					writeMatlab(g_objs, (char *)fname.c_str(), false);
-					pthread_mutex_unlock(&mutex_fwrite);
-					resp = string("saved file ");
-					resp += fname;
-					resp += {"\n"};
-				}
-			} else if (*beg == string("start_recording")) {
-				beg++;
-				g_record = true;
-				resp = string("started recording.");
-			} else if (*beg == string("stop_recording")) {
-				beg++;
-				g_record = false;
-				resp = string("stopped recording.");
-			} else {
-				resp = {"Current command vocabulary:\n"};
-				resp += {"\tmake circle <name>\n"};
-				resp += {"\tmake ring <name> <frac thickness>\n"};
-				resp += {"\tmake line <name>\n"};
-				resp += {"\tmake square <name>\n"};
-				resp += {"\tmake open_square <name> <frac thickness>\n"};
-				resp += {"\tmake stars <name> <num stars>\n"};
-				resp += {"\tmake stars_circle <name> <num stars>\n"};
-				resp += {"\tmake magnets <name> <num stars>\n"};
-				resp += {"\tmake text <name> <nchars>\n"};
-				resp += {"\t\tDisplays text on the screen.\n"};
-				resp += {"\t\tnchars should be less than 256\n"};
-				resp += {"\t\t<name>_v in b5 structure MUST NOT CHANGE SIZE.\n"};
-				resp += {"\t\te.g. you cannot only do b5.text_v = 'something';\n"};
-				resp += {"\t\tdo: b5.text_v = [double(msg) zeros(1,nchars-length(msg))]';"};
-				resp += {"\tmake tone <name>\n"};
-				resp += {"\t\tmake a tone generator\n"};
-				resp += {"\tmake store <type> <size> <name>\n"};
-				resp += {"\t\tmake a generic store for matlab data --\n"};
-				resp += {"\t\t<type> can be char, uchar, int, float, or double.\n"};
-				resp += {"\t\t<size> is the size of the vector\n"};
-				resp += {"\t\tNOTE: in b5, all vectors are type DOUBLE,\n"};
-				resp += {"\t\tindependent of disc storage type\n"};
-				resp += {"\tmake polhemus <name> [<nsensors>]-- for getting polhemus sensor loc\n"};
-				resp += {"\tmake mouse <name> -- for getting mouse location\n"};
-				resp += {"\tmake optotrak <name> [<nsensors>] -- for getting optotrak location\n"};
-				resp += {"\tmake labjack <name> [<nsensors>] -- for getting analog input\n"};
-				resp += {"\tmake tdtudp <name> <size> <ipaddress> -- for talking to TDT\n"};
-				resp += {"\tmmap\n"};
-				resp += {"\t\treturn mmap structure information, for eval() in matlab\n"};
-				resp += {"\tclear_all\n"};
-				resp += {"\t\tclear data stored in memory (e.g. when starting an experiment)\n"};
-				resp += {"\tdelete_all\n"};
-				resp += {"\t\tdelete all objects (shapes etc) & reinstate timing objects.\n"};
-				resp += {"\tstart_recording\n"};
-				resp += {"\tstop_recording\n"};
-				resp += {"\tsave <file name>\n"};
+				mutex_gobjs.unlock();
+				sendResponse(resp);
+				usleep(200000); //does not seem to limit the frame rate, just the startup sync.
+				bufn = 0;
 			}
-			pthread_mutex_unlock(&mutex_gobjs);
-			sendResponse(resp);
-			usleep(200000); //does not seem to limit the frame rate, just the startup sync.
-			bufn = 0;
+			g_nCommand++;
 		}
-		g_nCommand++;
 	}
-	return NULL;
 }
-void *backup_thread(void *)
+void backup_thread()
 {
 	//find a directory, see if it exist; if not make it.
 	time_t t = time(NULL);
@@ -992,14 +998,13 @@ void *backup_thread(void *)
 		if (!g_die && g_do_backup && matlabHasNewData(g_objs)) {
 			char fname[256];
 			snprintf(fname, 256, "%s/backup_%04d.mat", dirname, k);
-			pthread_mutex_lock(&mutex_fwrite);
+			mutex_fwrite.lock();
 			writeMatlab(g_objs, fname, true);
-			pthread_mutex_unlock(&mutex_fwrite);
+			mutex_fwrite.unlock();
 			printf("... saved %s\n", fname);
 			k++;
 		}
 	}
-	return 0;
 }
 /* Liberty / Polhemus.
  as reading from USB / serial will take some time, it makes sense to
@@ -1015,7 +1020,7 @@ char g_circBuff[1024];
 unsigned int g_cbPtr = 0;	// write pointer
 unsigned int g_cbRN = 0; 	// pointer to the last carrige return (read pointer).
 
-void *polhemus_thread(void *)
+void polhemus_thread()
 {
 	unsigned char buf[BUF_SIZE];
 	int count, len, i;
@@ -1024,7 +1029,6 @@ void *polhemus_thread(void *)
 	polhemus *pol = new polhemus();
 	if (!pol) {
 		printf("Memory Allocation Error creating tracker object\n");
-		return NULL;
 	}
 	int fail;
 	//fail = pol->UsbConnect(TRKR_LIB); //see polhemus.h
@@ -1060,7 +1064,6 @@ void *polhemus_thread(void *)
 	} else {
 		cout << "polhemus: connection established .." << endl;
 		// first establish comm and clear out any residual trash data
-		double frames = 0;
 		float markerData[16*3];
 
 		pol->Write("U1\r"); // put polhemus in centimeter mode (no response is sent)
@@ -1127,14 +1130,13 @@ void *polhemus_thread(void *)
 					buf[i] = 0; // not sure why we need to do this? xxx
 					// this data is used, move the pointer forward one frame
 					g_cbRN += 20;
-					float *pData=(float *)(buf+8);			// header is first 8 bytes
+					float *pData=(float *)(buf+8); // header is first 8 bytes
 					if (g_polhemus && g_record) {
 						for (int j=0; j<3; j++)
 							markerData[(markerid-1)*3 + j] = pData[j];
 						if (markerid ==  g_polhemus->m_nsensors)
 							g_polhemus->store(markerData);
 					}
-					frames += 1;
 					usleep(1800);
 				}
 			}
@@ -1157,11 +1159,10 @@ void *polhemus_thread(void *)
 		//len = pol->Read(buf, BUF_SIZE); //throw away.
 	}
 	pol->Close();
-	return NULL;
 }
 
 #ifdef OPTO
-void *opto_thread(void *)
+void opto_thread()
 {
 	pcap_t *handle;			/* Session handle */
 	char dev[PCAP_ERRBUF_SIZE];			/* The device to sniff on */
@@ -1288,12 +1289,11 @@ void *opto_thread(void *)
 	}
 	/* And close the session */
 	pcap_close(handle);
-	return (void *)0;
 }
 #endif
 
 #ifdef LABJACK
-void *labjack_thread(void *)
+void labjack_thread()
 {
 	const uint8 settlingFactor = 0; //0=5us, 1=10us, 2=100us, 3=1ms, 4=10ms.  Default 0.
 	const uint8 gainIndex = 2; //0 = +-10V, 1 = +-1V, 2 = +-100mV, 3 = +-10mV, 15=autorange.  Default 0.
@@ -1519,7 +1519,6 @@ cleanmem:
 	printf("labjack: closing USB handle\n");
 	closeUSBConnection(hDevice);
 	g_labjackLabelStr = string("Error!  Disconnected.\nTry unplugging the labjack\nand restarting bmi5.");
-	return 0;
 }
 #endif
 
@@ -1538,9 +1537,9 @@ static void saveMatlabData(gpointer, gpointer parent_window)
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
 		char *filename;
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-		pthread_mutex_lock(&mutex_fwrite);
+		mutex_fwrite.lock();
 		writeMatlab(g_objs, filename, false);
-		pthread_mutex_unlock(&mutex_fwrite);
+		mutex_fwrite.unlock();
 		g_free (filename);
 	}
 	gtk_widget_destroy (dialog);
@@ -1805,25 +1804,21 @@ int main(int argn, char **argc)
 	g_labjack_AIN = 0;
 	g_labjack_DOUT = 0;
 	g_mouse = 0;
-	pthread_mutex_lock(&mutex_gobjs);
+
+	mutex_gobjs.lock();
 	gobjsInit();
-	pthread_mutex_unlock(&mutex_gobjs);
+	mutex_gobjs.unlock();
 
-	//mutexes --
-	pthread_mutex_init(&mutex_fwrite, NULL);
-	pthread_mutex_init(&mutex_gobjs, NULL);
+	std::vector <std::thread> threads;
 
-	pthread_t pthread, mthread, bthread;
-	pthread_create(&pthread, NULL, polhemus_thread, NULL);
-	pthread_create(&mthread, NULL, mmap_thread, NULL);
-	pthread_create(&bthread, NULL, backup_thread, NULL);
+	threads.push_back(std::thread(polhemus_thread));
+	threads.push_back(std::thread(mmap_thread));
+	threads.push_back(std::thread(backup_thread));
 #ifdef OPTO
-	pthread_t othread;
-	pthread_create(&othread, NULL, opto_thread, NULL);
+	threads.push_back(std::thread(opto_thread));
 #endif
 #ifdef LABJACK
-	pthread_t lthread;
-	pthread_create(&lthread, NULL, labjack_thread, NULL);
+	threads.push_back(std::thread(labjack_thread));
 #endif
 
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
@@ -1855,18 +1850,12 @@ int main(int argn, char **argc)
 #ifdef JACK
 	jackClose(0);
 #endif
-#ifdef LABJACK
-	pthread_join(lthread,NULL);
-#endif
-#ifdef OPTO
-	pthread_join(othread,NULL);
-#endif
-	// can't join mthread easily since the read on the pipe is blocking
-	pthread_join(mthread,NULL);
-	pthread_join(pthread,NULL);  // wait for the read thread to complete
 
-	pthread_mutex_destroy(&mutex_fwrite);
-	pthread_mutex_destroy(&mutex_gobjs);
+	for (auto &thread : threads) {
+		//std::cout << thread.get_id() << " ... joining ... ";
+		thread.join();
+		//std::cout << "joined\n";
+	}
 
 	for (unsigned int i=0; i<g_objs.size(); i++) {
 		delete (g_objs[i]);
