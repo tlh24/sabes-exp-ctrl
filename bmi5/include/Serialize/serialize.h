@@ -23,7 +23,7 @@ class Serialize
 public:
 	string	m_name;
 	int		m_lastBackup; //index+1 of last record saved to backup.
-	
+
 	Serialize();
 	virtual ~Serialize();
 	void perr(const char *method);
@@ -51,4 +51,3 @@ size_t matlabFileSize(vector<Serialize *> tosave);
 size_t mmapFileSize(vector<Serialize *> tosave);
 bool matlabHasNewData(vector<Serialize *> tosave);
 #endif
-

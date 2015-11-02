@@ -18,70 +18,70 @@ typedef unsigned int uint32;
 
 //Structure for storing calibration constants
 struct U6_CALIBRATION_INFORMATION {
-    uint8 prodID;
-    uint8 hiRes;
-    double ccConstants[40];
-    /*
-    Calibration constants order
-    0 - AIN +-10V Slope, GainIndex=0
-    1 - AIN +-10V Offset, GainIndex=0
-    2 - AIN +-1V Slope, GainIndex=1
-    3 - AIN +-1V Offset, GainIndex=1
-    4 - AIN +-100mV Slope, GainIndex=2
-    5 - AIN +-100mV Offset, GainIndex=2
-    6 - AIN +-10mV Slope, GainIndex=3
-    7 - AIN +-10mV Offset, GainIndex=3
-    8 - AIN +-10V Neg. Slope, GainIndex=0
-    9 - AIN +-10V Center Pt., GainIndex=0
-    10 - AIN +-1V Neg. Slope, GainIndex=1
-    11 - AIN +-1V Center Pt., GainIndex=1
-    12 - AIN +-100mV Neg. Slope, GainIndex=2
-    13 - AIN +-100mV Center Pt., GainIndex=2
-    14 - AIN +-10mV Neg. Slope, GainIndex=3
-    15 - AIN +-10mV Center Pt., GainIndex=3
-    16 - DAC0 Slope
-    17 - DAC0 Offset
-    18 - DAC1 Slope
-    19 - DAC1 Offset
-    20 - Current Output 0
-    21 - Current Output 1
-    22 - Temperature Slope
-    23 - Temperature Offset
+	uint8 prodID;
+	uint8 hiRes;
+	double ccConstants[40];
+	/*
+	Calibration constants order
+	0 - AIN +-10V Slope, GainIndex=0
+	1 - AIN +-10V Offset, GainIndex=0
+	2 - AIN +-1V Slope, GainIndex=1
+	3 - AIN +-1V Offset, GainIndex=1
+	4 - AIN +-100mV Slope, GainIndex=2
+	5 - AIN +-100mV Offset, GainIndex=2
+	6 - AIN +-10mV Slope, GainIndex=3
+	7 - AIN +-10mV Offset, GainIndex=3
+	8 - AIN +-10V Neg. Slope, GainIndex=0
+	9 - AIN +-10V Center Pt., GainIndex=0
+	10 - AIN +-1V Neg. Slope, GainIndex=1
+	11 - AIN +-1V Center Pt., GainIndex=1
+	12 - AIN +-100mV Neg. Slope, GainIndex=2
+	13 - AIN +-100mV Center Pt., GainIndex=2
+	14 - AIN +-10mV Neg. Slope, GainIndex=3
+	15 - AIN +-10mV Center Pt., GainIndex=3
+	16 - DAC0 Slope
+	17 - DAC0 Offset
+	18 - DAC1 Slope
+	19 - DAC1 Offset
+	20 - Current Output 0
+	21 - Current Output 1
+	22 - Temperature Slope
+	23 - Temperature Offset
 
-    High Resolution
-    24 - AIN +-10V Slope, GainIndex=0
-    25 - AIN +-10V Offset, GainIndex=0
-    26 - AIN +-1V Slope, GainIndex=1
-    27 - AIN +-1V Offset, GainIndex=1
-    28 - AIN +-100mV Slope, GainIndex=2
-    29 - AIN +-100mV Offset, GainIndex=2
-    30 - AIN +-10mV Slope, GainIndex=3
-    31 - AIN +-10mV Offset, GainIndex=3
-    32 - AIN +-10V Neg. Slope, GainIndex=0
-    33 - AIN +-10V Center Pt., GainIndex=0
-    34 - AIN +-1V Neg. Slope, GainIndex=1
-    35 - AIN +-1V Center Pt., GainIndex=1
-    36 - AIN +-100mV Neg. Slope, GainIndex=2
-    37 - AIN +-100mV Center Pt., GainIndex=2
-    38 - AIN +-10mV Neg. Slope, GainIndex=3
-    39 - AIN +-10mV Center Pt., GainIndex=3
-    */
+	High Resolution
+	24 - AIN +-10V Slope, GainIndex=0
+	25 - AIN +-10V Offset, GainIndex=0
+	26 - AIN +-1V Slope, GainIndex=1
+	27 - AIN +-1V Offset, GainIndex=1
+	28 - AIN +-100mV Slope, GainIndex=2
+	29 - AIN +-100mV Offset, GainIndex=2
+	30 - AIN +-10mV Slope, GainIndex=3
+	31 - AIN +-10mV Offset, GainIndex=3
+	32 - AIN +-10V Neg. Slope, GainIndex=0
+	33 - AIN +-10V Center Pt., GainIndex=0
+	34 - AIN +-1V Neg. Slope, GainIndex=1
+	35 - AIN +-1V Center Pt., GainIndex=1
+	36 - AIN +-100mV Neg. Slope, GainIndex=2
+	37 - AIN +-100mV Center Pt., GainIndex=2
+	38 - AIN +-10mV Neg. Slope, GainIndex=3
+	39 - AIN +-10mV Center Pt., GainIndex=3
+	*/
 
 };
 
 typedef struct U6_CALIBRATION_INFORMATION u6CalibrationInfo;
 
 //Structure for storing LJTDAC calibration constants
-struct U6_TDAC_CALIBRATION_INFORMATION{
-    uint8 prodID;
-    double ccConstants[4];
-    /*
-    DAC Calibration constants order
-    0 - SlopeA;
-    1 - OffsetA;
-    2 - SlopeB;
-    3 - OffsetB;
-    */
+struct U6_TDAC_CALIBRATION_INFORMATION {
+	uint8 prodID;
+	double ccConstants[4];
+	/*
+	DAC Calibration constants order
+	0 - SlopeA;
+	1 - OffsetA;
+	2 - SlopeB;
+	3 - OffsetB;
+	*/
 };
 
 typedef struct U6_TDAC_CALIBRATION_INFORMATION u6TdacCalibrationInfo;
@@ -175,7 +175,7 @@ long getAinVoltCalibrated( u6CalibrationInfo *caliInfo,
 //                  0=default, 1-8 for high speed ADC, 9-13 for higres ADC (U6-Pro).
 //gainIndex = The gain index used when reading the binary AIN voltage.
 //            0 = +-10V, 1 = +-1V, 2 = +-100mV, 3 = +-10mV
-//bits24 = Indicates if the voltage bytes passed is a 24-bit binary value, 
+//bits24 = Indicates if the voltage bytes passed is a 24-bit binary value,
 //         otherwise considered to be 16-bits.
 //bytesVolt = The binary voltage that will be converted.  Can be a 16 or 24 bit
 //            value.

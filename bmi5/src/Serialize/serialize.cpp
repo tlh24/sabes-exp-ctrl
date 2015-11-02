@@ -1,6 +1,9 @@
 #include "../../include/Serialize/serialize.h"
 
-Serialize::Serialize() {}
+Serialize::Serialize()
+{
+	m_lastBackup = 0;
+}
 Serialize::~Serialize()
 {
 	m_lastBackup = 0;

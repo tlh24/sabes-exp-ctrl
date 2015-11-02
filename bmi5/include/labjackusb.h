@@ -45,10 +45,10 @@
 #include <stdbool.h>
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
-typedef void * HANDLE;
+typedef void *HANDLE;
 typedef unsigned int UINT;
 typedef unsigned char BYTE;
 
@@ -92,7 +92,7 @@ unsigned long LJUSB_GetDevCount(unsigned long ProductID);
 //Returns the total number of LabJack USB devices connected.
 //ProductID = The product ID of the devices you want to get the count of.
 
-int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n);
+int LJUSB_GetDevCounts(UINT *productCounts, UINT *productIds, UINT n);
 // Returns the count for n products.
 // productCounts = Array of size n that holds the count
 // productIds = Array of size n which holds the product IDs.
@@ -111,13 +111,13 @@ int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n);
 //   5 SkyMote Bridges
 // connected.
 
-int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices);
+int LJUSB_OpenAllDevices(HANDLE *devHandles, UINT *productIds, UINT maxDevices);
 // Opens all LabJack devices up to a maximum of maxDevices.
 // devHandles = An array of handles with a size of maxDevices
 // productIds = An array of product IDs with a size of maxDevices
 // maxDevices = Maximum number of devices to open.
-// Returns the number of devices actually opened, or -1 if a tragically bad 
-// error occurs. The structure of the arrays is similar to that of 
+// Returns the number of devices actually opened, or -1 if a tragically bad
+// error occurs. The structure of the arrays is similar to that of
 // LJUSB_GetDevCounts above. A simple example would be:
 //   {2341234, 55343, 0, 0, ...}
 //   {3, 0x501, 0, 0, ...}
@@ -150,7 +150,7 @@ unsigned long LJUSB_Read(HANDLE hDevice, BYTE *pBuff, unsigned long count);
 // This function replaces the deprecated LJUSB_BulkRead, which required the endpoint
 
 unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count);
-// Reads from a device's stream interface. 
+// Reads from a device's stream interface.
 // Returns the number of bytes read, or -1 on error.
 // hDevice = The handle for your device
 // pBuff = The buffer to filled in with bytes from the device.

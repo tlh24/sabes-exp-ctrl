@@ -1,8 +1,10 @@
 #include "../../include/Serialize/toneSerialize.h"
+#include "jacksnd.h"
 
 ToneSerialize::ToneSerialize() : Serialize()
 {
 	m_name = "tone_";
+	m_time = 0;
 }
 ToneSerialize::~ToneSerialize()
 {

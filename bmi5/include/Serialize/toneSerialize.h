@@ -3,7 +3,6 @@
 
 #include "serialize.h"
 
-
 class ToneSerialize : public Serialize
 {
 	vector<double> v_time;

@@ -6,7 +6,7 @@
 // this class is for recording arbitrary numbers, in the form of a vector,
 // from matlab.  Can be used for e.g. trial#, trial type, your mommas number ...
 // ... pager number, of course.
-template <class T> 
+template <class T>
 class VectorSerialize : public Serialize
 {
 public:
@@ -34,6 +34,7 @@ public:
 
 template <class T> VectorSerialize<T>::VectorSerialize(int size, int matiotype) : Serialize()
 {
+	m_time = 0;
 	m_size = size;
 	m_type = matiotype;
 	for (int i=0; i<size; i++) {
