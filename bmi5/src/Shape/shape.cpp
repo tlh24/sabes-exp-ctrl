@@ -332,15 +332,14 @@ int Shape::numStores()
 }
 double* Shape::mmapRead(double *d)
 {
-	int i;
 	m_time = gettime();
 	*d++ = m_time;
 	m_draw = (char)floor(*d++);
-	for (i=0; i<4; i++)
+	for (int i=0; i<4; i++)
 		m_color[i] = *d++;
-	for (i=0; i<2; i++)
+	for (int i=0; i<2; i++)
 		m_scale[i] = *d++;
-	for (i=0; i<2; i++)
+	for (int i=0; i<2; i++)
 		m_trans[i] = *d++;
 	m_rot = *d++;
 	return d;

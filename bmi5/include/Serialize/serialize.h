@@ -30,7 +30,7 @@ public:
 	virtual bool 	store();
 	virtual void	clear();
 	virtual int 	nstored();
-	virtual string storeName(int );
+	virtual string 	storeName(int );
 	virtual int 	getStoreClass(int );
 	virtual void	getStoreDims(int , size_t *dims);
 	virtual void	*getStore(int , int);
@@ -44,7 +44,6 @@ public:
 	virtual string getMmapInfo();
 	virtual string getStructInfo();
 };
-
 
 void writeMatlab(vector<Serialize *> tosave, char *filename, bool backup);
 size_t matlabFileSize(vector<Serialize *> tosave);

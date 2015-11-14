@@ -12,6 +12,7 @@ TdtUdpSerialize::TdtUdpSerialize(int sock, int size) : Serialize()
 	}
 	m_bs = 0;
 	m_name = "tdtudp_";
+	m_time = 0;
 }
 TdtUdpSerialize::~TdtUdpSerialize()
 {

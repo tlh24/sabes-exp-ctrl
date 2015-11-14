@@ -5,13 +5,19 @@ ToneSerialize::ToneSerialize() : Serialize()
 {
 	m_name = "tone_";
 	m_time = 0;
+	m_freq = 0;
+	m_pan  = 0;
+	m_scale = 0;
+	m_duration = 0;
+	m_play = 0;
 }
 ToneSerialize::~ToneSerialize()
 {
+	clear();
 }
 bool ToneSerialize::store()
 {
-	return false;       //done in mmapread().
+	return false;        //do it in mmapRead()
 }
 void ToneSerialize::clear()
 {
@@ -62,25 +68,26 @@ int ToneSerialize::getStoreClass(int indx)
 	}
 	return 0;
 }
-void ToneSerialize::getStoreDims(int , size_t *dims)
+void ToneSerialize::getStoreDims(int, size_t *dims)
 {
+	// dims for all stores for tones are 1x1
 	dims[0] = dims[1] = 1;
 }
-void* ToneSerialize::getStore(int indx, int i)
+void* ToneSerialize::getStore(int indx, int k)
 {
 	switch (indx) {
 	case 0:
-		return (void *)&(v_time[i]);
+		return (void *)&(v_time[k]);
 	case 1:
-		return (void *)&(v_freq[i]);
+		return (void *)&(v_freq[k]);
 	case 2:
-		return (void *)&(v_pan[i]);
+		return (void *)&(v_pan[k]);
 	case 3:
-		return (void *)&(v_scale[i]);
+		return (void *)&(v_scale[k]);
 	case 4:
-		return (void *)&(v_duration[i]);
+		return (void *)&(v_duration[k]);
 	case 5:
-		return (void *)&(v_play[i]);
+		return (void *)&(v_play[k]);
 	}
 	return NULL;
 }
@@ -90,24 +97,40 @@ int ToneSerialize::numStores()
 }
 double* ToneSerialize::mmapRead(double *d)
 {
-	float freq = d[1];
-	float pan = d[2];
-	float scale = d[3];
-	float duration = d[4];
-	if (d[5] > 0) {
-#ifdef JACK
-		jackAddToneP(freq, pan, scale, duration);
-#endif
-		m_time  = gettime();
-		v_time.push_back(m_time);
-		v_freq.push_back(freq);
-		v_pan.push_back(pan);
-		v_scale.push_back(scale);
-		v_duration.push_back(duration);
-		v_play.push_back((float)d[5]);
-		d[0] = m_time;	// { xxx this isnt working!
-		d[5] = 0.0;		// reset play
+	m_time = gettime();
+
+	m_freq		= d[1];
+	m_pan  		= d[2];
+	m_scale 	= d[3];
+	m_duration 	= d[4];
+	m_play 		= d[5];
+
+	int n = nstored();
+	bool different = false;
+	if (n>0) {
+		different |= (m_freq != v_freq[n-1]);
+		different |= (m_pan != v_pan[n-1]);
+		different |= (m_scale != v_scale[n-1]);
+		different |= (m_duration != v_duration[n-1]);
 	}
+
+	if (different || m_play) {
+		v_time.push_back(m_time);
+		v_freq.push_back(m_freq);
+		v_pan.push_back(m_pan);
+		v_scale.push_back(m_scale);
+		v_duration.push_back(m_duration);
+		v_play.push_back(m_play);
+		d[0] = m_time;
+	}
+
+	if (m_play > 0) {
+		#ifdef JACK
+		jackAddToneP(m_freq, m_pan, m_scale, m_duration);
+		#endif
+		d[5] = 0;
+	}
+
 	d += 6;
 	return d;
 }

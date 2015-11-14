@@ -1133,7 +1133,7 @@ void polhemus_thread()
 					if (g_polhemus && g_record) {
 						for (int j=0; j<3; j++)
 							markerData[(markerid-1)*3 + j] = pData[j];
-						if (markerid ==  g_polhemus->m_nsensors)
+						if (markerid == g_polhemus->m_nsensors)
 							g_polhemus->store(markerData);
 					}
 					usleep(1800);
