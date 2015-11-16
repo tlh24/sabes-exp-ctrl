@@ -68,14 +68,14 @@ void MagneticField::makeCompasses(int nCompasses)
 	int width(1);
 	int height(1);
 	gtk_window_get_size ((GtkWindow *)g_subjectWindow, &width, &height);
-	float ratio = width/(double)height;
+	float ratio = m_scale[0]/((double)m_scale[1]);
 	
 	int ncolumns = ceil(sqrt(nCompasses * ratio) ) ;
 	int nrows = ceil(sqrt(nCompasses / ratio) ) ;
 	m_v = (Compass *)malloc(2 * nrows * ncolumns * sizeof(Compass));
 	m_phase = (double *)malloc(nrows * ncolumns * sizeof(double));
 	int size = 2;
-	float offset = 1/sqrt(nCompasses) / 2 - 0.5f*size;
+	float offset = 1/sqrt(nCompasses) / 2 - 0.5f*m_scale[0]*2;
 
 	std::cerr << "Ratio : "<< ratio << std::endl;
 	
@@ -90,9 +90,9 @@ void MagneticField::makeCompasses(int nCompasses)
 			m_v[(int)(k*2*nrows) + l + 1].y1 = j;
 			m_v[(int)(k*2*nrows) + l + 1].color1 = 0xffffffff;
 			
-			j += size/(double)nrows;
+			j += m_scale[1]*2/(double)nrows;
 		}
-		i += size/(double)ncolumns;
+		i += m_scale[0]*2/(double)ncolumns;
 	}
 	for(int i(0); i < nrows * ncolumns; ++i){
 		m_phase[i] = 0; 
@@ -133,7 +133,7 @@ void MagneticField::move(long double time)
 	int width(1);
 	int height(1);
 	gtk_window_get_size ((GtkWindow *)g_subjectWindow, &width, &height);
-	float ratio = width/(double)height;
+	float ratio = m_scale[0]/((double)m_scale[1]);
 	
 	for (int i=0; i<m_n; i += 2) {
 		double angle;
