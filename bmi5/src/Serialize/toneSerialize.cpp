@@ -73,7 +73,7 @@ void ToneSerialize::getStoreDims(int, size_t *dims)
 	// dims for all stores for tones are 1x1
 	dims[0] = dims[1] = 1;
 }
-void* ToneSerialize::getStore(int indx, int k)
+void *ToneSerialize::getStore(int indx, int k)
 {
 	switch (indx) {
 	case 0:
@@ -95,7 +95,7 @@ int ToneSerialize::numStores()
 {
 	return 6;
 }
-double* ToneSerialize::mmapRead(double *d)
+double *ToneSerialize::mmapRead(double *d)
 {
 	m_time = gettime();
 
@@ -125,9 +125,9 @@ double* ToneSerialize::mmapRead(double *d)
 	}
 
 	if (m_play > 0) {
-		#ifdef JACK
+#ifdef JACK
 		jackAddToneP(m_freq, m_pan, m_scale, m_duration);
-		#endif
+#endif
 		d[5] = 0;
 	}
 

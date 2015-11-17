@@ -32,7 +32,7 @@ string LabjackSerializeAIN::storeName(int indx)
 	}
 	return string("none");
 }
-double* LabjackSerializeAIN::mmapRead(double *d)
+double *LabjackSerializeAIN::mmapRead(double *d)
 {
 	*d++ = m_time; //last time the sensors were read.
 	for (int i=0; i<m_nsensors; i++) {

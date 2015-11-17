@@ -17,7 +17,7 @@ string MouseSerialize::storeName(int )
 {
 	return m_name + string("sensors_o");        //output.
 }
-double* MouseSerialize::mmapRead(double *d)
+double *MouseSerialize::mmapRead(double *d)
 {
 	*d++ = g_mousePos[0];
 	*d++ = g_mousePos[1];

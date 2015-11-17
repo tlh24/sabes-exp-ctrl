@@ -65,7 +65,7 @@ void TdtUdpSerialize::getStoreDims(int indx, size_t *dims)
 		return;
 	}
 }
-void* TdtUdpSerialize::getStore(int indx, int k)
+void *TdtUdpSerialize::getStore(int indx, int k)
 {
 	switch (indx) {
 	case 0:
@@ -89,7 +89,7 @@ int TdtUdpSerialize::numStores()
 {
 	return 2;
 }
-double* TdtUdpSerialize::mmapRead(double *d)
+double *TdtUdpSerialize::mmapRead(double *d)
 {
 	d += 1; //skip time -- this is only saved in the file.
 	bool sames = true;

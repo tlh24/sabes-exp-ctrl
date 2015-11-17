@@ -24,7 +24,7 @@ bool FrameSerialize::store(int frame)
 	v_frame.push_back(m_frame);
 	return true;
 }
-double* FrameSerialize::mmapRead(double *d)
+double *FrameSerialize::mmapRead(double *d)
 {
 	//this is a write, and returns the time & ticks of the last recorded frame.
 	*d++ = m_time;

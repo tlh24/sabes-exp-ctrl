@@ -48,7 +48,7 @@ void PolhemusPredict::update()
 		for (int j=0; j<m_nsmooth; j++)
 			m_sfit[j] = m_s[(n-1-j)&7][i]; //relative to the most recent sample (avg).
 		gsl_fit_linear(m_tfit, 1, m_sfit, 1, m_nsmooth, &(m_fit[i][0]), &(m_fit[i][1]),
-					   &cov00, &cov01, &cov11, &sumsq);
+		               &cov00, &cov01, &cov11, &sumsq);
 	}
 }
 void PolhemusPredict::predict(long double time, float *s)

@@ -138,8 +138,11 @@ pretty:
 	# "-rm" means that make ignores errors, if any
 	astyle -A8 --indent=tab -H -k3 include/*.h
 	-rm include/*.h.orig
-	astyle -A8 --indent=tab -H -k3 src/*.cpp
-	-rm src/*.cpp.orig
+
+	astyle -A8 --indent=tab -H -k3 $(SOURCES)
+	-rm $(shell find ./src/ -name *.cpp.orig \
+	! -name *u6.cpp \
+	! -name *glxgears.cpp)
 
 #Make the Directories
 directories:

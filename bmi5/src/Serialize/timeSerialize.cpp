@@ -54,7 +54,7 @@ void TimeSerialize::getStoreDims(int , size_t *dims)
 	dims[0] = 1;
 	dims[1] = 1;
 }
-void* TimeSerialize::getStore(int indx, int i)
+void *TimeSerialize::getStore(int indx, int i)
 {
 	switch (indx) {
 	case 0:
@@ -70,7 +70,7 @@ int TimeSerialize::numStores()
 {
 	return 3;
 }
-double* TimeSerialize::mmapRead(double *d)
+double *TimeSerialize::mmapRead(double *d)
 {
 	//this is actually a write (all variables output)
 	long double time = 0.0;
