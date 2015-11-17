@@ -176,18 +176,25 @@ void StarField::setVel(double x, double y)
 }
 void StarField::setCoherence(double c)
 {
-	m_coherence = c;
+	if (c < 0) {
+		m_coherence = 0.f;
+	} else {
+		m_coherence = c;
+	}
 }
 void StarField::setLifetime(double x)
 {
-	m_lifetime = x;
+	if (x < 0) {
+		m_lifetime = 0.f;
+	} else {
+		m_lifetime = x;
+	}
 }
 void StarField::setStarSize(double ss)
 {
-	if(ss < 0){
+	if (ss < 0) {
 		m_starsize = 0;
-	}
-	else{
+	} else {
 		m_starsize = ss;
 	}
 }
@@ -286,7 +293,7 @@ void StarField::getStoreDims(int indx, size_t *dims)
 	}
 	return Shape::getStoreDims(indx-4, dims);
 }
-void* StarField::getStore(int indx, int i)
+void *StarField::getStore(int indx, int i)
 {
 	switch (indx) {
 	case 0:
@@ -304,12 +311,12 @@ int StarField::numStores()
 {
 	return Shape::numStores() + 4;
 }
-double* StarField::mmapRead(double *d)
+double *StarField::mmapRead(double *d)
 {
 	for (int i=0; i<2; i++)
 		m_vel[i] = *d++;
-	m_coherence = *d++;
-	m_lifetime = *d++;
-	m_starsize = *d++;
+	setCoherence(*d++);
+	setLifetime(*d++);
+	setStarSize(*d++);
 	return Shape::mmapRead(d);
 }
