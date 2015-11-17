@@ -1,23 +1,22 @@
 #include "../../include/Shape/magneticField.h"
 
-
-
 float norm(float a, float b)
 {
 	return sqrtf(a*a + b*b);
 }
 
-void generateUniqueNumbers( set<int> *ln, int min, int max, int n){
-	while( ln->size() < n ){
+void generateUniqueNumbers( set<int> *ln, int min, int max, int n)
+{
+	while ( ln->size() < n ) {
 		ln->insert( rand()%max + min );
 	}
 }
-
 
 MagneticField::MagneticField() : Shape()
 {
 	m_v = NULL;
 	m_phase = NULL;
+	m_num_compasses = 0;
 	m_coherence = 1.0f;
 	m_compass_l = 0.02f;
 	m_target[0] = 0.0f;
@@ -64,39 +63,43 @@ void MagneticField::makeCompasses(int nCompasses)
 	if (m_phase) free(m_phase);
 	m_v = NULL;
 	m_phase = NULL;
-	
-	int width(1);
-	int height(1);
-	gtk_window_get_size ((GtkWindow *)g_subjectWindow, &width, &height);
-	float ratio = m_scale[0]/((double)m_scale[1]);
-	
+
+	m_num_compasses = nCompasses;
+
+	float ratio = m_scale[0]/m_scale[1];
 	int ncolumns = ceil(sqrt(nCompasses * ratio) ) ;
 	int nrows = ceil(sqrt(nCompasses / ratio) ) ;
-	m_v = (Compass *)malloc(2 * nrows * ncolumns * sizeof(Compass));
-	m_phase = (double *)malloc(nrows * ncolumns * sizeof(double));
-	int size = 2;
-	float offset = 1/sqrt(nCompasses) / 2 - 0.5f*m_scale[0]*2;
+
+	m_v = (Compass *)malloc(2*nrows*ncolumns*sizeof(Compass)); // 2 points each
+	m_phase = (double *)malloc(nrows*ncolumns*sizeof(double));
+
+	float offset_w = - 0.5f + m_compass_l/m_scale[0]/2;
+	float offset_h = - 0.5f + m_compass_l/m_scale[1]/2;
 
 	std::cerr << "Ratio : "<< ratio << std::endl;
-	
-	float i = offset;
-	for (int k=0; k < ncolumns ; k += 1) {
-		float j = offset;
-		for(int l = 0; l < 2 * nrows ; l += 2){
-			m_v[(int)(k*2*nrows) + l].x1 = i;
-			m_v[(int)(k*2*nrows) + l].y1 = j;
-			m_v[(int)(k*2*nrows) + l].color1 = 0xffffffff;
-			m_v[(int)(k*2*nrows) + l + 1].x1 = i;
-			m_v[(int)(k*2*nrows) + l + 1].y1 = j;
-			m_v[(int)(k*2*nrows) + l + 1].color1 = 0xffffffff;
-			
-			j += m_scale[1]*2/(double)nrows;
+
+	float i = offset_w;
+	for (int k=0; k < ncolumns ; k++) {
+		float j = offset_h;
+		for (int l = 0; l < 2*nrows ; l+=2) {
+			// first point in line
+			m_v[(int)(k*2*nrows) + l].x = i;
+			m_v[(int)(k*2*nrows) + l].y = j;
+			m_v[(int)(k*2*nrows) + l].color = 0xffffffff;
+			// second point in line
+			m_v[(int)(k*2*nrows) + l + 1].x = i;
+			m_v[(int)(k*2*nrows) + l + 1].y = j;
+			m_v[(int)(k*2*nrows) + l + 1].color = 0xffffffff;
+
+			j += 1/(double)nrows;
 		}
-		i += m_scale[0]*2/(double)ncolumns;
+		i += 1/(double)ncolumns;
 	}
-	for(int i(0); i < nrows * ncolumns; ++i){
-		m_phase[i] = 0; 
+
+	for (int i(0); i < nrows * ncolumns; ++i) {
+		m_phase[i] = 0.0;
 	}
+
 	m_n = 2 * nrows * ncolumns;
 	m_needConfig[0] = m_needConfig[1] = true;
 	m_drawmode = GL_LINES;
@@ -121,7 +124,7 @@ void MagneticField::configure(int display)
 void MagneticField::move(long double time)
 {
 	if (!m_v || !m_phase) return;
-	
+
 	unsigned int basecol = 0;
 	basecol += (unsigned int)(m_color[3] * 255) & 255;
 	basecol <<= 8;
@@ -130,28 +133,26 @@ void MagneticField::move(long double time)
 	basecol += (unsigned int)(m_color[1] * 255) & 255;
 	basecol <<= 8;
 	basecol += (unsigned int)(m_color[0] * 255) & 255;
-	int width(1);
-	int height(1);
-	gtk_window_get_size ((GtkWindow *)g_subjectWindow, &width, &height);
-	float ratio = m_scale[0]/((double)m_scale[1]);
-	
-	for (int i=0; i<m_n; i += 2) {
+
+	float ratio = m_scale[0]/m_scale[1];
+
+	for (int i(0); i<m_n; i+=2) {
 		double angle;
-		if(m_phase[i/2] > 0){
-			angle = m_phase[i/2];
-		}
-		else{
-			double x2 = 0.5 * (m_v[i].x1 + m_v[i+1].x1) - m_target[0];
-			double y2 = 0.5 * (m_v[i].y1 + m_v[i+1].y1) - m_target[1];
-			angle = atan2(y2, x2);  	// atan2(y, x) or atan2(sin, cos)
+
+		double x2 = 0.5 * (m_v[i].x + m_v[i+1].x) - (m_target[0]-m_trans[0])/m_scale[0];
+		double y2 = 0.5 * (m_v[i].y + m_v[i+1].y) - (m_target[1]-m_trans[1])/m_scale[1];
+		angle = atan2(y2, x2);  	// atan2(y, x) or atan2(sin, cos)
+		if (m_phase[i/2] > 0) {
+			angle += m_phase[i/2];
 		}
 
-		m_v[i].x1 = 0.5 * (m_v[i].x1 + m_v[i+1].x1 - m_compass_l / ratio * cos(angle));
-		m_v[i].y1 = 0.5 * (m_v[i].y1 + m_v[i+1].y1 - m_compass_l * sin(angle));
-		m_v[i+1].x1 = 0.5 * (m_v[i].x1 + m_v[i+1].x1 + m_compass_l / ratio * cos(angle));
-		m_v[i+1].y1 = 0.5 * (m_v[i].y1 + m_v[i+1].y1 + m_compass_l * sin(angle));
-		m_v[i].color1 = basecol;
-		m_v[i+1].color1 = basecol;
+		// we scale the length of the compas by the  xxx
+		m_v[i].x = 0.5 * (m_v[i].x + m_v[i+1].x - m_compass_l/m_scale[0] * cos(angle));
+		m_v[i].y = 0.5 * (m_v[i].y + m_v[i+1].y - m_compass_l/m_scale[1] * sin(angle));
+		m_v[i+1].x = 0.5 * (m_v[i].x + m_v[i+1].x + m_compass_l/m_scale[0] * cos(angle));
+		m_v[i+1].y = 0.5 * (m_v[i].y + m_v[i+1].y + m_compass_l/m_scale[1] * sin(angle));
+		m_v[i].color = basecol;
+		m_v[i+1].color = basecol;
 	}
 }
 
@@ -166,7 +167,7 @@ void MagneticField::draw(int display, float ar)
 		glBindVertexArray(m_vao[display]);
 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo[display]); // Bind our Vertex Buffer Object
 		glBufferData(GL_ARRAY_BUFFER, m_n*sizeof(Compass), m_v, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
-		
+
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Compass), 0);
@@ -199,7 +200,7 @@ bool MagneticField::store()
 		same &= (m_draw == v_draw[n-1]);
 		for (int i=0; i<4; i++)
 			same &= (color[i] == (v_color[n-1])[i]);
-			
+
 		for (int i=0; i<2; i++) {
 			same &= (m_scale[i] == (v_scale[n-1])[i]);
 			same &= (m_trans[i] == (v_trans[n-1])[i]);
@@ -216,7 +217,7 @@ bool MagneticField::store()
 		v_scale.push_back(m_scale);
 		v_trans.push_back(m_trans);
 		v_rot.push_back(m_rot);
-		
+
 		v_coherence.push_back(m_coherence);
 		v_target.push_back(m_target);
 		v_compass_l.push_back(m_compass_l);
@@ -269,7 +270,7 @@ void MagneticField::getStoreDims(int indx, size_t *dims)
 	return Shape::getStoreDims(indx-3, dims);
 }
 
-void* MagneticField::getStore(int indx, int i)
+void *MagneticField::getStore(int indx, int i)
 {
 	switch (indx) {
 	case 0:
@@ -287,59 +288,78 @@ int MagneticField::numStores()
 	return Shape::numStores() + 3;
 }
 
-double* MagneticField::mmapRead(double *d)
+double *MagneticField::mmapRead(double *d)
 {
 	setCoherence(*d++);
-	m_compass_l = *d++;
+	setLinesLength(*d++);
 	for (int i=0; i<2; i++)
 		m_target[i] = *d++;
-		
+
+	// see the base shape mmap read
+	// we are duplicating it's functionality
+	// but overriding scaling
+
+	m_time = gettime();
+	*d++ = m_time;
+	m_draw = (char)floor(*d++);
+	for (int i(0); i<4; i++)
+		m_color[i] = *d++;
+
+	float scale_x, scale_y;
+	scale_x = *d++;
+	scale_y = *d++;
+	if ((abs(scale_x - m_scale[0]) > EPS) ||
+	    (abs(scale_y - m_scale[1]) > EPS)) {
+		m_scale[0] = scale_x;
+		m_scale[1] = scale_y;
+		makeCompasses(m_num_compasses);
+	}
+
+	for (int i(0); i<2; i++)
+		m_trans[i] = *d++;
+	m_rot = *d++;
+	return d;
+
 	return Shape::mmapRead(d);
 }
 
 void MagneticField::setCoherence(float coherence)
-{	
-	if(coherence != m_coherence){
-		if(coherence < 0){
+{
+	if (coherence != m_coherence) {
+		if (coherence < 0) {
 			m_coherence = 0.f;
+		} else if (coherence > 1) {
+			m_coherence = 1.f;
 		}
-		else{
+
+		else {
 			m_coherence = coherence;
 		}
 		set<int> index;
 		generateUniqueNumbers(&index, 0, m_n / 2, (int)((1.0f - m_coherence) * m_n / 2));
-		if(index.size() != 0){
+		if (index.size() != 0) {
 			std::set<int>::iterator it = index.begin();
-			for(int i(0); i < m_n / 2; ++i){
-				if(i == *it){
+			for (int i(0); i < m_n / 2; ++i) {
+				if (i == *it) {
 					m_phase[i] = rand() / (double)RAND_MAX * M_PI;
 					++it;
-				}
-				else{
+				} else {
 					m_phase[i] = 0;
 				}
 			}
-		}
-		else{
-			for(int i(0); i < m_n / 2; ++i){
+		} else {
+			for (int i(0); i < m_n / 2; ++i) {
 				m_phase[i] = 0;
 			}
 		}
 	}
 }
 
-void MagneticField::setTarget(float* target)
-{
-	m_target[0] = target[0];
-	m_target[1] = target[1];
-}
-
 void MagneticField::setLinesLength(float length)
 {
-	if(length < 0){
+	if (length < 0) {
 		m_compass_l = 0;
-	}
-	else{
+	} else {
 		m_compass_l = length;
 	}
 }
