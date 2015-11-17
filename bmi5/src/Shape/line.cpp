@@ -8,9 +8,10 @@ Line::Line(float length) : Shape()
 	m_drawmode = GL_LINES;
 }
 
-Line::~Line(){}
+Line::~Line() {}
 
-void Line::fill(float *v){
+void Line::fill(float *v)
+{
 	v[0] = -1.0f * m_l;
 	v[1] = 0.0f;
 	v[2] = 1.0f * m_l;

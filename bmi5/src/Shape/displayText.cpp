@@ -89,7 +89,7 @@ void DisplayText::getStoreDims(int indx, size_t *dims)
 	}
 	return VectorSerialize::getStoreDims(indx - 3, dims);
 }
-void* DisplayText::getStore(int indx, int i)
+void *DisplayText::getStore(int indx, int i)
 {
 	switch (indx) {
 	case 0:
@@ -105,7 +105,7 @@ int DisplayText::numStores()
 {
 	return VectorSerialize::numStores() + 3;
 }
-double* DisplayText::mmapRead(double *d)
+double *DisplayText::mmapRead(double *d)
 {
 	m_draw = (char)floor(*d++);
 	for (int i=0; i<2; i++)

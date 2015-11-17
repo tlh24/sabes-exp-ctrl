@@ -84,7 +84,7 @@ std::string Shape::fileToString(const char *fname)
 	str.reserve(t.tellg());
 	t.seekg(0, std::ios::beg);
 	str.assign((std::istreambuf_iterator<char>(t)),
-			   std::istreambuf_iterator<char>());
+	           std::istreambuf_iterator<char>());
 	return str;
 }
 void Shape::makeShadersNamed(int index, const char *vertexName, const char *fragmentName)
@@ -308,7 +308,7 @@ void Shape::getStoreDims(int indx, size_t *dims)
 		return;
 	}
 }
-void* Shape::getStore(int indx, int i)
+void *Shape::getStore(int indx, int i)
 {
 	switch (indx) {
 	case 0:
@@ -330,7 +330,7 @@ int Shape::numStores()
 {
 	return 6;
 }
-double* Shape::mmapRead(double *d)
+double *Shape::mmapRead(double *d)
 {
 	int i;
 	m_time = gettime();
