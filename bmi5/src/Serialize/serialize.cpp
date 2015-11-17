@@ -11,7 +11,7 @@ Serialize::~Serialize()
 void Serialize::perr(const char *method)
 {
 	fprintf(stderr, "\"%s\":%s must be implemented in derived classes.\n",
-			m_name.c_str(), method);
+	        m_name.c_str(), method);
 }
 bool Serialize::store()
 {
@@ -42,7 +42,7 @@ void Serialize::getStoreDims(int , size_t *dims)
 	dims[0] = 0;
 	dims[1] = 0;
 }
-void* Serialize::getStore(int , int)
+void *Serialize::getStore(int , int)
 {
 	perr("getStore");
 	return NULL;
@@ -52,7 +52,7 @@ int Serialize::numStores()
 	perr("numStores");
 	return 0;
 }
-double* Serialize::mmapRead(double *)
+double *Serialize::mmapRead(double *)
 {
 	perr("mmapRead");
 	return NULL;

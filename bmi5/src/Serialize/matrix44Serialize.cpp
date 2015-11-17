@@ -43,7 +43,7 @@ void Matrix44Serialize::getStoreDims(int, size_t *dims)
 	dims[1] = 4;
 	return;
 }
-void* Matrix44Serialize::getStore(int , int k)
+void *Matrix44Serialize::getStore(int , int k)
 {
 	return (void *)&(v_x[k]);
 }
@@ -51,7 +51,7 @@ int Matrix44Serialize::numStores()
 {
 	return 1;
 }
-double* Matrix44Serialize::mmapRead(double *d)
+double *Matrix44Serialize::mmapRead(double *d)
 {
 	//don't store the time here, as an incentive to not change it during the exp!
 	bool sames = true;
@@ -67,7 +67,7 @@ double* Matrix44Serialize::mmapRead(double *d)
 	d += 16;
 	return d;
 }
-float* Matrix44Serialize::data()
+float *Matrix44Serialize::data()
 {
 	return m_x.data();
 };

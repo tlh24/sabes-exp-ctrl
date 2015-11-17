@@ -23,7 +23,7 @@ string LabjackSerializeDOUT::storeName(int indx)
 	}
 	return string("none");
 }
-double* LabjackSerializeDOUT::mmapRead(double *d)
+double *LabjackSerializeDOUT::mmapRead(double *d)
 {
 	m_time = gettime(); //time bmi5 retreives DOUT values.
 	*d = m_time;

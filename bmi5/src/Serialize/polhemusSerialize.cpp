@@ -56,7 +56,7 @@ string PolhemusSerialize::storeName(int indx)
 	}
 	return string {"none"};
 }
-double* PolhemusSerialize::mmapRead(double *d)
+double *PolhemusSerialize::mmapRead(double *d)
 {
 	*d++ = m_time; // last time the sensors were read.
 	getLoc(gettime(), m_stor.data()); // sample position now.

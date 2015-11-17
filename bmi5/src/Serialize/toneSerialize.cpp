@@ -66,7 +66,7 @@ void ToneSerialize::getStoreDims(int , size_t *dims)
 {
 	dims[0] = dims[1] = 1;
 }
-void* ToneSerialize::getStore(int indx, int i)
+void *ToneSerialize::getStore(int indx, int i)
 {
 	switch (indx) {
 	case 0:
@@ -88,7 +88,7 @@ int ToneSerialize::numStores()
 {
 	return 6;
 }
-double* ToneSerialize::mmapRead(double *d)
+double *ToneSerialize::mmapRead(double *d)
 {
 	float freq = d[1];
 	float pan = d[2];
