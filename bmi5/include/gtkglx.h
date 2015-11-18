@@ -43,7 +43,7 @@ public:
 		root = RootWindow (m_display, xscreen);
 		m_xcolormap = XCreateColormap(m_display, root,
 		                              m_xvisual->visual, AllocNone);
-		m_context = glXCreateContext (m_display, m_xvisual, NULL, TRUE);
+		m_context = glXCreateContext (m_display, m_xvisual, nullptr, TRUE);
 		m_size[0] = m_size[1] = 1.f;
 	}
 	~gtkglx()

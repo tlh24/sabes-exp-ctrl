@@ -330,11 +330,10 @@ void MagneticField::setCoherence(float coherence)
 			m_coherence = 0.f;
 		} else if (coherence > 1) {
 			m_coherence = 1.f;
-		}
-
-		else {
+		} else {
 			m_coherence = coherence;
 		}
+
 		set<int> index;
 		generateUniqueNumbers(&index, 0, m_n / 2, (int)((1.0f - m_coherence) * m_n / 2));
 		if (index.size() != 0) {
