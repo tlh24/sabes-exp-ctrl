@@ -43,11 +43,11 @@ public:
 	vector<array<float,2>> v_scale;
 	vector<array<float,2>> v_trans;
 	vector<float> v_rot;
-	
+
 	Shape(void);
 	void deleteBuffers();
 	virtual ~Shape();
-	
+
 	virtual void makeVAO(float *vertices, bool del, int display);
 	void makeShader(int index, GLenum type, std::string source);
 	std::string fileToString(const char *fname);
@@ -153,7 +153,7 @@ public:
 		const char *str = source.c_str();
 		glShaderSource(shader, 1, (const char **)&str, &length);
 		glCompileShader(shader);
-		GLint result; // make sure the compilation was successful 
+		GLint result; // make sure the compilation was successful
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 		if (result == GL_FALSE) {
 			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
@@ -195,7 +195,7 @@ public:
 			glGetProgramInfoLog(m_program[index], length, &result, log);
 			fprintf(stderr, "Program linking failed %d: %s\n", length, log);
 			free(log);
-			// delete the program 
+			// delete the program
 			glDeleteProgram(m_program[index]);
 			m_program[index] = 0;
 		}
@@ -896,7 +896,7 @@ class Line : public Shape
 		v[2] = 1.0f * m_l;
 		v[3] = 0.0f;
 	}
-	
+
 };
 
 class Circle : public Shape

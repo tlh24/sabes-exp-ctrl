@@ -9,15 +9,16 @@
 
 float norm(float a, float b);
 void generateUniqueNumbers( set<int> *ln, int min, int max, int n);
-extern GtkWindow * g_subjectWindow;
+extern GtkWindow *g_subjectWindow;
 
-struct Compass{
+struct Compass {
 	float	x, y;
 	unsigned int color;
 };
 
-class MagneticField : public Shape{
-	public:
+class MagneticField : public Shape
+{
+public:
 	double *m_phase; // angular offset; coherent lines have zero
 	Compass *m_v; //vertices, backing store.
 	int 	m_num_compasses;
@@ -26,7 +27,7 @@ class MagneticField : public Shape{
 	GLuint	m_colorbuffer;
 	float 	m_target[2];
 	vector<float> v_coherence;
-	vector <float*> v_target;
+	vector <float *> v_target;
 	vector <float> v_compass_l;
 
 	MagneticField();
