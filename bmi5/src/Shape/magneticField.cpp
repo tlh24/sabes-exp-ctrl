@@ -1,9 +1,5 @@
 #include "../../include/Shape/magneticField.h"
-
-float norm(float a, float b)
-{
-	return sqrtf(a*a + b*b);
-}
+#include "random.h"
 
 void generateUniqueNumbers( set<int> *ln, int min, int max, int n)
 {
@@ -325,14 +321,12 @@ double *MagneticField::mmapRead(double *d)
 
 void MagneticField::setCoherence(float coherence)
 {
-	if (coherence != m_coherence) {
+	if (abs(coherence - m_coherence) > EPS) {
 		if (coherence < 0) {
 			m_coherence = 0.f;
 		} else if (coherence > 1) {
 			m_coherence = 1.f;
-		}
-
-		else {
+		} else {
 			m_coherence = coherence;
 		}
 		set<int> index;
@@ -341,7 +335,7 @@ void MagneticField::setCoherence(float coherence)
 			std::set<int>::iterator it = index.begin();
 			for (int i(0); i < m_n / 2; ++i) {
 				if (i == *it) {
-					m_phase[i] = rand() / (double)RAND_MAX * M_PI;
+					m_phase[i] = uniform() * M_PI;
 					++it;
 				} else {
 					m_phase[i] = 0;

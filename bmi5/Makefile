@@ -36,7 +36,7 @@ SOURCES=$(shell find ./src/ -name *.cpp \
 	! -name *glxgears.cpp)
 
 OBJS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:%.cpp=%.o))
-OBJS += $(BUILDDIR)/gettime.o $(BUILDDIR)/lconf.o
+OBJS += $(BUILDDIR)/gettime.o $(BUILDDIR)/lconf.o $(BUILDDIR)/random.o
 
 CFLAGS := -Iinclude -I/usr/local/include -I../../myopen/common_host
 CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \

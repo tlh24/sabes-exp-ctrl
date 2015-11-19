@@ -1,5 +1,9 @@
 #include "../../include/Shape/shape.h"
 
+float norm(float a, float b)
+{
+	return sqrtf(a*a + b*b);
+}
 Shape::Shape(void) : Serialize()
 {
 	m_vao[0] = m_vao[1] = 0;

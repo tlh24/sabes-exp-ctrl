@@ -1,4 +1,5 @@
 #include "../../include/Shape/starField.h"
+#include "random.h"
 
 StarField::StarField() : Shape()
 {
@@ -51,14 +52,6 @@ void StarField::makeVAO(starStruct *vertices, bool del, int display)
 	} else {
 		printf("error: makeVAO: m_n < 0\n");
 	}
-}
-float StarField::uniform()
-{
-	return ((float)rand() / (float)RAND_MAX);
-}
-float StarField::norm(float a, float b)
-{
-	return sqrtf(a*a + b*b);
 }
 void StarField::makeStars(int nstars)
 {

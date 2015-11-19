@@ -5,9 +5,6 @@
 #include <set>
 #include <gtk/gtk.h>
 
-#define EPS 	1e-5
-
-float norm(float a, float b);
 void generateUniqueNumbers( set<int> *ln, int min, int max, int n);
 extern GtkWindow * g_subjectWindow;
 

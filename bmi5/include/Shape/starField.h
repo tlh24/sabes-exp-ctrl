@@ -30,8 +30,6 @@ public: //do something like the flow field common in the lab.
 	StarField();
 	~StarField();
 	virtual void makeVAO(starStruct *vertices, bool del, int display);
-	float uniform();
-	float norm(float a, float b);
 	virtual void makeStars(int nstars);
 	virtual void makeShaders(int index);
 	virtual void configure(int display);
