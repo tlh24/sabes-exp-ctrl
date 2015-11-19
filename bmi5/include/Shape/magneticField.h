@@ -2,11 +2,6 @@
 #define MAGNETICFIELD_H
 
 #include "shape.h"
-#include <set>
-#include <gtk/gtk.h>
-
-void generateUniqueNumbers( set<int> *ln, int min, int max, int n);
-extern GtkWindow * g_subjectWindow;
 
 struct Compass{
 	float	x, y;

@@ -1,13 +1,6 @@
 #include "../../include/Shape/magneticField.h"
 #include "random.h"
 
-void generateUniqueNumbers( set<int> *ln, int min, int max, int n)
-{
-	while ( ln->size() < n ) {
-		ln->insert( rand()%max + min );
-	}
-}
-
 MagneticField::MagneticField() : Shape()
 {
 	m_v = NULL;
@@ -93,7 +86,10 @@ void MagneticField::makeCompasses(int nCompasses)
 	}
 
 	for (int i(0); i < nrows * ncolumns; ++i) {
-		m_phase[i] = 0.0;
+		m_phase[i] = 0;
+		if (uniform() > m_coherence) {
+			m_phase[i] = uniform() * M_PI;
+		}
 	}
 
 	m_n = 2 * nrows * ncolumns;
@@ -130,7 +126,7 @@ void MagneticField::move(long double time)
 	basecol <<= 8;
 	basecol += (unsigned int)(m_color[0] * 255) & 255;
 
-	float ratio = m_scale[0]/m_scale[1];
+	float ratio = m_scale[0]/m_scale[1]; // XXX never used?
 
 	for (int i(0); i<m_n; i+=2) {
 		double angle;
@@ -138,9 +134,7 @@ void MagneticField::move(long double time)
 		double x2 = 0.5 * (m_v[i].x + m_v[i+1].x) - (m_target[0]-m_trans[0])/m_scale[0];
 		double y2 = 0.5 * (m_v[i].y + m_v[i+1].y) - (m_target[1]-m_trans[1])/m_scale[1];
 		angle = atan2(y2, x2);  	// atan2(y, x) or atan2(sin, cos)
-		if (m_phase[i/2] > 0) {
-			angle += m_phase[i/2];
-		}
+		angle += m_phase[i/2]; // if phase is zero, adding it does nothing
 
 		// we scale the length of the compas by the  xxx
 		m_v[i].x = 0.5 * (m_v[i].x + m_v[i+1].x - m_compass_l/m_scale[0] * cos(angle));
@@ -311,17 +305,16 @@ double *MagneticField::mmapRead(double *d)
 		makeCompasses(m_num_compasses);
 	}
 
-	for (int i(0); i<2; i++)
-		m_trans[i] = *d++;
+	m_trans[0] = *d++;
+	m_trans[1] = *d++;
 	m_rot = *d++;
 	return d;
-
-	return Shape::mmapRead(d);
 }
 
 void MagneticField::setCoherence(float coherence)
 {
 	if (abs(coherence - m_coherence) > EPS) {
+
 		if (coherence < 0) {
 			m_coherence = 0.f;
 		} else if (coherence > 1) {
@@ -329,21 +322,11 @@ void MagneticField::setCoherence(float coherence)
 		} else {
 			m_coherence = coherence;
 		}
-		set<int> index;
-		generateUniqueNumbers(&index, 0, m_n / 2, (int)((1.0f - m_coherence) * m_n / 2));
-		if (index.size() != 0) {
-			std::set<int>::iterator it = index.begin();
-			for (int i(0); i < m_n / 2; ++i) {
-				if (i == *it) {
-					m_phase[i] = uniform() * M_PI;
-					++it;
-				} else {
-					m_phase[i] = 0;
-				}
-			}
-		} else {
-			for (int i(0); i < m_n / 2; ++i) {
-				m_phase[i] = 0;
+
+		for (int i=0; i<m_n/2; i++) {
+			m_phase[i] = 0;
+			if (uniform() > m_coherence) {
+				m_phase[i] = uniform() * M_PI;
 			}
 		}
 	}
@@ -351,9 +334,5 @@ void MagneticField::setCoherence(float coherence)
 
 void MagneticField::setLinesLength(float length)
 {
-	if (length < 0) {
-		m_compass_l = 0;
-	} else {
-		m_compass_l = length;
-	}
+	m_compass_l = length < 0 ? 0 : length;
 }
