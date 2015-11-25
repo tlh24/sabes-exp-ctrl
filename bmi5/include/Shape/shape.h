@@ -43,11 +43,11 @@ public:
 	vector<array<float,2>> v_scale;
 	vector<array<float,2>> v_trans;
 	vector<float> v_rot;
-	
+
 	Shape(void);
 	void deleteBuffers();
 	virtual ~Shape();
-	
+
 	virtual void makeVAO(float *vertices, bool del, int display);
 	void makeShader(int index, GLenum type, std::string source);
 	std::string fileToString(const char *fname);
@@ -137,7 +137,7 @@ public:
 
 			glBindBuffer(GL_ARRAY_BUFFER, m_vbo[display]); // Bind our Vertex Buffer Object
 			glBufferData(GL_ARRAY_BUFFER, m_n*2*sizeof(GLfloat), vertices, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
-			glVertexAttribPointer((GLuint)0, 2, GL_FLOAT, GL_FALSE, 0, 0); // Set up our vertex attributes pointer
+			glVertexAttribPointer((GLuint)0, 2, GL_FLOAT, GL_FALSE, 0, nullptr); // Set up our vertex attributes pointer
 
 			glEnableVertexAttribArray(0);
 			glBindVertexArray(0);
@@ -153,7 +153,7 @@ public:
 		const char *str = source.c_str();
 		glShaderSource(shader, 1, (const char **)&str, &length);
 		glCompileShader(shader);
-		GLint result; // make sure the compilation was successful 
+		GLint result; // make sure the compilation was successful
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 		if (result == GL_FALSE) {
 			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
@@ -195,7 +195,7 @@ public:
 			glGetProgramInfoLog(m_program[index], length, &result, log);
 			fprintf(stderr, "Program linking failed %d: %s\n", length, log);
 			free(log);
-			// delete the program 
+			// delete the program
 			glDeleteProgram(m_program[index]);
 			m_program[index] = 0;
 		}
@@ -228,9 +228,9 @@ public:
 	{
 		//first pre-multiply the local->world with the world->screen matrix.
 		float m[4][4]; //local->world matrix.
-		for (int i=0; i<4; i++) {
+		for (auto &elem : m) {
 			for (int j=0; j<4; j++)
-				m[i][j] = 0.f;
+				elem[j] = 0.f;
 		}
 		// joey has chosen to simply absorb the aspect ratio into the scale
 		// parameters in the star fields -- will do the same here.
@@ -260,7 +260,7 @@ public:
 		int quadloc = glGetUniformLocation(m_program[display], "quadratic_matrix");
 		if (quadloc >= 0)glUniformMatrix4fv(quadloc, 1, GL_FALSE, g_quadratic44->data());
 	}
-	virtual void draw(int display, float ar)
+	virtual void draw(int display, float ar) override
 	{
 		configure(display); //if we need it.
 		if (m_draw & (1<<display)) {
@@ -284,7 +284,7 @@ public:
 			}
 		}
 	}
-	virtual void move(long double) {} //no velocity here.
+	virtual void move(long double) override {} //no velocity here.
 	///serialization.
 	unsigned char floatToU8(float in)
 	{
@@ -293,7 +293,7 @@ public:
 		in = in < 0.f ? 0.f : in;
 		return (unsigned char)in;
 	}
-	virtual void clear()
+	virtual void clear() override
 	{
 		v_time.clear();
 		v_color.clear();
@@ -301,7 +301,7 @@ public:
 		v_trans.clear();
 		v_rot.clear();
 	}
-	virtual bool store()
+	virtual bool store() override
 	{
 		array<unsigned char,4> color;
 		for (int i=0; i<4; i++)
@@ -328,11 +328,11 @@ public:
 		}
 		return !same;
 	}
-	virtual int nstored()
+	virtual int nstored() override
 	{
 		return v_time.size();
 	}
-	virtual string storeName(int indx)
+	virtual string storeName(int indx) override
 	{
 		switch (indx) {
 		case 0:
@@ -350,7 +350,7 @@ public:
 		}
 		return string("none");
 	}
-	virtual int getStoreClass(int indx)
+	virtual int getStoreClass(int indx) override
 	{
 		switch (indx) {
 		case 0:
@@ -368,7 +368,7 @@ public:
 		}
 		return 0;
 	}
-	virtual void getStoreDims(int indx, size_t *dims)
+	virtual void getStoreDims(int indx, size_t *dims) override
 	{
 		switch (indx) {
 		case 0:
@@ -401,7 +401,7 @@ public:
 			return;
 		}
 	}
-	virtual void *getStore(int indx, int i)
+	virtual void *getStore(int indx, int i) override
 	{
 		switch (indx) {
 		case 0:
@@ -417,13 +417,13 @@ public:
 		case 5:
 			return (void *)&((v_rot[i]));
 		}
-		return NULL;
+		return nullptr;
 	}
-	virtual int numStores()
+	virtual int numStores() override
 	{
 		return 6;
 	}
-	virtual double *mmapRead(double *d)
+	virtual double *mmapRead(double *d) override
 	{
 		int i;
 		m_time = gettime();
@@ -468,9 +468,9 @@ public: //do something like the flow field common in the lab.
 	{
 		m_vel[0] = 0.2f;
 		m_vel[1] = 0.1f;
-		m_v = NULL;
-		m_pvel = NULL;
-		m_phase = NULL;
+		m_v = nullptr;
+		m_pvel = nullptr;
+		m_phase = nullptr;
 		m_coherence = 1.0f;
 		m_lifetime = 1.0f;
 		m_lastTime = 0.0;
@@ -481,11 +481,11 @@ public: //do something like the flow field common in the lab.
 	~StarField()
 	{
 		if (m_v) free(m_v);
-		m_v = NULL;
+		m_v = nullptr;
 		if (m_pvel) free(m_pvel);
-		m_pvel = NULL;
+		m_pvel = nullptr;
 		if (m_phase) free(m_phase);
-		m_phase = NULL;
+		m_phase = nullptr;
 		//deleteBuffers();
 		v_vel.clear();
 		v_coherence.clear();
@@ -503,7 +503,7 @@ public: //do something like the flow field common in the lab.
 
 			glBindBuffer(GL_ARRAY_BUFFER, m_vbo[display]); // Bind our Vertex Buffer Object
 			glBufferData(GL_ARRAY_BUFFER, m_n*sizeof(starStruct), vertices, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW
-			glVertexAttribPointer((GLuint)0, 2, GL_FLOAT, GL_FALSE, sizeof(starStruct), 0); // Set up our vertex attributes pointer
+			glVertexAttribPointer((GLuint)0, 2, GL_FLOAT, GL_FALSE, sizeof(starStruct), nullptr); // Set up our vertex attributes pointer
 			glVertexAttribPointer((GLuint)1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(starStruct), (void *)8);
 
 			glEnableVertexAttribArray(0); // enable our Vertex Array Object
@@ -529,9 +529,9 @@ public: //do something like the flow field common in the lab.
 		//distribute the stars uniformly over w, h.
 		//this just requires scaling some rand() s.
 		if (m_v) free(m_v);
-		m_v = NULL;
+		m_v = nullptr;
 		if (m_pvel) free(m_pvel);
-		m_pvel = NULL;
+		m_pvel = nullptr;
 		m_v = (starStruct *)malloc(nstars * sizeof(starStruct));
 		m_pvel = (float *)malloc(nstars * 2 * sizeof(float));
 		m_phase = (double *)malloc(nstars * sizeof(double));
@@ -548,13 +548,13 @@ public: //do something like the flow field common in the lab.
 		m_needConfig[0] = m_needConfig[1] = true;
 		m_drawmode = GL_POINTS;
 	}
-	virtual void makeShaders(int index)
+	virtual void makeShaders(int index) override
 	{
 		string vertex   = g_basedirname + "/glsl/" + "vertex.glsl";
 		string fragment = g_basedirname + "/glsl/" + "fragment.glsl";
 		makeShadersNamed(index, vertex.c_str(), fragment.c_str());
 	}
-	virtual void configure(int display)
+	virtual void configure(int display) override
 	{
 		if (m_needConfig[display]) {
 			makeVAO(m_v, false, display); //keep around the b.s.
@@ -562,7 +562,7 @@ public: //do something like the flow field common in the lab.
 			m_needConfig[display] = false;
 		}
 	}
-	virtual void move(long double time)
+	virtual void move(long double time) override
 	{
 		if (!m_v || !m_pvel || !m_phase) return;
 		unsigned int basecol = 0;
@@ -610,7 +610,7 @@ public: //do something like the flow field common in the lab.
 		}
 		m_lastTime = time;
 	}
-	virtual void draw(int display, float ar)
+	virtual void draw(int display, float ar) override
 	{
 		configure(display);
 		//this is a little more complicated, as we need to do a memcpy and user shaders.
@@ -624,7 +624,7 @@ public: //do something like the flow field common in the lab.
 
 			glEnableVertexAttribArray(0);
 			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(starStruct), 0);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(starStruct), nullptr);
 			glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(starStruct), (void *)8);
 
 			glDrawArrays(m_drawmode, 0, m_n);
@@ -651,7 +651,7 @@ public: //do something like the flow field common in the lab.
 		m_starsize = ss;
 	}
 	// serialization
-	virtual void clear()
+	virtual void clear() override
 	{
 		Shape::clear();
 		v_vel.clear();
@@ -659,7 +659,7 @@ public: //do something like the flow field common in the lab.
 		v_lifetime.clear();
 		v_starsize.clear();
 	}
-	virtual bool store()
+	virtual bool store() override
 	{
 		array<unsigned char,4> color;
 		for (int i=0; i<4; i++)
@@ -695,7 +695,7 @@ public: //do something like the flow field common in the lab.
 		}
 		return !same;
 	}
-	virtual string storeName(int indx)
+	virtual string storeName(int indx) override
 	{
 		switch (indx) {
 		case 0:
@@ -709,7 +709,7 @@ public: //do something like the flow field common in the lab.
 		}
 		return Shape::storeName(indx - 4);
 	}
-	virtual int getStoreClass(int indx)
+	virtual int getStoreClass(int indx) override
 	{
 		switch (indx) {
 		case 0:
@@ -723,7 +723,7 @@ public: //do something like the flow field common in the lab.
 		}
 		return Shape::getStoreClass(indx - 4);
 	}
-	virtual void getStoreDims(int indx, size_t *dims)
+	virtual void getStoreDims(int indx, size_t *dims) override
 	{
 		switch (indx) {
 		case 0:
@@ -745,7 +745,7 @@ public: //do something like the flow field common in the lab.
 		}
 		return Shape::getStoreDims(indx-4, dims);
 	}
-	virtual void *getStore(int indx, int i)
+	virtual void *getStore(int indx, int i) override
 	{
 		switch (indx) {
 		case 0:
@@ -759,11 +759,11 @@ public: //do something like the flow field common in the lab.
 		}
 		return Shape::getStore(indx-4, i);
 	}
-	virtual int numStores()
+	virtual int numStores() override
 	{
 		return Shape::numStores() + 4;
 	}
-	virtual double *mmapRead(double *d)
+	virtual double *mmapRead(double *d) override
 	{
 		for (int i=0; i<2; i++)
 			m_vel[i] = *d++;
@@ -779,14 +779,14 @@ class StarFieldCircle : public StarField
 public:
 	StarFieldCircle() {}
 	~StarFieldCircle() {}
-	void makeStars(int nstars)
+	void makeStars(int nstars) override
 	{
 		//distribute the stars uniformly over w, h.
 		//this just requires scaling some rand() s.
 		if (m_v) free(m_v);
-		m_v = NULL;
+		m_v = nullptr;
 		if (m_pvel) free(m_pvel);
-		m_pvel = NULL;
+		m_pvel = nullptr;
 		m_v = (starStruct *)malloc(nstars * sizeof(starStruct));
 		m_pvel = (float *)malloc(nstars * 2 * sizeof(float));
 		m_phase = (double *)malloc(nstars * sizeof(double));
@@ -809,7 +809,7 @@ public:
 		m_needConfig[0] = m_needConfig[1] = true;
 		m_drawmode = GL_POINTS;
 	}
-	virtual void move(long double time)
+	virtual void move(long double time) override
 	{
 
 		if (!m_v || !m_pvel || !m_phase) return;
@@ -896,7 +896,7 @@ class Line : public Shape
 		v[2] = 1.0f * m_l;
 		v[3] = 0.0f;
 	}
-	
+
 };
 
 class Circle : public Shape
@@ -911,7 +911,7 @@ public:
 		m_drawmode = GL_TRIANGLE_FAN;
 	}
 	~Circle() {}
-	virtual void fill(float *v)
+	virtual void fill(float *v) override
 	{
 		v[0] = 0.f;
 		v[1] = 0.f;
@@ -939,7 +939,7 @@ public:
 		m_drawmode = GL_TRIANGLE_STRIP;
 	}
 	~Ring() {}
-	virtual void fill(float *v)
+	virtual void fill(float *v) override
 	{
 		for (int i=0; i<m_ns+1; i++) {
 			float t = (float)i * PI * 2 / (m_ns);
@@ -964,7 +964,7 @@ public:
 		m_drawmode = GL_TRIANGLE_FAN;
 	}
 	~Square() {}
-	virtual void fill(float *v)
+	virtual void fill(float *v) override
 	{
 		for (int i=0; i<5; i++) {
 			v[i*2+0] = m_sign[i*2+0]*m_w;
@@ -985,7 +985,7 @@ public:
 		m_drawmode = GL_TRIANGLE_STRIP;
 	}
 	~OpenSquare() {}
-	virtual void fill(float *v)
+	virtual void fill(float *v) override
 	{
 		for (int i=0; i<5; i++) {
 			v[i*4+0] = m_sign[i*2+0]*m_iw;
@@ -1023,7 +1023,7 @@ public:
 	{
 		clear();
 	}
-	virtual bool store()
+	virtual bool store() override
 	{
 		int n = nstored();
 		bool same = true;
@@ -1044,14 +1044,14 @@ public:
 		}
 		return !same;
 	}
-	virtual void clear()
+	virtual void clear() override
 	{
 		VectorSerialize::clear();
 		v_draw.clear();
 		v_pos.clear();
 		v_color.clear();
 	}
-	virtual string storeName(int indx)
+	virtual string storeName(int indx) override
 	{
 		switch (indx) {
 		case 0:
@@ -1064,7 +1064,7 @@ public:
 		return VectorSerialize::storeName(indx - 3);
 
 	}
-	virtual int getStoreClass(int indx)
+	virtual int getStoreClass(int indx) override
 	{
 		switch (indx) {
 		case 0:
@@ -1076,7 +1076,7 @@ public:
 		}
 		return VectorSerialize::getStoreClass(indx - 3);
 	}
-	virtual void getStoreDims(int indx, size_t *dims)
+	virtual void getStoreDims(int indx, size_t *dims) override
 	{
 		switch (indx) {
 		case 0:
@@ -1094,7 +1094,7 @@ public:
 		}
 		return VectorSerialize::getStoreDims(indx - 3, dims);
 	}
-	virtual void *getStore(int indx, int i)
+	virtual void *getStore(int indx, int i) override
 	{
 		switch (indx) {
 		case 0:
@@ -1106,11 +1106,11 @@ public:
 		}
 		return VectorSerialize::getStore(indx - 3, i);
 	}
-	virtual int numStores()
+	virtual int numStores() override
 	{
 		return VectorSerialize::numStores() + 3;
 	}
-	virtual double *mmapRead(double *d)
+	virtual double *mmapRead(double *d) override
 	{
 		m_draw = (char)floor(*d++);
 		for (int i=0; i<2; i++)
@@ -1125,7 +1125,7 @@ public:
 			s[i] = m_stor[i];
 		return d;
 	}
-	virtual void draw(int display, float ar)
+	virtual void draw(int display, float ar) override
 	{
 		if (m_draw & (1<<display)) {
 			//need to convert world coords to screen.

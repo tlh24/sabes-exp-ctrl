@@ -6,8 +6,8 @@
 class Line : public Shape
 {
 	float m_l;
-	
-	public:
+
+public:
 	Line(float length);
 	virtual ~Line();
 	virtual void fill(float *v);

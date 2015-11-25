@@ -95,29 +95,31 @@ bool sendDataRZ(int sock, float *data, int count)
 {
 	char *packet;
 	bool retval = false;
-	int i;
+
 	// Allocate packet
-	packet = new char[4+4*count];
+	int n = 4+4*count;
+	packet = new char[n];
 
 	// Get header and load into packet
 	char header[4] = DATA_HEADER((char)count);
-	for (i=0; i<4; i++)
+	for (int i=0; i<4; i++)
 		packet[i]=header[i];
 
 	// Load data (as floats)
 	float *f = (float *)(packet + HEADER_BYTES);
-	for (i=0; i<count; i++)
+	for (int i=0; i<count; i++)
 		f[i] = (float)(data[i]);
 
 	// match the byte ordering of the RZ communication
 	uint32_t *udata = (uint32_t *)f;
-	for (i=0; i<count; i++)
+	for (int i=0; i<count; i++)
 		udata[i] = htonl(udata[i]);
+
 	// send the data over the UDP connection
-	if (send(sock, packet, 4 + count * 4, 0) == 4 + count * 4)
-		retval = true;
+	retval = send(sock, packet, n, 0) == n ? true : false;
+
 	// Close
-	free(packet);
+	delete[] packet;
 	return retval;
 }
 

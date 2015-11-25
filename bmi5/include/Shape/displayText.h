@@ -16,7 +16,7 @@ public:
 
 	DisplayText(int size);
 	~DisplayText();
-	
+
 	virtual bool store();
 	virtual void clear();
 	virtual string storeName(int indx);

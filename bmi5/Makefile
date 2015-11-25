@@ -35,6 +35,8 @@ SOURCES=$(shell find ./src/ -name *.cpp \
 	! -name *u6.cpp \
 	! -name *glxgears.cpp)
 
+HEADERS=$(shell find ./include/ -name *.h)
+
 OBJS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:%.cpp=%.o))
 OBJS += $(BUILDDIR)/gettime.o $(BUILDDIR)/lconf.o
 
@@ -69,8 +71,8 @@ ifeq ($(strip $(OPTO)),true)
 	CFLAGS += -DOPTO
 endif
 
-# DEPENDENCIES: NOTE WE REQUIRE JESSIE NOW
-DEPS = gcc g++ gdb astyle cppcheck libboost-dev libgtk-3-dev \
+# DEPENDENCIES: WE REQUIRE AT LEAST DEBIAN JESSIE
+DEPS = clang lldb gcc g++ gdb astyle cppcheck libboost-dev libgtk-3-dev \
 libgtkglext1-dev freeglut3-dev libglew-dev libusb-1.0-0-dev \
 libmatio-dev libhdf5-7 libhdf5-dev libhdf5-serial-dev \
 libblas-dev liblapack-dev libfftw3-dev libgsl0-dev \
@@ -136,13 +138,11 @@ conf:
 
 pretty:
 	# "-rm" means that make ignores errors, if any
-	astyle -A8 --indent=tab -H -k3 include/*.h
-	-rm include/*.h.orig
+	astyle -A8 --indent=tab -H -k3 $(HEADERS)
+	-rm $(shell find ./include/ -name *.h.orig)
 
 	astyle -A8 --indent=tab -H -k3 $(SOURCES)
-	-rm $(shell find ./src/ -name *.cpp.orig \
-	! -name *u6.cpp \
-	! -name *glxgears.cpp)
+	-rm $(shell find ./src/ -name *.cpp.orig)
 
 #Make the Directories
 directories:

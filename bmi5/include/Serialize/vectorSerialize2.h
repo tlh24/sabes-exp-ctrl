@@ -112,7 +112,7 @@ template <class T> void VectorSerialize2<T>::getStoreDims(int indx, size_t *dims
 		return;
 	}
 }
-template <class T> void* VectorSerialize2<T>::getStore(int indx, int k)
+template <class T> void *VectorSerialize2<T>::getStore(int indx, int k)
 {
 	//coalesce the memory -- <vector<vector>> is non-continuous in memory.
 	if (indx == 0) {
@@ -138,7 +138,7 @@ template <class T> int VectorSerialize2<T>::numStores()
 {
 	return 3;
 }
-template <class T> double* VectorSerialize2<T>::mmapRead(double *d)
+template <class T> double *VectorSerialize2<T>::mmapRead(double *d)
 {
 	*d++ = m_time; //when the vector was updated.
 	for (int i=0; i<m_size; i++) {
