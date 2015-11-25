@@ -26,6 +26,8 @@ public:
 	float	m_compass_l;
 	GLuint	m_colorbuffer;
 	float 	m_target[2];
+	float 	m_ptarget[2];
+	bool* 	m_is_coherent;
 	vector<float> v_coherence;
 	vector <float *> v_target;
 	vector <float> v_compass_l;
@@ -45,6 +47,7 @@ public:
 	// Setters
 	void setCoherence(float coherence);
 	void setLinesLength(float length);
+	void setTarget(double* target);
 
 	virtual void clear();
 	virtual bool store();

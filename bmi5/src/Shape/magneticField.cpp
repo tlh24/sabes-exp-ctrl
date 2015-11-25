@@ -16,11 +16,14 @@ MagneticField::MagneticField() : Shape()
 {
 	m_v = NULL;
 	m_phase = NULL;
+	m_is_coherent = NULL;
 	m_num_compasses = 0;
 	m_coherence = 1.0f;
 	m_compass_l = 0.02f;
 	m_target[0] = 0.0f;
 	m_target[1] = 0.0f;
+	m_ptarget[0] = 0.0f;
+	m_ptarget[1] = 0.0f;
 	m_name = string {"magnetic"};
 }
 
@@ -30,6 +33,8 @@ MagneticField::~MagneticField()
 	m_v = NULL;
 	if (m_phase) free(m_phase);
 	m_phase = NULL;
+	if (m_is_coherent) free(m_is_coherent);
+	m_is_coherent = NULL;
 }
 
 void MagneticField::makeVAO(Compass *vertices, bool del, int display)
@@ -61,8 +66,10 @@ void MagneticField::makeCompasses(int nCompasses)
 {
 	if (m_v) free(m_v);
 	if (m_phase) free(m_phase);
+	if (m_is_coherent) free(m_is_coherent);
 	m_v = NULL;
 	m_phase = NULL;
+	m_is_coherent = NULL;
 
 	m_num_compasses = nCompasses;
 
@@ -72,11 +79,10 @@ void MagneticField::makeCompasses(int nCompasses)
 
 	m_v = (Compass *)malloc(2*nrows*ncolumns*sizeof(Compass)); // 2 points each
 	m_phase = (double *)malloc(2*nrows*ncolumns*sizeof(double));
+	m_is_coherent = (bool *)malloc(nrows*ncolumns*sizeof(bool));
 
 	float offset_w = - 0.5f + m_compass_l/m_scale[0]/2;
 	float offset_h = - 0.5f + m_compass_l/m_scale[1]/2;
-
-	std::cerr << "Ratio : "<< ratio << std::endl;
 
 	float i = offset_w;
 	for (int k=0; k < ncolumns ; k++) {
@@ -98,6 +104,7 @@ void MagneticField::makeCompasses(int nCompasses)
 
 	for (int i(0); i < 2*nrows * ncolumns; ++i) {
 		m_phase[i] = 0.0;
+		m_is_coherent[i/2] = true;
 	}
 
 	m_n = 2 * nrows * ncolumns;
@@ -135,12 +142,18 @@ void MagneticField::move(long double time)
 	basecol += (unsigned int)(m_color[0] * 255) & 255;
 
 	float ratio = m_scale[0]/m_scale[1];
-
+	float dposition[2];
+	dposition[0] = m_target[0] - m_ptarget[0];
+	dposition[1] = m_target[1] - m_ptarget[1];
+	m_ptarget[0] 	= m_target[0];
+	m_ptarget[1] 	= m_target[1];
 	for (int i(0); i<m_n; i+=2) {
 		double angle;
 		double x2; 
 		double y2;
-		if (m_phase[i] != 0 && m_phase[i+1] != 0) {
+		if (!m_is_coherent[i/2]) {		
+			m_phase[i] += dposition[0];
+			m_phase[i+1] += dposition[1];
 			x2 = 0.5 * (m_v[i].x + m_v[i+1].x) - (m_phase[i]-m_trans[0])/m_scale[0];
 			y2 = 0.5 * (m_v[i].y + m_v[i+1].y) - (m_phase[i+1]-m_trans[1])/m_scale[1];
 		}else{
@@ -295,8 +308,9 @@ double *MagneticField::mmapRead(double *d)
 {
 	setCoherence(*d++);
 	setLinesLength(*d++);
-	for (int i=0; i<2; i++)
-		m_target[i] = *d++;
+	setTarget(d);
+	*d++;
+	*d++;
 
 	// see the base shape mmap read
 	// we are duplicating it's functionality
@@ -326,6 +340,11 @@ double *MagneticField::mmapRead(double *d)
 	return Shape::mmapRead(d);
 }
 
+void MagneticField::setTarget(double* target){	
+	m_target[0] 	= (*target++);
+	m_target[1] 	= (*target++);
+}
+
 void MagneticField::setCoherence(float coherence)
 {
 	if (coherence != m_coherence) {
@@ -341,12 +360,16 @@ void MagneticField::setCoherence(float coherence)
 		generateUniqueNumbers(&index, 0, m_n / 2, (int)((1.0f - m_coherence) * m_n / 2));
 		if (index.size() != 0) {
 			std::set<int>::iterator it = index.begin();
-			for (int i(0); i < m_n / 2; ++i) {
-				if (i == *it) {
-					m_phase[i] = rand() / (float)RAND_MAX * M_PI;
+			for (int i(0); i < m_n; i+=2) {
+				if (i == 2*(*it)) {
+					m_is_coherent[i/2] = false;
+					m_phase[i] = m_scale[0] - rand() / (float)RAND_MAX * m_scale[0] * 2 + m_trans[0];
+					m_phase[i+1] = m_scale[1] - rand() / (float)RAND_MAX * m_scale[1] * 2 + m_trans[1];
 					++it;
 				} else {
+					m_is_coherent[i/2] = true;
 					m_phase[i] = 0;
+					m_phase[i+1] = 0;
 				}
 			}
 		} else {
