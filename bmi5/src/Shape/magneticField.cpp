@@ -71,7 +71,7 @@ void MagneticField::makeCompasses(int nCompasses)
 	int nrows = ceil(sqrt(nCompasses / ratio) ) ;
 
 	m_v = (Compass *)malloc(2*nrows*ncolumns*sizeof(Compass)); // 2 points each
-	m_phase = (double *)malloc(nrows*ncolumns*sizeof(double));
+	m_phase = (double *)malloc(2*nrows*ncolumns*sizeof(double));
 
 	float offset_w = - 0.5f + m_compass_l/m_scale[0]/2;
 	float offset_h = - 0.5f + m_compass_l/m_scale[1]/2;
@@ -96,7 +96,7 @@ void MagneticField::makeCompasses(int nCompasses)
 		i += 1/(double)ncolumns;
 	}
 
-	for (int i(0); i < nrows * ncolumns; ++i) {
+	for (int i(0); i < 2*nrows * ncolumns; ++i) {
 		m_phase[i] = 0.0;
 	}
 
@@ -138,14 +138,17 @@ void MagneticField::move(long double time)
 
 	for (int i(0); i<m_n; i+=2) {
 		double angle;
-
-		double x2 = 0.5 * (m_v[i].x + m_v[i+1].x) - (m_target[0]-m_trans[0])/m_scale[0];
-		double y2 = 0.5 * (m_v[i].y + m_v[i+1].y) - (m_target[1]-m_trans[1])/m_scale[1];
-		angle = atan2(y2, x2);  	// atan2(y, x) or atan2(sin, cos)
-		if (m_phase[i/2] > 0) {
-			angle += m_phase[i/2];
+		double x2; 
+		double y2;
+		if (m_phase[i] != 0 && m_phase[i+1] != 0) {
+			x2 = 0.5 * (m_v[i].x + m_v[i+1].x) - (m_phase[i]-m_trans[0])/m_scale[0];
+			y2 = 0.5 * (m_v[i].y + m_v[i+1].y) - (m_phase[i+1]-m_trans[1])/m_scale[1];
+		}else{
+			x2 = 0.5 * (m_v[i].x + m_v[i+1].x) - (m_target[0]-m_trans[0])/m_scale[0];
+			y2 = 0.5 * (m_v[i].y + m_v[i+1].y) - (m_target[1]-m_trans[1])/m_scale[1];
 		}
-
+		angle = atan2(y2, x2);  	// atan2(y, x) or atan2(sin, cos)
+		
 		// we scale the length of the compas by the  xxx
 		m_v[i].x = 0.5 * (m_v[i].x + m_v[i+1].x - m_compass_l/m_scale[0] * cos(angle));
 		m_v[i].y = 0.5 * (m_v[i].y + m_v[i+1].y - m_compass_l/m_scale[1] * sin(angle));
@@ -341,7 +344,7 @@ void MagneticField::setCoherence(float coherence)
 			std::set<int>::iterator it = index.begin();
 			for (int i(0); i < m_n / 2; ++i) {
 				if (i == *it) {
-					m_phase[i] = rand() / (double)RAND_MAX * M_PI;
+					m_phase[i] = rand() / (float)RAND_MAX * M_PI;
 					++it;
 				} else {
 					m_phase[i] = 0;
