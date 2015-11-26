@@ -377,7 +377,7 @@ static gboolean refresh (gpointer )
 		int nsensors = g_polhemus->m_nsensors;
 		float *ff = loc;
 		auto clampfloat = [&](float w) {
-			return fabs(w) > 1e6 ? 0 : w;;
+			return fabs(w) > 1e6 ? 0 : w;
 		};
 		for (int j=0; j<nsensors; j++) {
 			oss << "marker_" << (j+1) << " ";

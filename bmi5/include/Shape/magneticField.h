@@ -19,15 +19,16 @@ struct Compass {
 class MagneticField : public Shape
 {
 public:
-	double *m_phase; // angular offset; coherent lines have zero
+	float 	*m_ghost_targets;
 	Compass *m_v; //vertices, backing store.
 	int 	m_num_compasses;
 	float	m_coherence;
 	float	m_compass_l;
 	GLuint	m_colorbuffer;
 	float 	m_target[2];
-	float 	m_ptarget[2];
-	bool* 	m_is_coherent;
+	float 	m_ptarget[2]; // previous target
+	bool 	*m_is_coherent;
+	bool	*m_clockwise; // true -> clockwise; false -> anticlockwise
 	vector<float> v_coherence;
 	vector <float *> v_target;
 	vector <float> v_compass_l;
@@ -35,6 +36,7 @@ public:
 	MagneticField();
 	~MagneticField();
 
+	void freeMemory();
 	virtual void makeVAO(Compass *vertices, bool del, int display);
 	virtual void makeShaders(int index);
 	virtual void makeCompasses(int nCompasses);
@@ -47,7 +49,7 @@ public:
 	// Setters
 	void setCoherence(float coherence);
 	void setLinesLength(float length);
-	void setTarget(double* target);
+	void setTarget(double *&target);
 
 	virtual void clear();
 	virtual bool store();
