@@ -1,15 +1,10 @@
 #ifndef MAGNETICFIELD_H
 #define MAGNETICFIELD_H
 
-#include "shape.h"
 #include <set>
-#include <gtk/gtk.h>
+#include "shape.h"
 
-#define EPS 	1e-5
-
-float norm(float a, float b);
 void generateUniqueNumbers( set<int> *ln, int min, int max, int n);
-extern GtkWindow *g_subjectWindow;
 
 struct Compass {
 	float	x, y;

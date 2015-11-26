@@ -1,11 +1,6 @@
 #include "../../include/Shape/magneticField.h"
 #include "random.h"
 
-float norm(float a, float b)
-{
-	return sqrtf(a*a + b*b);
-}
-
 void generateUniqueNumbers( set<int> *ln, int min, int max, int n)
 {
 	while ( ln->size() < n ) {
@@ -186,7 +181,6 @@ void MagneticField::move(long double time)
 			angle = 0.0;
 		}
 
-		// we scale the length of the compas by the  xxx
 		float cx = 0.5 * (m_v[i].x + m_v[i+1].x);
 		float cy = 0.5 * (m_v[i].y + m_v[i+1].y);
 
@@ -362,12 +356,10 @@ double *MagneticField::mmapRead(double *d)
 		makeCompasses(m_num_compasses);
 	}
 
-	for (int i(0); i<2; i++)
-		m_trans[i] = *d++;
+	m_trans[0] = *d++;
+	m_trans[1] = *d++;
 	m_rot = *d++;
 	return d;
-
-	return Shape::mmapRead(d);
 }
 
 void MagneticField::setTarget(double *(&target))

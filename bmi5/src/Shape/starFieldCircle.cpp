@@ -1,4 +1,5 @@
 #include "../../include/Shape/starFieldCircle.h"
+#include "random.h"
 
 StarFieldCircle::StarFieldCircle() {}
 StarFieldCircle::~StarFieldCircle() {}
@@ -17,7 +18,7 @@ void StarFieldCircle::makeStars(int nstars)
 
 		// draw uniformly in a circle with radius 0.5
 		float x = uniform()*PI*2.f;
-		float u = random()+random();
+		float u = uniform()+uniform();
 		float r = u > 1 ? 2-u : u;
 		m_v[i].position[0] = 0.5f*r*cosf(x);
 		m_v[i].position[1] = 0.5f*r*sinf(x);
