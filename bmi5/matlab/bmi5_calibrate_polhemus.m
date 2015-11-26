@@ -2,14 +2,14 @@ function [] = bmi5_calibrate_polhemus()
 
 global bmi5_in bmi5_out;
 
-BASEPATH = '/home/motorlab/';
+BASEPATH = '/home/joeyo/';
 CalibrationFile = fullfile(BASEPATH,'sw/sabes-exp-ctrl/bmi5/matlab/calibration_polhemus.mat');
 
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r'); 
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w'); 
 
-num_targets = 25;
+num_targets = 16;
 snt = sqrt(num_targets);
 
 bmi5_cmd('clear_all');
@@ -67,7 +67,7 @@ b5.tone_pan = 0;
 b5.tone_scale = 1;
 b5.tone_duration = 0.25;
 
-pause(30);
+pause(10);
 
 i=1;
 for yi = 1:snt
