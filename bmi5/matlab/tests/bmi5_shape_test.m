@@ -4,6 +4,9 @@ global bmi5_out bmi5_in b5
 
 bmi5_out = fopen('/tmp/bmi5_out.fifo', 'r');
 bmi5_in  = fopen('/tmp/bmi5_in.fifo',  'w');
+
+bmi5_cmd('delete_all')
+
 bmi5_cmd('make circle cursor');
 bmi5_cmd('make ring ring 0.5');
 bmi5_cmd('make square square'); 
@@ -17,6 +20,10 @@ b5.cursor_draw = 1;
 b5.cursor_scale = [0.5 0.5];
 b5.cursor_color = [1 0 0 1]; % red
 b5.cursor_pos = [-0.5 -0.5]; 
+
+b5 = bmi5_mmap(b5);
+
+pause;
 
 b5.ring_draw = 1;
 b5.ring_scale = [0.5 0.5];
