@@ -3,7 +3,7 @@
 # ie: make DBG=true JACK=false
 #
 # install dependencies with make deps
-DBG = true
+DBG = false
 JACK = true
 LABJACK = false
 OPTO = false

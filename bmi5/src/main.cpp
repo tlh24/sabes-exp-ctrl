@@ -288,7 +288,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p)
 		mutex_gobjs.unlock();
 		/// end
 
-		{
+		/*{
 			float in[4], out[4];
 			for (int i=0; i<4; i++) {
 				in[i] = out[i] = 0.f;
@@ -302,7 +302,7 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p)
 			glColor4f(1.0, 0.0, 0.0, 1.0);
 			glRasterPos2f(out[0], out[1]);
 			glPrint("Lorem ipsum dolor sit amet\n foo", h);
-		}
+		}*/
 
 		g_daglx[h]->swap(); //always double buffered
 		g_openGLTimer.exit();
