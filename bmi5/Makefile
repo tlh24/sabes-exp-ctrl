@@ -3,7 +3,7 @@
 # ie: make DBG=true JACK=false
 #
 # install dependencies with make deps
-DBG = false
+DBG = true
 JACK = true
 LABJACK = false
 OPTO = false
@@ -20,12 +20,12 @@ ifeq	($(shell hostname),inCage)
 	LABJACK = true
 endif
 
-CC  = clang-3.6
-CPP = clang++-3.6
 ifeq ($(shell lsb_release -sc), jessie)
         CC = clang-3.5
         CPP = clang++-3.5
 endif
+CC  = clang-3.8
+CPP = clang++-3.8
 
 TARGET = /usr/local/bin
 BUILDDIR = ./bin
@@ -41,18 +41,24 @@ OBJS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:%.cpp=%.o))
 OBJS += $(BUILDDIR)/gettime.o $(BUILDDIR)/lconf.o $(BUILDDIR)/random.o
 
 CFLAGS := -Iinclude -I/usr/local/include -I../../myopen/common_host
-CFLAGS += -Wall -Wcast-align -Wpointer-arith -Wshadow -Wsign-compare \
--Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses -Wtrigraphs \
--Wextra -pedantic -Wno-deprecated-declarations -std=c++11 -stdlib=libstdc++
-CFLAGS += -march=native -Wno-unused-result
+
+CFLAGS += -Wall -Wextra -pedantic -Wshadow
+CFLAGS += -std=c++11 -Wno-int-to-pointer-cast -Wtrigraphs
+CFLAGS += -Wstrict-overflow -fno-strict-aliasing
+CFLAGS += -Wcast-align -Wpointer-arith -Wsign-compare
+CFLAGS += -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses
+CFLAGS += -Wno-missing-field-initializers
+CFLAGS += -Wno-deprecated-declarations -stdlib=libstdc++
+CFLAGS += -Wno-braced-scalar-init -Wno-unused-result
+
 LDFLAGS := -lrt -lGL -lglut -lGLU -lGLEW -lusb-1.0 -lX11 -lpthread
 
 ifeq ($(strip $(DBG)),true)
-	CFLAGS  += -O0 -g -rdynamic -DDEBUG
-	LDFLAGS += -rdynamic
+	CFLAGS  += -O0 -g -DDEBUG
+	LDFLAGS +=
 	JACK = false
 else
-	CFLAGS += -O3
+	CFLAGS += -O3 -march=native -fslp-vectorize-aggressive
 endif
 
 ifeq ($(strip $(JACK)),true)
@@ -80,15 +86,7 @@ libxdg-basedir-dev liblua5.1-0-dev libprocps3-dev \
 libpcap-dev winbind zlib1g-dev \
 qjackctl libjack-jackd2-dev
 
-HDFLIB = -lhdf5
-ifeq ($(shell lsb_release -sc), wheezy)
-	HDFLIB = -lhdf5
-endif
-ifeq ($(shell lsb_release -sc), jessie)
-	HDFLIB = -lhdf5_serial
-endif
-
-LIBS=gtk+-3.0 gsl libxdg-basedir lua5.1 libprocps
+LIBS=gtk+-3.0 gsl libxdg-basedir lua5.1 libprocps hdf5 matio
 CFLAGS += $(shell pkg-config --cflags $(LIBS))
 LDFLAGS += $(shell pkg-config --libs $(LIBS))
 
@@ -101,7 +99,7 @@ $(BUILDDIR)/%.o: ../../myopen/common_host/%.cpp
 	$(CPP) -c $(CFLAGS) $< -o $@
 
 bmi5: $(OBJS)
-	$(CPP) -o $@ $(LDFLAGS) $(HDFLIB) -lmatio -lpcap $(OBJS)
+	$(CPP) -o $@ $(LDFLAGS) -lpcap $(OBJS)
 
 opto: bmi5 # enables packet-capture privelages on bmi5.
 	sudo setcap cap_net_raw,cap_net_admin=eip bmi5

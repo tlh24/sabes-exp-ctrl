@@ -3,7 +3,7 @@
 
 void generateUniqueNumbers( set<int> *ln, int min, int max, int n)
 {
-	while ( ln->size() < n ) {
+	while ( ln->size() < (size_t)n ) {
 		ln->insert( rand()%max + min );
 	}
 }
@@ -81,22 +81,25 @@ void MagneticField::makeCompasses(int nCompasses)
 	m_is_coherent = (bool *)malloc(nrows*ncolumns*sizeof(bool));
 	m_clockwise = (bool *)malloc(nrows*ncolumns*sizeof(bool));
 
-	float i = 0;
-	for (int k=0; k < ncolumns; k++) {
-		float j = 0;
-		for (int l = 0; l < 2*nrows ; l+=2) {
-			// first point in line
-			m_v[(int)(k*2*nrows) + l].x = i;
-			m_v[(int)(k*2*nrows) + l].y = j;
-			m_v[(int)(k*2*nrows) + l].color = 0xffffffff;
-			// second point in line
-			m_v[(int)(k*2*nrows) + l + 1].x = i;
-			m_v[(int)(k*2*nrows) + l + 1].y = j;
-			m_v[(int)(k*2*nrows) + l + 1].color = 0xffffffff;
+	{
+		// scope the counter variables
+		float i = 0;
+		for (int k=0; k < ncolumns; k++) {
+			float j = 0;
+			for (int l = 0; l < 2*nrows ; l+=2) {
+				// first point in line
+				m_v[(int)(k*2*nrows) + l].x = i;
+				m_v[(int)(k*2*nrows) + l].y = j;
+				m_v[(int)(k*2*nrows) + l].color = 0xffffffff;
+				// second point in line
+				m_v[(int)(k*2*nrows) + l + 1].x = i;
+				m_v[(int)(k*2*nrows) + l + 1].y = j;
+				m_v[(int)(k*2*nrows) + l + 1].color = 0xffffffff;
 
-			j += 1/(double)nrows;
+				j += 1/(double)nrows;
+			}
+			i += 1/(double)ncolumns;
 		}
-		i += 1/(double)ncolumns;
 	}
 
 	// now compute and remove the mean position of the line array
