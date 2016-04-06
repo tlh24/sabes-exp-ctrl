@@ -107,10 +107,9 @@ bool		g_record = false;
 bool		g_polhemusConnected = false;
 bool		g_optoConnected = false;
 bool		g_labjackConnected = false;
-GtkWindow 	*g_mainWindow; //used for dialogs, etc.
-GtkWindow 	*g_subjectWindow; //used for dialogs, etc.
-gtkglx  	*g_daglx[2]; //monkey, human.
-GtkWidget 	*g_da[2]; //draw areas, same order as above.
+
+vector <gtkglx *> g_daglx; //monkey, human.
+vector <GtkWidget *> g_da; //draw areas, same order as above.
 GtkWidget 	*g_timeLabel;
 GtkWidget 	*g_matlabTimeLabel;
 GtkWidget 	*g_openglTimeLabel;
@@ -134,11 +133,11 @@ PolhemusSerialize 	*g_polhemus;
 OptoSerialize 		*g_opto; //the optotrak.
 MouseSerialize		*g_mouse; //mouse control.
 LabjackSerializeAIN	*g_labjack_AIN; //USB analog input.
-LabjackSerializeDOUT	 *g_labjack_DOUT; //USB digital output
-vector<Serialize *> 	g_objs; //container for each of these, and more!
+LabjackSerializeDOUT *g_labjack_DOUT; //USB digital output
+vector<Serialize *>	g_objs; //container for each of these, and more!
 
-std::mutex 	mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
-std::mutex 	mutex_gobjs;
+mutex 	mutex_fwrite; //mutex on file-writing, between automatic backup & user-initiated.
+mutex 	mutex_gobjs;
 long double g_nextVsyncTime = -1;
 
 luaConf 	g_lc;
@@ -148,34 +147,12 @@ string 		g_basedirname;
 //forward decl.
 void gobjsInit();
 
-void errorDialog(char *msg)
-{
-	GtkWidget *dialog, *label, *content_area;
-	dialog = gtk_dialog_new_with_buttons ("Error",
-	                                      g_mainWindow,
-	                                      GTK_DIALOG_DESTROY_WITH_PARENT,
-	                                      "_OK",
-	                                      GTK_RESPONSE_NONE,
-	                                      NULL);
-	content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-	label = gtk_label_new (msg);
-	/* Ensure that the dialog box is destroyed when the user responds. */
-	g_signal_connect_swapped (dialog,
-	                          "response",
-	                          G_CALLBACK (gtk_widget_destroy),
-	                          dialog);
-	/* Add the label, and show everything we've added to the dialog. */
-	gtk_container_add (GTK_CONTAINER (content_area), label);
-	gtk_widget_show_all (dialog);
-}
 void destroy(int)
 {
 	//more cleanup later.
 	g_die = true;
 	sleep(1);
 	gtk_main_quit();
-	KillFont(0);
-	KillFont(1);
 }
 void destroyGUI(GtkWidget *, gpointer)
 {
@@ -300,8 +277,8 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p)
 		float ar = 1.f;
 		if (da == g_da[0]) {
 			t = gettime();
-			for (unsigned int i=0; i<g_objs.size(); i++)
-				g_objs[i]->move(t);
+			for (auto &obj : g_objs)
+				obj->move(t);
 		} else {
 			//convert between aspect-ratios.
 			ar = g_daglx[0]->getAR() / g_daglx[1]->getAR();
@@ -310,6 +287,22 @@ draw1 (GtkWidget *da, cairo_t *, gpointer p)
 			obj->draw(h, ar);
 		mutex_gobjs.unlock();
 		/// end
+
+		{
+			float in[4], out[4];
+			for (int i=0; i<4; i++) {
+				in[i] = out[i] = 0.f;
+			}
+			float *aff = g_affine44->data(); //in matlab/openGL row major order.
+			for (int r=0; r<4; r++) {
+				for (int c=0; c<4; c++) {
+					out[r] += aff[r+4*c] * in[c];
+				}
+			}
+			glColor4f(1.0, 0.0, 0.0, 1.0);
+			glRasterPos2f(out[0], out[1]);
+			glPrint("Lorem ipsum dolor sit amet\n foo", h);
+		}
 
 		g_daglx[h]->swap(); //always double buffered
 		g_openGLTimer.exit();
@@ -414,9 +407,8 @@ string getMmapStructure()
 	oss << "% mmap structure (pass to bmi5_mmap())\n";
 	oss << "mex -O " << g_basedirname << "/matlab/bmi5_mmap.cpp % to make sure you have the latest version.\n";
 	oss << "clear b5; \n";
-	for (unsigned int i=0; i<g_objs.size(); i++) {
-		oss << g_objs[i]->getStructInfo();
-	}
+	for (auto &obj : g_objs)
+		oss << obj->getStructInfo();
 	oss << "b5_numdoubles = 0;\n";
 	oss << "b5c = struct2cell(b5);\n";
 	oss << "for i=1:size(b5c)\n";
@@ -511,9 +503,8 @@ void mmap_thread()
 				count /= 8;
 				*b = (double)count;
 				if (g_record) {
-					for (unsigned int i=0; i<g_objs.size(); i++) {
-						g_objs[i]->store(); //store when changes were commanded.
-					}
+					for (auto &obj : g_objs)
+						obj->store(); //store when changes were commanded.
 				}
 				mutex_gobjs.unlock();
 				// variables which are the other direction -- e.g. polhemus --
@@ -885,8 +876,8 @@ void mmap_thread()
 					resp = getMmapStructure();
 				} else if (*beg == string("clear_all")) {
 					printf("clearing all data in memory\n");
-					for (unsigned int i=0; i<g_objs.size(); i++)
-						g_objs[i]->clear();
+					for (auto &obj : g_objs)
+						obj->clear();
 					resp = {"cleared all stored data\n"};
 				} else if (*beg == string("delete_all")) {
 					printf("deleting all objects\n");
@@ -896,9 +887,8 @@ void mmap_thread()
 					if (g_opto) g_opto = 0;
 					if (g_labjack_AIN) g_labjack_AIN = 0;
 					if (g_labjack_DOUT) g_labjack_DOUT = 0;
-					for (unsigned int i=0; i<g_objs.size(); i++) {
-						delete g_objs[i];
-					}
+					for (auto &obj : g_objs)
+						delete obj;
 					resp = {"all objects deleted.\n"};
 					g_objs.clear();
 					gobjsInit(); //timing, etc.
@@ -1556,8 +1546,8 @@ static void clearDataCB(gpointer, gpointer parent_window)
 	gint result = gtk_dialog_run(GTK_DIALOG(dialog));
 	if (result == GTK_RESPONSE_YES) {
 		printf("clearing all data in memory\n");
-		for (unsigned int i=0; i<g_objs.size(); i++)
-			g_objs[i]->clear();
+		for (auto &obj : g_objs)
+			obj->clear();
 	}
 	gtk_widget_destroy(dialog);
 }
@@ -1653,8 +1643,8 @@ int main(int argn, char **argc)
 	g_lc.getString("backup.dir", g_backup_dir);
 
 	//setup a window with openGL.
-	GtkWidget *window;
-	GtkWidget *da1, *da2, *paned, *v1, *frame;
+	GtkWidget *top, *window;
+	GtkWidget *da, *paned, *v1, *frame;
 
 	g_startTime = gettime();
 
@@ -1664,22 +1654,34 @@ int main(int argn, char **argc)
 
 	gtk_init (&argn, &argc);
 
-	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	top = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 #ifndef DEBUG
-	gtk_window_set_title (GTK_WINDOW (window), "sabes experimental control");
+	gtk_window_set_title(GTK_WINDOW(top), "subject view");
 #else
-	gtk_window_set_title (GTK_WINDOW (window), "sabes experimental control *** DEBUG ***");
+	gtk_window_set_title(GTK_WINDOW(top), "subject view *** DEBUG ***");
 #endif
-	gtk_window_set_default_size (GTK_WINDOW (window), g_renderOpView?800:270, 650);
+	gtk_window_set_default_size(GTK_WINDOW(top), 320, 240);
+
+	da = gtk_drawing_area_new();
+	gtk_container_add(GTK_CONTAINER(top), da);
+	g_da.push_back(da);
+
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+#ifndef DEBUG
+	gtk_window_set_title(GTK_WINDOW(window), "sabes experimental control");
+#else
+	gtk_window_set_title(GTK_WINDOW(window), "sabes experimental control *** DEBUG ***");
+#endif
+	gtk_window_set_default_size(GTK_WINDOW(window), g_renderOpView?800:270, 650);
 
 	paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_container_add (GTK_CONTAINER (window), paned);
+	gtk_container_add (GTK_CONTAINER(window), paned);
 
 	//left: gui etc.
 	v1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_set_size_request(GTK_WIDGET(v1), 270, 650);
 	g_timeLabel = gtk_label_new("time: ");
-	gtk_container_add (GTK_CONTAINER (v1), g_timeLabel );
+	gtk_container_add(GTK_CONTAINER(v1), g_timeLabel );
 
 	auto makeLabel = [&](const char *frameLbl, const char *dflt) {
 		frame = gtk_frame_new(frameLbl);
@@ -1710,66 +1712,40 @@ int main(int argn, char **argc)
 	gtk_box_pack_start(GTK_BOX(v1), button, TRUE, TRUE, 0);
 
 	gtk_paned_add1(GTK_PANED(paned), v1);
-	da1 = gtk_drawing_area_new ();
-	gtk_paned_add2(GTK_PANED(paned), da1);
 
-	//setup the opengl context for da1.
-	//before we do this, tun on FSAA.
-	putenv((char *)"__GL_FSAA_MODE=10" ); //http://www.opengl.org/discussion_boards/showthread.php/172000-Programmatically-controlling-level-of-AA
+	da = gtk_drawing_area_new();
+	gtk_paned_add2(GTK_PANED(paned), da);
+	g_da.push_back(da);
+
+	// setup the opengl contexts
+	// before we do this, tun on FSAA.
+	putenv((char *)"__GL_FSAA_MODE=10"); //http://www.opengl.org/discussion_boards/showthread.php/172000-Programmatically-controlling-level-of-AA
 	putenv((char *)"__GL_SYNC_TO_VBLANK=0"); //don't sync to vertical blanking.  individually per window.
 	putenv((char *)"__GL_SYNC_DISPLAY_DEVICE=CRT-1"); //sync to this display device. (use nvidia-settings)
-	gtk_widget_set_double_buffered (da1, FALSE);
-	g_daglx[1] = new gtkglx(da1);
+	//gtk_widget_set_double_buffered (da, FALSE);
 
-	g_signal_connect (da1, "configure-event",
-	                  G_CALLBACK (configure1), (void *)1);
-	g_signal_connect (da1, "draw",
-	                  G_CALLBACK (draw1), (void *)1);
-	g_signal_connect (da1, "realize",
-	                  G_CALLBACK (realize1), (void *)1);
-	g_signal_connect (da1, "motion_notify_event",
-	                  G_CALLBACK (motion_notify_event), NULL);
-	//in order to receive keypresses, must be focusable!
-	gtk_widget_set_can_focus(da1, TRUE);
+	for (size_t i=0; i < g_da.size(); i++) {
+		gtk_widget_set_double_buffered(g_da[i], FALSE);
+		g_daglx.push_back(new gtkglx(g_da[i]));
+		g_signal_connect (g_da[i], "configure-event",
+		                  G_CALLBACK (configure1), (void *)i);
+		g_signal_connect (g_da[i], "draw",
+		                  G_CALLBACK (draw1), (void *)i);
+		g_signal_connect (g_da[i], "realize",
+		                  G_CALLBACK (realize1), (void *)i);
+		g_signal_connect (g_da[i], "motion_notify_event",
+		                  G_CALLBACK (motion_notify_event), NULL);
+		gtk_widget_set_events (g_da[i], GDK_EXPOSURE_MASK
+		                       | GDK_LEAVE_NOTIFY_MASK
+		                       | GDK_BUTTON_PRESS_MASK
+		                       | GDK_POINTER_MOTION_MASK
+		                       | GDK_POINTER_MOTION_HINT_MASK);
+		gtk_widget_show(g_da[i]);
+	}
 
-	gtk_widget_set_events (da1, GDK_EXPOSURE_MASK
-	                       | GDK_LEAVE_NOTIFY_MASK
-	                       | GDK_BUTTON_PRESS_MASK
-	                       | GDK_POINTER_MOTION_MASK
-	                       | GDK_POINTER_MOTION_HINT_MASK);
-
-	gtk_widget_show (da1);
-
-	//make the aux / monkey window.
-
-	GtkWidget *top = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-#ifndef DEBUG
-	gtk_window_set_title (GTK_WINDOW (top), "subject view");
-#else
-	gtk_window_set_title (GTK_WINDOW (top), "subject view *** DEBUG ***");
-#endif
-	gtk_window_set_default_size (GTK_WINDOW (top), 320, 240);
-	da2 = gtk_drawing_area_new ();
-	gtk_container_add (GTK_CONTAINER (top), da2);
-	gtk_widget_set_double_buffered (da2, FALSE);
-	g_daglx[0] = new gtkglx(da2);
-
-	g_signal_connect (da2, "configure-event",
-	                  G_CALLBACK (configure1), (void *)0);
-	g_signal_connect (da2, "draw",
-	                  G_CALLBACK (draw1), (void *)0);
-	g_signal_connect (da2, "realize",
-	                  G_CALLBACK (realize1), (void *)0);
-	//in order to receive keypresses, must be focusable!
-	//gtk_widget_set_can_focus( da2, TRUE);
-
-	gtk_widget_set_events (da2, GDK_EXPOSURE_MASK
-	                       | GDK_LEAVE_NOTIFY_MASK
-	                       | GDK_BUTTON_PRESS_MASK
-	                       | GDK_POINTER_MOTION_MASK
-	                       | GDK_POINTER_MOTION_HINT_MASK);
-
-	gtk_widget_show (da2);
+	// only for human display
+	g_timeout_add(4, refresh, g_da[1]); 		// 250 Hz, approximate.
+	gtk_widget_set_can_focus(g_da[1], TRUE); 	// to receive keypresses
 
 	auto makeCheckbox = [&](const char *lbl, bool ic, GCallback cb) {
 		button = gtk_check_button_new_with_label(lbl);
@@ -1787,16 +1763,11 @@ int main(int argn, char **argc)
 	makeCheckbox("Render Operator View\n(needed for mouse control)",
 	             g_renderOpView, G_CALLBACK(opViewCB));
 
-	g_signal_connect_swapped (window, "destroy",
-	                          G_CALLBACK (destroyGUI), NULL);
+	g_signal_connect_swapped(window, "destroy", G_CALLBACK(destroyGUI), NULL);
+	g_signal_connect_swapped (top, "destroy", G_CALLBACK(destroyGUI), NULL);
 
-	gtk_widget_show (window);
-	gtk_widget_show (top);
-
-	//add a refresh timeout.
-	g_da[1] = da1; //human
-	g_da[0] = da2; //monkey
-	g_timeout_add (4, refresh, da1); //250 Hz, approximate.
+	gtk_widget_show(window);
+	gtk_widget_show(top);
 
 	g_polhemus = 0;
 	g_opto = 0;
@@ -1808,16 +1779,16 @@ int main(int argn, char **argc)
 	gobjsInit();
 	mutex_gobjs.unlock();
 
-	std::vector <std::thread> threads;
+	vector <thread> threads;
 
-	threads.push_back(std::thread(polhemus_thread));
-	threads.push_back(std::thread(mmap_thread));
-	threads.push_back(std::thread(backup_thread));
+	threads.push_back(thread(polhemus_thread));
+	threads.push_back(thread(mmap_thread));
+	threads.push_back(thread(backup_thread));
 #ifdef OPTO
-	threads.push_back(std::thread(opto_thread));
+	threads.push_back(thread(opto_thread));
 #endif
 #ifdef LABJACK
-	threads.push_back(std::thread(labjack_thread));
+	threads.push_back(thread(labjack_thread));
 #endif
 
 	g_tsc = new TimeSyncClient(); //tells us the ticks when things happen.
@@ -1825,18 +1796,14 @@ int main(int argn, char **argc)
 	//jack audio.
 #ifdef JACK
 	jackInit("bmi5", JACKPROCESS_TONES);
-	if (g_lc.getBool("jack.connectFront")) {
+	if (g_lc.getBool("jack.connectFront"))
 		jackConnectFront();
-	}
-	if (g_lc.getBool("jack.connectCenterSub")) {
+	if (g_lc.getBool("jack.connectCenterSub"))
 		jackConnectCenterSub();
-	}
 	jackTest();
 #endif
 
-	g_mainWindow = (GtkWindow *)window;
-	g_subjectWindow = (GtkWindow *)top;
-	gtk_widget_show_all (window);
+	gtk_widget_show_all(window);
 
 	g_record = true;
 
@@ -1850,18 +1817,18 @@ int main(int argn, char **argc)
 	jackClose(0);
 #endif
 
-	for (auto &thread : threads) {
-		//std::cout << thread.get_id() << " ... joining ... ";
+	KillFont(0);
+	KillFont(1);
+
+	for (auto &thread : threads)
 		thread.join();
-		//std::cout << "joined\n";
-	}
 
-	for (unsigned int i=0; i<g_objs.size(); i++) {
-		delete (g_objs[i]);
-	}
+	for (auto &obj : g_objs)
+		delete obj;
 
-	delete g_daglx[0];
-	delete g_daglx[1];
+	for (auto &obj : g_daglx)
+		delete obj;
+
 	delete g_tsc;
 	return 0;
 }
