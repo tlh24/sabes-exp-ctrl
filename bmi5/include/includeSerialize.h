@@ -11,3 +11,4 @@
 #include "Serialize/toneSerialize.h"
 #include "Serialize/vectorSerialize.h"
 #include "Serialize/vectorSerialize2.h"
+#include "Serialize/storeSerialize.h"

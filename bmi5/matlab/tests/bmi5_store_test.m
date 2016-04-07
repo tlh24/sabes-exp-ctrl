@@ -7,6 +7,8 @@ bmi5_cmd('make store int 1 scalar');
 bmi5_cmd('make store int 2 vector');
 eval(bmi5_cmd('mmap'));
 
+b5 = bmi5_mmap(b5);
+
 b5.scalar_v = 1;
 b5 = bmi5_mmap(b5);
 b5.scalar_v = 200;

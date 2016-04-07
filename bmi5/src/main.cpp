@@ -711,24 +711,24 @@ void mmap_thread()
 									name = (*beg++);
 									//good, we have all the parameters
 									if (type == string("char")) {
-										VectorSerialize<char> *obj =
-										    new VectorSerialize<char>(size, MAT_C_INT8);
+										StoreSerialize<char> *obj =
+										    new StoreSerialize<char>(size, MAT_C_INT8);
 										makeStoreConf(obj, type, name);
 									} else if (type == string("uchar")) {
-										VectorSerialize<unsigned char> *obj =
-										    new VectorSerialize<unsigned char>(size, MAT_C_UINT8);
+										StoreSerialize<unsigned char> *obj =
+										    new StoreSerialize<unsigned char>(size, MAT_C_UINT8);
 										makeStoreConf(obj, type, name);
 									} else if (type == string("int")) {
-										VectorSerialize<int> *obj =
-										    new VectorSerialize<int>(size, MAT_C_INT32);
+										StoreSerialize<int> *obj =
+										    new StoreSerialize<int>(size, MAT_C_INT32);
 										makeStoreConf(obj, type, name);
 									} else if (type == string("float")) {
-										VectorSerialize<float> *obj =
-										    new VectorSerialize<float>(size, MAT_C_SINGLE);
+										StoreSerialize<float> *obj =
+										    new StoreSerialize<float>(size, MAT_C_SINGLE);
 										makeStoreConf(obj, type, name);
 									} else if (type == string("double")) {
-										VectorSerialize<double> *obj =
-										    new VectorSerialize<double>(size, MAT_C_DOUBLE);
+										StoreSerialize<double> *obj =
+										    new StoreSerialize<double>(size, MAT_C_DOUBLE);
 										makeStoreConf(obj, type, name);
 									} else {
 										resp = {"could not generate a store --\n"};
