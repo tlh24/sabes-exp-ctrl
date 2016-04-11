@@ -14,8 +14,8 @@ public:
 	vector<T> 			m_stor;
 	vector<T> 			m_stor2;
 	vector<double>		v_time;
-	vector<vector<T> > v_stor;
-	vector<vector<T> > v_stor2;
+	vector<vector<T> > 	v_stor;
+	vector<vector<T> > 	v_stor2;
 	T		*m_bs;
 
 	VectorSerialize2(int size, int matiotype);

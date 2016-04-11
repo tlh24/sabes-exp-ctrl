@@ -26,6 +26,7 @@ ifeq ($(shell lsb_release -sc), jessie)
 endif
 CC  = clang-3.8
 CPP = clang++-3.8
+LD  = clang++-3.8
 
 TARGET = /usr/local/bin
 BUILDDIR = ./bin
@@ -48,14 +49,14 @@ CFLAGS += -Wstrict-overflow -fno-strict-aliasing
 CFLAGS += -Wcast-align -Wpointer-arith -Wsign-compare
 CFLAGS += -Wformat=2 -Wno-format-y2k -Wmissing-braces -Wparentheses
 CFLAGS += -Wno-missing-field-initializers
-CFLAGS += -Wno-deprecated-declarations -stdlib=libstdc++
+CFLAGS += -Wno-deprecated-declarations #-stdlib=libstdc++
 CFLAGS += -Wno-braced-scalar-init -Wno-unused-result
 
 LDFLAGS := -lrt -lGL -lglut -lGLU -lGLEW -lusb-1.0 -lX11 -lpthread
 
 ifeq ($(strip $(DBG)),true)
-	CFLAGS  += -O0 -g -DDEBUG
-	LDFLAGS +=
+	CFLAGS  += -O1 -g -DDEBUG -fsanitize=address -fno-inline -fno-omit-frame-pointer
+	LDFLAGS += -fsanitize=address -fno-inline -fno-omit-frame-pointer
 	JACK = false
 else
 	CFLAGS += -O3 -march=native -fslp-vectorize-aggressive

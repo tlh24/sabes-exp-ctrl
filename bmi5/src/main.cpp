@@ -1148,6 +1148,7 @@ void polhemus_thread()
 		//len = pol->Read(buf, BUF_SIZE); //throw away.
 	}
 	pol->Close();
+	delete pol;
 }
 
 #ifdef OPTO
