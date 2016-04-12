@@ -89,7 +89,9 @@ using namespace boost;
 string 		g_mmap = "/tmp/bmi5_control.mmap";
 string 		g_in_fifo = "/tmp/bmi5_in.fifo";
 string 		g_out_fifo = "/tmp/bmi5_out.fifo";
+
 string 		g_polhemus_serial = "/dev/ttyS0";
+int			g_polhemus_dof = 3;
 
 bool 		g_do_backup = true;
 string 		g_backup_dir = "/tmp";
@@ -357,7 +359,7 @@ static gboolean refresh (gpointer )
 	         g_openGLTimer.lastTime()*1000.0);
 	gtk_label_set_text(GTK_LABEL(g_openglTimeLabel), str);
 
-	float loc[48];
+	float loc[96];
 	string con;
 
 	con = g_polhemusConnected ? string("connected\n") : string("disconnected\n");
@@ -365,18 +367,32 @@ static gboolean refresh (gpointer )
 		g_polhemus->getLoc(gettime(), loc);
 
 		ostringstream oss;
-		oss << std::setprecision(2);
+		oss << std::setprecision(1);
 		oss << std::fixed;
 		int nsensors = g_polhemus->m_nsensors;
 		float *ff = loc;
 		auto clampfloat = [&](float w) {
 			return fabs(w) > 1e6 ? 0 : w;
 		};
+
+		oss << "(X, Y, Z";
+		if (g_polhemus_dof == 3)
+			oss << ")\n";
+		else
+			oss << ", Az, El, Ro)\n";
+
 		for (int j=0; j<nsensors; j++) {
-			oss << "marker_" << (j+1) << " ";
-			oss << " x:" << clampfloat(*ff++);
-			oss << " y:" << clampfloat(*ff++);
-			oss << " z:" << clampfloat(*ff++) << "\n";
+			oss << "marker_" << (j+1) << ": ";
+			oss << clampfloat(*ff++) << ", ";
+			oss << clampfloat(*ff++) << ", ";
+			oss << clampfloat(*ff++);
+			if (g_polhemus_dof == 6) {
+				oss << ", ";
+				oss << clampfloat(*ff++) << ", ";
+				oss << clampfloat(*ff++) << ", ";
+				oss << clampfloat(*ff++);
+			}
+			oss << "\n";
 			//ff += 3;
 		}
 		con += oss.str();
@@ -760,7 +776,7 @@ void mmap_thread()
 							if (g_polhemus)
 								delete g_polhemus;
 							nsensors = nsensors < 1 ? 1 : (nsensors > 8 ? 8 : nsensors);
-							g_polhemus = new PolhemusSerialize(nsensors);
+							g_polhemus = new PolhemusSerialize(nsensors, g_polhemus_dof);
 							makeConf(g_polhemus, name);
 						} else {
 							resp = string("could not initialize polhemus object ");
@@ -1053,13 +1069,23 @@ void polhemus_thread()
 	} else {
 		cout << "polhemus: connection established .." << endl;
 		// first establish comm and clear out any residual trash data
-		float markerData[16*3];
+		float markerData[16*6];
 
 		pol->Write("U1\r"); // put polhemus in centimeter mode (no response is sent)
 		usleep(5e4);
 
+		pol->Write("R4\r");	// get data at 240 Hz
+		usleep(5e4);
+
 		// we only care about x, y, z -- faster (lower latency) transmission.
-		pol->Write("O*,2\r"); // turn off Euler angles (no response is sent).
+		//pol->Write("O*,2\r"); // turn off Euler angles (no response is sent).
+		if (g_polhemus_dof == 3) {
+			pol->Write("O*,2\r"); // enable euler angles too
+		} else if (g_polhemus_dof == 6) {
+			pol->Write("O*,2,4\r"); // enable euler angles too
+		} else {
+			printf("Illegal DoF\n");
+		}
 		usleep(5e4);
 
 		// now put it in binary (faster than ascii!) mode
@@ -1073,7 +1099,7 @@ void polhemus_thread()
 		g_cbPtr = g_cbRN = 0;
 		while (!g_die) {
 			count = 0;
-			memset(buf, 0, 16*20); // max markers * 20 bytes. is this necessasry???
+			memset(buf, 0, 16*32); // max markers * 32 bytes. is this necessasry???
 			do {
 				len = pol->Read(buf+count, BUF_SIZE-count);
 				if (len>0)
@@ -1081,48 +1107,59 @@ void polhemus_thread()
 				usleep(300);
 			} while ((len>0));
 			if (count > 0) {
-				//frame starts with 'LY_P', and is 8 bytes. This is followed by 3 4-byte floats.
-				//total frame is hence 20 bytes.
+				// Frame starts with 'LY_P', and is 8 bytes.
+				// This is followed by k 4-byte floats.
+				// Total frame is hence 8+3*4 = 20 bytes (X, Y, and Z)
+				// or 8+6*4 = 32 bytes (X, Y, Z, Azimuth, Elevation, and Roll)
 				for (i=0; i<count; i++) {
 					g_circBuff[g_cbPtr % 1024] = buf[i];
 					g_cbPtr++;
 				}
+
 				// align to frame.
 				while (((g_circBuff[g_cbRN % 1024] != 'L') ||
 				        (g_circBuff[(g_cbRN+1) % 1024] != 'Y')) &&
-				       (g_cbRN + 20 <= g_cbPtr)) {
+				       (g_cbRN + 32 <= g_cbPtr)) {
 					g_cbRN++;
 				}
+
 				//printf("polhemus lag: %d\n", g_cbPtr - g_cbRN);
 				//this will either leave us aligned at the start of a frame
 				//or waiting for more data.
 				//copy between the current /r/n.
 				while (g_circBuff[g_cbRN % 1024] == 'L' &&
 				       g_circBuff[(g_cbRN+1) % 1024] == 'Y' &&
-				       g_cbRN + 20 <= g_cbPtr) {
+				       g_cbRN + 32 <= g_cbPtr) {
 
-					int markerid = (int)g_circBuff[(g_cbRN+2) % 1024]; // convert to int
+					// byte 2 is the "station number" (the emitter/marker pair)
+					int markerid = (int)g_circBuff[(g_cbRN+2) % 1024];
 
 					if (!g_polhemus) {
-						g_cbRN += 20;
+						g_cbRN += 32;
 						continue;
 					}
 
 					if (markerid < 1 || markerid > g_polhemus->m_nsensors) {
-						g_cbRN += 20;
+						g_cbRN += 32;
 						continue;
 					}
 
-					for (i=0; i<20 && (g_cbRN+i) < g_cbPtr; i++) {
+					// this buffer seems to be purely to allow us to unwrap
+					// the circular buffer.
+					// It seems like this is potentially a needless copy:
+					// why not just go straight into markerData
+					for (i=0; i<32 && (g_cbRN+i) < g_cbPtr; i++) {
 						buf[i] = g_circBuff[(g_cbRN+i) % 1024];
 					}
 					buf[i] = 0; // not sure why we need to do this? xxx
-					// this data is used, move the pointer forward one frame
-					g_cbRN += 20;
+
+					// These data, being used, move the pointer forward a frame
+					g_cbRN += 32;
+
 					float *pData=(float *)(buf+8); // header is first 8 bytes
 					if (g_polhemus && g_record) {
-						for (int j=0; j<3; j++)
-							markerData[(markerid-1)*3 + j] = pData[j];
+						for (int j=0; j<6; j++)
+							markerData[(markerid-1)*6 + j] = pData[j];
 						if (markerid == g_polhemus->m_nsensors)
 							g_polhemus->store(markerData);
 					}
@@ -1244,7 +1281,7 @@ void opto_thread()
 				}
 				if (k == 2) {
 					ostringstream oss;
-					oss << std::setprecision(2);
+					oss << std::setprecision(1);
 					oss << std::fixed;
 					int nsensors = len/24;
 					float *ff = f;
@@ -1640,6 +1677,8 @@ int main(int argn, char **argc)
 	g_lc.getString("bmi5.fifoIn", g_in_fifo);
 	g_lc.getString("bmi5.fifoOut", g_out_fifo);
 	g_lc.getString("polhemus.serialPort", g_polhemus_serial);
+	int d = g_lc.getInt("polhemus.DoF");
+	g_polhemus_dof = (d == 3 || d == 6) ? d : 3;
 	g_do_backup = g_lc.getBool("backup.enable");
 	g_lc.getString("backup.dir", g_backup_dir);
 

@@ -12,9 +12,11 @@ class PolhemusSerialize : public VectorSerialize2<float>
 {
 public:
 	int 						m_nsensors; // number of sensors
+	int							m_dof; 		// DoF to receive from Liberty
 	vector<PolhemusPredict *>	m_pp;
 
 	PolhemusSerialize(int nsensors);
+	PolhemusSerialize(int nsensors, int dof);
 	~PolhemusSerialize();
 	virtual bool store();
 	bool store(float *data);

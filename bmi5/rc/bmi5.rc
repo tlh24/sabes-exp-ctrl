@@ -16,6 +16,12 @@ backup = {
 
 polhemus = {}
 polhemus.serialPort = "/dev/ttyS0"
+-- DoF can either be:
+-- 3 -> X, Y, Z
+--  (OR)
+-- 6 -> X, Y, Z, AZIMUTH, ELEVANTION, ROLL
+-- other values are not allowed
+polhemus.DoF = 3
 
 jack = {
   connectFront = true,

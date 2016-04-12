@@ -2,7 +2,7 @@ clear;
 
 global bmi5_out bmi5_in b5
 
-BASEPATH = '/home/motorlab/';
+BASEPATH = '/home/joeyo/';
 
 CalibrationFile = fullfile(BASEPATH,'sw/sabes-exp-ctrl/bmi5/matlab/calibration_polhemus.mat');
 
@@ -16,6 +16,8 @@ bmi5_cmd('delete_all');
 bmi5_cmd('make polhemus finger'); 
 bmi5_cmd('make circle cursor');
 eval(bmi5_cmd('mmap structure'));
+
+b5 = bmi5_mmap(b5);
 
 c = load(CalibrationFile); 
 qp = c.q';
