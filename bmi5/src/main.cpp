@@ -1712,14 +1712,14 @@ int main(int argn, char **argc)
 #else
 	gtk_window_set_title(GTK_WINDOW(window), "sabes experimental control *** DEBUG ***");
 #endif
-	gtk_window_set_default_size(GTK_WINDOW(window), g_renderOpView?800:270, 650);
+	gtk_window_set_default_size(GTK_WINDOW(window), g_renderOpView?800:275, 650);
 
 	paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_container_add (GTK_CONTAINER(window), paned);
 
 	//left: gui etc.
 	v1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_widget_set_size_request(GTK_WIDGET(v1), 270, 650);
+	gtk_widget_set_size_request(GTK_WIDGET(v1), 275, 650);
 	g_timeLabel = gtk_label_new("time: ");
 	gtk_container_add(GTK_CONTAINER(v1), g_timeLabel );
 
