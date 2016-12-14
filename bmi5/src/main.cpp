@@ -1677,8 +1677,7 @@ int main(int argn, char **argc)
 	g_lc.getString("bmi5.fifoIn", g_in_fifo);
 	g_lc.getString("bmi5.fifoOut", g_out_fifo);
 	g_lc.getString("polhemus.serialPort", g_polhemus_serial);
-	int d = g_lc.getInt("polhemus.DoF");
-	g_polhemus_dof = (d == 3 || d == 6) ? d : 3;
+	g_lc.getInt("polhemus.DoF", g_polhemus_dof);
 	g_do_backup = g_lc.getBool("backup.enable");
 	g_lc.getString("backup.dir", g_backup_dir);
 

@@ -20,10 +20,10 @@ ifeq	($(shell hostname),inCage)
 	LABJACK = true
 endif
 
-ifeq ($(shell lsb_release -sc), jessie)
-        CC = clang-3.5
-        CPP = clang++-3.5
-endif
+#ifeq ($(shell lsb_release -sc), jessie)
+#        CC = clang-3.5
+#        CPP = clang++-3.5
+#endif
 CC  = clang-3.8
 CPP = clang++-3.8
 LD  = clang++-3.8
@@ -40,8 +40,9 @@ HEADERS=$(shell find ./include/ -name *.h)
 
 OBJS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:%.cpp=%.o))
 OBJS += $(BUILDDIR)/gettime.o $(BUILDDIR)/lconf.o $(BUILDDIR)/random.o
+OBJS += $(BUILDDIR)/util.o
 
-CFLAGS := -Iinclude -I/usr/local/include -I../../myopen/common_host
+CFLAGS := -Iinclude -I/usr/local/include -I../../spk/lib
 
 CFLAGS += -Wall -Wextra -pedantic -Wshadow
 CFLAGS += -std=c++11 -Wno-int-to-pointer-cast -Wtrigraphs
@@ -96,7 +97,7 @@ all: directories bmi5 glxgears
 $(BUILDDIR)/%.o: src/%.cpp
 	$(CPP) -c $(CFLAGS) $< -o $@
 
-$(BUILDDIR)/%.o: ../../myopen/common_host/%.cpp
+$(BUILDDIR)/%.o: ../../spk/lib/%.cpp
 	$(CPP) -c $(CFLAGS) $< -o $@
 
 bmi5: $(OBJS)
@@ -115,7 +116,7 @@ deps:
 	sudo apt-get install $(DEPS)
 
 check:
-	cppcheck -Iinclude -I/usr/local/include -I../../myopen/common_host \
+	cppcheck -Iinclude -I/usr/local/include -I../../spk/lib \
 	--enable=all \
 	src/*.cpp
 
@@ -129,7 +130,7 @@ install:
 	install -d $(TARGET)/matlab
 	install matlab/bmi5_mmap.cpp -t $(TARGET)/matlab
 	install -d /usr/local/include
-	install ../../myopen/common_host/mmaphelp.h -t /usr/local/include
+	install ../../spk/lib/mmaphelp.h -t /usr/local/include
 
 conf:
 	install -d $(HOME)/.config/bmi5
